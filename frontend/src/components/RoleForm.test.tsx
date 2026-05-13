@@ -154,4 +154,21 @@ describe("RoleForm", () => {
     expect(screen.getByLabelText(/role title/i)).toHaveValue("Manual title");
     expect(screen.getByPlaceholderText("Example Company")).toHaveValue("Manual Company");
   });
+
+  it("keeps the add role form mounted after a large paste", () => {
+    const onSubmit = vi.fn();
+    render(<RoleForm onSubmit={onSubmit} />);
+
+    fireEvent.change(screen.getByLabelText(/paste job description/i), {
+      target: {
+        value: Array.from({ length: 200 }, (_, index) => `Requirement ${index}`).join(
+          "\n",
+        ),
+      },
+    });
+
+    expect(screen.getByLabelText(/paste job description/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /parse role/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create role/i })).toBeInTheDocument();
+  });
 });

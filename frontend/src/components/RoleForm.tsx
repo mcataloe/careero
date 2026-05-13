@@ -238,14 +238,16 @@ export function RoleForm({
             label="Paste job description"
             description="Paste content from LinkedIn, recruiter emails, job boards, or company sites."
             minRows={8}
+            maxRows={16}
             autosize
             value={parseInput.rawText}
-            onChange={(event) =>
+            onChange={(event) => {
+              const value = event.currentTarget.value;
               setParseInput((current) => ({
                 ...current,
-                rawText: event.currentTarget.value,
-              }))
-            }
+                rawText: value,
+              }));
+            }}
           />
           <Grid>
             <Grid.Col span={{ base: 12, md: 8 }}>
@@ -253,12 +255,13 @@ export function RoleForm({
                 label="Optional URL"
                 placeholder="https://example.com/jobs/123"
                 value={parseInput.jobUrl}
-                onChange={(event) =>
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
                   setParseInput((current) => ({
                     ...current,
-                    jobUrl: event.currentTarget.value,
-                  }))
-                }
+                    jobUrl: value,
+                  }));
+                }}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }}>
