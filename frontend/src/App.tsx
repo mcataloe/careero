@@ -1,50 +1,27 @@
-const layerItems = [
-  "Local FastAPI backend",
-  "React + Vite TypeScript frontend",
-  "Health check and build validation",
-  "Reserved modular areas for future growth",
-];
+import { Navigate, Route, Routes } from "react-router-dom";
 
-const outOfScopeItems = [
-  "Authentication",
-  "Tenants and workspaces",
-  "Billing",
-  "Cloud deployment",
-  "Automated application submission",
-];
+import { AppShellLayout } from "./components/AppShellLayout";
+import { ApplicationsPage } from "./pages/ApplicationsPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { RoleDetailPage } from "./pages/RoleDetailPage";
+import { RoleNewPage } from "./pages/RoleNewPage";
+import { RolesPage } from "./pages/RolesPage";
+import { SettingsPage } from "./pages/SettingsPage";
 
 function App() {
   return (
-    <main className="app-shell">
-      <section className="intro">
-        <p className="eyebrow">Local-first Layer 1 foundation</p>
-        <h1>Careero</h1>
-        <p className="summary">
-          A STRIDE-powered career operations application for organizing a
-          personal job search and preparing stronger applications.
-        </p>
-      </section>
-
-      <section className="foundation-grid" aria-label="Layer 1 foundation">
-        <div className="panel">
-          <h2>Layer 1 includes</h2>
-          <ul>
-            {layerItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="panel">
-          <h2>Out of scope</h2>
-          <ul>
-            {outOfScopeItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    </main>
+    <AppShellLayout>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/roles" element={<RolesPage />} />
+        <Route path="/roles/new" element={<RoleNewPage />} />
+        <Route path="/roles/:roleId" element={<RoleDetailPage />} />
+        <Route path="/applications" element={<ApplicationsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </AppShellLayout>
   );
 }
 

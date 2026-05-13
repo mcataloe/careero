@@ -65,6 +65,20 @@ npm install
 npm run dev
 ```
 
+The Vite dev server proxies `/api` requests to `http://127.0.0.1:8000`, so start the backend first for role intake.
+
+Manual role intake:
+
+```text
+http://127.0.0.1:5173/roles/new
+```
+
+Run frontend tests:
+
+```powershell
+npm run test
+```
+
 Build validation:
 
 ```powershell

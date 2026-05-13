@@ -9,6 +9,7 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
