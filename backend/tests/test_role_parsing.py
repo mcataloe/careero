@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from app.api.roles import get_role_parsing_service
 from app.config import Settings
 from app.main import create_app
-from app.schemas.role_parsing import RoleParseAIOutput, RoleParseResponse
+from app.schemas.role_parsing import ParsedRole, RoleParseAIOutput, RoleParseResponse
 from app.services.role_parsing import (
     RoleParsingService,
     RoleParsingUnavailableError,
@@ -39,6 +39,50 @@ def enabled_settings(**overrides) -> Settings:
     return Settings(_env_file=None, **values)
 
 
+def ai_output(**overrides) -> RoleParseAIOutput:
+    values = {
+        "roleTitle": None,
+        "company": None,
+        "companyWebsite": None,
+        "jobUrl": None,
+        "source": None,
+        "location": None,
+        "remoteType": None,
+        "compensationMin": None,
+        "compensationMax": None,
+        "currency": None,
+        "employmentType": None,
+        "seniority": None,
+        "datePosted": None,
+        "normalizedDescription": None,
+        "extractedSkills": [],
+        "warnings": [],
+        "confidence": {
+            "roleTitle": None,
+            "company": None,
+            "companyWebsite": None,
+            "jobUrl": None,
+            "source": None,
+            "location": None,
+            "remoteType": None,
+            "compensationMin": None,
+            "compensationMax": None,
+            "currency": None,
+            "employmentType": None,
+            "seniority": None,
+            "datePosted": None,
+            "normalizedDescription": None,
+            "extractedSkills": None,
+        },
+    }
+    confidence = values["confidence"]
+    confidence_override = overrides.pop("confidence", None)
+    if confidence_override is not None:
+        confidence.update(confidence_override)
+    values.update(overrides)
+    return RoleParseAIOutput(**values)
+
+
 def test_role_parsing_prompt_contains_grounding_rules() -> None:
     from app.schemas.role_parsing import RoleParseRequest
 
@@ -60,7 +104,7 @@ def test_role_parsing_prompt_contains_grounding_rules() -> None:
 
 def test_role_parser_success_validates_and_applies_request_defaults() -> None:
     responses = FakeResponses(
-        parsed=RoleParseAIOutput(
+        parsed=ai_output(
             roleTitle="Senior Backend Engineer",
             company="Example Company",
             location="Chicago, IL",
@@ -136,7 +180,7 @@ def test_role_parse_endpoint_success_and_failures() -> None:
     class FakeService:
         def parse(self, payload):
             return RoleParseResponse(
-                parsed=RoleParseAIOutput(roleTitle="Engineer", company="Acme"),
+                parsed=ParsedRole(roleTitle="Engineer", company="Acme"),
                 metadata={"parserVersion": "role_parser_v1", "model": "gpt-5-mini"},
             )
 

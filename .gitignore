@@ -30,7 +30,10 @@ pnpm-debug.log*
 
 # Editors / OS
 .idea/
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 *.swp
 *.swo
 .DS_Store

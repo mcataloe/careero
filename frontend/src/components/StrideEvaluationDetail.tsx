@@ -17,6 +17,7 @@ import type {
   EvidenceItem,
   StrideEvaluation,
 } from "../types/strideEvaluations";
+import { ExpandableTextSection } from "./ExpandableTextSection";
 import { EmptyState } from "./States";
 
 function titleize(value: string | null | undefined) {
@@ -106,7 +107,9 @@ function AlignmentSection({
             {score}/100
           </Text>
         ) : null}
-        <Text>{section?.notes ?? "No details available."}</Text>
+        <ExpandableTextSection maxHeight={180}>
+          {section?.notes ?? "No details available."}
+        </ExpandableTextSection>
         {Array.isArray(section?.evidence) && section.evidence.length > 0 ? (
           <Text size="sm" c="dimmed">
             Evidence: {section.evidence.join("; ")}
@@ -231,10 +234,9 @@ export function StrideEvaluationDetail({
           </Grid.Col>
         </Grid>
 
-        <Stack gap="xs">
-          <Title order={4}>Summary</Title>
-          <Text>{evaluation.summary ?? "No summary available."}</Text>
-        </Stack>
+        <ExpandableTextSection title="Summary">
+          {evaluation.summary ?? "No summary available."}
+        </ExpandableTextSection>
 
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
 from typing import Literal
 
 from pydantic import (
@@ -57,8 +56,8 @@ class ParsedRole(BaseModel):
     source: SourceType | None = None
     location: str | None = Field(default=None, max_length=255)
     remote_type: RemoteType | None = Field(default=None, alias="remoteType")
-    compensation_min: Decimal | None = Field(default=None, alias="compensationMin")
-    compensation_max: Decimal | None = Field(default=None, alias="compensationMax")
+    compensation_min: float | None = Field(default=None, alias="compensationMin")
+    compensation_max: float | None = Field(default=None, alias="compensationMax")
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     employment_type: str | None = Field(
         default=None,
@@ -111,14 +110,17 @@ class ParsedRole(BaseModel):
     def normalize_currency(cls, value: str | None) -> str | None:
         if value is None:
             return None
-        return value.strip().upper()
+        normalized = value.strip().upper()
+        if not normalized.isalpha() or len(normalized) != 3:
+            return None
+        return normalized
 
     @field_validator("compensation_min", "compensation_max")
     @classmethod
     def compensation_must_be_non_negative(
         cls,
-        value: Decimal | None,
-    ) -> Decimal | None:
+        value: float | None,
+    ) -> float | None:
         if value is not None and value < 0:
             raise ValueError("compensation values must be non-negative")
         return value
@@ -132,8 +134,10 @@ class ParsedRole(BaseModel):
     @classmethod
     def confidence_values_must_be_zero_to_one(
         cls,
-        value: dict[str, float],
-    ) -> dict[str, float]:
+        value,
+    ):
+        if not isinstance(value, dict):
+            return value
         for field_name, score in value.items():
             if not 0 <= score <= 1:
                 raise ValueError(f"confidence for {field_name} must be between 0 and 1")
@@ -162,8 +166,46 @@ class RoleParseResponse(BaseModel):
     metadata: RoleParseMetadata
 
 
+class RoleParseConfidence(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    role_title: float | None = Field(alias="roleTitle", ge=0, le=1)
+    company: float | None = Field(ge=0, le=1)
+    company_website: float | None = Field(alias="companyWebsite", ge=0, le=1)
+    job_url: float | None = Field(alias="jobUrl", ge=0, le=1)
+    source: float | None = Field(ge=0, le=1)
+    location: float | None = Field(ge=0, le=1)
+    remote_type: float | None = Field(alias="remoteType", ge=0, le=1)
+    compensation_min: float | None = Field(alias="compensationMin", ge=0, le=1)
+    compensation_max: float | None = Field(alias="compensationMax", ge=0, le=1)
+    currency: float | None = Field(ge=0, le=1)
+    employment_type: float | None = Field(alias="employmentType", ge=0, le=1)
+    seniority: float | None = Field(ge=0, le=1)
+    date_posted: float | None = Field(alias="datePosted", ge=0, le=1)
+    normalized_description: float | None = Field(alias="normalizedDescription", ge=0, le=1)
+    extracted_skills: float | None = Field(alias="extractedSkills", ge=0, le=1)
+
+
 class RoleParseAIOutput(ParsedRole):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    role_title: str | None = Field(alias="roleTitle", max_length=255)
+    company: str | None = Field(max_length=255)
+    company_website: str | None = Field(alias="companyWebsite", max_length=2048)
+    job_url: str | None = Field(alias="jobUrl", max_length=2048)
+    source: SourceType | None
+    location: str | None = Field(max_length=255)
+    remote_type: RemoteType | None = Field(alias="remoteType")
+    compensation_min: float | None = Field(alias="compensationMin")
+    compensation_max: float | None = Field(alias="compensationMax")
+    currency: str | None = Field(min_length=3, max_length=3)
+    employment_type: str | None = Field(alias="employmentType", max_length=100)
+    seniority: str | None = Field(max_length=100)
+    date_posted: date | None = Field(alias="datePosted")
+    normalized_description: str | None = Field(alias="normalizedDescription")
+    extracted_skills: list[str] = Field(alias="extractedSkills")
+    warnings: list[str]
+    confidence: RoleParseConfidence
 
 
 def _validate_url(value: str | None) -> str | None:

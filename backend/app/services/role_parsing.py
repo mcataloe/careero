@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from app.config import Settings, get_settings
 from app.schemas.role_parsing import (
+    ParsedRole,
     RoleParseAIOutput,
     RoleParseMetadata,
     RoleParseRequest,
@@ -82,7 +83,7 @@ class RoleParsingService:
 
         parsed = self._apply_request_defaults(parsed, payload)
         return RoleParseResponse(
-            parsed=parsed,
+            parsed=self._to_public_parsed_role(parsed),
             metadata=RoleParseMetadata(
                 parserVersion=ROLE_PARSER_VERSION,
                 model=self.settings.openai_default_role_parsing_model,
@@ -100,3 +101,11 @@ class RoleParsingService:
         if data.get("source") is None and request.source is not None:
             data["source"] = request.source
         return RoleParseAIOutput.model_validate(data)
+
+    def _to_public_parsed_role(self, parsed: RoleParseAIOutput) -> ParsedRole:
+        data = parsed.model_dump(by_alias=True)
+        data["confidence"] = parsed.confidence.model_dump(
+            by_alias=True,
+            exclude_none=True,
+        )
+        return ParsedRole.model_validate(data)

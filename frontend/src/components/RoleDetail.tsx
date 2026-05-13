@@ -15,6 +15,7 @@ import {
 import { useForm } from "@mantine/form";
 
 import type { Role, RoleStatus, RoleUpdatePayload } from "../types/roles";
+import { ExpandableTextSection } from "./ExpandableTextSection";
 
 const statusOptions: { label: string; value: RoleStatus }[] = [
   { label: "Found", value: "found" },
@@ -116,12 +117,13 @@ export function RoleDetail({
       <Paper withBorder radius="md" p="lg">
         <Stack>
           <Title order={3}>Description</Title>
-          <Text style={{ whiteSpace: "pre-wrap" }}>{valueOrDash(role.raw_description)}</Text>
+          <ExpandableTextSection title="Raw description">
+            {valueOrDash(role.raw_description)}
+          </ExpandableTextSection>
           <Divider />
-          <Title order={4}>Normalized description</Title>
-          <Text style={{ whiteSpace: "pre-wrap" }}>
+          <ExpandableTextSection title="Normalized description">
             {valueOrDash(role.normalized_description)}
-          </Text>
+          </ExpandableTextSection>
         </Stack>
       </Paper>
 

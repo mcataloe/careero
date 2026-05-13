@@ -1,0 +1,64 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Careero: Debug Backend API",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--reload"
+      ],
+      "cwd": "${workspaceFolder}\\backend",
+      "python": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe",
+      "envFile": "${workspaceFolder}\\backend\\.env",
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
+      "name": "Careero: Run Frontend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm.cmd run dev",
+      "cwd": "${workspaceFolder}\\frontend"
+    },
+    {
+      "name": "Careero: Start All Services",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\start-all.ps1",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Careero: Stop All Services",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\stop-all.ps1",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Careero: Debug Backend Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "tests"
+      ],
+      "cwd": "${workspaceFolder}\\backend",
+      "python": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe",
+      "envFile": "${workspaceFolder}\\backend\\.env",
+      "justMyCode": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Careero: Debug Backend + Run Frontend",
+      "configurations": [
+        "Careero: Debug Backend API",
+        "Careero: Run Frontend"
+      ],
+      "stopAll": true
+    }
+  ]
+}
