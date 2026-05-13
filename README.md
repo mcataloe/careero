@@ -10,6 +10,7 @@ Layer 1 is the local development foundation: a FastAPI backend, PostgreSQL persi
 - Local PostgreSQL persistence with Alembic migrations.
 - Local React + Vite frontend for manual role intake.
 - Manual create, list, view, update, and archive role workflow.
+- Local resume/profile source storage for STRIDE grounding.
 - Basic backend test coverage for `GET /health`.
 - Database-backed integration tests for role intake when PostgreSQL is configured.
 - Frontend component tests and production build validation.
@@ -27,6 +28,7 @@ Layer 1 does not include:
 - AWS or other cloud deployment logic.
 - Background job execution.
 - Automated job application submission.
+- Tailored resume or cover letter generation.
 
 ## Repository Structure
 

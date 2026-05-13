@@ -59,3 +59,10 @@ class StrideDimension(StrEnum):
     APPLICATION_EFFORT = "application_effort"
     ATS_RESUME_ALIGNMENT = "ats_resume_alignment"
     RISK_FLAGS = "risk_flags"
+
+
+class ResumeSourceType(StrEnum):
+    MASTER_RESUME = "master_resume"
+    PROFILE = "profile"
+    LINKEDIN_EXPORT = "linkedin_export"
+    OTHER = "other"

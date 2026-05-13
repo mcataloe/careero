@@ -2,7 +2,18 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, ForeignKey, Index, Numeric, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Numeric,
+    String,
+    Text,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -45,6 +56,7 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
         back_populates="user"
     )
+    resume_sources: Mapped[list["ResumeSource"]] = relationship(back_populates="user")
 
 
 class Company(TimestampMixin, SoftDeleteMixin, Base):
@@ -145,6 +157,69 @@ class JobSource(TimestampMixin, SoftDeleteMixin, Base):
     website_url: Mapped[str | None] = mapped_column(String(2048))
 
     roles: Mapped[list[Role]] = relationship(back_populates="source")
+
+
+class ResumeSource(TimestampMixin, Base):
+    __tablename__ = "resume_sources"
+    __table_args__ = (
+        Index("ix_resume_sources_user_id", "user_id"),
+        Index("ix_resume_sources_source_type", "source_type"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_type: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    user: Mapped[User] = relationship(back_populates="resume_sources")
+    versions: Mapped[list["ResumeSourceVersion"]] = relationship(
+        back_populates="source"
+    )
+
+
+class ResumeSourceVersion(TimestampMixin, Base):
+    __tablename__ = "resume_source_versions"
+    __table_args__ = (
+        Index("ix_resume_source_versions_user_id", "user_id"),
+        Index("ix_resume_source_versions_source_id", "source_id"),
+        Index("ix_resume_source_versions_is_active", "is_active"),
+        Index(
+            "uq_resume_source_versions_active_user",
+            "user_id",
+            unique=True,
+            postgresql_where=text("is_active"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    source_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("resume_sources.id"),
+        nullable=False,
+    )
+    version_label: Mapped[str] = mapped_column(String(100), nullable=False)
+    raw_text: Mapped[str] = mapped_column(Text, nullable=False)
+    normalized_summary: Mapped[str | None] = mapped_column(Text)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    source: Mapped[ResumeSource] = relationship(back_populates="versions")
 
 
 class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):

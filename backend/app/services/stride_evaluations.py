@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.config import Settings, get_settings
 from app.constants import RoleStatus, StrideEvaluationStatus
-from app.models import ActivityLog, Role, StrideEvaluation, User
+from app.models import ActivityLog, ResumeSourceVersion, Role, StrideEvaluation, User
 from app.schemas.stride_evaluations import StrideEvaluationCreate
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.stride_ai import OpenAIStrideEvaluator, merge_ai_analysis
@@ -63,12 +63,18 @@ class StrideEvaluationService:
             payload.user_context,
             payload.user_notes,
         )
+        active_resume_source = self._get_active_resume_source_version(user.id)
         ai_metadata = self.ai_evaluator.enrich(
             role=role,
             payload=payload,
             baseline=baseline,
+            active_resume_source=active_resume_source,
         )
-        evaluation_data = merge_ai_analysis(baseline, ai_metadata)
+        evaluation_data = merge_ai_analysis(
+            baseline,
+            ai_metadata,
+            active_resume_source=active_resume_source,
+        )
         evaluation = StrideEvaluation(
             user_id=user.id,
             role_id=role.id,
@@ -157,5 +163,24 @@ class StrideEvaluationService:
                 Role.deleted_at.is_(None),
                 Role.status != RoleStatus.ARCHIVED.value,
             )
+        )
+        return self.db.scalar(statement)
+
+    def _get_active_resume_source_version(
+        self,
+        user_id: uuid.UUID,
+    ) -> ResumeSourceVersion | None:
+        statement = (
+            select(ResumeSourceVersion)
+            .options(joinedload(ResumeSourceVersion.source))
+            .where(
+                ResumeSourceVersion.user_id == user_id,
+                ResumeSourceVersion.is_active.is_(True),
+            )
+            .order_by(
+                ResumeSourceVersion.updated_at.desc(),
+                ResumeSourceVersion.id.desc(),
+            )
+            .limit(1)
         )
         return self.db.scalar(statement)

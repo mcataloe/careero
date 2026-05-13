@@ -132,6 +132,74 @@ Invoke-RestMethod -Method Delete http://127.0.0.1:8000/api/roles/{role_id}
 
 Company intake accepts either an existing company ID or a name. When a name is supplied, Careero reuses an existing company for the default local user using case-insensitive name matching or creates a new company if one does not exist.
 
+## Resume/Profile Source API
+
+Careero can store a local master resume or profile source for grounded STRIDE evaluation. Source text is manually pasted into the API. This phase does not upload files, import external profiles, extract profile facts, generate resumes, or generate cover letters.
+
+Create a master resume source with an active initial version:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/resume-sources `
+  -ContentType "application/json" `
+  -Body '{
+    "name": "Master Resume",
+    "source_type": "master_resume",
+    "version_label": "v1",
+    "raw_text": "Paste the master resume or profile text here.",
+    "normalized_summary": "Optional concise summary of the profile.",
+    "is_active": true
+  }'
+```
+
+List sources:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/resume-sources
+```
+
+Get the active source version:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/resume-sources/active
+```
+
+Create a new version:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/resume-sources/{source_id}/versions `
+  -ContentType "application/json" `
+  -Body '{
+    "version_label": "v2",
+    "raw_text": "Updated master resume or profile text.",
+    "normalized_summary": "Updated optional summary.",
+    "is_active": false
+  }'
+```
+
+Activate a version:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/resume-sources/{source_id}/versions/{version_id}/activate
+```
+
+Update source metadata:
+
+```powershell
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/resume-sources/{source_id} `
+  -ContentType "application/json" `
+  -Body '{ "name": "Updated Master Resume", "source_type": "profile" }'
+```
+
+Only one resume source version can be active for the default local user. STRIDE evaluation can still run without an active source, but OpenAI enrichment includes the active source when present.
+
 ## STRIDE Evaluation API
 
 STRIDE evaluation support always starts with deterministic local rules. The deterministic score remains the canonical baseline. Optional OpenAI enrichment can add grounded structured analysis, but it does not replace the baseline score, infer resume facts, generate resumes or cover letters, scrape jobs, poll sources, or perform external research.
@@ -185,7 +253,9 @@ CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 ```
 
-When enabled, Careero uses the OpenAI Responses API with structured output validation. The prompt includes only stored role fields, the deterministic baseline, STRIDE rules, and request `user_context`. If OpenAI is unavailable, times out, or returns invalid structured output, the evaluation still succeeds with deterministic results and stores `ai_status` as `failed` or `skipped` in `raw_evaluation_json`.
+When enabled, Careero uses the OpenAI Responses API with structured output validation. The prompt includes only stored role fields, the deterministic baseline, STRIDE rules, request `user_context`, and the active resume/profile source version when one exists. If OpenAI is unavailable, times out, or returns invalid structured output, the evaluation still succeeds with deterministic results and stores `ai_status` as `failed` or `skipped` in `raw_evaluation_json`.
+
+AI output stores grounding details in `raw_evaluation_json.ai_result`, including `evidence_matches`, `evidence_gaps`, `positioning_opportunities`, and `unsupported_claim_warnings`. The prompt requires the model to distinguish `strong_match`, `partial_match`, `no_evidence`, and `insufficient_data`.
 
 Create a baseline evaluation for a role. If AI enrichment is enabled and configured, the same endpoint also stores grounded AI analysis:
 

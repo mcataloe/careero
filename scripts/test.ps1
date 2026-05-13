@@ -27,7 +27,7 @@ try {
         $ErrorActionPreference = $previousErrorActionPreference
         if ($dbCheckExitCode -eq 0 -and $dbCheck -match "ok") {
             Write-Host "Test database is reachable. Running database-backed backend tests..."
-            & $python -m pytest tests/test_migrations.py tests/test_roles.py tests/test_role_api.py tests/test_stride_evaluations.py tests/test_database_health_integration.py
+            & $python -m pytest tests/test_migrations.py tests/test_roles.py tests/test_role_api.py tests/test_resume_sources_api.py tests/test_stride_evaluations.py tests/test_database_health_integration.py
         }
         else {
             Write-Warning "Skipping database-backed backend tests because CAREERO_TEST_DATABASE_URL is not reachable. Fix PostgreSQL credentials, then rerun this script."

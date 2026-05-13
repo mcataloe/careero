@@ -50,6 +50,8 @@ def drop_known_schema(database_url: str) -> None:
                             generated_artifacts,
                             applications,
                             stride_evaluations,
+                            resume_source_versions,
+                            resume_sources,
                             roles,
                             job_sources,
                             companies,

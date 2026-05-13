@@ -59,6 +59,38 @@ def ai_output() -> AIStrideEvaluationOutput:
         company_risk=grounded,
         ats_keywords=["postgresql", "python"],
         missing_keywords=[],
+        evidence_matches=[
+            AIStrideItem(
+                code="python_platforms",
+                message="Python platform experience is supported.",
+                evidence="Python and PostgreSQL platforms",
+                status="strong_match",
+            )
+        ],
+        evidence_gaps=[
+            AIStrideItem(
+                code="leadership_scope",
+                message="Leadership scope is only partially supported.",
+                evidence=None,
+                status="partial_match",
+            )
+        ],
+        positioning_opportunities=[
+            AIStrideItem(
+                code="platform_positioning",
+                message="Position around platform ownership.",
+                evidence="Platform role signals",
+                status="grounded",
+            )
+        ],
+        unsupported_claim_warnings=[
+            AIStrideItem(
+                code="no_kubernetes_evidence",
+                message="Do not claim Kubernetes experience without source evidence.",
+                evidence=None,
+                status="no_evidence",
+            )
+        ],
         ai_overall_score=82,
         ai_recommendation="apply",
         ai_confidence_level="medium",
@@ -118,6 +150,11 @@ def test_openai_success_is_validated_and_merged() -> None:
     assert (
         merged["raw_evaluation_json"]["ai_score_context"]["canonical_score_source"]
         == "deterministic_baseline"
+    )
+    assert merged["raw_evaluation_json"]["ai_result"]["unsupported_claim_warnings"]
+    assert (
+        merged["raw_evaluation_json"]["ai_result"]["evidence_matches"][0]["status"]
+        == "strong_match"
     )
 
 

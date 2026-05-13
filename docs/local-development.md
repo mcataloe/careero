@@ -93,6 +93,36 @@ DELETE http://127.0.0.1:8000/api/roles/{role_id}
 
 LinkedIn roles are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 1.
 
+Resume/profile source API:
+
+```text
+POST http://127.0.0.1:8000/api/resume-sources
+GET  http://127.0.0.1:8000/api/resume-sources
+GET  http://127.0.0.1:8000/api/resume-sources/active
+PATCH http://127.0.0.1:8000/api/resume-sources/{source_id}
+POST http://127.0.0.1:8000/api/resume-sources/{source_id}/versions
+POST http://127.0.0.1:8000/api/resume-sources/{source_id}/versions/{version_id}/activate
+```
+
+Create an active local master resume/profile source by manually pasting text:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/resume-sources `
+  -ContentType "application/json" `
+  -Body '{
+    "name": "Master Resume",
+    "source_type": "master_resume",
+    "version_label": "v1",
+    "raw_text": "Paste the master resume or profile text here.",
+    "normalized_summary": "Optional concise summary.",
+    "is_active": true
+  }'
+```
+
+Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. This phase does not upload files, extract profile facts, import external profiles, or generate tailored resumes or cover letters.
+
 Run tests:
 
 ```powershell

@@ -2,7 +2,7 @@ import json
 from decimal import Decimal
 from typing import Any
 
-from app.models import Role
+from app.models import ResumeSourceVersion, Role
 from app.services.stride_rules import StrideRuleResult
 
 
@@ -27,11 +27,13 @@ Recommendation thresholds:
 """.strip()
 
 GROUNDING_INSTRUCTIONS = """
-Use only the role data, deterministic baseline, and user context supplied in this
-request. Do not invent resume facts, user experience, company facts,
-compensation facts, or external research. If the supplied data is insufficient,
-return an insufficient_data status with a brief reason. Do not generate resumes,
-cover letters, outreach messages, or application artifacts.
+Use only the role data, deterministic baseline, user context, and active resume
+source supplied in this request. Do not invent resume facts, user experience,
+company facts, compensation facts, or external research. If the supplied data is
+insufficient, return an insufficient_data status with a brief reason. Identify
+gaps instead of inventing experience. Distinguish strong_match, partial_match,
+no_evidence, and insufficient_data. Do not generate resumes, cover letters,
+outreach messages, or application artifacts.
 """.strip()
 
 
@@ -41,6 +43,7 @@ def build_stride_evaluation_prompt(
     baseline: StrideRuleResult,
     user_notes: str | None,
     user_context: dict[str, Any],
+    active_resume_source: ResumeSourceVersion | None = None,
 ) -> list[dict[str, str]]:
     payload = {
         "role": {
@@ -69,6 +72,7 @@ def build_stride_evaluation_prompt(
         },
         "user_notes": user_notes,
         "user_context": user_context,
+        "active_resume_source": _active_resume_source_payload(active_resume_source),
         "deterministic_baseline": _baseline_payload(baseline),
         "stride_rules": STRIDE_RULES_TEXT,
         "grounding_instructions": GROUNDING_INSTRUCTIONS,
@@ -100,6 +104,27 @@ def _baseline_payload(baseline: StrideRuleResult) -> dict[str, Any]:
         "dimension_scores": baseline.raw_evaluation_json.get("dimension_scores", {}),
         "risk_flags": baseline.raw_evaluation_json.get("risk_flags", []),
         "limitations": baseline.raw_evaluation_json.get("limitations", []),
+    }
+
+
+def _active_resume_source_payload(
+    version: ResumeSourceVersion | None,
+) -> dict[str, Any] | None:
+    if version is None:
+        return None
+    return {
+        "source": {
+            "id": str(version.source.id),
+            "name": version.source.name,
+            "source_type": version.source.source_type,
+        },
+        "version": {
+            "id": str(version.id),
+            "version_label": version.version_label,
+            "normalized_summary": version.normalized_summary,
+            "raw_text": version.raw_text,
+            "is_active": version.is_active,
+        },
     }
 
 

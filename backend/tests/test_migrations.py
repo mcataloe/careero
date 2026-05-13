@@ -10,6 +10,8 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "roles",
         "job_sources",
         "stride_evaluations",
+        "resume_sources",
+        "resume_source_versions",
         "applications",
         "generated_artifacts",
         "activity_log",
@@ -64,3 +66,35 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "ix_stride_evaluations_status",
         "ix_stride_evaluations_role_created_at",
     }.issubset(stride_indexes)
+
+    resume_source_columns = {
+        column["name"] for column in inspector.get_columns("resume_sources")
+    }
+    assert {
+        "id",
+        "user_id",
+        "name",
+        "source_type",
+        "created_at",
+        "updated_at",
+    }.issubset(resume_source_columns)
+
+    resume_source_version_columns = {
+        column["name"] for column in inspector.get_columns("resume_source_versions")
+    }
+    assert {
+        "id",
+        "user_id",
+        "source_id",
+        "version_label",
+        "raw_text",
+        "normalized_summary",
+        "is_active",
+        "created_at",
+        "updated_at",
+    }.issubset(resume_source_version_columns)
+
+    resume_source_version_indexes = {
+        index["name"] for index in inspector.get_indexes("resume_source_versions")
+    }
+    assert "uq_resume_source_versions_active_user" in resume_source_version_indexes
