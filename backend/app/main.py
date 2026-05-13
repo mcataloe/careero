@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI, Response, status
 
+from app.api.roles import router as roles_router
 from app.config import Settings, get_settings
 from app.database import check_database
 from app.logging import configure_logging
@@ -18,6 +19,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description="Local-first API foundation for Careero.",
         version="0.1.0",
     )
+    app.include_router(roles_router, prefix="/api")
 
     @app.get("/health")
     def health() -> dict[str, str]:

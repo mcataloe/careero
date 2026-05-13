@@ -15,20 +15,36 @@ class RoleRepository:
         *,
         user_id: uuid.UUID,
         company_id: uuid.UUID,
+        source_id: uuid.UUID | None,
         title: str,
-        description: str | None = None,
+        job_url: str | None = None,
         location: str | None = None,
-        employment_type: str | None = None,
-        source_url: str | None = None,
+        remote_type: str | None = None,
+        compensation_min=None,
+        compensation_max=None,
+        compensation_currency: str | None = None,
+        raw_description: str | None = None,
+        normalized_description: str | None = None,
+        status: str = "found",
+        date_found=None,
+        date_posted=None,
     ) -> Role:
         role = Role(
             user_id=user_id,
             company_id=company_id,
+            source_id=source_id,
             title=title,
-            description=description,
+            job_url=job_url,
             location=location,
-            employment_type=employment_type,
-            source_url=source_url,
+            remote_type=remote_type,
+            compensation_min=compensation_min,
+            compensation_max=compensation_max,
+            compensation_currency=compensation_currency,
+            raw_description=raw_description,
+            normalized_description=normalized_description,
+            status=status,
+            date_found=date_found,
+            date_posted=date_posted,
         )
         self.db.add(role)
         self.db.flush()
@@ -47,3 +63,15 @@ class RoleRepository:
             Role.deleted_at.is_(None),
         )
         return self.db.scalar(statement)
+
+    def list_for_user(self, *, user_id: uuid.UUID) -> list[Role]:
+        statement = (
+            select(Role)
+            .where(
+                Role.user_id == user_id,
+                Role.deleted_at.is_(None),
+                Role.status != "archived",
+            )
+            .order_by(Role.date_found.desc(), Role.created_at.desc())
+        )
+        return list(self.db.scalars(statement))

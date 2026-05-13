@@ -1,7 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
+from sqlalchemy import Date, DateTime, ForeignKey, Index, Numeric, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -70,6 +71,9 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     __table_args__ = (
         Index("ix_roles_user_id", "user_id"),
         Index("ix_roles_company_id", "company_id"),
+        Index("ix_roles_source_id", "source_id"),
+        Index("ix_roles_status", "status"),
+        Index("ix_roles_user_status", "user_id", "status"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -87,19 +91,38 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
         ForeignKey("companies.id"),
         nullable=False,
     )
+    source_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("job_sources.id"),
+    )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text)
+    job_url: Mapped[str | None] = mapped_column(String(2048))
     location: Mapped[str | None] = mapped_column(String(255))
-    employment_type: Mapped[str | None] = mapped_column(String(100))
-    source_url: Mapped[str | None] = mapped_column(String(2048))
+    remote_type: Mapped[str | None] = mapped_column(String(100))
+    compensation_min: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    compensation_max: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    compensation_currency: Mapped[str | None] = mapped_column(String(3))
+    raw_description: Mapped[str | None] = mapped_column(Text)
+    normalized_description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(100), nullable=False, default="found")
+    date_found: Mapped[date] = mapped_column(
+        Date,
+        server_default=func.current_date(),
+        nullable=False,
+    )
+    date_posted: Mapped[date | None] = mapped_column(Date)
 
     user: Mapped[User] = relationship(back_populates="roles")
     company: Mapped[Company] = relationship(back_populates="roles")
+    source: Mapped["JobSource | None"] = relationship(back_populates="roles")
 
 
 class JobSource(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "job_sources"
-    __table_args__ = (Index("ix_job_sources_user_id", "user_id"),)
+    __table_args__ = (
+        Index("ix_job_sources_user_id", "user_id"),
+        Index("uq_job_sources_user_source_type", "user_id", "source_type", unique=True),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -114,6 +137,8 @@ class JobSource(TimestampMixin, SoftDeleteMixin, Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     source_type: Mapped[str | None] = mapped_column(String(100))
     website_url: Mapped[str | None] = mapped_column(String(2048))
+
+    roles: Mapped[list[Role]] = relationship(back_populates="source")
 
 
 class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):

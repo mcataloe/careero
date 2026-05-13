@@ -53,7 +53,7 @@ Seed the default local user:
 python -m app.seed
 ```
 
-The seed command is idempotent. It creates or updates `local-user@careero.local`.
+The seed command is idempotent. It creates or updates `local-user@careero.local` and the canonical job sources: `manual`, `linkedin_manual`, `greenhouse`, `lever`, `ashby`, `workable`, and `other`.
 
 ## Run
 
@@ -69,6 +69,64 @@ http://127.0.0.1:8000/health/database
 ```
 
 `/health/database` connects to the PostgreSQL database configured by `CAREERO_DATABASE_URL` and runs a lightweight probe.
+
+## Role Intake API
+
+Role intake is manual-only in this phase. Paste role details discovered from LinkedIn or another source into Careero; the backend does not scrape LinkedIn, poll job boards, call OpenAI, or score STRIDE.
+
+Create a role from a LinkedIn manual paste:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/roles `
+  -ContentType "application/json" `
+  -Body '{
+    "title": "Senior Backend Engineer",
+    "company": {
+      "name": "Example Company",
+      "website_url": "https://example.com"
+    },
+    "source": {
+      "source_type": "linkedin_manual"
+    },
+    "job_url": "https://www.linkedin.com/jobs/view/example",
+    "location": "Chicago, IL",
+    "remote_type": "hybrid",
+    "compensation_min": "120000.00",
+    "compensation_max": "150000.00",
+    "compensation_currency": "USD",
+    "raw_description": "Paste the original job description here.",
+    "normalized_description": null,
+    "status": "found",
+    "date_found": "2026-05-13",
+    "date_posted": "2026-05-01"
+  }'
+```
+
+List active roles:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/roles
+```
+
+Update a role:
+
+```powershell
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/roles/{role_id} `
+  -ContentType "application/json" `
+  -Body '{ "status": "interested", "remote_type": "remote" }'
+```
+
+Archive a role:
+
+```powershell
+Invoke-RestMethod -Method Delete http://127.0.0.1:8000/api/roles/{role_id}
+```
+
+Company intake accepts either an existing company ID or a name. When a name is supplied, Careero reuses an existing company for the default local user using case-insensitive name matching or creates a new company if one does not exist.
 
 ## Test
 

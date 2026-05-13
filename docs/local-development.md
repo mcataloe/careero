@@ -27,6 +27,7 @@ uvicorn app.main:app --reload
 ```
 
 Edit `backend/.env` so `CAREERO_DATABASE_URL` and `CAREERO_TEST_DATABASE_URL` point at your local PostgreSQL databases.
+Run `python -m app.seed` after migrations so the default local user and canonical manual job sources are available for role intake.
 
 Health check:
 
@@ -34,6 +35,18 @@ Health check:
 http://127.0.0.1:8000/health
 http://127.0.0.1:8000/health/database
 ```
+
+Manual role intake API:
+
+```text
+POST   http://127.0.0.1:8000/api/roles
+GET    http://127.0.0.1:8000/api/roles
+GET    http://127.0.0.1:8000/api/roles/{role_id}
+PATCH  http://127.0.0.1:8000/api/roles/{role_id}
+DELETE http://127.0.0.1:8000/api/roles/{role_id}
+```
+
+LinkedIn roles are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 1.
 
 Run tests:
 
