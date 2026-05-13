@@ -12,13 +12,17 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements-dev.txt
+Copy-Item .env.example .env
 uvicorn app.main:app --reload
 ```
+
+Edit `backend/.env` so `CAREERO_DATABASE_URL` points at your local PostgreSQL database.
 
 Health check:
 
 ```text
 http://127.0.0.1:8000/health
+http://127.0.0.1:8000/health/database
 ```
 
 Run tests:

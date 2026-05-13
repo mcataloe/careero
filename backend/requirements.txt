@@ -1,2 +1,4 @@
 fastapi
+pydantic-settings
+psycopg[binary]
 uvicorn[standard]

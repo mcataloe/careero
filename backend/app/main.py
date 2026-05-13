@@ -1,12 +1,50 @@
-from fastapi import FastAPI
+import logging
 
-app = FastAPI(
-    title="Careero API",
-    description="Local-first API foundation for Careero.",
-    version="0.1.0",
-)
+from fastapi import FastAPI, Response, status
+
+from app.config import Settings, get_settings
+from app.database import check_database
+from app.logging import configure_logging
+
+logger = logging.getLogger(__name__)
 
 
-@app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def create_app(settings: Settings | None = None) -> FastAPI:
+    settings = settings or get_settings()
+    configure_logging(settings)
+
+    app = FastAPI(
+        title=settings.app_name,
+        description="Local-first API foundation for Careero.",
+        version="0.1.0",
+    )
+
+    @app.get("/health")
+    def health() -> dict[str, str]:
+        return {
+            "status": "ok",
+            "app_name": settings.app_name,
+            "environment": settings.environment,
+        }
+
+    @app.get("/health/database")
+    def database_health(response: Response) -> dict[str, str]:
+        try:
+            check_database(settings)
+        except Exception:
+            logger.exception("Database health check failed")
+            response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+            return {
+                "status": "unhealthy",
+                "database": "unavailable",
+            }
+
+        return {
+            "status": "ok",
+            "database": "available",
+        }
+
+    return app
+
+
+app = create_app()

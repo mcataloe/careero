@@ -22,7 +22,7 @@ Layer 1 does not include:
 - Billing or subscriptions.
 - AWS or other cloud deployment logic.
 - Background job execution.
-- Database setup.
+- Database schema or migrations.
 - Automated job application submission.
 
 ## Repository Structure
@@ -53,7 +53,10 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements-dev.txt
+Copy-Item .env.example .env
 ```
+
+Edit `backend/.env` for your local PostgreSQL database. See `backend/README.md` for all backend configuration variables.
 
 Run the backend:
 
@@ -65,6 +68,7 @@ The health check is available at:
 
 ```text
 http://127.0.0.1:8000/health
+http://127.0.0.1:8000/health/database
 ```
 
 Run backend tests:
