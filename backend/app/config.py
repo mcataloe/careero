@@ -25,10 +25,19 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="postgresql://careero:careero@localhost:5432/careero"
     )
+    test_database_url: str = Field(
+        default="postgresql://careero:careero@localhost:5432/careero_test"
+    )
     openai_api_key: str = Field(default="")
     log_level: str = Field(default="INFO")
 
-    @field_validator("app_name", "environment", "database_url", "log_level")
+    @field_validator(
+        "app_name",
+        "environment",
+        "database_url",
+        "test_database_url",
+        "log_level",
+    )
     @classmethod
     def required_text_must_not_be_blank(cls, value: str) -> str:
         if not value or not value.strip():

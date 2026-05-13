@@ -31,8 +31,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def database_health(response: Response) -> dict[str, str]:
         try:
             check_database(settings)
-        except Exception:
-            logger.exception("Database health check failed")
+        except Exception as exc:
+            logger.warning(
+                "Database health check failed: %s",
+                type(exc).__name__,
+            )
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             return {
                 "status": "unhealthy",

@@ -21,6 +21,10 @@ def test_settings_have_safe_local_defaults_without_env_file() -> None:
     assert settings.app_name == "Careero API"
     assert settings.environment == "local"
     assert settings.database_url == "postgresql://careero:careero@localhost:5432/careero"
+    assert (
+        settings.test_database_url
+        == "postgresql://careero:careero@localhost:5432/careero_test"
+    )
     assert settings.log_level == "INFO"
 
 
@@ -30,6 +34,7 @@ def test_settings_have_safe_local_defaults_without_env_file() -> None:
         ("app_name", ""),
         ("environment", " "),
         ("database_url", ""),
+        ("test_database_url", ""),
         ("log_level", ""),
     ],
 )

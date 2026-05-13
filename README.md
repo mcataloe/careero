@@ -7,6 +7,7 @@ Layer 1 is the local development foundation: a FastAPI backend, a React + Vite +
 ## Layer 1 Includes
 
 - Local FastAPI backend with a health check endpoint.
+- Local PostgreSQL persistence with Alembic migrations.
 - Local React + Vite frontend shell.
 - Basic backend test coverage for `GET /health`.
 - Frontend production build validation.
@@ -22,7 +23,6 @@ Layer 1 does not include:
 - Billing or subscriptions.
 - AWS or other cloud deployment logic.
 - Background job execution.
-- Database schema or migrations.
 - Automated job application submission.
 
 ## Repository Structure
@@ -54,9 +54,11 @@ python -m venv .venv
 python -m pip install --upgrade pip
 python -m pip install -r requirements-dev.txt
 Copy-Item .env.example .env
+python -m alembic upgrade head
+python -m app.seed
 ```
 
-Edit `backend/.env` for your local PostgreSQL database. See `backend/README.md` for all backend configuration variables.
+Create the local PostgreSQL databases first, then edit `backend/.env` for your local connection URLs. See `backend/README.md` for database creation and all backend configuration variables.
 
 Run the backend:
 
