@@ -27,3 +27,9 @@ SOURCE_DISPLAY_NAMES: dict[SourceType, str] = {
     SourceType.WORKABLE: "Workable",
     SourceType.OTHER: "Other",
 }
+
+
+class StrideEvaluationStatus(StrEnum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"

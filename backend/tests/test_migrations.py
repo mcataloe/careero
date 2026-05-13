@@ -29,3 +29,38 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "date_found",
         "date_posted",
     }.issubset(role_columns)
+
+    stride_columns = {
+        column["name"] for column in inspector.get_columns("stride_evaluations")
+    }
+    assert {
+        "evaluation_status",
+        "overall_score",
+        "recommendation",
+        "confidence_level",
+        "summary",
+        "strengths",
+        "concerns",
+        "resume_alignment",
+        "compensation_alignment",
+        "seniority_alignment",
+        "remote_alignment",
+        "technical_alignment",
+        "company_risk",
+        "ats_keywords",
+        "missing_keywords",
+        "raw_evaluation_json",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+    }.issubset(stride_columns)
+
+    stride_indexes = {
+        index["name"] for index in inspector.get_indexes("stride_evaluations")
+    }
+    assert {
+        "ix_stride_evaluations_user_id",
+        "ix_stride_evaluations_role_id",
+        "ix_stride_evaluations_status",
+        "ix_stride_evaluations_role_created_at",
+    }.issubset(stride_indexes)

@@ -128,6 +128,46 @@ Invoke-RestMethod -Method Delete http://127.0.0.1:8000/api/roles/{role_id}
 
 Company intake accepts either an existing company ID or a name. When a name is supplied, Careero reuses an existing company for the default local user using case-insensitive name matching or creates a new company if one does not exist.
 
+## STRIDE Evaluation API
+
+STRIDE evaluation support is a backend foundation only in this phase. The API creates deterministic placeholder records so the data model, service boundary, and route shape are ready for the later evaluator. It does not call OpenAI, score roles, infer resume facts, generate resumes or cover letters, scrape jobs, or poll sources.
+
+Create a placeholder evaluation for a role:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/roles/{role_id}/evaluations `
+  -ContentType "application/json" `
+  -Body '{
+    "user_notes": "Evaluate this role once the real STRIDE engine is connected.",
+    "user_context": {
+      "priority": "medium"
+    }
+  }'
+```
+
+Get the latest evaluation for a role:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/roles/{role_id}/evaluations/latest
+```
+
+List evaluations:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/stride-evaluations
+Invoke-RestMethod "http://127.0.0.1:8000/api/stride-evaluations?evaluation_status=completed"
+```
+
+Get one evaluation by ID:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/stride-evaluations/{evaluation_id}
+```
+
+Placeholder evaluations currently return `evaluation_status` as `completed` while `overall_score`, `recommendation`, and `confidence_level` remain empty. Alignment, risk, and keyword fields are stored as structured JSON so future AI-generated output can fit without changing callers.
+
 ## Test
 
 Run tests:

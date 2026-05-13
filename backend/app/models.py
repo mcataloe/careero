@@ -42,6 +42,9 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
 
     companies: Mapped[list["Company"]] = relationship(back_populates="user")
     roles: Mapped[list["Role"]] = relationship(back_populates="user")
+    stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
+        back_populates="user"
+    )
 
 
 class Company(TimestampMixin, SoftDeleteMixin, Base):
@@ -115,6 +118,9 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     user: Mapped[User] = relationship(back_populates="roles")
     company: Mapped[Company] = relationship(back_populates="roles")
     source: Mapped["JobSource | None"] = relationship(back_populates="roles")
+    stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
+        back_populates="role"
+    )
 
 
 class JobSource(TimestampMixin, SoftDeleteMixin, Base):
@@ -146,6 +152,8 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
     __table_args__ = (
         Index("ix_stride_evaluations_user_id", "user_id"),
         Index("ix_stride_evaluations_role_id", "role_id"),
+        Index("ix_stride_evaluations_status", "evaluation_status"),
+        Index("ix_stride_evaluations_role_created_at", "role_id", "created_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -163,9 +171,57 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
         ForeignKey("roles.id"),
         nullable=False,
     )
+    evaluation_status: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="completed",
+    )
+    overall_score: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    recommendation: Mapped[str | None] = mapped_column(String(100))
+    confidence_level: Mapped[str | None] = mapped_column(String(100))
     summary: Mapped[str | None] = mapped_column(Text)
-    scores: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
-    notes: Mapped[str | None] = mapped_column(Text)
+    strengths: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    concerns: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list)
+    resume_alignment: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    compensation_alignment: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    seniority_alignment: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    remote_alignment: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    technical_alignment: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    company_risk: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    ats_keywords: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    missing_keywords: Mapped[list[str]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+    )
+    raw_evaluation_json: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+    user: Mapped[User] = relationship(back_populates="stride_evaluations")
+    role: Mapped[Role] = relationship(back_populates="stride_evaluations")
 
 
 class Application(TimestampMixin, SoftDeleteMixin, Base):
