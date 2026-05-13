@@ -13,7 +13,7 @@ if (-not (Test-Path $python)) {
 Write-Host "Running backend unit tests..."
 Push-Location $backendDir
 try {
-    & $python -m pytest tests/test_config.py tests/test_health.py
+    & $python -m pytest tests/test_config.py tests/test_health.py tests/test_stride_rules.py
 
     Write-Host "Checking whether database-backed backend tests can run..."
     if (-not $env:CAREERO_TEST_DATABASE_URL) {

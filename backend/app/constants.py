@@ -33,3 +33,29 @@ class StrideEvaluationStatus(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class StrideRecommendation(StrEnum):
+    APPLY = "apply"
+    MONITOR = "monitor"
+    SKIP = "skip"
+    NEEDS_REVIEW = "needs_review"
+
+
+class StrideConfidenceLevel(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+class StrideDimension(StrEnum):
+    STRATEGIC_FIT = "strategic_fit"
+    TECHNICAL_ALIGNMENT = "technical_alignment"
+    SENIORITY_ALIGNMENT = "seniority_alignment"
+    COMPENSATION_ALIGNMENT = "compensation_alignment"
+    REMOTE_LOCATION_ALIGNMENT = "remote_location_alignment"
+    COMPANY_SIGNAL = "company_signal"
+    ROLE_CLARITY = "role_clarity"
+    APPLICATION_EFFORT = "application_effort"
+    ATS_RESUME_ALIGNMENT = "ats_resume_alignment"
+    RISK_FLAGS = "risk_flags"

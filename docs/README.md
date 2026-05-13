@@ -2,4 +2,4 @@
 
 This directory contains Careero project documentation.
 
-Layer 1 documents only the local-first foundation. STRIDE is referenced by name for now and will be defined in later product documentation.
+Layer 1 documents the local-first foundation. Layer 2 begins defining STRIDE with deterministic backend scoring rules before AI enrichment.

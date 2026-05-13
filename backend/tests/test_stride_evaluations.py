@@ -56,7 +56,12 @@ def create_evaluation(client: TestClient, role_id: str) -> dict:
         f"/api/roles/{role_id}/evaluations",
         json={
             "user_notes": "Evaluate this later with the real STRIDE engine.",
-            "user_context": {"priority": "medium"},
+            "user_context": {
+                "preferred_remote_type": "hybrid",
+                "target_compensation_min": "110000",
+                "target_seniority": "mid",
+                "target_keywords": ["python", "postgresql"],
+            },
         },
     )
     assert response.status_code == 201
@@ -95,13 +100,22 @@ def test_create_evaluation_for_active_role_logs_activity(
     assert evaluation["role_id"] == role["id"]
     assert evaluation["user_id"] == str(DEFAULT_LOCAL_USER_ID)
     assert evaluation["evaluation_status"] == "completed"
-    assert evaluation["overall_score"] is None
-    assert evaluation["recommendation"] is None
-    assert evaluation["confidence_level"] is None
-    assert evaluation["resume_alignment"]["status"] == "not_evaluated"
-    assert evaluation["ats_keywords"] == []
+    assert evaluation["overall_score"] is not None
+    assert evaluation["recommendation"] in {
+        "apply",
+        "monitor",
+        "skip",
+        "needs_review",
+    }
+    assert evaluation["confidence_level"] in {"low", "medium", "high"}
+    assert evaluation["resume_alignment"]["status"] == "baseline"
+    assert evaluation["ats_keywords"] == ["postgresql", "python"]
     assert evaluation["missing_keywords"] == []
-    assert evaluation["raw_evaluation_json"]["evaluator"] == "deterministic_placeholder"
+    assert (
+        evaluation["raw_evaluation_json"]["ruleset_version"]
+        == "phase_2b_deterministic_v1"
+    )
+    assert "dimension_scores" in evaluation["raw_evaluation_json"]
 
     actions = list(
         db_session.scalars(

@@ -1,6 +1,4 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -9,6 +7,7 @@ from app.constants import RoleStatus, StrideEvaluationStatus
 from app.models import ActivityLog, Role, StrideEvaluation, User
 from app.schemas.stride_evaluations import StrideEvaluationCreate
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.stride_rules import evaluate_role
 
 
 class StrideEvaluationError(Exception):
@@ -50,7 +49,11 @@ class StrideEvaluationService:
         if role is None:
             raise StrideEvaluationRoleNotFoundError("Role not found")
 
-        evaluation_data = self._evaluate_role(role=role, payload=payload)
+        evaluation_data = evaluate_role(
+            role,
+            payload.user_context,
+            payload.user_notes,
+        ).to_persistence_dict()
         evaluation = StrideEvaluation(
             user_id=user.id,
             role_id=role.id,
@@ -141,59 +144,3 @@ class StrideEvaluationService:
             )
         )
         return self.db.scalar(statement)
-
-    def _evaluate_role(
-        self,
-        *,
-        role: Role,
-        payload: StrideEvaluationCreate,
-    ) -> dict[str, Any]:
-        not_evaluated = {
-            "status": "not_evaluated",
-            "reason": (
-                "This phase does not connect resume data, external company data, "
-                "or an AI evaluator."
-            ),
-        }
-        summary = (
-            f"Placeholder STRIDE evaluation for {role.title}"
-            f" at {role.company.name}."
-            " Structured scoring will be added in a later phase."
-        )
-        description_text = role.normalized_description or role.raw_description
-
-        return {
-            "evaluation_status": StrideEvaluationStatus.COMPLETED.value,
-            "overall_score": None,
-            "recommendation": None,
-            "confidence_level": None,
-            "summary": summary,
-            "strengths": [],
-            "concerns": [],
-            "resume_alignment": not_evaluated,
-            "compensation_alignment": not_evaluated,
-            "seniority_alignment": not_evaluated,
-            "remote_alignment": not_evaluated,
-            "technical_alignment": not_evaluated,
-            "company_risk": not_evaluated,
-            "ats_keywords": [],
-            "missing_keywords": [],
-            "raw_evaluation_json": {
-                "evaluator": "deterministic_placeholder",
-                "version": "phase_2a",
-                "generated_at": datetime.now(timezone.utc).isoformat(),
-                "inputs": {
-                    "role_id": str(role.id),
-                    "title": role.title,
-                    "company_name": role.company.name,
-                    "description_present": bool(description_text),
-                    "user_notes": payload.user_notes,
-                    "user_context": payload.user_context,
-                },
-                "limitations": [
-                    "No OpenAI call was made.",
-                    "No resume facts were inferred.",
-                    "No external company or compensation research was performed.",
-                ],
-            },
-        }

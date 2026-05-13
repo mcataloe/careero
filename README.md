@@ -1,6 +1,6 @@
 # Careero
 
-Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a STRIDE-powered workflow, but this initial foundation only names that direction and does not define the STRIDE model yet.
+Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a STRIDE-powered workflow for evaluating role fit, risk, positioning, and application priority.
 
 Layer 1 is the local development foundation: a FastAPI backend, PostgreSQL persistence, a React + Vite + TypeScript frontend, manual role intake, and basic validation commands.
 
@@ -169,7 +169,7 @@ Layer 1 is complete when local PostgreSQL credentials are valid, migrations and 
 
 ## Known Next Steps
 
-- Define and implement STRIDE evaluation.
+- Enrich STRIDE evaluation with AI-assisted structured analysis.
 - Add application workflow features on top of captured roles.
 - Add source polling only after manual intake is stable.
 - Keep AWS deployment, auth, billing, tenants, and workspaces out of Layer 1.
