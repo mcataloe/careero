@@ -6,7 +6,7 @@ export function DashboardPage() {
       <div>
         <Title order={1}>Dashboard</Title>
         <Text c="dimmed">
-          A local workspace for job search operations. Start by adding roles manually.
+          A local control center for job search operations. Start by adding roles manually.
         </Text>
       </div>
 

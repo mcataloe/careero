@@ -2,6 +2,39 @@
 
 Careero Layer 1 runs locally with a FastAPI backend and a React + Vite frontend.
 
+## Root Commands
+
+Run these from the repository root:
+
+```powershell
+.\scripts\start-backend.ps1
+.\scripts\start-frontend.ps1
+.\scripts\migrate.ps1
+.\scripts\seed.ps1
+.\scripts\test.ps1
+.\scripts\check-local.ps1
+```
+
+If PowerShell blocks local scripts, use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
+```
+
+## Readiness Checklist
+
+1. PostgreSQL is running.
+2. `backend/.env` has working `CAREERO_DATABASE_URL` and `CAREERO_TEST_DATABASE_URL` values.
+3. Backend dependencies are installed.
+4. Frontend dependencies are installed.
+5. Migrations are applied with `.\scripts\migrate.ps1`.
+6. Local data is seeded with `.\scripts\seed.ps1`.
+7. Backend and frontend are running.
+8. `.\scripts\check-local.ps1` passes.
+9. Manual role intake works at `http://127.0.0.1:5173/roles/new`.
+
+If database health fails, fix PostgreSQL credentials or update `backend/.env`, then rerun migrations and seed.
+
 ## Backend
 
 Create PostgreSQL databases for local development and tests:
@@ -101,3 +134,7 @@ npm.cmd run build
 ## Current Boundaries
 
 Layer 1 is local-first only. It does not include authentication, tenants, workspaces, billing, cloud deployment, background job execution, or automated application submission.
+
+## Layer 1 Completion
+
+Layer 1 is considered locally stable when the backend, frontend, and PostgreSQL all pass readiness checks and the role workflow can create, list, view, update, and archive records.
