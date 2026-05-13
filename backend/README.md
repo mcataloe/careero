@@ -33,7 +33,11 @@ CAREERO_APP_NAME=Careero API
 CAREERO_ENVIRONMENT=local
 CAREERO_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero
 CAREERO_TEST_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero_test
+CAREERO_ENABLE_AI_EVALUATIONS=false
 CAREERO_OPENAI_API_KEY=
+CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
+CAREERO_OPENAI_TIMEOUT_SECONDS=30
+CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_LOG_LEVEL=INFO
 ```
 
@@ -130,7 +134,7 @@ Company intake accepts either an existing company ID or a name. When a name is s
 
 ## STRIDE Evaluation API
 
-STRIDE evaluation support currently uses deterministic local rules. The score is a baseline before AI enrichment, not final truth. The backend does not call OpenAI, infer resume facts, generate resumes or cover letters, scrape jobs, or poll sources.
+STRIDE evaluation support always starts with deterministic local rules. The deterministic score remains the canonical baseline. Optional OpenAI enrichment can add grounded structured analysis, but it does not replace the baseline score, infer resume facts, generate resumes or cover letters, scrape jobs, poll sources, or perform external research.
 
 The first-pass dimensions are equally weighted:
 
@@ -169,7 +173,21 @@ The create request can include optional `user_context` hints:
 
 Rule-based concerns currently detect missing compensation, unclear seniority, hybrid/on-site mismatch, vague responsibilities, excessive technology sprawl, and suspiciously generic descriptions. The full scoring breakdown is stored in `raw_evaluation_json`.
 
-Create a baseline evaluation for a role:
+### Optional OpenAI Enrichment
+
+AI enrichment is disabled by default. To enable it locally, set:
+
+```dotenv
+CAREERO_ENABLE_AI_EVALUATIONS=true
+CAREERO_OPENAI_API_KEY=sk-...
+CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
+CAREERO_OPENAI_TIMEOUT_SECONDS=30
+CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
+```
+
+When enabled, Careero uses the OpenAI Responses API with structured output validation. The prompt includes only stored role fields, the deterministic baseline, STRIDE rules, and request `user_context`. If OpenAI is unavailable, times out, or returns invalid structured output, the evaluation still succeeds with deterministic results and stores `ai_status` as `failed` or `skipped` in `raw_evaluation_json`.
+
+Create a baseline evaluation for a role. If AI enrichment is enabled and configured, the same endpoint also stores grounded AI analysis:
 
 ```powershell
 Invoke-RestMethod `

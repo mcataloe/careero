@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import ClassVar
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,7 +28,11 @@ class Settings(BaseSettings):
     test_database_url: str = Field(
         default="postgresql://careero:careero@localhost:5432/careero_test"
     )
+    enable_ai_evaluations: bool = Field(default=False)
     openai_api_key: str = Field(default="")
+    openai_default_evaluation_model: str = Field(default="gpt-5-mini")
+    openai_timeout_seconds: int = Field(default=30)
+    openai_max_output_tokens: int = Field(default=2500)
     log_level: str = Field(default="INFO")
 
     @field_validator(
@@ -36,6 +40,7 @@ class Settings(BaseSettings):
         "environment",
         "database_url",
         "test_database_url",
+        "openai_default_evaluation_model",
         "log_level",
     )
     @classmethod
@@ -43,6 +48,25 @@ class Settings(BaseSettings):
         if not value or not value.strip():
             raise ValueError("must not be blank")
         return value.strip()
+
+    @field_validator("openai_timeout_seconds")
+    @classmethod
+    def openai_timeout_must_be_positive(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("must be greater than zero")
+        return value
+
+    @field_validator("openai_max_output_tokens")
+    @classmethod
+    def openai_max_output_tokens_must_be_positive(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("must be greater than zero")
+        return value
+
+    @model_validator(mode="after")
+    def openai_key_can_be_blank_for_fallback(self) -> "Settings":
+        self.openai_api_key = self.openai_api_key.strip()
+        return self
 
     @field_validator("log_level")
     @classmethod

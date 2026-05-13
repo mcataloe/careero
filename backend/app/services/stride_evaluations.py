@@ -3,10 +3,12 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.config import Settings, get_settings
 from app.constants import RoleStatus, StrideEvaluationStatus
 from app.models import ActivityLog, Role, StrideEvaluation, User
 from app.schemas.stride_evaluations import StrideEvaluationCreate
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.stride_ai import OpenAIStrideEvaluator, merge_ai_analysis
 from app.services.stride_rules import evaluate_role
 
 
@@ -27,8 +29,15 @@ class StrideEvaluationNotFoundError(StrideEvaluationError):
 
 
 class StrideEvaluationService:
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        settings: Settings | None = None,
+        ai_evaluator: OpenAIStrideEvaluator | None = None,
+    ) -> None:
         self.db = db
+        self.settings = settings or get_settings()
+        self.ai_evaluator = ai_evaluator or OpenAIStrideEvaluator(self.settings)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
@@ -49,11 +58,17 @@ class StrideEvaluationService:
         if role is None:
             raise StrideEvaluationRoleNotFoundError("Role not found")
 
-        evaluation_data = evaluate_role(
+        baseline = evaluate_role(
             role,
             payload.user_context,
             payload.user_notes,
-        ).to_persistence_dict()
+        )
+        ai_metadata = self.ai_evaluator.enrich(
+            role=role,
+            payload=payload,
+            baseline=baseline,
+        )
+        evaluation_data = merge_ai_analysis(baseline, ai_metadata)
         evaluation = StrideEvaluation(
             user_id=user.id,
             role_id=role.id,

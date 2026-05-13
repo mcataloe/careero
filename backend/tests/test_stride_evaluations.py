@@ -116,6 +116,10 @@ def test_create_evaluation_for_active_role_logs_activity(
         == "phase_2b_deterministic_v1"
     )
     assert "dimension_scores" in evaluation["raw_evaluation_json"]
+    assert evaluation["raw_evaluation_json"]["ai_status"] == "skipped"
+    assert "AI evaluations are disabled" in (
+        evaluation["raw_evaluation_json"]["ai_failure_reason"]
+    )
 
     actions = list(
         db_session.scalars(

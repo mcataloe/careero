@@ -169,7 +169,7 @@ Layer 1 is complete when local PostgreSQL credentials are valid, migrations and 
 
 ## Known Next Steps
 
-- Enrich STRIDE evaluation with AI-assisted structured analysis.
+- Add frontend views for STRIDE evaluation results.
 - Add application workflow features on top of captured roles.
 - Add source polling only after manual intake is stable.
 - Keep AWS deployment, auth, billing, tenants, and workspaces out of Layer 1.

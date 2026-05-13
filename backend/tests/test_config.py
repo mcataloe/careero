@@ -25,6 +25,10 @@ def test_settings_have_safe_local_defaults_without_env_file() -> None:
         settings.test_database_url
         == "postgresql://careero:careero@localhost:5432/careero_test"
     )
+    assert settings.enable_ai_evaluations is False
+    assert settings.openai_default_evaluation_model == "gpt-5-mini"
+    assert settings.openai_timeout_seconds == 30
+    assert settings.openai_max_output_tokens == 2500
     assert settings.log_level == "INFO"
 
 
@@ -35,6 +39,7 @@ def test_settings_have_safe_local_defaults_without_env_file() -> None:
         ("environment", " "),
         ("database_url", ""),
         ("test_database_url", ""),
+        ("openai_default_evaluation_model", ""),
         ("log_level", ""),
     ],
 )
@@ -52,3 +57,36 @@ def test_settings_normalize_log_level() -> None:
     settings = Settings(_env_file=None, log_level="debug")
 
     assert settings.log_level == "DEBUG"
+
+
+def test_settings_accept_ai_enabled_with_valid_openai_options() -> None:
+    settings = Settings(
+        _env_file=None,
+        enable_ai_evaluations=True,
+        openai_api_key=" sk-test ",
+        openai_default_evaluation_model="gpt-5-mini",
+        openai_timeout_seconds=45,
+        openai_max_output_tokens=3000,
+    )
+
+    assert settings.enable_ai_evaluations is True
+    assert settings.openai_api_key == "sk-test"
+    assert settings.openai_timeout_seconds == 45
+    assert settings.openai_max_output_tokens == 3000
+
+
+@pytest.mark.parametrize(
+    ("field_name", "value"),
+    [
+        ("openai_timeout_seconds", 0),
+        ("openai_timeout_seconds", -1),
+        ("openai_max_output_tokens", 0),
+        ("openai_max_output_tokens", -10),
+    ],
+)
+def test_settings_reject_invalid_openai_numeric_options(
+    field_name: str,
+    value: int,
+) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **{field_name: value})

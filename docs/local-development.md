@@ -62,6 +62,18 @@ uvicorn app.main:app --reload
 Edit `backend/.env` so `CAREERO_DATABASE_URL` and `CAREERO_TEST_DATABASE_URL` point at your local PostgreSQL databases.
 Run `python -m app.seed` after migrations so the default local user and canonical manual job sources are available for role intake.
 
+OpenAI STRIDE enrichment is optional and disabled by default. Deterministic STRIDE scoring works without an API key. To enable AI enrichment locally, set these in `backend/.env`:
+
+```dotenv
+CAREERO_ENABLE_AI_EVALUATIONS=true
+CAREERO_OPENAI_API_KEY=sk-...
+CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
+CAREERO_OPENAI_TIMEOUT_SECONDS=30
+CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
+```
+
+Do not commit real API keys. If AI is disabled, missing, times out, or returns invalid structured output, role evaluation falls back to the deterministic baseline and records `ai_status` in `raw_evaluation_json`.
+
 Health check:
 
 ```text

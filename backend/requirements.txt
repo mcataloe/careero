@@ -1,5 +1,6 @@
 alembic
 fastapi
+openai
 pydantic-settings
 psycopg[binary]
 SQLAlchemy
