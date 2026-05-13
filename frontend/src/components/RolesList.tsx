@@ -2,9 +2,17 @@ import { Badge, Button, Paper, Stack, Table, Text, Title } from "@mantine/core";
 import { Link } from "react-router-dom";
 
 import type { Role } from "../types/roles";
+import type { EvaluationSummaryState } from "../types/strideEvaluations";
+import { EvaluationIndicator } from "./EvaluationIndicator";
 import { EmptyState } from "./States";
 
-export function RolesList({ roles }: { roles: Role[] }) {
+export function RolesList({
+  roles,
+  evaluationStates = {},
+}: {
+  roles: Role[];
+  evaluationStates?: Record<string, EvaluationSummaryState>;
+}) {
   if (roles.length === 0) {
     return (
       <EmptyState
@@ -29,6 +37,7 @@ export function RolesList({ roles }: { roles: Role[] }) {
               <Table.Th>Company</Table.Th>
               <Table.Th>Source</Table.Th>
               <Table.Th>Status</Table.Th>
+              <Table.Th>STRIDE</Table.Th>
               <Table.Th>Location</Table.Th>
               <Table.Th>Date found</Table.Th>
             </Table.Tr>
@@ -52,6 +61,9 @@ export function RolesList({ roles }: { roles: Role[] }) {
                 <Table.Td>{role.source?.name ?? "Unknown"}</Table.Td>
                 <Table.Td>
                   <Badge variant="light">{role.status}</Badge>
+                </Table.Td>
+                <Table.Td>
+                  <EvaluationIndicator state={evaluationStates[role.id]} />
                 </Table.Td>
                 <Table.Td>{role.location ?? "-"}</Table.Td>
                 <Table.Td>{role.date_found}</Table.Td>

@@ -2,19 +2,20 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { RolesPage } from "./RolesPage";
-import { sampleRole } from "../test-data";
+import { sampleEvaluation, sampleRole } from "../test-data";
 import { render, screen, waitFor } from "../test-utils";
 
-function mockFetch(response: unknown, ok = true) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue({
-      ok,
-      status: ok ? 200 : 500,
-      headers: new Headers({ "content-type": "application/json" }),
-      json: async () => response,
-    }),
-  );
+function jsonResponse(response: unknown, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: new Headers({ "content-type": "application/json" }),
+    json: async () => response,
+  };
+}
+
+function mockFetch(response: unknown, status = 200) {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(response, status)));
 }
 
 describe("RolesPage", () => {
@@ -36,7 +37,7 @@ describe("RolesPage", () => {
   });
 
   it("renders an error state", async () => {
-    mockFetch({ detail: "Backend unavailable" }, false);
+    mockFetch({ detail: "Backend unavailable" }, 500);
 
     render(
       <MemoryRouter>
@@ -48,7 +49,13 @@ describe("RolesPage", () => {
   });
 
   it("renders populated roles", async () => {
-    mockFetch([sampleRole]);
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse([sampleRole]))
+        .mockResolvedValueOnce(jsonResponse(sampleEvaluation)),
+    );
 
     render(
       <MemoryRouter>
@@ -60,5 +67,25 @@ describe("RolesPage", () => {
     expect(screen.getByText("Senior Backend Engineer")).toBeInTheDocument();
     expect(screen.getByText("Example Company")).toBeInTheDocument();
     expect(screen.getByText("LinkedIn manual")).toBeInTheDocument();
+    expect(await screen.findByText("82.00")).toBeInTheDocument();
+    expect(screen.getByText("apply")).toBeInTheDocument();
+  });
+
+  it("renders not evaluated indicators", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse([sampleRole]))
+        .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404)),
+    );
+
+    render(
+      <MemoryRouter>
+        <RolesPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Not evaluated")).toBeInTheDocument();
   });
 });

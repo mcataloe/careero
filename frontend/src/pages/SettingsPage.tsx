@@ -1,5 +1,7 @@
 import { List, Paper, Stack, Text, Title } from "@mantine/core";
 
+import { ResumeSourceSettings } from "../components/ResumeSourceSettings";
+
 export function SettingsPage() {
   return (
     <Stack gap="lg">
@@ -14,6 +16,7 @@ export function SettingsPage() {
           <List.Item>Authentication and workspace switching are intentionally absent.</List.Item>
         </List>
       </Paper>
+      <ResumeSourceSettings />
     </Stack>
   );
 }
