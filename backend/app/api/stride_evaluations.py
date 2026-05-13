@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.constants import StrideEvaluationStatus
@@ -32,14 +32,18 @@ def get_stride_evaluation_service(
 )
 def create_stride_evaluation(
     role_id: uuid.UUID,
+    response: Response,
     payload: StrideEvaluationCreate | None = None,
     service: StrideEvaluationService = Depends(get_stride_evaluation_service),
 ):
     try:
-        return service.create_for_role(
+        result = service.create_for_role(
             role_id=role_id,
             payload=payload or StrideEvaluationCreate(),
         )
+        if result.reused_cache:
+            response.status_code = status.HTTP_200_OK
+        return result.evaluation
     except StrideEvaluationRoleNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except StrideEvaluationSeedMissingError as exc:

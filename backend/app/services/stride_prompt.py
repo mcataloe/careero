@@ -6,6 +6,8 @@ from app.models import ResumeSourceVersion, Role
 from app.services.stride_rules import StrideRuleResult
 
 
+PROMPT_VERSION = "phase_2c_grounded_prompt_v1"
+
 STRIDE_RULES_TEXT = """
 STRIDE evaluates role fit, risk, positioning, and application priority using:
 - strategic fit

@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     openai_default_evaluation_model: str = Field(default="gpt-5-mini")
     openai_timeout_seconds: int = Field(default=30)
     openai_max_output_tokens: int = Field(default=2500)
+    max_ai_evaluations_per_session: int = Field(default=25)
     log_level: str = Field(default="INFO")
 
     @field_validator(
@@ -59,6 +60,13 @@ class Settings(BaseSettings):
     @field_validator("openai_max_output_tokens")
     @classmethod
     def openai_max_output_tokens_must_be_positive(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("must be greater than zero")
+        return value
+
+    @field_validator("max_ai_evaluations_per_session")
+    @classmethod
+    def max_ai_evaluations_per_session_must_be_positive(cls, value: int) -> int:
         if value <= 0:
             raise ValueError("must be greater than zero")
         return value

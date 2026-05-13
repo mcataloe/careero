@@ -15,7 +15,11 @@ def test_settings_accept_empty_openai_api_key() -> None:
     assert settings.openai_api_key == ""
 
 
-def test_settings_have_safe_local_defaults_without_env_file() -> None:
+def test_settings_have_safe_local_defaults_without_env_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("CAREERO_DATABASE_URL", raising=False)
+    monkeypatch.delenv("CAREERO_TEST_DATABASE_URL", raising=False)
     settings = Settings(_env_file=None)
 
     assert settings.app_name == "Careero API"
@@ -29,6 +33,7 @@ def test_settings_have_safe_local_defaults_without_env_file() -> None:
     assert settings.openai_default_evaluation_model == "gpt-5-mini"
     assert settings.openai_timeout_seconds == 30
     assert settings.openai_max_output_tokens == 2500
+    assert settings.max_ai_evaluations_per_session == 25
     assert settings.log_level == "INFO"
 
 
@@ -67,12 +72,14 @@ def test_settings_accept_ai_enabled_with_valid_openai_options() -> None:
         openai_default_evaluation_model="gpt-5-mini",
         openai_timeout_seconds=45,
         openai_max_output_tokens=3000,
+        max_ai_evaluations_per_session=10,
     )
 
     assert settings.enable_ai_evaluations is True
     assert settings.openai_api_key == "sk-test"
     assert settings.openai_timeout_seconds == 45
     assert settings.openai_max_output_tokens == 3000
+    assert settings.max_ai_evaluations_per_session == 10
 
 
 @pytest.mark.parametrize(
@@ -82,6 +89,8 @@ def test_settings_accept_ai_enabled_with_valid_openai_options() -> None:
         ("openai_timeout_seconds", -1),
         ("openai_max_output_tokens", 0),
         ("openai_max_output_tokens", -10),
+        ("max_ai_evaluations_per_session", 0),
+        ("max_ai_evaluations_per_session", -1),
     ],
 )
 def test_settings_reject_invalid_openai_numeric_options(

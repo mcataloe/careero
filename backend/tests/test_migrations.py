@@ -51,6 +51,18 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "company_risk",
         "ats_keywords",
         "missing_keywords",
+        "model_used",
+        "prompt_version",
+        "ruleset_version",
+        "input_token_estimate",
+        "output_token_estimate",
+        "latency_ms",
+        "ai_enabled",
+        "ai_status",
+        "error_message",
+        "role_content_hash",
+        "source_hash",
+        "evaluation_input_hash",
         "raw_evaluation_json",
         "created_at",
         "updated_at",
@@ -65,6 +77,9 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "ix_stride_evaluations_role_id",
         "ix_stride_evaluations_status",
         "ix_stride_evaluations_role_created_at",
+        "ix_stride_evaluations_role_input_hash",
+        "ix_stride_evaluations_ai_status",
+        "ix_stride_evaluations_ruleset_version",
     }.issubset(stride_indexes)
 
     resume_source_columns = {

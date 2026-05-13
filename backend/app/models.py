@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     Numeric,
     String,
     Text,
@@ -229,6 +230,13 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
         Index("ix_stride_evaluations_role_id", "role_id"),
         Index("ix_stride_evaluations_status", "evaluation_status"),
         Index("ix_stride_evaluations_role_created_at", "role_id", "created_at"),
+        Index(
+            "ix_stride_evaluations_role_input_hash",
+            "role_id",
+            "evaluation_input_hash",
+        ),
+        Index("ix_stride_evaluations_ai_status", "ai_status"),
+        Index("ix_stride_evaluations_ruleset_version", "ruleset_version"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -289,6 +297,18 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
         nullable=False,
         default=list,
     )
+    model_used: Mapped[str | None] = mapped_column(String(100))
+    prompt_version: Mapped[str | None] = mapped_column(String(100))
+    ruleset_version: Mapped[str | None] = mapped_column(String(100))
+    input_token_estimate: Mapped[int | None] = mapped_column(Integer)
+    output_token_estimate: Mapped[int | None] = mapped_column(Integer)
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    ai_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    ai_status: Mapped[str | None] = mapped_column(String(100))
+    error_message: Mapped[str | None] = mapped_column(Text)
+    role_content_hash: Mapped[str | None] = mapped_column(String(64))
+    source_hash: Mapped[str | None] = mapped_column(String(64))
+    evaluation_input_hash: Mapped[str | None] = mapped_column(String(64))
     raw_evaluation_json: Mapped[dict] = mapped_column(
         JSONB,
         nullable=False,

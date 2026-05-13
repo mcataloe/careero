@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
+import time
 from decimal import Decimal
+import json
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -19,6 +22,9 @@ from app.services.stride_prompt import build_stride_evaluation_prompt
 from app.services.stride_rules import StrideRuleResult
 
 logger = logging.getLogger(__name__)
+
+_session_counter_lock = threading.Lock()
+_ai_evaluations_this_session = 0
 
 
 class AIStrideItem(BaseModel):
@@ -85,10 +91,17 @@ class OpenAIStrideEvaluator:
         active_resume_source: ResumeSourceVersion | None = None,
     ) -> dict[str, Any]:
         if not self.settings.enable_ai_evaluations:
-            return self._skipped("AI evaluations are disabled")
+            return self._skipped("AI evaluations are disabled", ai_enabled=False)
         if not self.settings.openai_api_key:
-            return self._skipped("OpenAI API key is not configured")
+            return self._skipped("OpenAI API key is not configured", ai_enabled=True)
+        if not _try_consume_ai_evaluation(self.settings.max_ai_evaluations_per_session):
+            return self._skipped(
+                "AI evaluation session limit reached",
+                ai_enabled=True,
+            )
 
+        prompt: list[dict[str, str]] | None = None
+        started_at = time.perf_counter()
         try:
             client = self.client or create_openai_client(self.settings)
             prompt = build_stride_evaluation_prompt(
@@ -104,32 +117,59 @@ class OpenAIStrideEvaluator:
                 text_format=AIStrideEvaluationOutput,
                 max_output_tokens=self.settings.openai_max_output_tokens,
             )
+            usage = getattr(response, "usage", None)
             parsed = getattr(response, "output_parsed", None)
             if parsed is None:
                 raise ValueError("OpenAI response did not include parsed output")
             if not isinstance(parsed, AIStrideEvaluationOutput):
                 parsed = AIStrideEvaluationOutput.model_validate(parsed)
         except (OpenAIClientUnavailableError, ValidationError, ValueError) as exc:
-            return self._failed(exc)
+            return self._failed(exc, prompt=prompt, started_at=started_at)
         except Exception as exc:
             logger.warning("OpenAI STRIDE evaluation failed: %s", type(exc).__name__)
-            return self._failed(exc)
+            return self._failed(exc, prompt=prompt, started_at=started_at)
 
+        output_payload = parsed.model_dump(mode="json")
         return {
             "ai_status": "completed",
+            "ai_enabled": True,
             "ai_model": self.settings.openai_default_evaluation_model,
-            "ai_result": parsed.model_dump(mode="json"),
+            "ai_latency_ms": _elapsed_ms(started_at),
+            "ai_input_token_estimate": _usage_value(
+                usage,
+                "input_tokens",
+                fallback=_estimate_tokens(prompt),
+            ),
+            "ai_output_token_estimate": _usage_value(
+                usage,
+                "output_tokens",
+                fallback=_estimate_tokens(output_payload),
+            ),
+            "ai_result": output_payload,
         }
 
-    def _skipped(self, reason: str) -> dict[str, str]:
+    def _skipped(self, reason: str, *, ai_enabled: bool) -> dict[str, Any]:
         return {
             "ai_status": "skipped",
+            "ai_enabled": ai_enabled,
+            "ai_model": self.settings.openai_default_evaluation_model if ai_enabled else None,
             "ai_failure_reason": reason,
         }
 
-    def _failed(self, exc: Exception) -> dict[str, str]:
+    def _failed(
+        self,
+        exc: Exception,
+        *,
+        prompt: list[dict[str, str]] | None,
+        started_at: float,
+    ) -> dict[str, Any]:
         return {
             "ai_status": "failed",
+            "ai_enabled": True,
+            "ai_model": self.settings.openai_default_evaluation_model,
+            "ai_latency_ms": _elapsed_ms(started_at),
+            "ai_input_token_estimate": _estimate_tokens(prompt),
+            "ai_output_token_estimate": None,
             "ai_error_type": type(exc).__name__,
             "ai_failure_reason": _sanitize_failure_reason(str(exc)),
         }
@@ -205,3 +245,38 @@ def _sanitize_failure_reason(reason: str) -> str:
     if len(redacted) > 500:
         redacted = redacted[:497] + "..."
     return redacted or "OpenAI evaluation failed"
+
+
+def reset_ai_evaluation_session_counter() -> None:
+    global _ai_evaluations_this_session
+    with _session_counter_lock:
+        _ai_evaluations_this_session = 0
+
+
+def _try_consume_ai_evaluation(limit: int) -> bool:
+    global _ai_evaluations_this_session
+    with _session_counter_lock:
+        if _ai_evaluations_this_session >= limit:
+            return False
+        _ai_evaluations_this_session += 1
+        return True
+
+
+def _elapsed_ms(started_at: float) -> int:
+    return max(0, round((time.perf_counter() - started_at) * 1000))
+
+
+def _estimate_tokens(payload: Any) -> int | None:
+    if payload is None:
+        return None
+    text = payload if isinstance(payload, str) else json.dumps(payload, default=str)
+    return max(1, round(len(text) / 4))
+
+
+def _usage_value(usage: Any, name: str, *, fallback: int | None) -> int | None:
+    if usage is None:
+        return fallback
+    value = getattr(usage, name, None)
+    if value is None and isinstance(usage, dict):
+        value = usage.get(name)
+    return int(value) if value is not None else fallback

@@ -38,6 +38,7 @@ CAREERO_OPENAI_API_KEY=
 CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
+CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 CAREERO_LOG_LEVEL=INFO
 ```
 
@@ -251,11 +252,27 @@ CAREERO_OPENAI_API_KEY=sk-...
 CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
+CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 ```
 
 When enabled, Careero uses the OpenAI Responses API with structured output validation. The prompt includes only stored role fields, the deterministic baseline, STRIDE rules, request `user_context`, and the active resume/profile source version when one exists. If OpenAI is unavailable, times out, or returns invalid structured output, the evaluation still succeeds with deterministic results and stores `ai_status` as `failed` or `skipped` in `raw_evaluation_json`.
 
+`CAREERO_MAX_AI_EVALUATIONS_PER_SESSION` is a simple local cost control. It limits OpenAI-backed evaluation attempts per backend process and resets when the backend restarts. Cached evaluations, AI-disabled runs, and missing-key skipped runs do not consume the counter.
+
 AI output stores grounding details in `raw_evaluation_json.ai_result`, including `evidence_matches`, `evidence_gaps`, `positioning_opportunities`, and `unsupported_claim_warnings`. The prompt requires the model to distinguish `strong_match`, `partial_match`, `no_evidence`, and `insufficient_data`.
+
+### Evaluation Audit Metadata and Caching
+
+Each STRIDE evaluation stores audit metadata:
+
+- `model_used`, `prompt_version`, and `ruleset_version`
+- input/output token estimates when usage is available or can be approximated
+- `latency_ms`, `ai_enabled`, `ai_status`, and sanitized `error_message`
+- `role_content_hash`, `source_hash`, and `evaluation_input_hash`
+
+The cache key uses stable role content, active resume/profile source content, request notes/context, prompt version, ruleset version, AI enabled state, and model name. If those inputs have not changed, `POST /api/roles/{role_id}/evaluations` returns the cached latest completed evaluation with HTTP `200`. To explicitly re-run and create a new row, send `"force": true`.
+
+Careero logs evaluation lifecycle activity for `stride_evaluation.started`, `stride_evaluation.completed`, `stride_evaluation.failed`, and `stride_evaluation.cached_result_reused`. Logs and stored errors must not include API keys, full prompts, raw job descriptions, or full resume/profile text.
 
 Create a baseline evaluation for a role. If AI enrichment is enabled and configured, the same endpoint also stores grounded AI analysis:
 
@@ -266,6 +283,7 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body '{
     "user_notes": "Baseline review before AI enrichment.",
+    "force": false,
     "user_context": {
       "preferred_remote_type": "remote",
       "target_compensation_min": "130000",
@@ -273,6 +291,16 @@ Invoke-RestMethod `
       "target_keywords": ["python", "postgresql", "fastapi"]
     }
   }'
+```
+
+Force a re-run even when the same inputs have already been evaluated:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/roles/{role_id}/evaluations `
+  -ContentType "application/json" `
+  -Body '{ "force": true }'
 ```
 
 Get the latest evaluation for a role:

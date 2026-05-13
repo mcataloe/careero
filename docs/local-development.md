@@ -70,9 +70,14 @@ CAREERO_OPENAI_API_KEY=sk-...
 CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
+CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 ```
 
 Do not commit real API keys. If AI is disabled, missing, times out, or returns invalid structured output, role evaluation falls back to the deterministic baseline and records `ai_status` in `raw_evaluation_json`.
+
+STRIDE evaluations are cached by an input hash built from role content, active resume/profile source content, request notes/context, prompt version, ruleset version, AI enabled state, and model name. Reposting the same inputs returns the cached completed evaluation with HTTP `200`; send `"force": true` to create a new evaluation. The backend stores model, prompt/ruleset versions, token estimates when available, latency, AI status, sanitized errors, and content hashes for auditability.
+
+`CAREERO_MAX_AI_EVALUATIONS_PER_SESSION` limits OpenAI-backed attempts per backend process and resets on backend restart. Cached evaluations and AI-disabled or missing-key skipped runs do not consume the counter. Logs should include IDs/status/latency only, not prompts, API keys, raw role descriptions, or resume/profile source text.
 
 Health check:
 

@@ -9,6 +9,7 @@ from app.services.stride_ai import (
     AIStrideItem,
     OpenAIStrideEvaluator,
     merge_ai_analysis,
+    reset_ai_evaluation_session_counter,
 )
 from app.services.stride_rules import evaluate_role
 
@@ -128,6 +129,7 @@ def enabled_settings(**overrides) -> Settings:
 
 
 def test_openai_success_is_validated_and_merged() -> None:
+    reset_ai_evaluation_session_counter()
     role = role_fixture()
     payload = StrideEvaluationCreate(user_context={"target_keywords": ["python"]})
     baseline = evaluate_role(role, payload.user_context, payload.user_notes)
@@ -143,6 +145,9 @@ def test_openai_success_is_validated_and_merged() -> None:
     assert ai_metadata["ai_status"] == "completed"
     assert responses.kwargs["model"] == "gpt-5-mini"
     assert responses.kwargs["max_output_tokens"] == 2500
+    assert ai_metadata["ai_input_token_estimate"] is not None
+    assert ai_metadata["ai_output_token_estimate"] is not None
+    assert ai_metadata["ai_latency_ms"] >= 0
     assert merged["summary"] == "AI-enriched grounded STRIDE analysis."
     assert merged["recommendation"] == baseline.recommendation
     assert merged["confidence_level"] == baseline.confidence_level
@@ -187,6 +192,7 @@ def test_ai_enabled_without_api_key_falls_back() -> None:
 
 
 def test_openai_error_falls_back_without_secret_leak() -> None:
+    reset_ai_evaluation_session_counter()
     role = role_fixture()
     payload = StrideEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
@@ -203,9 +209,12 @@ def test_openai_error_falls_back_without_secret_leak() -> None:
     assert metadata["ai_error_type"] == "TimeoutError"
     assert "sk-secret123" not in metadata["ai_failure_reason"]
     assert "sk-REDACTED" in metadata["ai_failure_reason"]
+    assert metadata["ai_input_token_estimate"] is not None
+    assert metadata["ai_output_token_estimate"] is None
 
 
 def test_invalid_structured_output_falls_back() -> None:
+    reset_ai_evaluation_session_counter()
     role = role_fixture()
     payload = StrideEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
@@ -218,3 +227,43 @@ def test_invalid_structured_output_falls_back() -> None:
 
     assert metadata["ai_status"] == "failed"
     assert metadata["ai_error_type"] == "ValidationError"
+
+
+def test_ai_session_limit_skips_without_calling_openai() -> None:
+    reset_ai_evaluation_session_counter()
+    role = role_fixture()
+    payload = StrideEvaluationCreate()
+    baseline = evaluate_role(role, {}, None)
+    first_responses = FakeResponses(parsed=ai_output())
+    first = OpenAIStrideEvaluator(
+        enabled_settings(max_ai_evaluations_per_session=1),
+        client=FakeClient(first_responses),
+    )
+    second_responses = FakeResponses(parsed=ai_output())
+    second = OpenAIStrideEvaluator(
+        enabled_settings(max_ai_evaluations_per_session=1),
+        client=FakeClient(second_responses),
+    )
+
+    first_metadata = first.enrich(role=role, payload=payload, baseline=baseline)
+    second_metadata = second.enrich(role=role, payload=payload, baseline=baseline)
+
+    assert first_metadata["ai_status"] == "completed"
+    assert second_metadata["ai_status"] == "skipped"
+    assert "session limit" in second_metadata["ai_failure_reason"]
+    assert not hasattr(second_responses, "kwargs")
+
+
+def test_openai_error_log_does_not_include_secret(caplog) -> None:
+    reset_ai_evaluation_session_counter()
+    role = role_fixture()
+    payload = StrideEvaluationCreate()
+    baseline = evaluate_role(role, {}, None)
+    evaluator = OpenAIStrideEvaluator(
+        enabled_settings(),
+        client=FakeClient(FakeResponses(error=RuntimeError("boom sk-secret123"))),
+    )
+
+    evaluator.enrich(role=role, payload=payload, baseline=baseline)
+
+    assert "sk-secret123" not in caplog.text
