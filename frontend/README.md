@@ -37,9 +37,10 @@ STRIDE evaluation workflow:
 
 - Open a role at `/roles/:roleId`.
 - Use `Run STRIDE evaluation` for a role with no evaluation.
-- Use `Re-run evaluation` to create a new latest evaluation.
+- Use `Re-run evaluation` to force a new latest evaluation.
 - Use `View latest evaluation` to jump to the evaluation section.
 - The role list shows a non-blocking evaluation indicator for each role.
+- A normal run may reuse the backend cache when role/source/context inputs have not changed.
 
 Resume/profile grounding source:
 

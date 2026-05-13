@@ -4,13 +4,14 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.models import ActivityLog, ResumeSource, ResumeSourceVersion, User
+from app.models import ResumeSource, ResumeSourceVersion, User
 from app.schemas.resume_sources import (
     ResumeSourceCreate,
     ResumeSourceUpdate,
     ResumeSourceVersionCreate,
 )
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.activity_log import ActivityLogService
 
 
 class ResumeSourceError(Exception):
@@ -36,6 +37,7 @@ class ActiveResumeSourceNotFoundError(ResumeSourceError):
 class ResumeSourceService:
     def __init__(self, db: Session) -> None:
         self.db = db
+        self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
@@ -332,12 +334,10 @@ class ResumeSourceService:
         action: str,
         details: dict[str, Any],
     ) -> None:
-        self.db.add(
-            ActivityLog(
-                user_id=user_id,
-                entity_type="resume_source",
-                entity_id=entity_id,
-                action=action,
-                details=details,
-            )
+        self.activity_log.append(
+            user_id=user_id,
+            entity_type="resume_source",
+            entity_id=entity_id,
+            action=action,
+            details=details,
         )

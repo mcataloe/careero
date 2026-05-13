@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { archiveRole, getRole, updateRole } from "../api/roles";
-import { createEvaluation, getLatestEvaluation } from "../api/strideEvaluations";
+import {
+  createEvaluationWithStatus,
+  getLatestEvaluation,
+} from "../api/strideEvaluations";
 import { RoleDetail } from "../components/RoleDetail";
 import { StrideEvaluationDetail } from "../components/StrideEvaluationDetail";
 import { ErrorState, LoadingState } from "../components/States";
@@ -81,17 +84,23 @@ export function RoleDetailPage() {
     }
   }
 
-  async function handleRunEvaluation() {
+  async function handleRunEvaluation(force = false) {
     if (!roleId) return;
     setEvaluating(true);
     setEvaluationError(null);
     setNotice(null);
     try {
-      const nextEvaluation = await createEvaluation(roleId, {
+      const result = await createEvaluationWithStatus(roleId, {
         user_context: {},
+        ...(force ? { force: true } : {}),
       });
+      const nextEvaluation = result.evaluation;
       setEvaluation(nextEvaluation);
-      setNotice("STRIDE evaluation completed");
+      setNotice(
+        result.status === 200
+          ? "Cached STRIDE evaluation reused"
+          : "STRIDE evaluation completed",
+      );
       evaluationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
       setEvaluationError(

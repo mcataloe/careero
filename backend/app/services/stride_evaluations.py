@@ -8,9 +8,10 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.config import Settings, get_settings
 from app.constants import RoleStatus, StrideEvaluationStatus
-from app.models import ActivityLog, ResumeSourceVersion, Role, StrideEvaluation, User
+from app.models import ResumeSourceVersion, Role, StrideEvaluation, User
 from app.schemas.stride_evaluations import StrideEvaluationCreate
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.activity_log import ActivityLogService
 from app.services.evaluation_hashing import (
     evaluation_input_hash,
     resume_source_hash,
@@ -56,6 +57,7 @@ class StrideEvaluationService:
         self.db = db
         self.settings = settings or get_settings()
         self.ai_evaluator = ai_evaluator or OpenAIStrideEvaluator(self.settings)
+        self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
@@ -371,12 +373,10 @@ class StrideEvaluationService:
         action: str,
         details: dict,
     ) -> None:
-        self.db.add(
-            ActivityLog(
-                user_id=user_id,
-                entity_type="stride_evaluation",
-                entity_id=entity_id,
-                action=action,
-                details=details,
-            )
+        self.activity_log.append(
+            user_id=user_id,
+            entity_type="stride_evaluation",
+            entity_id=entity_id,
+            action=action,
+            details=details,
         )

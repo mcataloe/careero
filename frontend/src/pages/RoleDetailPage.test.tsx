@@ -50,7 +50,57 @@ describe("RoleDetailPage", () => {
         expect.objectContaining({ method: "POST" }),
       ),
     );
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body as string)).toEqual({
+      user_context: {},
+    });
     expect(await screen.findByText("STRIDE evaluation completed")).toBeInTheDocument();
     expect(screen.getByText("Strong baseline fit for backend platform work.")).toBeInTheDocument();
+  });
+
+  it("re-runs evaluation with force enabled", async () => {
+    const user = userEvent.setup();
+    const nextEvaluation = {
+      ...sampleEvaluation,
+      id: "55555555-5555-4555-8555-555555555555",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse(sampleEvaluation))
+      .mockResolvedValueOnce(jsonResponse(nextEvaluation, 201));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage();
+
+    expect(await screen.findByText("Strong baseline fit for backend platform work.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /re-run evaluation/i }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/roles/${sampleRole.id}/evaluations`,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body as string)).toEqual({
+      user_context: {},
+      force: true,
+    });
+  });
+
+  it("shows cached reuse notice when backend returns 200", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404))
+      .mockResolvedValueOnce(jsonResponse(sampleEvaluation, 200));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage();
+
+    expect(await screen.findByText("Not evaluated")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /run stride evaluation/i }));
+
+    expect(await screen.findByText("Cached STRIDE evaluation reused")).toBeInTheDocument();
   });
 });

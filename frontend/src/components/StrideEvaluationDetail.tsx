@@ -37,7 +37,7 @@ function recommendationColor(recommendation: string | null | undefined) {
 }
 
 function aiStatusLabel(evaluation: StrideEvaluation) {
-  const aiStatus = evaluation.raw_evaluation_json?.ai_status;
+  const aiStatus = evaluation.ai_status ?? evaluation.raw_evaluation_json?.ai_status;
   if (aiStatus === "skipped") return "Skipped AI fallback";
   if (aiStatus === "failed") return "AI failed";
   if (aiStatus === "completed") return "AI enriched";
@@ -129,10 +129,11 @@ export function EvaluationStatusBadge({
   if (loading) return <Badge variant="light">Loading evaluation</Badge>;
   if (error) return <Badge color="red">Evaluation error</Badge>;
   if (!evaluation) return <Badge variant="light">Not evaluated</Badge>;
-  if (evaluation.raw_evaluation_json?.ai_status === "skipped") {
+  const aiStatus = evaluation.ai_status ?? evaluation.raw_evaluation_json?.ai_status;
+  if (aiStatus === "skipped") {
     return <Badge color="yellow">Skipped AI fallback</Badge>;
   }
-  if (evaluation.raw_evaluation_json?.ai_status === "failed") {
+  if (aiStatus === "failed") {
     return <Badge color="orange">AI failed</Badge>;
   }
   return <Badge color="green">Completed</Badge>;
@@ -145,7 +146,7 @@ export function StrideEvaluationDetail({
   onViewLatest,
 }: {
   evaluation: StrideEvaluation | null;
-  onRun: () => Promise<void> | void;
+  onRun: (force?: boolean) => Promise<void> | void;
   running?: boolean;
   onViewLatest?: () => void;
 }) {
@@ -156,7 +157,7 @@ export function StrideEvaluationDetail({
           title="Not evaluated"
           message="Run STRIDE evaluation to create a local recommendation for this role."
           action={
-            <Button loading={running} onClick={onRun}>
+            <Button loading={running} onClick={() => onRun(false)}>
               Run STRIDE evaluation
             </Button>
           }
@@ -186,7 +187,7 @@ export function StrideEvaluationDetail({
                 View latest evaluation
               </Button>
             ) : null}
-            <Button loading={running} onClick={onRun}>
+            <Button loading={running} onClick={() => onRun(true)}>
               Re-run evaluation
             </Button>
           </Group>
@@ -290,9 +291,9 @@ export function StrideEvaluationDetail({
           </Grid.Col>
         </Grid>
 
-        {evaluation.raw_evaluation_json?.ai_failure_reason ? (
+        {evaluation.error_message || evaluation.raw_evaluation_json?.ai_failure_reason ? (
           <Text size="sm" c="dimmed">
-            AI fallback: {evaluation.raw_evaluation_json.ai_failure_reason}
+            AI fallback: {evaluation.error_message ?? evaluation.raw_evaluation_json.ai_failure_reason}
           </Text>
         ) : null}
       </Stack>

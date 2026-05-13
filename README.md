@@ -2,31 +2,33 @@
 
 Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a STRIDE-powered workflow for evaluating role fit, risk, positioning, and application priority.
 
-Layer 1 is the local development foundation: a FastAPI backend, PostgreSQL persistence, a React + Vite + TypeScript frontend, manual role intake, and basic validation commands.
+Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/profile grounding, deterministic scoring, optional OpenAI enrichment, audit metadata, cache reuse, and frontend review.
 
-## Layer 1 Includes
+## Current Layer Includes
 
 - Local FastAPI backend with a health check endpoint.
 - Local PostgreSQL persistence with Alembic migrations.
 - Local React + Vite frontend for manual role intake.
 - Manual create, list, view, update, and archive role workflow.
 - Local resume/profile source storage for STRIDE grounding.
-- Basic backend test coverage for `GET /health`.
-- Database-backed integration tests for role intake when PostgreSQL is configured.
+- Deterministic STRIDE scoring for stored roles.
+- Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
+- Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
+- Backend integration tests for the full Layer 2 flow when PostgreSQL is configured.
 - Frontend component tests and production build validation.
-- Frontend production build validation.
 - Local development documentation.
 - Reserved directories for future modular growth.
 
 ## Out of Scope
 
-Layer 1 does not include:
+Careero does not yet include:
 
 - Authentication.
 - Tenants, workspaces, or multi-user behavior.
 - Billing or subscriptions.
 - AWS or other cloud deployment logic.
 - Background job execution.
+- Automated source discovery or polling.
 - Automated job application submission.
 - Tailored resume or cover letter generation.
 
@@ -90,8 +92,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 7. Start backend and frontend in separate terminals.
 8. Run `.\scripts\check-local.ps1`.
 9. Open `http://127.0.0.1:5173/roles/new` and create a role.
-
-Known current blocker on this machine: PostgreSQL is running, but the configured `careero` database credentials are rejected. Until that is fixed, `/health/database` returns `503`, `/api/roles` fails, and database-backed tests fail with `OperationalError`.
+10. Open `http://127.0.0.1:5173/settings` and add an active resume/profile source.
+11. Open the role detail page and run a STRIDE evaluation.
 
 ## Backend Setup
 
@@ -163,15 +165,24 @@ From `frontend`:
 npm run build
 ```
 
-These checks validate the initial backend health endpoint and frontend production build.
+These checks validate the backend API, database-backed Layer 2 flow, frontend components, and frontend production build.
 
-## Layer 1 Status
+## Layer 2 Status
 
-Layer 1 is complete when local PostgreSQL credentials are valid, migrations and seed data have been applied, and the manual role workflow works end to end: create, list, view, update, and archive.
+Layer 2 is complete when local PostgreSQL credentials are valid, migrations and seed data have been applied, and the evaluation workflow works end to end: create a role, configure an active resume/profile source, run STRIDE evaluation, view it in the frontend, reuse the cached result, force a re-run, and inspect activity-log entries.
+
+## STRIDE Architecture
+
+- Role intake stores manually pasted role details. Careero does not scrape LinkedIn or poll job boards.
+- Resume/profile source storage keeps one active local grounding source for the seeded local user.
+- Deterministic rules produce the canonical score, recommendation, confidence, concerns, and keyword gaps.
+- Optional OpenAI enrichment adds grounded structured analysis when enabled, but fallback deterministic results are always preserved.
+- Evaluation metadata records model, prompt/ruleset versions, token estimates, latency, AI status, content hashes, and sanitized errors.
+- Activity log entries record role, resume-source, and evaluation lifecycle events.
 
 ## Known Next Steps
 
-- Add frontend views for STRIDE evaluation results.
-- Add application workflow features on top of captured roles.
-- Add source polling only after manual intake is stable.
-- Keep AWS deployment, auth, billing, tenants, and workspaces out of Layer 1.
+- Add application tracking workflows on top of evaluated roles.
+- Add artifact generation preparation for resumes and cover letters.
+- Add source discovery connectors only after manual intake and evaluation remain stable.
+- Keep AWS deployment, auth, billing, tenants, workspaces, automated discovery, and application submission out of Layer 2.

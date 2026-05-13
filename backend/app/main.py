@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI, Response, status
 
+from app.api.activity_log import router as activity_log_router
 from app.api.resume_sources import router as resume_sources_router
 from app.api.roles import router as roles_router
 from app.api.stride_evaluations import router as stride_evaluations_router
@@ -21,6 +22,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description="Local-first API foundation for Careero.",
         version="0.1.0",
     )
+    app.include_router(activity_log_router, prefix="/api")
     app.include_router(resume_sources_router, prefix="/api")
     app.include_router(roles_router, prefix="/api")
     app.include_router(stride_evaluations_router, prefix="/api")

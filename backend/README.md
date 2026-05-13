@@ -322,6 +322,26 @@ Get one evaluation by ID:
 Invoke-RestMethod http://127.0.0.1:8000/api/stride-evaluations/{evaluation_id}
 ```
 
+Inspect activity log entries for an evaluation:
+
+```powershell
+Invoke-RestMethod `
+  "http://127.0.0.1:8000/api/activity-log?entity_type=stride_evaluation&entity_id={evaluation_id}"
+```
+
+The activity log is scoped to the seeded default local user. It supports optional `entity_type`, `entity_id`, `action`, and `limit` query parameters. The default limit is `50`; the maximum is `200`.
+
+## Layer 2 Local Flow
+
+1. Create a role manually with `POST /api/roles`.
+2. Create and activate a resume/profile source with `POST /api/resume-sources`.
+3. Run STRIDE evaluation with `POST /api/roles/{role_id}/evaluations`.
+4. Open `http://127.0.0.1:5173/roles/{role_id}` to view the evaluation.
+5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
+6. Inspect lifecycle events with `GET /api/activity-log`.
+
+Layer 2 remains evaluation-only. It does not add auth, automated discovery, tailored resumes, cover letters, generated application packets, or application submission.
+
 ## Test
 
 Run tests:

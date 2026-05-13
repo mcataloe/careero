@@ -42,6 +42,18 @@ export interface StrideEvaluation {
   company_risk: EvaluationSection;
   ats_keywords: string[];
   missing_keywords: string[];
+  model_used: string | null;
+  prompt_version: string | null;
+  ruleset_version: string | null;
+  input_token_estimate: number | null;
+  output_token_estimate: number | null;
+  latency_ms: number | null;
+  ai_enabled: boolean;
+  ai_status: "completed" | "failed" | "skipped" | string | null;
+  error_message: string | null;
+  role_content_hash: string | null;
+  source_hash: string | null;
+  evaluation_input_hash: string | null;
   raw_evaluation_json: {
     ai_status?: "completed" | "failed" | "skipped";
     ai_failure_reason?: string;
@@ -69,6 +81,7 @@ export interface StrideEvaluation {
 export interface StrideEvaluationCreatePayload {
   user_notes?: string | null;
   user_context?: Record<string, unknown>;
+  force?: boolean;
 }
 
 export type EvaluationSummaryState =

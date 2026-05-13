@@ -6,10 +6,11 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.constants import RoleStatus
-from app.models import ActivityLog, Company, JobSource, Role, User
+from app.models import Company, JobSource, Role, User
 from app.repositories.roles import RoleRepository
 from app.schemas.roles import CompanyLookup, RoleCreate, RoleUpdate, SourceLookup
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.activity_log import ActivityLogService
 
 
 class RoleIntakeError(Exception):
@@ -32,6 +33,7 @@ class RoleService:
     def __init__(self, db: Session) -> None:
         self.db = db
         self.repository = RoleRepository(db)
+        self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
@@ -245,12 +247,10 @@ class RoleService:
         action: str,
         details: dict[str, Any],
     ) -> None:
-        self.db.add(
-            ActivityLog(
-                user_id=user_id,
-                entity_type="role",
-                entity_id=entity_id,
-                action=action,
-                details=details,
-            )
+        self.activity_log.append(
+            user_id=user_id,
+            entity_type="role",
+            entity_id=entity_id,
+            action=action,
+            details=details,
         )

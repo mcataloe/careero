@@ -96,7 +96,7 @@ PATCH  http://127.0.0.1:8000/api/roles/{role_id}
 DELETE http://127.0.0.1:8000/api/roles/{role_id}
 ```
 
-LinkedIn roles are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 1.
+LinkedIn roles are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 2.
 
 Resume/profile source API:
 
@@ -127,6 +127,25 @@ Invoke-RestMethod `
 ```
 
 Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. This phase does not upload files, extract profile facts, import external profiles, or generate tailored resumes or cover letters.
+
+STRIDE evaluation flow:
+
+```text
+POST http://127.0.0.1:8000/api/roles/{role_id}/evaluations
+GET  http://127.0.0.1:8000/api/roles/{role_id}/evaluations/latest
+GET  http://127.0.0.1:8000/api/stride-evaluations
+GET  http://127.0.0.1:8000/api/activity-log?entity_type=stride_evaluation&entity_id={evaluation_id}
+```
+
+Posting the same role/source/context inputs reuses a cached completed evaluation. Send `"force": true` to create a new run. Evaluation activity entries include `stride_evaluation.started`, `stride_evaluation.completed`, `stride_evaluation.failed`, and `stride_evaluation.cached_result_reused`.
+
+Manual browser smoke flow:
+
+1. Open `http://127.0.0.1:5173/roles/new` and create a role.
+2. Open `http://127.0.0.1:5173/settings` and create an active resume/profile source.
+3. Open the role detail page and run STRIDE evaluation.
+4. Confirm the evaluation shows score, recommendation, confidence, alignments, keyword gaps, and AI fallback/enrichment status.
+5. Re-run the evaluation and confirm a forced new run succeeds.
 
 Run tests:
 
@@ -180,8 +199,8 @@ npm.cmd run build
 
 ## Current Boundaries
 
-Layer 1 is local-first only. It does not include authentication, tenants, workspaces, billing, cloud deployment, background job execution, or automated application submission.
+Layer 2 is local-first and evaluation-focused only. It does not include authentication, tenants, workspaces, billing, cloud deployment, automated discovery, resume or cover letter generation, application packets, or automated application submission.
 
-## Layer 1 Completion
+## Layer 2 Completion
 
-Layer 1 is considered locally stable when the backend, frontend, and PostgreSQL all pass readiness checks and the role workflow can create, list, view, update, and archive records.
+Layer 2 is considered locally stable when the backend, frontend, and PostgreSQL all pass readiness checks and the role-to-resume-to-STRIDE workflow can create, display, cache, force re-run, and audit evaluations.

@@ -33,6 +33,34 @@ describe("StrideEvaluationDetail", () => {
     expect(screen.getByText("Not evaluated")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /run stride evaluation/i }));
 
-    await waitFor(() => expect(onRun).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onRun).toHaveBeenCalledWith(false));
+  });
+
+  it("sends force flag for re-run action", async () => {
+    const user = userEvent.setup();
+    const onRun = vi.fn();
+
+    render(<StrideEvaluationDetail evaluation={sampleEvaluation} onRun={onRun} />);
+
+    await user.click(screen.getByRole("button", { name: /re-run evaluation/i }));
+
+    await waitFor(() => expect(onRun).toHaveBeenCalledWith(true));
+  });
+
+  it("renders top-level AI failure metadata safely", () => {
+    render(
+      <StrideEvaluationDetail
+        evaluation={{
+          ...sampleEvaluation,
+          ai_status: "failed",
+          error_message: "timeout for sk-REDACTED",
+          raw_evaluation_json: {},
+        }}
+        onRun={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText("AI failed").length).toBeGreaterThan(0);
+    expect(screen.getByText(/timeout for sk-REDACTED/i)).toBeInTheDocument();
   });
 });
