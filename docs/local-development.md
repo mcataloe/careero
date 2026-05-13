@@ -73,6 +73,13 @@ CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 ```
 
+AI role parsing is separately controlled. To enable the Add Role parser, set:
+
+```dotenv
+CAREERO_ENABLE_AI_ROLE_PARSING=true
+CAREERO_OPENAI_DEFAULT_ROLE_PARSING_MODEL=gpt-5-mini
+```
+
 Do not commit real API keys. If AI is disabled, missing, times out, or returns invalid structured output, role evaluation falls back to the deterministic baseline and records `ai_status` in `raw_evaluation_json`.
 
 STRIDE evaluations are cached by an input hash built from role content, active resume/profile source content, request notes/context, prompt version, ruleset version, AI enabled state, and model name. Reposting the same inputs returns the cached completed evaluation with HTTP `200`; send `"force": true` to create a new evaluation. The backend stores model, prompt/ruleset versions, token estimates when available, latency, AI status, sanitized errors, and content hashes for auditability.
@@ -90,6 +97,7 @@ Manual role intake API:
 
 ```text
 POST   http://127.0.0.1:8000/api/roles
+POST   http://127.0.0.1:8000/api/roles/parse
 GET    http://127.0.0.1:8000/api/roles
 GET    http://127.0.0.1:8000/api/roles/{role_id}
 PATCH  http://127.0.0.1:8000/api/roles/{role_id}
@@ -97,6 +105,8 @@ DELETE http://127.0.0.1:8000/api/roles/{role_id}
 ```
 
 LinkedIn roles are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 2.
+
+The AI parse endpoint accepts `rawText`, optional `source`, and optional `jobUrl`, then returns structured fields for review. It does not save data. The Add Role UI fills empty fields only and requires the user to click `Create role`. Parsing failures do not clear manually entered content.
 
 Resume/profile source API:
 

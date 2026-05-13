@@ -44,6 +44,13 @@ def role_payload(company_name: str = "Example Company") -> dict:
         "compensation_currency": "usd",
         "raw_description": "Raw pasted job description",
         "normalized_description": "Normalized job description",
+        "parse_metadata": {
+            "parserVersion": "role_parser_v1",
+            "aiModel": "gpt-5-mini",
+            "parseWarnings": ["Review compensation."],
+            "confidence": {"roleTitle": 0.93},
+            "userEditedFields": ["title"],
+        },
         "status": "found",
         "date_found": "2026-05-13",
         "date_posted": "2026-05-01",
@@ -60,6 +67,8 @@ def test_create_role_with_new_company_and_source_type(role_api_client: TestClien
     assert body["source"]["source_type"] == "linkedin_manual"
     assert body["job_url"] == "https://www.linkedin.com/jobs/view/example"
     assert body["compensation_currency"] == "USD"
+    assert body["parse_metadata"]["parserVersion"] == "role_parser_v1"
+    assert body["parse_metadata"]["userEditedFields"] == ["title"]
 
 
 def test_create_role_reuses_company_by_case_insensitive_name(

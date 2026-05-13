@@ -14,6 +14,7 @@ export const sampleRole: Role = {
   compensation_currency: "USD",
   raw_description: "Raw pasted job description",
   normalized_description: "Normalized job description",
+  parse_metadata: {},
   status: "found",
   date_found: "2026-05-13",
   date_posted: "2026-05-01",

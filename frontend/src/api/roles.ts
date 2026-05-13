@@ -1,5 +1,11 @@
 import { apiRequest } from "./client";
-import type { Role, RoleCreatePayload, RoleUpdatePayload } from "../types/roles";
+import type {
+  Role,
+  RoleCreatePayload,
+  RoleParseRequest,
+  RoleParseResponse,
+  RoleUpdatePayload,
+} from "../types/roles";
 
 export function listRoles(): Promise<Role[]> {
   return apiRequest<Role[]>("/api/roles");
@@ -11,6 +17,13 @@ export function getRole(roleId: string): Promise<Role> {
 
 export function createRole(payload: RoleCreatePayload): Promise<Role> {
   return apiRequest<Role>("/api/roles", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function parseRole(payload: RoleParseRequest): Promise<RoleParseResponse> {
+  return apiRequest<RoleParseResponse>("/api/roles/parse", {
     method: "POST",
     body: JSON.stringify(payload),
   });

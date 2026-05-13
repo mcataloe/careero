@@ -80,6 +80,7 @@ class RoleService:
             compensation_currency=payload.compensation_currency,
             raw_description=payload.raw_description,
             normalized_description=payload.normalized_description,
+            parse_metadata=payload.parse_metadata,
             status=payload.status.value,
             date_found=payload.date_found or date.today(),
             date_posted=payload.date_posted,

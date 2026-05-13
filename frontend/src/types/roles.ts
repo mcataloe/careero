@@ -34,6 +34,7 @@ export interface Role {
   compensation_currency: string | null;
   raw_description: string | null;
   normalized_description: string | null;
+  parse_metadata: RoleParseMetadata;
   status: RoleStatus;
   date_found: string;
   date_posted: string | null;
@@ -41,6 +42,17 @@ export interface Role {
   updated_at: string;
   company: Company;
   source: JobSource | null;
+}
+
+export interface RoleParseMetadata {
+  parserVersion?: string;
+  aiModel?: string;
+  parseTimestamp?: string;
+  parseWarnings?: string[];
+  confidence?: Record<string, number>;
+  userEditedFields?: string[];
+  extractedSkills?: string[];
+  [key: string]: unknown;
 }
 
 export interface RoleCreatePayload {
@@ -60,9 +72,44 @@ export interface RoleCreatePayload {
   compensation_currency?: string | null;
   raw_description?: string | null;
   normalized_description?: string | null;
+  parse_metadata?: RoleParseMetadata;
   status: RoleStatus;
   date_found?: string | null;
   date_posted?: string | null;
+}
+
+export interface RoleParseRequest {
+  rawText: string;
+  source?: SourceType | null;
+  jobUrl?: string | null;
+}
+
+export interface ParsedRole {
+  roleTitle?: string | null;
+  company?: string | null;
+  companyWebsite?: string | null;
+  jobUrl?: string | null;
+  source?: SourceType | null;
+  location?: string | null;
+  remoteType?: string | null;
+  compensationMin?: number | string | null;
+  compensationMax?: number | string | null;
+  currency?: string | null;
+  employmentType?: string | null;
+  seniority?: string | null;
+  datePosted?: string | null;
+  normalizedDescription?: string | null;
+  extractedSkills?: string[];
+  warnings?: string[];
+  confidence?: Record<string, number>;
+}
+
+export interface RoleParseResponse {
+  parsed: ParsedRole;
+  metadata: {
+    parserVersion: string;
+    model: string;
+  };
 }
 
 export interface RoleUpdatePayload {

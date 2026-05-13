@@ -27,6 +27,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "compensation_currency",
         "raw_description",
         "normalized_description",
+        "parse_metadata",
         "status",
         "date_found",
         "date_posted",

@@ -120,6 +120,7 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     compensation_currency: Mapped[str | None] = mapped_column(String(3))
     raw_description: Mapped[str | None] = mapped_column(Text)
     normalized_description: Mapped[str | None] = mapped_column(Text)
+    parse_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     status: Mapped[str] = mapped_column(String(100), nullable=False, default="found")
     date_found: Mapped[date] = mapped_column(
         Date,

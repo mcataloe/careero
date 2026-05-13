@@ -10,6 +10,7 @@ Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/p
 - Local PostgreSQL persistence with Alembic migrations.
 - Local React + Vite frontend for manual role intake.
 - Manual create, list, view, update, and archive role workflow.
+- Optional AI-assisted role parsing for pasted job posts, with user review before save.
 - Local resume/profile source storage for STRIDE grounding.
 - Deterministic STRIDE scoring for stored roles.
 - Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
@@ -179,6 +180,7 @@ Layer 2 is complete when local PostgreSQL credentials are valid, migrations and 
 - Optional OpenAI enrichment adds grounded structured analysis when enabled, but fallback deterministic results are always preserved.
 - Evaluation metadata records model, prompt/ruleset versions, token estimates, latency, AI status, content hashes, and sanitized errors.
 - Activity log entries record role, resume-source, and evaluation lifecycle events.
+- AI-assisted role parsing is staged before persistence: parse pasted content, fill editable fields, and store parse metadata only when the reviewed role is created.
 
 ## Known Next Steps
 

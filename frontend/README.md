@@ -33,6 +33,16 @@ Manual role intake is available at:
 http://127.0.0.1:5173/roles/new
 ```
 
+The Add Role page includes optional AI-assisted parsing:
+
+- Paste a full job post into `Paste job description`.
+- Optionally provide the posting URL and source.
+- Click `Parse role`.
+- Review/edit the populated manual fields.
+- Click `Create role` to save.
+
+Parsing fills empty fields only, does not auto-save, and keeps manual edits intact. The backend must have `CAREERO_ENABLE_AI_ROLE_PARSING=true` and an OpenAI API key configured for parsing to run.
+
 STRIDE evaluation workflow:
 
 - Open a role at `/roles/:roleId`.

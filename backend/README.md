@@ -34,8 +34,10 @@ CAREERO_ENVIRONMENT=local
 CAREERO_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero
 CAREERO_TEST_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero_test
 CAREERO_ENABLE_AI_EVALUATIONS=false
+CAREERO_ENABLE_AI_ROLE_PARSING=false
 CAREERO_OPENAI_API_KEY=
 CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
+CAREERO_OPENAI_DEFAULT_ROLE_PARSING_MODEL=gpt-5-mini
 CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
@@ -132,6 +134,36 @@ Invoke-RestMethod -Method Delete http://127.0.0.1:8000/api/roles/{role_id}
 ```
 
 Company intake accepts either an existing company ID or a name. When a name is supplied, Careero reuses an existing company for the default local user using case-insensitive name matching or creates a new company if one does not exist.
+
+### AI-Assisted Role Parsing
+
+AI role parsing is optional and disabled by default. It accepts pasted job content and returns structured fields for user review. It never creates a role by itself.
+
+Enable locally with:
+
+```dotenv
+CAREERO_ENABLE_AI_ROLE_PARSING=true
+CAREERO_OPENAI_API_KEY=sk-...
+CAREERO_OPENAI_DEFAULT_ROLE_PARSING_MODEL=gpt-5-mini
+```
+
+Parse a pasted job post:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/roles/parse `
+  -ContentType "application/json" `
+  -Body '{
+    "rawText": "Paste messy LinkedIn, recruiter, job board, or company site content here.",
+    "source": "linkedin_manual",
+    "jobUrl": "https://example.com/jobs/123"
+  }'
+```
+
+The response contains `parsed` role fields and `metadata` with `parserVersion` and model. Missing values are `null`. Compensation, company URLs, dates, and remote type are only returned when explicitly present in the pasted content. Invalid AI output returns `502`; disabled or unconfigured parsing returns `503`.
+
+When a user saves a parsed role, the frontend sends `parse_metadata` with parser version, model, parse timestamp, warnings, confidence, extracted skills, and fields edited after parsing. The original pasted content is preserved in `raw_description`; normalized text is stored separately in `normalized_description`.
 
 ## Resume/Profile Source API
 

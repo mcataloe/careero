@@ -30,7 +30,9 @@ def test_settings_have_safe_local_defaults_without_env_file(
         == "postgresql://careero:careero@localhost:5432/careero_test"
     )
     assert settings.enable_ai_evaluations is False
+    assert settings.enable_ai_role_parsing is False
     assert settings.openai_default_evaluation_model == "gpt-5-mini"
+    assert settings.openai_default_role_parsing_model == "gpt-5-mini"
     assert settings.openai_timeout_seconds == 30
     assert settings.openai_max_output_tokens == 2500
     assert settings.max_ai_evaluations_per_session == 25
@@ -45,6 +47,7 @@ def test_settings_have_safe_local_defaults_without_env_file(
         ("database_url", ""),
         ("test_database_url", ""),
         ("openai_default_evaluation_model", ""),
+        ("openai_default_role_parsing_model", ""),
         ("log_level", ""),
     ],
 )
@@ -68,15 +71,19 @@ def test_settings_accept_ai_enabled_with_valid_openai_options() -> None:
     settings = Settings(
         _env_file=None,
         enable_ai_evaluations=True,
+        enable_ai_role_parsing=True,
         openai_api_key=" sk-test ",
         openai_default_evaluation_model="gpt-5-mini",
+        openai_default_role_parsing_model="gpt-5-mini",
         openai_timeout_seconds=45,
         openai_max_output_tokens=3000,
         max_ai_evaluations_per_session=10,
     )
 
     assert settings.enable_ai_evaluations is True
+    assert settings.enable_ai_role_parsing is True
     assert settings.openai_api_key == "sk-test"
+    assert settings.openai_default_role_parsing_model == "gpt-5-mini"
     assert settings.openai_timeout_seconds == 45
     assert settings.openai_max_output_tokens == 3000
     assert settings.max_ai_evaluations_per_session == 10

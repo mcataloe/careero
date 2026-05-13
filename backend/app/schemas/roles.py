@@ -1,8 +1,9 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.constants import RoleStatus, SourceType
 
@@ -66,6 +67,15 @@ class RoleCreate(RoleBase):
     company: CompanyLookup
     source: SourceLookup
     status: RoleStatus = RoleStatus.FOUND
+    parse_metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("parse_metadata")
+    @classmethod
+    def parse_metadata_must_be_object(
+        cls,
+        value: dict[str, Any],
+    ) -> dict[str, Any]:
+        return value or {}
 
 
 class RoleUpdate(RoleBase):
@@ -111,6 +121,7 @@ class RoleResponse(BaseModel):
     compensation_currency: str | None
     raw_description: str | None
     normalized_description: str | None
+    parse_metadata: dict[str, Any]
     status: str
     date_found: date
     date_posted: date | None

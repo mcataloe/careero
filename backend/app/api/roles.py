@@ -4,7 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.schemas.role_parsing import RoleParseRequest, RoleParseResponse
 from app.schemas.roles import RoleCreate, RoleResponse, RoleUpdate
+from app.services.role_parsing import (
+    RoleParsingProviderError,
+    RoleParsingService,
+    RoleParsingUnavailableError,
+    RoleParsingValidationError,
+)
 from app.services.roles import (
     RoleDependencyNotFoundError,
     RoleNotFoundError,
@@ -19,6 +26,10 @@ def get_role_service(db: Session = Depends(get_db)) -> RoleService:
     return RoleService(db)
 
 
+def get_role_parsing_service() -> RoleParsingService:
+    return RoleParsingService()
+
+
 @router.post("", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
 def create_role(
     payload: RoleCreate,
@@ -30,6 +41,30 @@ def create_role(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except RoleSeedMissingError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post("/parse", response_model=RoleParseResponse)
+def parse_role(
+    payload: RoleParseRequest,
+    service: RoleParsingService = Depends(get_role_parsing_service),
+):
+    try:
+        return service.parse(payload)
+    except RoleParsingUnavailableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        )
+    except RoleParsingValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(exc),
+        )
+    except RoleParsingProviderError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(exc),
+        )
 
 
 @router.get("", response_model=list[RoleResponse])
