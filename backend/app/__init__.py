@@ -1,0 +1,1 @@
+"""Careero backend application package."""
