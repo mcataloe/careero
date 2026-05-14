@@ -13,6 +13,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import type { ReactNode } from "react";
 
 import type { Role, RoleStatus, RoleUpdatePayload } from "../types/roles";
 import { ExpandableTextSection } from "./ExpandableTextSection";
@@ -34,12 +35,14 @@ export function RoleDetail({
   onArchive,
   saving = false,
   archiving = false,
+  sectionNav,
 }: {
   role: Role;
   onUpdate: (payload: RoleUpdatePayload) => Promise<void> | void;
   onArchive: () => Promise<void> | void;
   saving?: boolean;
   archiving?: boolean;
+  sectionNav?: ReactNode;
 }) {
   const form = useForm({
     initialValues: {
@@ -61,7 +64,9 @@ export function RoleDetail({
         </Badge>
       </Group>
 
-      <Paper withBorder radius="md" p="lg">
+      {sectionNav}
+
+      <Paper id="role-overview" withBorder radius="md" p="lg">
         <Grid>
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Text size="sm" c="dimmed">
@@ -117,17 +122,21 @@ export function RoleDetail({
       <Paper withBorder radius="md" p="lg">
         <Stack>
           <Title order={3}>Description</Title>
-          <ExpandableTextSection title="Raw description">
-            {valueOrDash(role.raw_description)}
-          </ExpandableTextSection>
+          <div id="role-description">
+            <ExpandableTextSection title="Raw description">
+              {valueOrDash(role.raw_description)}
+            </ExpandableTextSection>
+          </div>
           <Divider />
-          <ExpandableTextSection title="Normalized description">
-            {valueOrDash(role.normalized_description)}
-          </ExpandableTextSection>
+          <div id="role-normalized-description">
+            <ExpandableTextSection title="Normalized description">
+              {valueOrDash(role.normalized_description)}
+            </ExpandableTextSection>
+          </div>
         </Stack>
       </Paper>
 
-      <Paper withBorder radius="md" p="lg">
+      <Paper id="role-edit" withBorder radius="md" p="lg">
         <form
           onSubmit={form.onSubmit((values) =>
             onUpdate({

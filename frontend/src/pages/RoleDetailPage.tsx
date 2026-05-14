@@ -8,6 +8,7 @@ import {
   getLatestEvaluation,
 } from "../api/strideEvaluations";
 import { RoleDetail } from "../components/RoleDetail";
+import { SectionNavigation } from "../components/SectionNavigation";
 import { StrideEvaluationDetail } from "../components/StrideEvaluationDetail";
 import { ErrorState, LoadingState } from "../components/States";
 import type { Role, RoleUpdatePayload } from "../types/roles";
@@ -27,6 +28,13 @@ export function RoleDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const evaluationRef = useRef<HTMLDivElement | null>(null);
+  const sectionNavItems = [
+    { label: "Overview", targetId: "role-overview" },
+    { label: "Description", targetId: "role-description" },
+    { label: "Normalized Description", targetId: "role-normalized-description" },
+    { label: "Edit Role", targetId: "role-edit" },
+    { label: "STRIDE Evaluation", targetId: "stride-evaluation" },
+  ];
 
   async function loadRole() {
     if (!roleId) return;
@@ -139,8 +147,9 @@ export function RoleDetailPage() {
             onArchive={handleArchive}
             saving={saving}
             archiving={archiving}
+            sectionNav={<SectionNavigation items={sectionNavItems} />}
           />
-          <div ref={evaluationRef}>
+          <div id="stride-evaluation" ref={evaluationRef}>
             {evaluationLoading ? <LoadingState label="Loading evaluation" /> : null}
             {!evaluationLoading && evaluationError ? (
               <ErrorState message={evaluationError} onRetry={loadEvaluation} />

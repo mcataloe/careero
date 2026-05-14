@@ -98,4 +98,75 @@ describe("ResumeSourceSettings", () => {
 
     expect(await screen.findByText("Backend unavailable")).toBeInTheDocument();
   });
+
+  it("imports a local file, allows edits, and saves only after explicit create", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404))
+      .mockResolvedValueOnce(jsonResponse({
+        file_name: "resume.txt",
+        file_type: "txt",
+        content_type: "text/plain",
+        size_bytes: 24,
+        character_count: 24,
+        warnings: [],
+        extracted_text: "Imported resume text",
+      }))
+      .mockResolvedValueOnce(jsonResponse({ id: "source-1" }, 201))
+      .mockResolvedValueOnce(jsonResponse(activeSource));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { container } = render(<ResumeSourceSettings />);
+
+    expect(await screen.findByText("No active source")).toBeInTheDocument();
+    await user.click(screen.getByLabelText(/upload file/i));
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(["Imported resume text"], "resume.txt", { type: "text/plain" }),
+    );
+
+    expect(await screen.findByText("Imported file")).toBeInTheDocument();
+    expect(screen.getByLabelText(/raw resume\/profile text/i)).toHaveValue(
+      "Imported resume text",
+    );
+    await user.type(screen.getByLabelText(/raw resume\/profile text/i), " edited");
+    await user.click(screen.getByRole("button", { name: /create active source/i }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/resume-sources/import",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.any(FormData),
+      }),
+    ));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/resume-sources",
+      expect.objectContaining({ method: "POST" }),
+    ));
+  });
+
+  it("rejects oversized local files before upload", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { container } = render(<ResumeSourceSettings />);
+
+    expect(await screen.findByText("No active source")).toBeInTheDocument();
+    await user.click(screen.getByLabelText(/upload file/i));
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File([new Uint8Array(5 * 1024 * 1024 + 1)], "resume.txt", {
+        type: "text/plain",
+      }),
+    );
+
+    expect(
+      await screen.findByText("Resume/profile file must be 5 MB or smaller."),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

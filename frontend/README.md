@@ -46,6 +46,7 @@ Parsing fills empty fields only, does not auto-save, and keeps manual edits inta
 STRIDE evaluation workflow:
 
 - Open a role at `/roles/:roleId`.
+- Use the compact section navigation near the top of the role detail page to jump between overview, descriptions, edit controls, and STRIDE evaluation.
 - Use `Run STRIDE evaluation` for a role with no evaluation.
 - Use `Re-run evaluation` to force a new latest evaluation.
 - Use `View latest evaluation` to jump to the evaluation section.
@@ -55,11 +56,13 @@ STRIDE evaluation workflow:
 Resume/profile grounding source:
 
 - Open `/settings`.
-- Create an active local `master_resume` source by pasting source text.
+- Create an active local `master_resume` source by pasting source text or importing a local file.
+- File import supports `.txt`, `.md`, `.docx`, and text-based `.pdf` files up to 5 MB.
+- Imported text is copied into the editable raw text field and is not saved until you submit the form.
 - When an active source exists, submit a new version to replace the active version.
 - The backend uses the active source to ground STRIDE evaluations when available.
 
-Careero does not generate resumes, cover letters, application packets, or automated discovery output from this UI phase.
+Careero does not run OCR, import Google Docs, generate resumes, cover letters, application packets, or automated discovery output from this UI phase.
 
 Run component tests:
 

@@ -3,5 +3,8 @@ fastapi
 openai
 pydantic-settings
 psycopg[binary]
+python-docx
+python-multipart
+pypdf
 SQLAlchemy
 uvicorn[standard]

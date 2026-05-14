@@ -41,3 +41,13 @@ export interface ResumeSourceVersionCreatePayload {
   normalized_summary?: string | null;
   is_active: boolean;
 }
+
+export interface ResumeSourceImportResponse {
+  file_name: string;
+  file_type: string;
+  content_type: string;
+  size_bytes: number;
+  character_count: number;
+  warnings: string[];
+  extracted_text: string;
+}

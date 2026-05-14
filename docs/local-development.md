@@ -112,6 +112,7 @@ Resume/profile source API:
 
 ```text
 POST http://127.0.0.1:8000/api/resume-sources
+POST http://127.0.0.1:8000/api/resume-sources/import
 GET  http://127.0.0.1:8000/api/resume-sources
 GET  http://127.0.0.1:8000/api/resume-sources/active
 PATCH http://127.0.0.1:8000/api/resume-sources/{source_id}
@@ -136,7 +137,11 @@ Invoke-RestMethod `
   }'
 ```
 
-Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. This phase does not upload files, extract profile facts, import external profiles, or generate tailored resumes or cover letters.
+You can also import local `.txt`, `.md`, `.docx`, and text-based `.pdf` files from the Settings page or with `POST /api/resume-sources/import`. Imports are limited to `5 MB`, extract text for preview only, and do not save uploaded files or create sources. The extracted text remains editable before saving. PDFs must contain embedded selectable text; OCR for scanned PDFs is not included.
+
+Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. This phase does not extract profile facts, import external profiles, or generate tailored resumes or cover letters.
+
+Future Google Docs import is tracked as a backlog item and requires Google OAuth, Drive/Docs scopes, document export, token handling, permission review, and a security design.
 
 STRIDE evaluation flow:
 

@@ -1,9 +1,11 @@
 import {
   Alert,
   Button,
+  FileInput,
   Grid,
   Group,
   Paper,
+  SegmentedControl,
   Stack,
   Text,
   TextInput,
@@ -18,14 +20,23 @@ import {
   createResumeSource,
   createResumeSourceVersion,
   getActiveResumeSource,
+  importResumeSourceFile,
 } from "../api/resumeSources";
-import type { ActiveResumeSource } from "../types/resumeSources";
+import type { ActiveResumeSource, ResumeSourceImportResponse } from "../types/resumeSources";
 import { EmptyState, ErrorState, LoadingState } from "./States";
+
+const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
+const IMPORT_ACCEPT = ".txt,.md,.docx,.pdf";
 
 export function ResumeSourceSettings() {
   const [activeSource, setActiveSource] = useState<ActiveResumeSource | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [inputMode, setInputMode] = useState<"paste" | "upload">("paste");
+  const [importedFile, setImportedFile] = useState<File | null>(null);
+  const [importResult, setImportResult] = useState<ResumeSourceImportResponse | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -61,6 +72,34 @@ export function ResumeSourceSettings() {
       setError(err instanceof Error ? err.message : "Could not load resume source");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleImport(file: File | null) {
+    setImportedFile(file);
+    setImportResult(null);
+    setImportError(null);
+    setNotice(null);
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > MAX_IMPORT_FILE_BYTES) {
+      setImportError("Resume/profile file must be 5 MB or smaller.");
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const result = await importResumeSourceFile(file);
+      form.setFieldValue("rawText", result.extracted_text);
+      setImportResult(result);
+      setNotice("Resume/profile text extracted. Review and edit before saving.");
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : "Could not import file");
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -136,6 +175,52 @@ export function ResumeSourceSettings() {
 
           {notice ? <Alert color="green">{notice}</Alert> : null}
           {error ? <ErrorState message={error} onRetry={loadActiveSource} /> : null}
+          {importError ? <Alert color="red">{importError}</Alert> : null}
+
+          <Stack gap="sm">
+            <SegmentedControl
+              value={inputMode}
+              onChange={(value) => setInputMode(value as "paste" | "upload")}
+              data={[
+                { label: "Paste text", value: "paste" },
+                { label: "Upload file", value: "upload" },
+              ]}
+            />
+            {inputMode === "upload" ? (
+              <Stack gap="xs">
+                <FileInput
+                  label="Resume/profile file"
+                  description="Upload .txt, .md, .docx, or text-based .pdf files up to 5 MB. Uploading extracts text only; it does not save the source."
+                  placeholder="Choose file"
+                  accept={IMPORT_ACCEPT}
+                  value={importedFile}
+                  onChange={handleImport}
+                  disabled={importing}
+                />
+                {importing ? <Text size="sm">Extracting text...</Text> : null}
+                {importResult ? (
+                  <Alert color="blue" title="Imported file">
+                    <Stack gap={4}>
+                      <Text size="sm">File: {importResult.file_name}</Text>
+                      <Text size="sm">Type: {importResult.file_type}</Text>
+                      <Text size="sm">
+                        Characters: {importResult.character_count.toLocaleString()}
+                      </Text>
+                      {importResult.warnings.map((warning) => (
+                        <Text key={warning} size="sm">
+                          Warning: {warning}
+                        </Text>
+                      ))}
+                    </Stack>
+                  </Alert>
+                ) : null}
+              </Stack>
+            ) : (
+              <Text size="sm" c="dimmed">
+                Paste resume or profile text directly into the raw text field below.
+              </Text>
+            )}
+          </Stack>
 
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>

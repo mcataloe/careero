@@ -11,7 +11,7 @@ Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/p
 - Local React + Vite frontend for manual role intake.
 - Manual create, list, view, update, and archive role workflow.
 - Optional AI-assisted role parsing for pasted job posts, with user review before save.
-- Local resume/profile source storage for STRIDE grounding.
+- Local resume/profile source storage for STRIDE grounding, with paste or local file import.
 - Deterministic STRIDE scoring for stored roles.
 - Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
@@ -175,7 +175,7 @@ Layer 2 is complete when local PostgreSQL credentials are valid, migrations and 
 ## STRIDE Architecture
 
 - Role intake stores manually pasted role details. Careero does not scrape LinkedIn or poll job boards.
-- Resume/profile source storage keeps one active local grounding source for the seeded local user.
+- Resume/profile source storage keeps one active local grounding source for the seeded local user and supports preview-only local imports for `.txt`, `.md`, `.docx`, and text-based `.pdf` files up to 5 MB.
 - Deterministic rules produce the canonical score, recommendation, confidence, concerns, and keyword gaps.
 - Optional OpenAI enrichment adds grounded structured analysis when enabled, but fallback deterministic results are always preserved.
 - Evaluation metadata records model, prompt/ruleset versions, token estimates, latency, AI status, content hashes, and sanitized errors.
@@ -187,4 +187,5 @@ Layer 2 is complete when local PostgreSQL credentials are valid, migrations and 
 - Add application tracking workflows on top of evaluated roles.
 - Add artifact generation preparation for resumes and cover letters.
 - Add source discovery connectors only after manual intake and evaluation remain stable.
+- Add Google Docs resume/profile import after OAuth, Drive/Docs scopes, document export, token handling, permission review, and security design are specified.
 - Keep AWS deployment, auth, billing, tenants, workspaces, automated discovery, and application submission out of Layer 2.

@@ -50,3 +50,13 @@ class ResumeSourceResponse(BaseModel):
 class ActiveResumeSourceResponse(BaseModel):
     source: ResumeSourceResponse
     version: ResumeSourceVersionResponse
+
+
+class ResumeSourceImportResponse(BaseModel):
+    file_name: str
+    file_type: str
+    content_type: str
+    size_bytes: int
+    character_count: int
+    warnings: list[str] = Field(default_factory=list)
+    extracted_text: str

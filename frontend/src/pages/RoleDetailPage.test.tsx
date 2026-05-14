@@ -57,6 +57,41 @@ describe("RoleDetailPage", () => {
     expect(screen.getByText("Strong baseline fit for backend platform work.")).toBeInTheDocument();
   });
 
+  it("renders section navigation with valid role detail targets", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse(sampleEvaluation));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage();
+
+    expect(await screen.findByRole("link", { name: /overview/i })).toHaveAttribute(
+      "href",
+      "#role-overview",
+    );
+    expect(screen.getByRole("link", { name: /^description$/i })).toHaveAttribute(
+      "href",
+      "#role-description",
+    );
+    expect(
+      screen.getByRole("link", { name: /normalized description/i }),
+    ).toHaveAttribute("href", "#role-normalized-description");
+    expect(screen.getByRole("link", { name: /edit role/i })).toHaveAttribute(
+      "href",
+      "#role-edit",
+    );
+    expect(
+      screen.getByRole("link", { name: /stride evaluation/i }),
+    ).toHaveAttribute("href", "#stride-evaluation");
+
+    expect(document.getElementById("role-overview")).not.toBeNull();
+    expect(document.getElementById("role-description")).not.toBeNull();
+    expect(document.getElementById("role-normalized-description")).not.toBeNull();
+    expect(document.getElementById("role-edit")).not.toBeNull();
+    expect(document.getElementById("stride-evaluation")).not.toBeNull();
+  });
+
   it("re-runs evaluation with force enabled", async () => {
     const user = userEvent.setup();
     const nextEvaluation = {

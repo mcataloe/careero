@@ -167,7 +167,22 @@ When a user saves a parsed role, the frontend sends `parse_metadata` with parser
 
 ## Resume/Profile Source API
 
-Careero can store a local master resume or profile source for grounded STRIDE evaluation. Source text is manually pasted into the API. This phase does not upload files, import external profiles, extract profile facts, generate resumes, or generate cover letters.
+Careero can store a local master resume or profile source for grounded STRIDE evaluation. Source text can be pasted manually or imported from a local file for preview. File import extracts text only; it does not persist uploaded files or create a source until the user explicitly saves one. This phase does not import external profiles, extract profile facts, generate resumes, or generate cover letters.
+
+Import a local resume/profile file:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/resume-sources/import `
+  -Form @{ file = Get-Item .\resume.pdf }
+```
+
+Supported import formats are `.txt`, `.md`, `.docx`, and text-based `.pdf` files up to `5 MB`. PDFs must contain embedded selectable text. Scanned/image-only PDFs fail with a clear error because OCR is not implemented. Import rejects unsupported extensions, unsupported MIME types, oversized files, and files with no readable text. The response includes extracted text, file name, file type, content type, size, character count, and warnings.
+
+Document parsing uses lightweight Python dependencies: `python-docx` for `.docx`, `pypdf` for text-based PDFs, and `python-multipart` for FastAPI multipart uploads.
+
+Google Docs import is a future backlog item. It requires Google OAuth, Drive/Docs scope selection, document export, token handling, permission review, and a security design.
 
 Create a master resume source with an active initial version:
 
