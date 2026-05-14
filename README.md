@@ -25,7 +25,7 @@ Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/p
 Careero does not yet include:
 
 - Authentication.
-- Tenants, workspaces, or multi-user behavior.
+- Tenant behavior, workspace persistence/runtime switching, or multi-user behavior.
 - Billing or subscriptions.
 - AWS or other cloud deployment logic.
 - Background job execution.
@@ -40,6 +40,7 @@ backend/   FastAPI application and backend tests
 frontend/  React + Vite + TypeScript application
 workers/   Reserved for future local worker processes
 shared/    Reserved for future shared schemas and utilities
+packages/  Standalone shared packages, including canonical contracts
 docs/      Project and local development documentation
 infra/     Reserved for future infrastructure notes and config
 scripts/   Reserved for future developer automation
@@ -182,8 +183,26 @@ Layer 2 is complete when local PostgreSQL credentials are valid, migrations and 
 - Activity log entries record role, resume-source, and evaluation lifecycle events.
 - AI-assisted role parsing is staged before persistence: parse pasted content, fill editable fields, and store parse metadata only when the reviewed role is created.
 
+## Canonical Platform Contracts
+
+Careero now includes an additive canonical contracts package at `packages/contracts`.
+
+The package defines versioned Zod/TypeScript contracts and generated JSON Schema for:
+
+- Workspace
+- Opportunity
+- STRIDE Evaluation
+- Resume Artifact
+- Cover Letter Artifact
+- Application State
+
+These contracts are future-facing platform definitions for backend persistence, frontend rendering, AI orchestration, workflow tracking, and export generation. Current role/evaluation APIs remain unchanged until a later migration phase.
+
+See `docs/canonical-domain-model.md` for lifecycle guidance, AI boundaries, versioning strategy, and migration mapping from current `Role`, `StrideEvaluation`, `Application`, `GeneratedArtifact`, and `ResumeSource` models.
+
 ## Known Next Steps
 
+- Migrate current role-centered data toward canonical workspace/opportunity contracts after Layer 2 workflows remain stable.
 - Add application tracking workflows on top of evaluated roles.
 - Add artifact generation preparation for resumes and cover letters.
 - Add source discovery connectors only after manual intake and evaluation remain stable.

@@ -1,0 +1,262 @@
+{
+  "$ref": "#/definitions/Workspace",
+  "definitions": {
+    "Workspace": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/Workspace/properties/createdAt"
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Workspace/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Workspace/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "ownerUserId": {
+          "$ref": "#/definitions/Workspace/properties/id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "searchCategory": {
+          "type": "string",
+          "enum": [
+            "full_time_leadership",
+            "full_time_individual_contributor",
+            "contract_consulting",
+            "exploration",
+            "relocation",
+            "other"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "archived",
+            "completed"
+          ]
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "targetTitles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default": []
+            },
+            "targetSeniority": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default": []
+            },
+            "preferredRemoteTypes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "remote",
+                  "hybrid",
+                  "onsite"
+                ]
+              },
+              "default": []
+            },
+            "preferredLocations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default": []
+            },
+            "targetCompensation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "max": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "currency": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 3
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "period": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "hourly",
+                            "daily",
+                            "weekly",
+                            "monthly",
+                            "annual",
+                            "project"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "sourceText": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max",
+                    "currency",
+                    "period",
+                    "sourceText"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetKeywords": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default": []
+            },
+            "avoidKeywords": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default": []
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "targetCompensation",
+            "notes"
+          ],
+          "additionalProperties": false
+        },
+        "workspaceMetadata": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "aiContextSummary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "deletedAt",
+        "id",
+        "ownerUserId",
+        "title",
+        "description",
+        "searchCategory",
+        "status",
+        "preferences",
+        "workspaceMetadata",
+        "aiContextSummary"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

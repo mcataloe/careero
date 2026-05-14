@@ -212,9 +212,21 @@ npm.cmd install
 npm.cmd run build
 ```
 
+## Canonical Contracts
+
+The executable platform contracts live in `packages/contracts`. They are additive and do not change current backend or frontend runtime behavior.
+
+```powershell
+cd packages/contracts
+npm install
+npm run validate
+```
+
+`npm run validate` builds the TypeScript package, generates JSON Schema files under `generated/json-schema/`, and runs the contract tests. See `docs/canonical-domain-model.md` for entity responsibilities, AI orchestration boundaries, versioning, and migration guidance.
+
 ## Current Boundaries
 
-Layer 2 is local-first and evaluation-focused only. It does not include authentication, tenants, workspaces, billing, cloud deployment, automated discovery, resume or cover letter generation, application packets, or automated application submission.
+Layer 2 is local-first and evaluation-focused only. It does not include authentication, tenants, workspace persistence/runtime switching, billing, cloud deployment, automated discovery, resume or cover letter generation, application packets, or automated application submission.
 
 ## Layer 2 Completion
 

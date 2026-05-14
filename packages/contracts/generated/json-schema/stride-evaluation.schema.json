@@ -1,0 +1,607 @@
+{
+  "$ref": "#/definitions/StrideEvaluation",
+  "definitions": {
+    "StrideEvaluation": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/StrideEvaluation/properties/id"
+        },
+        "opportunityId": {
+          "$ref": "#/definitions/StrideEvaluation/properties/id"
+        },
+        "evaluationVersion": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "previousVersion": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "changeReason": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "version",
+            "previousVersion",
+            "changeReason"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "completed",
+            "failed",
+            "superseded"
+          ]
+        },
+        "modelMetadata": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "promptVersion": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rulesetVersion": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "inputTokenEstimate": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "outputTokenEstimate": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "latencyMs": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "provider",
+            "model",
+            "promptVersion",
+            "rulesetVersion",
+            "inputTokenEstimate",
+            "outputTokenEstimate",
+            "latencyMs"
+          ],
+          "additionalProperties": false
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "overallScore": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "strengths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "score": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "score",
+              "notes"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StrideEvaluation/properties/strengths/items"
+          },
+          "default": []
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StrideEvaluation/properties/strengths/items"
+          },
+          "default": []
+        },
+        "atsFindings": {
+          "type": "object",
+          "properties": {
+            "matchedKeywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "missingKeywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "keywordNotes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "score": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "keywordNotes",
+            "score"
+          ],
+          "additionalProperties": false
+        },
+        "compensationFindings": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "aligned",
+                "below_target",
+                "above_target",
+                "unknown",
+                "needs_review"
+              ]
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "score": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "status",
+            "notes",
+            "score"
+          ],
+          "additionalProperties": false
+        },
+        "recommendation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "decision": {
+                  "type": "string",
+                  "enum": [
+                    "apply",
+                    "monitor",
+                    "skip",
+                    "needs_review"
+                  ]
+                },
+                "rationale": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "nextActions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                }
+              },
+              "required": [
+                "decision",
+                "rationale"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confidence": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "score": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rationale": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "level",
+            "score",
+            "rationale"
+          ],
+          "additionalProperties": false
+        },
+        "sections": {
+          "type": "object",
+          "properties": {
+            "strategicFit": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "strong_match",
+                    "partial_match",
+                    "no_evidence",
+                    "insufficient_data",
+                    "risk"
+                  ]
+                },
+                "score": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                },
+                "gaps": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                },
+                "assumptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                }
+              },
+              "required": [
+                "status",
+                "score",
+                "summary"
+              ],
+              "additionalProperties": false
+            },
+            "technicalAlignment": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            },
+            "seniorityAlignment": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            },
+            "compensationAlignment": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            },
+            "remoteAlignment": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            },
+            "companyRisk": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            },
+            "applicationEffort": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            },
+            "atsResumeAlignment": {
+              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+            }
+          },
+          "required": [
+            "strategicFit",
+            "technicalAlignment",
+            "seniorityAlignment",
+            "compensationAlignment",
+            "remoteAlignment",
+            "companyRisk",
+            "applicationEffort",
+            "atsResumeAlignment"
+          ],
+          "additionalProperties": false
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "reproducibility": {
+          "type": "object",
+          "properties": {
+            "inputHash": {
+              "type": "string",
+              "minLength": 1
+            },
+            "roleContentHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sourceHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "promptVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "rulesetVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sourceHashes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "default": {}
+            },
+            "deterministicBaseline": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "inputHash",
+            "roleContentHash",
+            "sourceHash",
+            "promptVersion",
+            "rulesetVersion",
+            "deterministicBaseline"
+          ],
+          "additionalProperties": false
+        },
+        "evaluatedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evaluationMetadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "deletedAt",
+        "id",
+        "workspaceId",
+        "opportunityId",
+        "evaluationVersion",
+        "status",
+        "modelMetadata",
+        "summary",
+        "overallScore",
+        "atsFindings",
+        "compensationFindings",
+        "recommendation",
+        "confidence",
+        "sections",
+        "reproducibility",
+        "evaluatedAt",
+        "evaluationMetadata"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

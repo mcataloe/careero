@@ -1,0 +1,313 @@
+{
+  "$ref": "#/definitions/ApplicationState",
+  "definitions": {
+    "ApplicationState": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/ApplicationState/properties/createdAt"
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ApplicationState/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ApplicationState/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/ApplicationState/properties/id"
+        },
+        "opportunityId": {
+          "$ref": "#/definitions/ApplicationState/properties/id"
+        },
+        "currentState": {
+          "type": "string",
+          "enum": [
+            "discovered",
+            "interested",
+            "applied",
+            "interviewing",
+            "offer",
+            "rejected",
+            "withdrawn",
+            "archived"
+          ]
+        },
+        "stateHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "$ref": "#/definitions/ApplicationState/properties/currentState"
+              },
+              "changedAt": {
+                "$ref": "#/definitions/ApplicationState/properties/createdAt"
+              },
+              "changedBy": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "system",
+                  "automation"
+                ],
+                "default": "user"
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "state",
+              "changedAt",
+              "reason",
+              "metadata"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "reminders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/ApplicationState/properties/id"
+              },
+              "dueAt": {
+                "$ref": "#/definitions/ApplicationState/properties/createdAt"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "completedAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "dueAt",
+              "title",
+              "notes",
+              "completedAt"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/ApplicationState/properties/id"
+              },
+              "createdAt": {
+                "$ref": "#/definitions/ApplicationState/properties/createdAt"
+              },
+              "author": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "body": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "author",
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "interviewStages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/ApplicationState/properties/id"
+              },
+              "stageType": {
+                "type": "string",
+                "enum": [
+                  "recruiter_screen",
+                  "hiring_manager",
+                  "technical",
+                  "panel",
+                  "onsite",
+                  "offer",
+                  "other"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "scheduled",
+                  "completed",
+                  "cancelled",
+                  "pending",
+                  "declined"
+                ]
+              },
+              "scheduledAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completedAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "externalLinks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "url",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "stageType",
+              "title",
+              "status",
+              "scheduledAt",
+              "completedAt",
+              "notes"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "externalLinks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ApplicationState/properties/interviewStages/items/properties/externalLinks/items"
+          },
+          "default": []
+        },
+        "applicationMetadata": {
+          "$ref": "#/definitions/ApplicationState/properties/stateHistory/items/properties/metadata"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "deletedAt",
+        "id",
+        "workspaceId",
+        "opportunityId",
+        "currentState",
+        "stateHistory",
+        "applicationMetadata"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

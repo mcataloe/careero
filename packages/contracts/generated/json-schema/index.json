@@ -1,0 +1,11 @@
+{
+  "contractVersion": "careero.contracts.v1",
+  "schemas": {
+    "Workspace": "workspace.schema.json",
+    "Opportunity": "opportunity.schema.json",
+    "StrideEvaluation": "stride-evaluation.schema.json",
+    "ResumeArtifact": "resume-artifact.schema.json",
+    "CoverLetterArtifact": "cover-letter-artifact.schema.json",
+    "ApplicationState": "application-state.schema.json"
+  }
+}

@@ -1,5 +1,5 @@
 # Shared
 
-Reserved for future shared schemas, types, and utilities used across Careero modules.
+Reserved for runtime-agnostic shared utilities that do not belong to a package yet.
 
-Layer 1 does not add shared runtime contracts yet.
+Canonical platform contracts now live in `packages/contracts`. Use that package as the source of truth for future cross-frontend, backend, AI, persistence, workflow, and export contracts.

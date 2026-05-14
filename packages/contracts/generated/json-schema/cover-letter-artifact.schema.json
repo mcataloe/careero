@@ -1,0 +1,365 @@
+{
+  "$ref": "#/definitions/CoverLetterArtifact",
+  "definitions": {
+    "CoverLetterArtifact": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+        },
+        "targetOpportunityId": {
+          "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "warm",
+            "executive",
+            "technical",
+            "consultative",
+            "custom"
+          ]
+        },
+        "generationMetadata": {
+          "type": "object",
+          "properties": {
+            "generatedBy": {
+              "type": "string",
+              "enum": [
+                "user",
+                "deterministic_rules",
+                "ai",
+                "import"
+              ],
+              "default": "user"
+            },
+            "modelMetadata": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "provider": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "model": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "promptVersion": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "rulesetVersion": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "inputTokenEstimate": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "outputTokenEstimate": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "latencyMs": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "provider",
+                    "model",
+                    "promptVersion",
+                    "rulesetVersion",
+                    "inputTokenEstimate",
+                    "outputTokenEstimate",
+                    "latencyMs"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "promptVersion": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "inputHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "groundingSourceIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+              },
+              "default": []
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "modelMetadata",
+            "promptVersion",
+            "inputHash"
+          ],
+          "additionalProperties": false
+        },
+        "editHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "editedAt": {
+                "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+              },
+              "editedBy": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "ai",
+                  "system"
+                ],
+                "default": "user"
+              },
+              "summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "editedAt",
+              "summary"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "exportFormats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": [
+                  "pdf",
+                  "docx",
+                  "md",
+                  "txt",
+                  "html"
+                ]
+              },
+              "exportedAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "contentHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "format",
+              "exportedAt",
+              "fileName",
+              "contentHash"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "revision": {
+          "type": "object",
+          "properties": {
+            "revisionId": {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+            },
+            "parentArtifactId": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "revisionNumber": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "changeSummary": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "createdAt": {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            }
+          },
+          "required": [
+            "revisionId",
+            "parentArtifactId",
+            "revisionNumber",
+            "changeSummary",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "reviewed",
+            "approved",
+            "exported",
+            "archived"
+          ]
+        },
+        "exportedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifactMetadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "deletedAt",
+        "id",
+        "workspaceId",
+        "targetOpportunityId",
+        "title",
+        "content",
+        "tone",
+        "generationMetadata",
+        "revision",
+        "status",
+        "exportedAt",
+        "artifactMetadata"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

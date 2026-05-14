@@ -1,0 +1,497 @@
+{
+  "$ref": "#/definitions/Opportunity",
+  "definitions": {
+    "Opportunity": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/Opportunity/properties/createdAt"
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Opportunity/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Opportunity/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/Opportunity/properties/id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "company": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "websiteUrl": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "industry": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "websiteUrl",
+            "industry",
+            "notes"
+          ],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "sourceType": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "linkedin_manual",
+                "greenhouse",
+                "lever",
+                "ashby",
+                "workable",
+                "company_site",
+                "recruiter_email",
+                "job_board",
+                "referral",
+                "other"
+              ]
+            },
+            "sourceName": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sourceUrl": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Opportunity/properties/company/properties/websiteUrl/anyOf/0"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "externalId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "ingestionMethod": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "ai_parse",
+                "import",
+                "connector"
+              ],
+              "default": "manual"
+            },
+            "ingestionTimestamp": {
+              "$ref": "#/definitions/Opportunity/properties/createdAt"
+            },
+            "parserVersion": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "rawContentHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "sourceType",
+            "sourceName",
+            "sourceUrl",
+            "externalId",
+            "ingestionTimestamp",
+            "parserVersion",
+            "rawContentHash"
+          ],
+          "additionalProperties": false
+        },
+        "rawSourceContent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "normalizedContent": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "companyName": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "responsibilities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "requirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "seniority": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "employmentType": {
+              "type": "string",
+              "enum": [
+                "full_time",
+                "part_time",
+                "contract",
+                "consulting",
+                "fractional",
+                "internship",
+                "temporary",
+                "other",
+                "unspecified"
+              ]
+            },
+            "remoteType": {
+              "type": "string",
+              "enum": [
+                "remote",
+                "hybrid",
+                "onsite",
+                "unspecified"
+              ]
+            },
+            "location": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "city": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "region": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "country": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "timezone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "label",
+                "city",
+                "region",
+                "country",
+                "timezone"
+              ],
+              "additionalProperties": false
+            },
+            "compensation": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "max": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "currency": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 3
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "period": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "hourly",
+                            "daily",
+                            "weekly",
+                            "monthly",
+                            "annual",
+                            "project"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "sourceText": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max",
+                    "currency",
+                    "period",
+                    "sourceText"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "title",
+            "companyName",
+            "description",
+            "seniority",
+            "employmentType",
+            "remoteType",
+            "location",
+            "compensation"
+          ],
+          "additionalProperties": false
+        },
+        "compensation": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Opportunity/properties/normalizedContent/properties/compensation/anyOf/0"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "$ref": "#/definitions/Opportunity/properties/normalizedContent/properties/location"
+        },
+        "remoteType": {
+          "$ref": "#/definitions/Opportunity/properties/normalizedContent/properties/remoteType"
+        },
+        "employmentType": {
+          "$ref": "#/definitions/Opportunity/properties/normalizedContent/properties/employmentType"
+        },
+        "ingestionTimestamp": {
+          "$ref": "#/definitions/Opportunity/properties/createdAt"
+        },
+        "parseConfidence": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "default": {}
+        },
+        "aiNotes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "default": []
+        },
+        "roleStatus": {
+          "type": "string",
+          "enum": [
+            "discovered",
+            "interested",
+            "evaluating",
+            "evaluated",
+            "application_started",
+            "applied",
+            "rejected",
+            "withdrawn",
+            "archived"
+          ]
+        },
+        "linkedEvaluationIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Opportunity/properties/id"
+          },
+          "default": []
+        },
+        "linkedApplicationStateId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Opportunity/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "linkedArtifactIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Opportunity/properties/id"
+          },
+          "default": []
+        },
+        "opportunityMetadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "deletedAt",
+        "id",
+        "workspaceId",
+        "title",
+        "company",
+        "source",
+        "rawSourceContent",
+        "normalizedContent",
+        "compensation",
+        "location",
+        "remoteType",
+        "employmentType",
+        "ingestionTimestamp",
+        "aiNotes",
+        "roleStatus",
+        "linkedApplicationStateId",
+        "opportunityMetadata"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

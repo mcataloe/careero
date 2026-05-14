@@ -1,0 +1,468 @@
+{
+  "$ref": "#/definitions/ResumeArtifact",
+  "definitions": {
+    "ResumeArtifact": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/ResumeArtifact/properties/id"
+        },
+        "sourceResumeId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResumeArtifact/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "targetOpportunityId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResumeArtifact/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifactType": {
+          "type": "string",
+          "enum": [
+            "source_resume",
+            "master_resume",
+            "resume_variant",
+            "tailored_resume",
+            "uploaded_resume"
+          ]
+        },
+        "sourceType": {
+          "type": "string",
+          "enum": [
+            "uploaded",
+            "generated",
+            "imported",
+            "manual"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generationMetadata": {
+          "type": "object",
+          "properties": {
+            "generatedBy": {
+              "type": "string",
+              "enum": [
+                "user",
+                "deterministic_rules",
+                "ai",
+                "import"
+              ],
+              "default": "user"
+            },
+            "modelMetadata": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "provider": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "model": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "promptVersion": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "rulesetVersion": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "inputTokenEstimate": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "outputTokenEstimate": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "latencyMs": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "provider",
+                    "model",
+                    "promptVersion",
+                    "rulesetVersion",
+                    "inputTokenEstimate",
+                    "outputTokenEstimate",
+                    "latencyMs"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "promptVersion": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "inputHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "groundingSourceIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResumeArtifact/properties/id"
+              },
+              "default": []
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "modelMetadata",
+            "promptVersion",
+            "inputHash"
+          ],
+          "additionalProperties": false
+        },
+        "exportFormats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": [
+                  "pdf",
+                  "docx",
+                  "md",
+                  "txt",
+                  "html"
+                ]
+              },
+              "exportedAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "contentHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "format",
+              "exportedAt",
+              "fileName",
+              "contentHash"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "revision": {
+          "type": "object",
+          "properties": {
+            "revisionId": {
+              "$ref": "#/definitions/ResumeArtifact/properties/id"
+            },
+            "parentArtifactId": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ResumeArtifact/properties/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "revisionNumber": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "changeSummary": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "createdAt": {
+              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+            }
+          },
+          "required": [
+            "revisionId",
+            "parentArtifactId",
+            "revisionNumber",
+            "changeSummary",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        },
+        "uploadMetadata": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "originalFileName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "contentType": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "sizeBytes": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "uploadedAt": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "contentHash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "originalFileName",
+                "contentType",
+                "sizeBytes",
+                "uploadedAt",
+                "contentHash"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parsingMetadata": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "parserVersion": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "parsedAt": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                }
+              },
+              "required": [
+                "parserVersion",
+                "parsedAt"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tailoringNotes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "reviewed",
+            "approved",
+            "exported",
+            "archived"
+          ]
+        },
+        "exportedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifactMetadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "deletedAt",
+        "id",
+        "workspaceId",
+        "sourceResumeId",
+        "targetOpportunityId",
+        "artifactType",
+        "sourceType",
+        "title",
+        "content",
+        "generationMetadata",
+        "revision",
+        "uploadMetadata",
+        "parsingMetadata",
+        "tailoringNotes",
+        "status",
+        "exportedAt",
+        "artifactMetadata"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
