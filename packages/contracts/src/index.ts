@@ -5,6 +5,7 @@ export * from "./examples.js";
 export * from "./opportunity.js";
 export * from "./primitives.js";
 export * from "./registry.js";
+export * from "./stride-engine.js";
 export * from "./stride-evaluation.js";
 export * from "./validation.js";
 export * from "./workspace.js";

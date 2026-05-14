@@ -113,6 +113,27 @@ AI contract guidance:
 - AI output cannot invent resume facts, company facts, compensation, or external research.
 - AI enrichment should clearly distinguish evidence, assumptions, gaps, and insufficient data.
 
+Layer 3B STRIDE pipeline:
+
+```text
+Workspace + Opportunity + optional resume/profile content
+-> prompt builder
+-> injected model provider
+-> raw model output
+-> JSON parse
+-> StrideEvaluationSchema validation
+-> normalized STRIDE evaluation
+-> caller persistence or return
+```
+
+Validation and error behavior:
+
+- Raw model output is kept separate from normalized output.
+- Only `StrideEvaluationSchema`-validated output may be treated as a completed evaluation.
+- Malformed JSON, schema-invalid output, and provider failures produce a valid failed fallback evaluation with low confidence and explicit assumptions.
+- Failed fallback evaluations are audit records, not completed recommendations.
+- Model configuration lives in the caller/provider adapter. The contracts package defines the provider interface but does not include an OpenAI SDK dependency.
+
 Rendering guidance:
 
 - Render structured sections directly from validated fields.
