@@ -1,4 +1,5 @@
 import {
+  Alert,
   Badge,
   Button,
   Divider,
@@ -11,6 +12,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import type { ReactNode } from "react";
 
 import type {
   EvaluationSection,
@@ -45,6 +47,47 @@ function aiStatusLabel(evaluation: StrideEvaluation) {
   return "Deterministic";
 }
 
+function evaluationStatus(evaluation: StrideEvaluation) {
+  return evaluation.evaluation_status ?? evaluation.status ?? "completed";
+}
+
+function overallScore(evaluation: StrideEvaluation) {
+  return scoreNumber(evaluation.overall_score ?? evaluation.overallScore);
+}
+
+function recommendation(evaluation: StrideEvaluation) {
+  return evaluation.recommendation ?? evaluation.recommendations?.decision ?? null;
+}
+
+function confidenceLevel(evaluation: StrideEvaluation) {
+  return evaluation.confidence_level ?? evaluation.confidence?.level ?? null;
+}
+
+function sectionSummary(section: EvaluationSection | null | undefined) {
+  return section?.notes ?? section?.summary ?? "No details available.";
+}
+
+function evidenceText(evidence: EvidenceItem["evidence"]) {
+  if (Array.isArray(evidence)) return evidence.join("; ");
+  return evidence ?? null;
+}
+
+function sectionFromCanonical(
+  evaluation: StrideEvaluation,
+  key: keyof NonNullable<StrideEvaluation["sections"]>,
+  fallback: EvaluationSection | null | undefined,
+) {
+  return evaluation.sections?.[key] ?? fallback;
+}
+
+function evidenceItemsFromStrings(values: string[] | undefined, labelPrefix: string) {
+  return (values ?? []).map((value) => ({
+    label: value,
+    message: value,
+    code: `${labelPrefix}_${value}`,
+  }));
+}
+
 function EvidenceList({
   items,
   empty,
@@ -59,28 +102,33 @@ function EvidenceList({
 
   return (
     <List spacing="xs">
-      {safeItems.map((item, index) => (
-        <List.Item key={`${item.code ?? item.message ?? "item"}-${index}`}>
-          <Stack gap={2}>
-            <Text>{item.message ?? item.code ?? "Evaluation item"}</Text>
-            {item.evidence ? (
-              <Text size="sm" c="dimmed">
-                Evidence: {item.evidence}
-              </Text>
-            ) : null}
-            {item.status || item.severity ? (
-              <Group gap="xs">
-                {item.status ? <Badge variant="light">{titleize(item.status)}</Badge> : null}
-                {item.severity ? (
-                  <Badge variant="light" color={item.severity === "high" ? "red" : "yellow"}>
-                    {item.severity}
-                  </Badge>
-                ) : null}
-              </Group>
-            ) : null}
-          </Stack>
-        </List.Item>
-      ))}
+      {safeItems.map((item, index) => {
+        const body = item.message ?? item.label ?? item.code ?? "Evaluation item";
+        const details = item.notes ?? evidenceText(item.evidence);
+
+        return (
+          <List.Item key={`${item.code ?? item.label ?? item.message ?? "item"}-${index}`}>
+            <Stack gap={2}>
+              <Text>{body}</Text>
+              {details ? (
+                <Text size="sm" c="dimmed">
+                  {item.notes ? "Notes" : "Evidence"}: {details}
+                </Text>
+              ) : null}
+              {item.status || item.severity ? (
+                <Group gap="xs">
+                  {item.status ? <Badge variant="light">{titleize(item.status)}</Badge> : null}
+                  {item.severity ? (
+                    <Badge variant="light" color={item.severity === "high" ? "red" : "yellow"}>
+                      {item.severity}
+                    </Badge>
+                  ) : null}
+                </Group>
+              ) : null}
+            </Stack>
+          </List.Item>
+        );
+      })}
     </List>
   );
 }
@@ -108,15 +156,39 @@ function AlignmentSection({
           </Text>
         ) : null}
         <ExpandableTextSection maxHeight={180}>
-          {section?.notes ?? "No details available."}
+          {sectionSummary(section)}
         </ExpandableTextSection>
         {Array.isArray(section?.evidence) && section.evidence.length > 0 ? (
           <Text size="sm" c="dimmed">
             Evidence: {section.evidence.join("; ")}
           </Text>
         ) : null}
+        {Array.isArray(section?.gaps) && section.gaps.length > 0 ? (
+          <Text size="sm" c="dimmed">
+            Gaps: {section.gaps.join("; ")}
+          </Text>
+        ) : null}
       </Stack>
     </Paper>
+  );
+}
+
+function EvaluationSectionBlock({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section id={id}>
+      <Stack gap="sm">
+        <Title order={3}>{title}</Title>
+        {children}
+      </Stack>
+    </section>
   );
 }
 
@@ -132,6 +204,7 @@ export function EvaluationStatusBadge({
   if (loading) return <Badge variant="light">Loading evaluation</Badge>;
   if (error) return <Badge color="red">Evaluation error</Badge>;
   if (!evaluation) return <Badge variant="light">Not evaluated</Badge>;
+  if (evaluationStatus(evaluation) === "failed") return <Badge color="red">Validation failed</Badge>;
   const aiStatus = evaluation.ai_status ?? evaluation.raw_evaluation_json?.ai_status;
   if (aiStatus === "skipped") {
     return <Badge color="yellow">Skipped AI fallback</Badge>;
@@ -169,9 +242,28 @@ export function StrideEvaluationDetail({
     );
   }
 
-  const score = scoreNumber(evaluation.overall_score);
+  const score = overallScore(evaluation);
+  const decision = recommendation(evaluation);
+  const confidence = confidenceLevel(evaluation);
   const unsupportedWarnings =
     evaluation.raw_evaluation_json?.ai_result?.unsupported_claim_warnings ?? [];
+  const evidenceGaps = evaluation.raw_evaluation_json?.ai_result?.evidence_gaps ?? [];
+  const positioningOpportunities =
+    evaluation.raw_evaluation_json?.ai_result?.positioning_opportunities ?? [];
+  const validationIssues = evaluation.raw_evaluation_json?.validationIssues ?? [];
+  const status = evaluationStatus(evaluation);
+  const atsKeywords = evaluation.ats_keywords ?? evaluation.atsFindings?.matchedKeywords ?? [];
+  const missingKeywords =
+    evaluation.missing_keywords ?? evaluation.atsFindings?.missingKeywords ?? [];
+  const assumptions = evaluation.assumptions ?? [];
+  const gaps =
+    evaluation.gaps && evaluation.gaps.length > 0 ? evaluation.gaps : evidenceGaps;
+  const risks =
+    evaluation.risks && evaluation.risks.length > 0 ? evaluation.risks : evaluation.concerns ?? [];
+  const compensationSection =
+    sectionFromCanonical(evaluation, "compensationAlignment", evaluation.compensation_alignment) ??
+    evaluation.compensationFindings;
+  const remoteSection = sectionFromCanonical(evaluation, "remoteAlignment", evaluation.remote_alignment);
 
   return (
     <Paper withBorder radius="md" p="lg">
@@ -196,6 +288,12 @@ export function StrideEvaluationDetail({
           </Group>
         </Group>
 
+        {status === "failed" ? (
+          <Alert color="red" title="Validation failed">
+            This evaluation did not produce a completed validated result. Review the fallback details before relying on it.
+          </Alert>
+        ) : null}
+
         <Grid>
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Paper withBorder radius="md" p="md">
@@ -214,8 +312,8 @@ export function StrideEvaluationDetail({
                 <Text size="sm" c="dimmed">
                   Recommendation
                 </Text>
-                <Badge size="lg" color={recommendationColor(evaluation.recommendation)}>
-                  {titleize(evaluation.recommendation)}
+                <Badge size="lg" color={recommendationColor(decision)}>
+                  {titleize(decision)}
                 </Badge>
               </Stack>
             </Paper>
@@ -227,25 +325,63 @@ export function StrideEvaluationDetail({
                   Confidence
                 </Text>
                 <Badge size="lg" variant="light">
-                  {titleize(evaluation.confidence_level)}
+                  {titleize(confidence)}
                 </Badge>
               </Stack>
             </Paper>
           </Grid.Col>
         </Grid>
 
-        <ExpandableTextSection title="Summary">
-          {evaluation.summary ?? "No summary available."}
-        </ExpandableTextSection>
+        <EvaluationSectionBlock id="stride-summary" title="Summary">
+          <ExpandableTextSection maxHeight={220}>
+            {evaluation.summary ?? "No summary available."}
+          </ExpandableTextSection>
+        </EvaluationSectionBlock>
+
+        <EvaluationSectionBlock id="stride-fit-analysis" title="Fit analysis">
+          <Grid>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <AlignmentSection
+                title="Strategic fit"
+                section={sectionFromCanonical(evaluation, "strategicFit", undefined)}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <AlignmentSection
+                title="Technical alignment"
+                section={sectionFromCanonical(evaluation, "technicalAlignment", evaluation.technical_alignment)}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <AlignmentSection
+                title="Seniority alignment"
+                section={sectionFromCanonical(evaluation, "seniorityAlignment", evaluation.seniority_alignment)}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <AlignmentSection
+                title="Resume alignment"
+                section={sectionFromCanonical(evaluation, "atsResumeAlignment", evaluation.resume_alignment)}
+              />
+            </Grid.Col>
+          </Grid>
+        </EvaluationSectionBlock>
 
         <Grid>
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <Title order={4}>Strengths</Title>
-            <EvidenceList items={evaluation.strengths} empty="No strengths recorded." />
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <EvaluationSectionBlock id="stride-strengths" title="Strengths">
+              <EvidenceList items={evaluation.strengths} empty="No strengths recorded." />
+            </EvaluationSectionBlock>
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <Title order={4}>Concerns</Title>
-            <EvidenceList items={evaluation.concerns} empty="No concerns recorded." />
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <EvaluationSectionBlock id="stride-gaps" title="Gaps">
+              <EvidenceList items={gaps} empty="No gaps recorded." />
+            </EvaluationSectionBlock>
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <EvaluationSectionBlock id="stride-risks" title="Risks">
+              <EvidenceList items={risks} empty="No risks recorded." />
+            </EvaluationSectionBlock>
           </Grid.Col>
         </Grid>
 
@@ -253,49 +389,139 @@ export function StrideEvaluationDetail({
 
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <AlignmentSection title="Technical alignment" section={evaluation.technical_alignment} />
+            <EvaluationSectionBlock id="stride-ats-findings" title="ATS findings">
+              <Stack gap="sm">
+                <Text size="sm" c="dimmed">
+                  Matched keywords
+                </Text>
+                {atsKeywords.length > 0 ? (
+                  <Group gap="xs">
+                    {atsKeywords.map((keyword) => (
+                      <Badge key={keyword} variant="light" color="green">
+                        {keyword}
+                      </Badge>
+                    ))}
+                  </Group>
+                ) : (
+                  <Text c="dimmed">No ATS keywords recorded.</Text>
+                )}
+                <Text size="sm" c="dimmed">
+                  Keyword gaps
+                </Text>
+                {missingKeywords.length > 0 ? (
+                  <Group gap="xs">
+                    {missingKeywords.map((keyword) => (
+                      <Badge key={keyword} variant="light" color="yellow">
+                        {keyword}
+                      </Badge>
+                    ))}
+                  </Group>
+                ) : (
+                  <Text c="dimmed">No keyword gaps recorded.</Text>
+                )}
+              </Stack>
+            </EvaluationSectionBlock>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <AlignmentSection title="Seniority alignment" section={evaluation.seniority_alignment} />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <AlignmentSection title="Compensation alignment" section={evaluation.compensation_alignment} />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <AlignmentSection title="Remote/location alignment" section={evaluation.remote_alignment} />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <AlignmentSection title="Resume alignment" section={evaluation.resume_alignment} />
+            <EvaluationSectionBlock id="stride-compensation" title="Compensation">
+              <AlignmentSection title="Compensation alignment" section={compensationSection} />
+            </EvaluationSectionBlock>
           </Grid.Col>
         </Grid>
 
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <Title order={4}>ATS keyword gaps</Title>
-            {evaluation.missing_keywords.length > 0 ? (
-              <Group gap="xs">
-                {evaluation.missing_keywords.map((keyword) => (
-                  <Badge key={keyword} variant="light" color="yellow">
-                    {keyword}
-                  </Badge>
-                ))}
-              </Group>
-            ) : (
-              <Text c="dimmed">No keyword gaps recorded.</Text>
-            )}
+            <EvaluationSectionBlock id="stride-remote-fit" title="Remote fit">
+              <AlignmentSection title="Remote/location alignment" section={remoteSection} />
+            </EvaluationSectionBlock>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <Title order={4}>Unsupported claim warnings</Title>
-            <EvidenceList
-              items={unsupportedWarnings}
-              empty="No unsupported claim warnings recorded."
-            />
+            <EvaluationSectionBlock id="stride-interview-positioning" title="Interview positioning">
+              <EvidenceList
+                items={[
+                  ...positioningOpportunities,
+                  ...evidenceItemsFromStrings(
+                    evaluation.recommendations?.nextActions,
+                    "next_action",
+                  ),
+                ]}
+                empty="No interview positioning guidance recorded."
+              />
+            </EvaluationSectionBlock>
           </Grid.Col>
         </Grid>
 
+        <EvaluationSectionBlock id="stride-recommendations" title="Recommendations">
+          <Stack gap="sm">
+            <Badge size="lg" color={recommendationColor(decision)}>
+              {titleize(decision)}
+            </Badge>
+            <ExpandableTextSection maxHeight={180}>
+              {evaluation.recommendations?.rationale ?? "No recommendation rationale recorded."}
+            </ExpandableTextSection>
+          </Stack>
+        </EvaluationSectionBlock>
+
+        <EvaluationSectionBlock id="stride-assumptions-confidence" title="Assumptions / confidence">
+          <Grid>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Paper withBorder radius="md" p="md">
+                <Stack gap="xs">
+                  <Title order={4}>Confidence</Title>
+                  <Badge variant="light">{titleize(confidence)}</Badge>
+                  {evaluation.confidence?.score !== undefined ? (
+                    <Progress value={(evaluation.confidence.score ?? 0) * 100} />
+                  ) : null}
+                  <ExpandableTextSection maxHeight={160}>
+                    {evaluation.confidence?.rationale ?? "No confidence rationale recorded."}
+                  </ExpandableTextSection>
+                </Stack>
+              </Paper>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Paper withBorder radius="md" p="md">
+                <Stack gap="xs">
+                  <Title order={4}>Assumptions</Title>
+                  {assumptions.length > 0 ? (
+                    <List spacing="xs">
+                      {assumptions.map((assumption) => (
+                        <List.Item key={assumption}>{assumption}</List.Item>
+                      ))}
+                    </List>
+                  ) : (
+                    <Text c="dimmed">No assumptions recorded.</Text>
+                  )}
+                </Stack>
+              </Paper>
+            </Grid.Col>
+          </Grid>
+        </EvaluationSectionBlock>
+
+        <EvaluationSectionBlock id="stride-unsupported-warnings" title="Unsupported claim warnings">
+          <EvidenceList
+            items={unsupportedWarnings}
+            empty="No unsupported claim warnings recorded."
+          />
+        </EvaluationSectionBlock>
+
+        {validationIssues.length > 0 ? (
+          <EvaluationSectionBlock id="stride-validation-issues" title="Validation issues">
+            <EvidenceList
+              items={validationIssues.map((issue, index) => ({
+                code: `validation_issue_${index}`,
+                message:
+                  typeof issue === "object" && issue !== null && "message" in issue
+                    ? String(issue.message)
+                    : String(issue),
+              }))}
+              empty="No validation issues recorded."
+            />
+          </EvaluationSectionBlock>
+        ) : null}
+
         {evaluation.error_message || evaluation.raw_evaluation_json?.ai_failure_reason ? (
           <Text size="sm" c="dimmed">
-            AI fallback: {evaluation.error_message ?? evaluation.raw_evaluation_json.ai_failure_reason}
+            AI fallback: {evaluation.error_message ?? evaluation.raw_evaluation_json?.ai_failure_reason}
           </Text>
         ) : null}
       </Stack>

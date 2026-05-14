@@ -28,12 +28,28 @@ export function RoleDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const evaluationRef = useRef<HTMLDivElement | null>(null);
+  const evaluationSectionNavItems = evaluation
+    ? [
+        { label: "Summary", targetId: "stride-summary" },
+        { label: "Fit Analysis", targetId: "stride-fit-analysis" },
+        { label: "Strengths", targetId: "stride-strengths" },
+        { label: "Gaps", targetId: "stride-gaps" },
+        { label: "Risks", targetId: "stride-risks" },
+        { label: "ATS Findings", targetId: "stride-ats-findings" },
+        { label: "Compensation", targetId: "stride-compensation" },
+        { label: "Remote Fit", targetId: "stride-remote-fit" },
+        { label: "Interview Positioning", targetId: "stride-interview-positioning" },
+        { label: "Recommendations", targetId: "stride-recommendations" },
+        { label: "Assumptions / Confidence", targetId: "stride-assumptions-confidence" },
+      ]
+    : [];
   const sectionNavItems = [
     { label: "Overview", targetId: "role-overview" },
     { label: "Description", targetId: "role-description" },
     { label: "Normalized Description", targetId: "role-normalized-description" },
     { label: "Edit Role", targetId: "role-edit" },
     { label: "STRIDE Evaluation", targetId: "stride-evaluation" },
+    ...evaluationSectionNavItems,
   ];
 
   async function loadRole() {

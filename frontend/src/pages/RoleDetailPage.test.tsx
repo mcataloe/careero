@@ -84,12 +84,22 @@ describe("RoleDetailPage", () => {
     expect(
       screen.getByRole("link", { name: /stride evaluation/i }),
     ).toHaveAttribute("href", "#stride-evaluation");
+    expect(screen.getByRole("link", { name: /^summary$/i })).toHaveAttribute(
+      "href",
+      "#stride-summary",
+    );
+    expect(screen.getByRole("link", { name: /ats findings/i })).toHaveAttribute(
+      "href",
+      "#stride-ats-findings",
+    );
 
     expect(document.getElementById("role-overview")).not.toBeNull();
     expect(document.getElementById("role-description")).not.toBeNull();
     expect(document.getElementById("role-normalized-description")).not.toBeNull();
     expect(document.getElementById("role-edit")).not.toBeNull();
     expect(document.getElementById("stride-evaluation")).not.toBeNull();
+    expect(document.getElementById("stride-summary")).not.toBeNull();
+    expect(document.getElementById("stride-ats-findings")).not.toBeNull();
   });
 
   it("re-runs evaluation with force enabled", async () => {

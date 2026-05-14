@@ -46,12 +46,14 @@ Parsing fills empty fields only, does not auto-save, and keeps manual edits inta
 STRIDE evaluation workflow:
 
 - Open a role at `/roles/:roleId`.
-- Use the compact section navigation near the top of the role detail page to jump between overview, descriptions, edit controls, and STRIDE evaluation.
+- Use the compact section navigation near the top of the role detail page to jump between overview, descriptions, edit controls, STRIDE evaluation, and major STRIDE sections.
 - Use `Run STRIDE evaluation` for a role with no evaluation.
 - Use `Re-run evaluation` to force a new latest evaluation.
 - Use `View latest evaluation` to jump to the evaluation section.
 - The role list shows a non-blocking evaluation indicator for each role.
 - A normal run may reuse the backend cache when role/source/context inputs have not changed.
+- Completed evaluations render through section blocks for summary, fit analysis, strengths, gaps, risks, ATS findings, compensation, remote fit, interview positioning, recommendations, and assumptions/confidence.
+- Long STRIDE text uses the shared `ExpandableTextSection` pattern so the role detail page stays scannable without hiding full content.
 
 Resume/profile grounding source:
 

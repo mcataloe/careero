@@ -5,17 +5,22 @@ export type ConfidenceLevel = "low" | "medium" | "high";
 export interface EvaluationSection {
   status?: string;
   score?: number | string | null;
+  summary?: string | null;
   notes?: string | null;
   evidence?: string[];
+  gaps?: string[];
+  assumptions?: string[];
   matched_keywords?: string[];
   missing_keywords?: string[];
   [key: string]: unknown;
 }
 
 export interface EvidenceItem {
+  label?: string;
   code?: string;
   message?: string;
-  evidence?: string | null;
+  notes?: string | null;
+  evidence?: string | string[] | null;
   status?: string;
   dimension?: string;
   severity?: string;
@@ -25,23 +30,60 @@ export interface EvidenceItem {
 
 export interface StrideEvaluation {
   id: string;
-  user_id: string;
-  role_id: string;
-  evaluation_status: EvaluationStatus;
-  overall_score: string | null;
-  recommendation: Recommendation | string | null;
-  confidence_level: ConfidenceLevel | string | null;
+  user_id?: string;
+  role_id?: string;
+  workspaceId?: string;
+  opportunityId?: string;
+  evaluation_status?: EvaluationStatus;
+  status?: EvaluationStatus | "superseded";
+  overall_score?: string | null;
+  overallScore?: number | null;
+  recommendation?: Recommendation | string | null;
+  recommendations?: {
+    decision?: Recommendation | string | null;
+    rationale?: string | null;
+    nextActions?: string[];
+  } | null;
+  confidence_level?: ConfidenceLevel | string | null;
+  confidence?: {
+    level?: ConfidenceLevel | string | null;
+    score?: number | null;
+    rationale?: string | null;
+  };
   summary: string | null;
   strengths: EvidenceItem[];
-  concerns: EvidenceItem[];
-  resume_alignment: EvaluationSection;
-  compensation_alignment: EvaluationSection;
-  seniority_alignment: EvaluationSection;
-  remote_alignment: EvaluationSection;
-  technical_alignment: EvaluationSection;
-  company_risk: EvaluationSection;
-  ats_keywords: string[];
-  missing_keywords: string[];
+  gaps?: EvidenceItem[];
+  risks?: EvidenceItem[];
+  concerns?: EvidenceItem[];
+  resume_alignment?: EvaluationSection;
+  compensation_alignment?: EvaluationSection;
+  seniority_alignment?: EvaluationSection;
+  remote_alignment?: EvaluationSection;
+  technical_alignment?: EvaluationSection;
+  company_risk?: EvaluationSection;
+  compensationFindings?: EvaluationSection & {
+    notes?: string | null;
+    evidence?: string[];
+  };
+  atsFindings?: {
+    matchedKeywords?: string[];
+    missingKeywords?: string[];
+    keywordNotes?: string | null;
+    score?: number | null;
+  };
+  sections?: {
+    strategicFit?: EvaluationSection;
+    technicalAlignment?: EvaluationSection;
+    seniorityAlignment?: EvaluationSection;
+    compensationAlignment?: EvaluationSection;
+    remoteAlignment?: EvaluationSection;
+    companyRisk?: EvaluationSection;
+    applicationEffort?: EvaluationSection;
+    atsResumeAlignment?: EvaluationSection;
+  };
+  assumptions?: string[];
+  ats_keywords?: string[];
+  missing_keywords?: string[];
   model_used: string | null;
   prompt_version: string | null;
   ruleset_version: string | null;
@@ -54,7 +96,7 @@ export interface StrideEvaluation {
   role_content_hash: string | null;
   source_hash: string | null;
   evaluation_input_hash: string | null;
-  raw_evaluation_json: {
+  raw_evaluation_json?: {
     ai_status?: "completed" | "failed" | "skipped";
     ai_failure_reason?: string;
     ai_error_type?: string;
@@ -65,6 +107,7 @@ export interface StrideEvaluation {
       positioning_opportunities?: EvidenceItem[];
       [key: string]: unknown;
     };
+    validationIssues?: unknown[];
     active_resume_source?: {
       source_id: string;
       source_name: string;
