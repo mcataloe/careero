@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI, Response, status
 
 from app.api.activity_log import router as activity_log_router
+from app.api.cover_letter_artifacts import router as cover_letter_artifacts_router
 from app.api.resume_sources import router as resume_sources_router
 from app.api.resume_artifacts import router as resume_artifacts_router
 from app.api.roles import router as roles_router
@@ -24,6 +25,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version="0.1.0",
     )
     app.include_router(activity_log_router, prefix="/api")
+    app.include_router(cover_letter_artifacts_router, prefix="/api")
     app.include_router(resume_sources_router, prefix="/api")
     app.include_router(resume_artifacts_router, prefix="/api")
     app.include_router(roles_router, prefix="/api")

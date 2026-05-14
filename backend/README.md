@@ -36,10 +36,12 @@ CAREERO_TEST_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero_te
 CAREERO_ENABLE_AI_EVALUATIONS=false
 CAREERO_ENABLE_AI_ROLE_PARSING=false
 CAREERO_ENABLE_AI_RESUME_GENERATION=false
+CAREERO_ENABLE_AI_COVER_LETTER_GENERATION=false
 CAREERO_OPENAI_API_KEY=
 CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_DEFAULT_ROLE_PARSING_MODEL=gpt-5-mini
 CAREERO_OPENAI_DEFAULT_RESUME_GENERATION_MODEL=gpt-5-mini
+CAREERO_OPENAI_DEFAULT_COVER_LETTER_GENERATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
@@ -169,7 +171,7 @@ When a user saves a parsed role, the frontend sends `parse_metadata` with parser
 
 ## Resume/Profile Source API
 
-Careero can store a local master resume or profile source for grounded STRIDE evaluation. Source text can be pasted manually or imported from a local file for preview. File import extracts text only; it does not persist uploaded files or create a source until the user explicitly saves one. This phase does not import external profiles, extract profile facts, generate resumes, or generate cover letters.
+Careero can store a local master resume or profile source for grounded STRIDE evaluation and artifact generation. Source text can be pasted manually or imported from a local file for preview. File import extracts text only; it does not persist uploaded files or create a source until the user explicitly saves one. This API does not import external profiles, extract profile facts, generate resumes, or generate cover letters.
 
 Import a local resume/profile file:
 
@@ -420,6 +422,39 @@ Invoke-RestMethod `
 If `evaluation_id` is omitted, Careero uses the latest STRIDE evaluation for the role. If `source_version_id` is omitted, it uses the active resume source version. Missing role/evaluation/source references return `404`. Disabled or unconfigured AI resume generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, and truthfulness violations return `502` and persist no artifact.
 
 The generated resume is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Source lineage, target evaluation linkage, revision metadata, generation metadata, and content hashes are preserved. The prompt and validation layers enforce the non-fabrication rule: employers, roles, technologies, metrics, accomplishments, credentials, and experience must come from the supplied resume/profile source or explicit user-provided inputs.
+
+## Cover Letter Artifact Generation
+
+Cover letter artifact generation is optional and disabled by default. It creates a validated canonical `CoverLetterArtifact` draft for a supplied `workspace_id` and target role. STRIDE evaluation and resume/profile source inputs are used when available, but missing evaluation or missing source does not block generation; the artifact records warnings in generation metadata.
+
+The default tone is `direct`, which maps to Careero's neutral, forward-looking professional standard for cold applications. Generated openings must avoid overly enthusiastic phrasing such as "I'm excited to apply."
+
+Enable locally with:
+
+```dotenv
+CAREERO_ENABLE_AI_COVER_LETTER_GENERATION=true
+CAREERO_OPENAI_API_KEY=sk-...
+CAREERO_OPENAI_DEFAULT_COVER_LETTER_GENERATION_MODEL=gpt-5-mini
+```
+
+Generate a cover letter artifact:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/roles/{role_id}/cover-letter-artifacts `
+  -ContentType "application/json" `
+  -Body '{
+    "workspace_id": "22222222-2222-4222-8222-222222222222",
+    "evaluation_id": "optional-stride-evaluation-uuid",
+    "source_version_id": "optional-resume-source-version-uuid",
+    "tone": "direct"
+  }'
+```
+
+If `evaluation_id` is omitted, Careero uses the latest STRIDE evaluation when one exists. If `source_version_id` is omitted, it uses the active resume source version when one exists. Explicit missing role/evaluation/source references return `404`. Disabled or unconfigured AI cover letter generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, tone violations, and truthfulness violations return `502` and persist no artifact.
+
+The generated cover letter is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Opportunity linkage, optional source lineage, optional target evaluation linkage, tone metadata, generation metadata, and revision metadata are preserved. Rendering and export are future layers.
 
 ## Test
 

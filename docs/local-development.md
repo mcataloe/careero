@@ -139,7 +139,7 @@ Invoke-RestMethod `
 
 You can also import local `.txt`, `.md`, `.docx`, and text-based `.pdf` files from the Settings page or with `POST /api/resume-sources/import`. Imports are limited to `5 MB`, extract text for preview only, and do not save uploaded files or create sources. The extracted text remains editable before saving. PDFs must contain embedded selectable text; OCR for scanned PDFs is not included.
 
-Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. This phase does not extract profile facts, import external profiles, or generate tailored resumes or cover letters.
+Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. Resume and cover letter artifact generation can also use the active source when enabled. This source API does not extract profile facts or import external profiles.
 
 Future Google Docs import is tracked as a backlog item and requires Google OAuth, Drive/Docs scopes, document export, token handling, permission review, and a security design.
 
