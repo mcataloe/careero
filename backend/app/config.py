@@ -30,9 +30,11 @@ class Settings(BaseSettings):
     )
     enable_ai_evaluations: bool = Field(default=False)
     enable_ai_role_parsing: bool = Field(default=False)
+    enable_ai_resume_generation: bool = Field(default=False)
     openai_api_key: str = Field(default="")
     openai_default_evaluation_model: str = Field(default="gpt-5-mini")
     openai_default_role_parsing_model: str = Field(default="gpt-5-mini")
+    openai_default_resume_generation_model: str = Field(default="gpt-5-mini")
     openai_timeout_seconds: int = Field(default=30)
     openai_max_output_tokens: int = Field(default=2500)
     max_ai_evaluations_per_session: int = Field(default=25)
@@ -45,6 +47,7 @@ class Settings(BaseSettings):
         "test_database_url",
         "openai_default_evaluation_model",
         "openai_default_role_parsing_model",
+        "openai_default_resume_generation_model",
         "log_level",
     )
     @classmethod

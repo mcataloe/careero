@@ -35,9 +35,11 @@ CAREERO_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero
 CAREERO_TEST_DATABASE_URL=postgresql://careero:careero@localhost:5432/careero_test
 CAREERO_ENABLE_AI_EVALUATIONS=false
 CAREERO_ENABLE_AI_ROLE_PARSING=false
+CAREERO_ENABLE_AI_RESUME_GENERATION=false
 CAREERO_OPENAI_API_KEY=
 CAREERO_OPENAI_DEFAULT_EVALUATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_DEFAULT_ROLE_PARSING_MODEL=gpt-5-mini
+CAREERO_OPENAI_DEFAULT_RESUME_GENERATION_MODEL=gpt-5-mini
 CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
@@ -387,7 +389,37 @@ The activity log is scoped to the seeded default local user. It supports optiona
 5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
 6. Inspect lifecycle events with `GET /api/activity-log`.
 
-Layer 2 remains evaluation-only. It does not add auth, automated discovery, tailored resumes, cover letters, generated application packets, or application submission.
+The Layer 2 local flow does not add auth, automated discovery, cover letters, generated application packets, or application submission.
+
+## Resume Artifact Generation
+
+Resume artifact generation is optional and disabled by default. It creates a validated canonical `ResumeArtifact` draft for a supplied `workspace_id`, target role, STRIDE evaluation, and active or requested resume source version. It does not render resumes or export files.
+
+Enable locally with:
+
+```dotenv
+CAREERO_ENABLE_AI_RESUME_GENERATION=true
+CAREERO_OPENAI_API_KEY=sk-...
+CAREERO_OPENAI_DEFAULT_RESUME_GENERATION_MODEL=gpt-5-mini
+```
+
+Generate a tailored resume artifact:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/roles/{role_id}/resume-artifacts `
+  -ContentType "application/json" `
+  -Body '{
+    "workspace_id": "22222222-2222-4222-8222-222222222222",
+    "evaluation_id": "optional-stride-evaluation-uuid",
+    "source_version_id": "optional-resume-source-version-uuid"
+  }'
+```
+
+If `evaluation_id` is omitted, Careero uses the latest STRIDE evaluation for the role. If `source_version_id` is omitted, it uses the active resume source version. Missing role/evaluation/source references return `404`. Disabled or unconfigured AI resume generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, and truthfulness violations return `502` and persist no artifact.
+
+The generated resume is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Source lineage, target evaluation linkage, revision metadata, generation metadata, and content hashes are preserved. The prompt and validation layers enforce the non-fabrication rule: employers, roles, technologies, metrics, accomplishments, credentials, and experience must come from the supplied resume/profile source or explicit user-provided inputs.
 
 ## Test
 
