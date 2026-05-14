@@ -121,6 +121,9 @@ describe("ResumeSourceSettings", () => {
 
     expect(await screen.findByText("No active source")).toBeInTheDocument();
     await user.click(screen.getByLabelText(/upload file/i));
+    expect(
+      screen.getByRole("button", { name: /choose file to import/i }),
+    ).toBeInTheDocument();
     const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(
       fileInput,
@@ -156,6 +159,9 @@ describe("ResumeSourceSettings", () => {
 
     expect(await screen.findByText("No active source")).toBeInTheDocument();
     await user.click(screen.getByLabelText(/upload file/i));
+    expect(
+      screen.getByRole("button", { name: /choose file to import/i }),
+    ).toBeInTheDocument();
     const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(
       fileInput,

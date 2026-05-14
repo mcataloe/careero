@@ -1,7 +1,7 @@
 import {
   Alert,
   Button,
-  FileInput,
+  FileButton,
   Grid,
   Group,
   Paper,
@@ -22,20 +22,25 @@ import {
   getActiveResumeSource,
   importResumeSourceFile,
 } from "../api/resumeSources";
-import type { ActiveResumeSource, ResumeSourceImportResponse } from "../types/resumeSources";
+import type {
+  ActiveResumeSource,
+  ResumeSourceImportResponse,
+} from "../types/resumeSources";
 import { EmptyState, ErrorState, LoadingState } from "./States";
 
 const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
 const IMPORT_ACCEPT = ".txt,.md,.docx,.pdf";
 
 export function ResumeSourceSettings() {
-  const [activeSource, setActiveSource] = useState<ActiveResumeSource | null>(null);
+  const [activeSource, setActiveSource] = useState<ActiveResumeSource | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const [inputMode, setInputMode] = useState<"paste" | "upload">("paste");
-  const [importedFile, setImportedFile] = useState<File | null>(null);
-  const [importResult, setImportResult] = useState<ResumeSourceImportResponse | null>(null);
+  const [importResult, setImportResult] =
+    useState<ResumeSourceImportResponse | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -49,7 +54,8 @@ export function ResumeSourceSettings() {
     },
     validate: {
       name: (value) => (value.trim() ? null : "Name is required"),
-      versionLabel: (value) => (value.trim() ? null : "Version label is required"),
+      versionLabel: (value) =>
+        value.trim() ? null : "Version label is required",
       rawText: (value) => (value.trim() ? null : "Source text is required"),
     },
   });
@@ -69,14 +75,15 @@ export function ResumeSourceSettings() {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load resume source");
+      setError(
+        err instanceof Error ? err.message : "Could not load resume source",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   async function handleImport(file: File | null) {
-    setImportedFile(file);
     setImportResult(null);
     setImportError(null);
     setNotice(null);
@@ -95,9 +102,13 @@ export function ResumeSourceSettings() {
       const result = await importResumeSourceFile(file);
       form.setFieldValue("rawText", result.extracted_text);
       setImportResult(result);
-      setNotice("Resume/profile text extracted. Review and edit before saving.");
+      setNotice(
+        "Resume/profile text extracted. Review and edit before saving.",
+      );
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : "Could not import file");
+      setImportError(
+        err instanceof Error ? err.message : "Could not import file",
+      );
     } finally {
       setImporting(false);
     }
@@ -119,18 +130,23 @@ export function ResumeSourceSettings() {
         });
         setNotice("Active resume source created");
       } else {
-        const version = await createResumeSourceVersion(activeSource.source.id, {
-          version_label: values.versionLabel.trim(),
-          raw_text: values.rawText.trim(),
-          normalized_summary: values.normalizedSummary.trim() || null,
-          is_active: false,
-        });
+        const version = await createResumeSourceVersion(
+          activeSource.source.id,
+          {
+            version_label: values.versionLabel.trim(),
+            raw_text: values.rawText.trim(),
+            normalized_summary: values.normalizedSummary.trim() || null,
+            is_active: false,
+          },
+        );
         await activateResumeSourceVersion(activeSource.source.id, version.id);
         setNotice("Active resume source updated");
       }
       await loadActiveSource();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save resume source");
+      setError(
+        err instanceof Error ? err.message : "Could not save resume source",
+      );
     } finally {
       setSaving(false);
     }
@@ -174,7 +190,9 @@ export function ResumeSourceSettings() {
           )}
 
           {notice ? <Alert color="green">{notice}</Alert> : null}
-          {error ? <ErrorState message={error} onRetry={loadActiveSource} /> : null}
+          {error ? (
+            <ErrorState message={error} onRetry={loadActiveSource} />
+          ) : null}
           {importError ? <Alert color="red">{importError}</Alert> : null}
 
           <Stack gap="sm">
@@ -188,15 +206,32 @@ export function ResumeSourceSettings() {
             />
             {inputMode === "upload" ? (
               <Stack gap="xs">
-                <FileInput
-                  label="Resume/profile file"
-                  description="Upload .txt, .md, .docx, or text-based .pdf files up to 5 MB. Uploading extracts text only; it does not save the source."
-                  placeholder="Choose file"
+                <Stack gap={4}>
+                  <Text fw={500}>Resume/profile file</Text>
+                  <Text size="sm" c="dimmed">
+                    Upload .txt, .md, .docx, or text-based .pdf files up to 5
+                    MB. Uploading extracts text only; it does not save the
+                    source.
+                  </Text>
+                </Stack>
+                <Group>
+                  <FileButton
+                    onChange={handleImport}
                   accept={IMPORT_ACCEPT}
-                  value={importedFile}
-                  onChange={handleImport}
                   disabled={importing}
-                />
+                  >
+                    {(props) => (
+                      <Button
+                        {...props}
+                        type="button"
+                        variant="light"
+                        loading={importing}
+                      >
+                        Choose file to import
+                      </Button>
+                    )}
+                  </FileButton>
+                </Group>
                 {importing ? <Text size="sm">Extracting text...</Text> : null}
                 {importResult ? (
                   <Alert color="blue" title="Imported file">
@@ -204,7 +239,8 @@ export function ResumeSourceSettings() {
                       <Text size="sm">File: {importResult.file_name}</Text>
                       <Text size="sm">Type: {importResult.file_type}</Text>
                       <Text size="sm">
-                        Characters: {importResult.character_count.toLocaleString()}
+                        Characters:{" "}
+                        {importResult.character_count.toLocaleString()}
                       </Text>
                       {importResult.warnings.map((warning) => (
                         <Text key={warning} size="sm">
@@ -217,7 +253,8 @@ export function ResumeSourceSettings() {
               </Stack>
             ) : (
               <Text size="sm" c="dimmed">
-                Paste resume or profile text directly into the raw text field below.
+                Paste resume or profile text directly into the raw text field
+                below.
               </Text>
             )}
           </Stack>
