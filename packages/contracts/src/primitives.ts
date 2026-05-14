@@ -26,11 +26,13 @@ export const MoneySchema = z.object({
   }
 });
 
-export const AuditTimestampsSchema = z.object({
+export const TimestampFieldsSchema = z.object({
   createdAt: IsoDateTimeSchema,
   updatedAt: IsoDateTimeSchema,
+});
+
+export const ArchivableTimestampFieldsSchema = TimestampFieldsSchema.extend({
   archivedAt: IsoDateTimeSchema.nullable(),
-  deletedAt: IsoDateTimeSchema.nullable(),
 });
 
 export const ModelMetadataSchema = z.object({

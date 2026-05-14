@@ -35,6 +35,10 @@ packages/contracts/
   generated/json-schema/
 ```
 
+## Consumption Boundary
+
+TypeScript consumers should import schemas, inferred types, and validation helpers from `@careero/contracts`. Python/backend consumers should use the generated JSON Schema files in `packages/contracts/generated/json-schema/`; the backend should not import TypeScript directly.
+
 ## Entity Responsibilities
 
 ### Workspace
@@ -121,7 +125,7 @@ Persistence guidance:
 
 Versioning strategy:
 
-- `evaluationVersion.version`, `modelMetadata.promptVersion`, and `modelMetadata.rulesetVersion` are required.
+- `version.version`, `modelMetadata.promptVersion`, and `modelMetadata.rulesetVersion` are required.
 - Changes to scoring or prompt behavior should update version fields.
 
 ### Resume Artifact

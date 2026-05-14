@@ -1,7 +1,7 @@
-import { CONTRACT_VERSION } from "./primitives.js";
 import type { ApplicationState } from "./application-state.js";
 import type { CoverLetterArtifact, ResumeArtifact } from "./artifacts.js";
 import type { Opportunity } from "./opportunity.js";
+import { CONTRACT_VERSION } from "./primitives.js";
 import type { StrideEvaluation } from "./stride-evaluation.js";
 import type { Workspace } from "./workspace.js";
 
@@ -17,10 +17,10 @@ const applicationStateId = "77777777-7777-4777-8777-777777777777";
 export const workspaceExample: Workspace = {
   contractVersion: CONTRACT_VERSION,
   id: workspaceId,
-  ownerUserId: userId,
+  userId,
   title: "Full-time leadership search",
   description: "Search for senior engineering leadership roles.",
-  searchCategory: "full_time_leadership",
+  workspaceType: "full_time_leadership",
   status: "active",
   preferences: {
     targetTitles: ["Director of Engineering", "VP Engineering"],
@@ -38,63 +38,37 @@ export const workspaceExample: Workspace = {
     avoidKeywords: ["commission only"],
     notes: "Prioritize credible product and platform teams.",
   },
-  workspaceMetadata: {},
   aiContextSummary: "Candidate is targeting engineering leadership roles.",
   tags: ["leadership", "full-time"],
+  metadata: {},
   createdAt: now,
   updatedAt: now,
   archivedAt: null,
-  deletedAt: null,
 };
 
 export const opportunityExample: Opportunity = {
   contractVersion: CONTRACT_VERSION,
   id: opportunityId,
   workspaceId,
-  title: "Senior Platform Engineering Manager",
+  sourceType: "linkedin_manual",
+  sourceUrl: "https://example.com/jobs/123",
+  rawContent: "Example Systems is hiring a Senior Platform Engineering Manager...",
+  normalizedContent: {
+    description: "Lead platform engineering teams and improve delivery systems.",
+    responsibilities: ["Lead platform teams", "Improve engineering delivery"],
+    requirements: ["Engineering management", "Cloud platforms"],
+    skills: ["Python", "PostgreSQL", "AWS"],
+    seniority: "senior",
+    notes: "Parsed from manually supplied job posting content.",
+  },
   company: {
     name: "Example Systems",
     websiteUrl: "https://example.com",
     industry: "SaaS",
     notes: null,
   },
-  source: {
-    sourceType: "linkedin_manual",
-    sourceName: "LinkedIn manual paste",
-    sourceUrl: "https://example.com/jobs/123",
-    externalId: null,
-    ingestionMethod: "ai_parse",
-    ingestionTimestamp: now,
-    parserVersion: "role_parser_v1",
-    rawContentHash: "sha256:role-content",
-    warnings: [],
-  },
-  rawSourceContent: "Example Systems is hiring a Senior Platform Engineering Manager...",
-  normalizedContent: {
-    title: "Senior Platform Engineering Manager",
-    companyName: "Example Systems",
-    description: "Lead platform engineering teams and improve delivery systems.",
-    responsibilities: ["Lead platform teams", "Improve engineering delivery"],
-    requirements: ["Engineering management", "Cloud platforms"],
-    skills: ["Python", "PostgreSQL", "AWS"],
-    seniority: "senior",
-    employmentType: "full_time",
-    remoteType: "hybrid",
-    location: {
-      label: "Chicago, IL",
-      city: "Chicago",
-      region: "IL",
-      country: "US",
-      timezone: "America/Chicago",
-    },
-    compensation: {
-      min: 170000,
-      max: 220000,
-      currency: "USD",
-      period: "annual",
-      sourceText: "$170k-$220k",
-    },
-  },
+  title: "Senior Platform Engineering Manager",
+  employmentType: "full_time",
   compensation: {
     min: 170000,
     max: 220000,
@@ -109,21 +83,13 @@ export const opportunityExample: Opportunity = {
     country: "US",
     timezone: "America/Chicago",
   },
-  remoteType: "hybrid",
-  employmentType: "full_time",
-  ingestionTimestamp: now,
+  remoteMode: "hybrid",
   parseConfidence: { title: 0.96, company: 0.94 },
-  aiNotes: "Parsed from manually supplied job posting content.",
   tags: ["platform", "leadership"],
-  roleStatus: "interested",
-  linkedEvaluationIds: [evaluationId],
-  linkedApplicationStateId: applicationStateId,
-  linkedArtifactIds: [resumeArtifactId, coverLetterArtifactId],
-  opportunityMetadata: {},
+  status: "interested",
+  metadata: {},
   createdAt: now,
   updatedAt: now,
-  archivedAt: null,
-  deletedAt: null,
 };
 
 export const strideEvaluationExample: StrideEvaluation = {
@@ -131,7 +97,7 @@ export const strideEvaluationExample: StrideEvaluation = {
   id: evaluationId,
   workspaceId,
   opportunityId,
-  evaluationVersion: {
+  version: {
     version: "stride_evaluation_v1",
     previousVersion: null,
     changeReason: "Initial canonical evaluation contract.",
@@ -163,7 +129,7 @@ export const strideEvaluationExample: StrideEvaluation = {
     evidence: ["$170k-$220k"],
     score: 80,
   },
-  recommendation: {
+  recommendations: {
     decision: "apply",
     rationale: "The role has enough alignment to justify applying after review.",
     nextActions: ["Review hybrid expectations", "Tailor resume to platform leadership"],
@@ -193,24 +159,25 @@ export const strideEvaluationExample: StrideEvaluation = {
     sourceHashes: { resume: "sha256:resume-source" },
     deterministicBaseline: { score: 78 },
   },
-  evaluatedAt: now,
-  evaluationMetadata: {},
+  metadata: {},
   createdAt: now,
   updatedAt: now,
-  archivedAt: null,
-  deletedAt: null,
 };
 
 export const resumeArtifactExample: ResumeArtifact = {
   contractVersion: CONTRACT_VERSION,
   id: resumeArtifactId,
   workspaceId,
-  sourceResumeId: null,
-  targetOpportunityId: opportunityId,
+  opportunityId,
+  sourceArtifactId: null,
   artifactType: "tailored_resume",
-  sourceType: "generated",
   title: "Example Systems tailored resume",
   content: "Resume content prepared for Example Systems.",
+  formatMetadata: {
+    primaryFormat: "md",
+    availableFormats: ["md", "pdf", "docx"],
+    contentHash: "sha256:resume-artifact",
+  },
   generationMetadata: {
     generatedBy: "ai",
     modelMetadata: strideEvaluationExample.modelMetadata,
@@ -219,7 +186,7 @@ export const resumeArtifactExample: ResumeArtifact = {
     groundingSourceIds: [],
     warnings: [],
   },
-  exportFormats: [{ format: "pdf", exportedAt: null, fileName: null, contentHash: null }],
+  exportMetadata: [{ format: "pdf", exportedAt: null, fileName: null, contentHash: null }],
   revision: {
     revisionId: "88888888-8888-4888-8888-888888888888",
     parentArtifactId: null,
@@ -230,20 +197,16 @@ export const resumeArtifactExample: ResumeArtifact = {
   uploadMetadata: null,
   parsingMetadata: null,
   tailoringNotes: "Emphasize platform leadership.",
-  status: "draft",
-  exportedAt: null,
-  artifactMetadata: {},
+  metadata: {},
   createdAt: now,
   updatedAt: now,
-  archivedAt: null,
-  deletedAt: null,
 };
 
 export const coverLetterArtifactExample: CoverLetterArtifact = {
   contractVersion: CONTRACT_VERSION,
   id: coverLetterArtifactId,
   workspaceId,
-  targetOpportunityId: opportunityId,
+  opportunityId,
   title: "Example Systems cover letter",
   content: "Cover letter content prepared for Example Systems.",
   tone: "direct",
@@ -256,7 +219,7 @@ export const coverLetterArtifactExample: CoverLetterArtifact = {
     warnings: [],
   },
   editHistory: [{ editedAt: now, editedBy: "user", summary: "Reviewed opening paragraph." }],
-  exportFormats: [{ format: "docx", exportedAt: null, fileName: null, contentHash: null }],
+  exportMetadata: [{ format: "docx", exportedAt: null, fileName: null, contentHash: null }],
   revision: {
     revisionId: "99999999-9999-4999-8999-999999999999",
     parentArtifactId: null,
@@ -264,13 +227,9 @@ export const coverLetterArtifactExample: CoverLetterArtifact = {
     changeSummary: "Initial cover letter artifact.",
     createdAt: now,
   },
-  status: "draft",
-  exportedAt: null,
-  artifactMetadata: {},
+  metadata: {},
   createdAt: now,
   updatedAt: now,
-  archivedAt: null,
-  deletedAt: null,
 };
 
 export const applicationStateExample: ApplicationState = {
@@ -284,7 +243,7 @@ export const applicationStateExample: ApplicationState = {
       state: "discovered",
       changedAt: now,
       changedBy: "user",
-      reason: "Role pasted into Careero.",
+      reason: "Opportunity pasted into Careero.",
       metadata: {},
     },
     {
@@ -312,13 +271,10 @@ export const applicationStateExample: ApplicationState = {
       body: "Review hybrid expectations before applying.",
     },
   ],
-  interviewStages: [],
   externalLinks: [{ label: "Job posting", url: "https://example.com/jobs/123", type: "posting" }],
-  applicationMetadata: {},
+  metadata: {},
   createdAt: now,
   updatedAt: now,
-  archivedAt: null,
-  deletedAt: null,
 };
 
 export const canonicalExamples = {

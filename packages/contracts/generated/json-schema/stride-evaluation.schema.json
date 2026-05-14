@@ -15,26 +15,6 @@
         "updatedAt": {
           "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
         },
-        "archivedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "deletedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "id": {
           "type": "string",
           "format": "uuid"
@@ -45,7 +25,7 @@
         "opportunityId": {
           "$ref": "#/definitions/StrideEvaluation/properties/id"
         },
-        "evaluationVersion": {
+        "version": {
           "type": "object",
           "properties": {
             "version": {
@@ -328,7 +308,7 @@
           ],
           "additionalProperties": false
         },
-        "recommendation": {
+        "recommendations": {
           "anyOf": [
             {
               "type": "object",
@@ -562,17 +542,7 @@
           ],
           "additionalProperties": false
         },
-        "evaluatedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "evaluationMetadata": {
+        "metadata": {
           "type": "object",
           "additionalProperties": {}
         }
@@ -581,24 +551,21 @@
         "contractVersion",
         "createdAt",
         "updatedAt",
-        "archivedAt",
-        "deletedAt",
         "id",
         "workspaceId",
         "opportunityId",
-        "evaluationVersion",
+        "version",
         "status",
         "modelMetadata",
         "summary",
         "overallScore",
         "atsFindings",
         "compensationFindings",
-        "recommendation",
+        "recommendations",
         "confidence",
         "sections",
         "reproducibility",
-        "evaluatedAt",
-        "evaluationMetadata"
+        "metadata"
       ],
       "additionalProperties": false
     }

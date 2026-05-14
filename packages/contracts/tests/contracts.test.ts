@@ -6,10 +6,14 @@ import { describe, expect, it } from "vitest";
 import {
   ApplicationStateSchema,
   CONTRACT_VERSION,
+  MoneySchema,
   OpportunitySchema,
+  StrideEvaluationSchema,
   WorkspaceSchema,
   canonicalExamples,
   canonicalSchemaRegistry,
+  parseWorkspace,
+  validateWorkspace,
 } from "../src/index.js";
 
 describe("canonical contract examples", () => {
@@ -47,10 +51,59 @@ describe("canonical contract validation", () => {
     expect(OpportunitySchema.safeParse(invalid).success).toBe(false);
   });
 
+  it("requires version fields for STRIDE evaluations", () => {
+    const invalid = { ...canonicalExamples.StrideEvaluation };
+    delete (invalid as Partial<typeof invalid>).version;
+
+    expect(StrideEvaluationSchema.safeParse(invalid).success).toBe(false);
+  });
+
   it("requires state history for application state", () => {
     const invalid = { ...canonicalExamples.ApplicationState, stateHistory: [] };
 
     expect(ApplicationStateSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it("rejects invalid timestamp formats", () => {
+    const invalid = { ...canonicalExamples.Workspace, createdAt: "May 13, 2026" };
+
+    expect(WorkspaceSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it("rejects compensation ranges where min is greater than max", () => {
+    const result = MoneySchema.safeParse({
+      min: 240000,
+      max: 180000,
+      currency: "USD",
+      period: "annual",
+      sourceText: "$240k-$180k",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("contract validation helpers", () => {
+  it("returns parsed data for valid objects", () => {
+    const result = validateWorkspace(canonicalExamples.Workspace);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.id).toBe(canonicalExamples.Workspace.id);
+    }
+  });
+
+  it("returns validation issues for invalid objects", () => {
+    const result = validateWorkspace({ ...canonicalExamples.Workspace, status: "running" });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.issues.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("throws through entity parse helpers for invalid objects", () => {
+    expect(() => parseWorkspace({ ...canonicalExamples.Workspace, status: "running" })).toThrow();
   });
 });
 

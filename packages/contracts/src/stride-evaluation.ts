@@ -6,13 +6,12 @@ import {
   RecommendationSchema,
 } from "./enums.js";
 import {
-  AuditTimestampsSchema,
   ContractEnvelopeSchema,
   IdSchema,
-  IsoDateTimeSchema,
   MetadataSchema,
   ModelMetadataSchema,
   ScoredTextSchema,
+  TimestampFieldsSchema,
   VersionMetadataSchema,
 } from "./primitives.js";
 
@@ -39,7 +38,7 @@ export const CompensationFindingsSchema = z.object({
   score: z.number().min(0).max(100).nullable(),
 });
 
-export const EvaluationRecommendationSchema = z.object({
+export const EvaluationRecommendationsSchema = z.object({
   decision: RecommendationSchema,
   rationale: z.string().min(1),
   nextActions: z.array(z.string()).default([]),
@@ -61,11 +60,11 @@ export const EvaluationReproducibilitySchema = z.object({
   deterministicBaseline: z.record(z.unknown()).nullable(),
 });
 
-export const StrideEvaluationSchema = ContractEnvelopeSchema.merge(AuditTimestampsSchema).extend({
+export const StrideEvaluationSchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
   id: IdSchema,
   workspaceId: IdSchema,
   opportunityId: IdSchema,
-  evaluationVersion: VersionMetadataSchema,
+  version: VersionMetadataSchema,
   status: EvaluationStatusSchema,
   modelMetadata: ModelMetadataSchema,
   summary: z.string().nullable(),
@@ -75,7 +74,7 @@ export const StrideEvaluationSchema = ContractEnvelopeSchema.merge(AuditTimestam
   risks: z.array(ScoredTextSchema).default([]),
   atsFindings: AtsFindingsSchema,
   compensationFindings: CompensationFindingsSchema,
-  recommendation: EvaluationRecommendationSchema.nullable(),
+  recommendations: EvaluationRecommendationsSchema.nullable(),
   confidence: EvaluationConfidenceSchema,
   sections: z.object({
     strategicFit: EvaluationSectionSchema,
@@ -89,8 +88,7 @@ export const StrideEvaluationSchema = ContractEnvelopeSchema.merge(AuditTimestam
   }),
   assumptions: z.array(z.string()).default([]),
   reproducibility: EvaluationReproducibilitySchema,
-  evaluatedAt: IsoDateTimeSchema.nullable(),
-  evaluationMetadata: MetadataSchema,
+  metadata: MetadataSchema,
 });
 
 export type EvaluationSection = z.infer<typeof EvaluationSectionSchema>;

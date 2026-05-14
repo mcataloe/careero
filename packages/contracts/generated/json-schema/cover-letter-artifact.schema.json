@@ -15,26 +15,6 @@
         "updatedAt": {
           "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
         },
-        "archivedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "deletedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "id": {
           "type": "string",
           "format": "uuid"
@@ -42,8 +22,15 @@
         "workspaceId": {
           "$ref": "#/definitions/CoverLetterArtifact/properties/id"
         },
-        "targetOpportunityId": {
-          "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+        "opportunityId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "title": {
           "type": "string",
@@ -228,7 +215,7 @@
           },
           "default": []
         },
-        "exportFormats": {
+        "exportMetadata": {
           "type": "array",
           "items": {
             "type": "object",
@@ -315,27 +302,7 @@
           ],
           "additionalProperties": false
         },
-        "status": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "reviewed",
-            "approved",
-            "exported",
-            "archived"
-          ]
-        },
-        "exportedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "artifactMetadata": {
+        "metadata": {
           "type": "object",
           "additionalProperties": {}
         }
@@ -344,19 +311,15 @@
         "contractVersion",
         "createdAt",
         "updatedAt",
-        "archivedAt",
-        "deletedAt",
         "id",
         "workspaceId",
-        "targetOpportunityId",
+        "opportunityId",
         "title",
         "content",
         "tone",
         "generationMetadata",
         "revision",
-        "status",
-        "exportedAt",
-        "artifactMetadata"
+        "metadata"
       ],
       "additionalProperties": false
     }

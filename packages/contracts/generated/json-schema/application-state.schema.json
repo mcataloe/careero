@@ -15,26 +15,6 @@
         "updatedAt": {
           "$ref": "#/definitions/ApplicationState/properties/createdAt"
         },
-        "archivedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ApplicationState/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "deletedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ApplicationState/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "id": {
           "type": "string",
           "format": "uuid"
@@ -174,122 +154,41 @@
           },
           "default": []
         },
-        "interviewStages": {
+        "externalLinks": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "$ref": "#/definitions/ApplicationState/properties/id"
-              },
-              "stageType": {
-                "type": "string",
-                "enum": [
-                  "recruiter_screen",
-                  "hiring_manager",
-                  "technical",
-                  "panel",
-                  "onsite",
-                  "offer",
-                  "other"
-                ]
-              },
-              "title": {
+              "label": {
                 "type": "string",
                 "minLength": 1
               },
-              "status": {
+              "url": {
                 "type": "string",
-                "enum": [
-                  "scheduled",
-                  "completed",
-                  "cancelled",
-                  "pending",
-                  "declined"
-                ]
+                "format": "uri"
               },
-              "scheduledAt": {
+              "type": {
                 "anyOf": [
                   {
-                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
+                    "type": "string",
+                    "minLength": 1
                   },
                   {
                     "type": "null"
                   }
                 ]
-              },
-              "completedAt": {
-                "anyOf": [
-                  {
-                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "notes": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "externalLinks": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "label": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "url": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "label",
-                    "url",
-                    "type"
-                  ],
-                  "additionalProperties": false
-                },
-                "default": []
               }
             },
             "required": [
-              "id",
-              "stageType",
-              "title",
-              "status",
-              "scheduledAt",
-              "completedAt",
-              "notes"
+              "label",
+              "url",
+              "type"
             ],
             "additionalProperties": false
           },
           "default": []
         },
-        "externalLinks": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ApplicationState/properties/interviewStages/items/properties/externalLinks/items"
-          },
-          "default": []
-        },
-        "applicationMetadata": {
+        "metadata": {
           "$ref": "#/definitions/ApplicationState/properties/stateHistory/items/properties/metadata"
         }
       },
@@ -297,14 +196,12 @@
         "contractVersion",
         "createdAt",
         "updatedAt",
-        "archivedAt",
-        "deletedAt",
         "id",
         "workspaceId",
         "opportunityId",
         "currentState",
         "stateHistory",
-        "applicationMetadata"
+        "metadata"
       ],
       "additionalProperties": false
     }

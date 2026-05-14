@@ -1,19 +1,17 @@
 import { z } from "zod";
 
 import {
-  ArtifactLifecycleStatusSchema,
-  ArtifactSourceTypeSchema,
   CoverLetterToneSchema,
   ExportFormatSchema,
   ResumeArtifactTypeSchema,
 } from "./enums.js";
 import {
-  AuditTimestampsSchema,
   ContractEnvelopeSchema,
   IdSchema,
   IsoDateTimeSchema,
   MetadataSchema,
   ModelMetadataSchema,
+  TimestampFieldsSchema,
 } from "./primitives.js";
 
 export const ArtifactGenerationMetadataSchema = z.object({
@@ -54,24 +52,28 @@ export const ArtifactParsingMetadataSchema = z.object({
   warnings: z.array(z.string()).default([]),
 });
 
-export const ResumeArtifactSchema = ContractEnvelopeSchema.merge(AuditTimestampsSchema).extend({
+export const FormatMetadataSchema = z.object({
+  primaryFormat: ExportFormatSchema,
+  availableFormats: z.array(ExportFormatSchema).default([]),
+  contentHash: z.string().nullable(),
+});
+
+export const ResumeArtifactSchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
   id: IdSchema,
   workspaceId: IdSchema,
-  sourceResumeId: IdSchema.nullable(),
-  targetOpportunityId: IdSchema.nullable(),
+  opportunityId: IdSchema.nullable(),
+  sourceArtifactId: IdSchema.nullable(),
   artifactType: ResumeArtifactTypeSchema,
-  sourceType: ArtifactSourceTypeSchema,
   title: z.string().min(1),
   content: z.string().min(1),
+  formatMetadata: FormatMetadataSchema,
   generationMetadata: ArtifactGenerationMetadataSchema,
-  exportFormats: z.array(ArtifactExportSchema).default([]),
+  exportMetadata: z.array(ArtifactExportSchema).default([]),
   revision: ArtifactRevisionSchema,
   uploadMetadata: ArtifactUploadMetadataSchema.nullable(),
   parsingMetadata: ArtifactParsingMetadataSchema.nullable(),
   tailoringNotes: z.string().nullable(),
-  status: ArtifactLifecycleStatusSchema,
-  exportedAt: IsoDateTimeSchema.nullable(),
-  artifactMetadata: MetadataSchema,
+  metadata: MetadataSchema,
 });
 
 export const CoverLetterEditHistoryEntrySchema = z.object({
@@ -80,20 +82,18 @@ export const CoverLetterEditHistoryEntrySchema = z.object({
   summary: z.string().nullable(),
 });
 
-export const CoverLetterArtifactSchema = ContractEnvelopeSchema.merge(AuditTimestampsSchema).extend({
+export const CoverLetterArtifactSchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
   id: IdSchema,
   workspaceId: IdSchema,
-  targetOpportunityId: IdSchema,
+  opportunityId: IdSchema.nullable(),
   title: z.string().min(1),
   content: z.string().min(1),
   tone: CoverLetterToneSchema,
   generationMetadata: ArtifactGenerationMetadataSchema,
   editHistory: z.array(CoverLetterEditHistoryEntrySchema).default([]),
-  exportFormats: z.array(ArtifactExportSchema).default([]),
+  exportMetadata: z.array(ArtifactExportSchema).default([]),
   revision: ArtifactRevisionSchema,
-  status: ArtifactLifecycleStatusSchema,
-  exportedAt: IsoDateTimeSchema.nullable(),
-  artifactMetadata: MetadataSchema,
+  metadata: MetadataSchema,
 });
 
 export type ResumeArtifact = z.infer<typeof ResumeArtifactSchema>;

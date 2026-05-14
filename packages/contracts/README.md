@@ -8,6 +8,7 @@ This package is additive and future-facing. Current backend and frontend runtime
 
 - Zod schemas for canonical entities.
 - TypeScript types inferred from those schemas.
+- Validation helpers for generic and entity-specific parsing.
 - Example fixtures for each entity.
 - Generated JSON Schema files for Python/backend validation and AI structured outputs.
 
@@ -30,6 +31,8 @@ npm run generate:json-schema
 ```
 
 Generated JSON Schema files are written to `generated/json-schema/`.
+
+TypeScript consumers import from `@careero/contracts`. Python/backend consumers should use the generated JSON Schema files; the backend should not import TypeScript directly.
 
 ## Contract Version
 

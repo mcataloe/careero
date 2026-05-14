@@ -25,21 +25,11 @@
             }
           ]
         },
-        "deletedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Workspace/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "id": {
           "type": "string",
           "format": "uuid"
         },
-        "ownerUserId": {
+        "userId": {
           "$ref": "#/definitions/Workspace/properties/id"
         },
         "title": {
@@ -53,7 +43,7 @@
             "null"
           ]
         },
-        "searchCategory": {
+        "workspaceType": {
           "type": "string",
           "enum": [
             "full_time_leadership",
@@ -219,10 +209,6 @@
           ],
           "additionalProperties": false
         },
-        "workspaceMetadata": {
-          "type": "object",
-          "additionalProperties": {}
-        },
         "aiContextSummary": {
           "type": [
             "string",
@@ -237,6 +223,10 @@
             "maxLength": 80
           },
           "default": []
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
         }
       },
       "required": [
@@ -244,16 +234,15 @@
         "createdAt",
         "updatedAt",
         "archivedAt",
-        "deletedAt",
         "id",
-        "ownerUserId",
+        "userId",
         "title",
         "description",
-        "searchCategory",
+        "workspaceType",
         "status",
         "preferences",
-        "workspaceMetadata",
-        "aiContextSummary"
+        "aiContextSummary",
+        "metadata"
       ],
       "additionalProperties": false
     }

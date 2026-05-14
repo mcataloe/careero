@@ -7,13 +7,12 @@ import {
   RemoteTypeSchema,
 } from "./enums.js";
 import {
-  AuditTimestampsSchema,
   ContractEnvelopeSchema,
   IdSchema,
-  IsoDateTimeSchema,
   MetadataSchema,
   MoneySchema,
   TagsSchema,
+  TimestampFieldsSchema,
   UrlSchema,
 } from "./primitives.js";
 
@@ -32,57 +31,35 @@ export const OpportunityLocationSchema = z.object({
   timezone: z.string().nullable(),
 });
 
-export const OpportunityProvenanceSchema = z.object({
-  sourceType: OpportunitySourceTypeSchema,
-  sourceName: z.string().nullable(),
-  sourceUrl: UrlSchema.nullable(),
-  externalId: z.string().nullable(),
-  ingestionMethod: z.enum(["manual", "ai_parse", "import", "connector"]).default("manual"),
-  ingestionTimestamp: IsoDateTimeSchema,
-  parserVersion: z.string().nullable(),
-  rawContentHash: z.string().nullable(),
-  warnings: z.array(z.string()).default([]),
-});
-
 export const OpportunityNormalizedContentSchema = z.object({
-  title: z.string().min(1),
-  companyName: z.string().min(1),
   description: z.string().nullable(),
   responsibilities: z.array(z.string()).default([]),
   requirements: z.array(z.string()).default([]),
   skills: z.array(z.string()).default([]),
   seniority: z.string().nullable(),
-  employmentType: EmploymentTypeSchema,
-  remoteType: RemoteTypeSchema,
-  location: OpportunityLocationSchema,
-  compensation: MoneySchema.nullable(),
+  notes: z.string().nullable(),
 });
 
-export const OpportunitySchema = ContractEnvelopeSchema.merge(AuditTimestampsSchema).extend({
+export const OpportunitySchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
   id: IdSchema,
   workspaceId: IdSchema,
-  title: z.string().min(1).max(240),
-  company: OpportunityCompanySchema,
-  source: OpportunityProvenanceSchema,
-  rawSourceContent: z.string().nullable(),
+  sourceType: OpportunitySourceTypeSchema,
+  sourceUrl: UrlSchema.nullable(),
+  rawContent: z.string().nullable(),
   normalizedContent: OpportunityNormalizedContentSchema,
+  company: OpportunityCompanySchema,
+  title: z.string().min(1).max(240),
+  employmentType: EmploymentTypeSchema,
   compensation: MoneySchema.nullable(),
   location: OpportunityLocationSchema,
-  remoteType: RemoteTypeSchema,
-  employmentType: EmploymentTypeSchema,
-  ingestionTimestamp: IsoDateTimeSchema,
+  remoteMode: RemoteTypeSchema,
   parseConfidence: z.record(z.number().min(0).max(1)).default({}),
-  aiNotes: z.string().nullable(),
   tags: TagsSchema,
-  roleStatus: OpportunityStatusSchema,
-  linkedEvaluationIds: z.array(IdSchema).default([]),
-  linkedApplicationStateId: IdSchema.nullable(),
-  linkedArtifactIds: z.array(IdSchema).default([]),
-  opportunityMetadata: MetadataSchema,
+  status: OpportunityStatusSchema,
+  metadata: MetadataSchema,
 });
 
 export type OpportunityCompany = z.infer<typeof OpportunityCompanySchema>;
 export type OpportunityLocation = z.infer<typeof OpportunityLocationSchema>;
-export type OpportunityProvenance = z.infer<typeof OpportunityProvenanceSchema>;
 export type OpportunityNormalizedContent = z.infer<typeof OpportunityNormalizedContentSchema>;
 export type Opportunity = z.infer<typeof OpportunitySchema>;

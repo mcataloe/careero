@@ -15,26 +15,6 @@
         "updatedAt": {
           "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
         },
-        "archivedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "deletedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "id": {
           "type": "string",
           "format": "uuid"
@@ -42,7 +22,7 @@
         "workspaceId": {
           "$ref": "#/definitions/ResumeArtifact/properties/id"
         },
-        "sourceResumeId": {
+        "opportunityId": {
           "anyOf": [
             {
               "$ref": "#/definitions/ResumeArtifact/properties/id"
@@ -52,7 +32,7 @@
             }
           ]
         },
-        "targetOpportunityId": {
+        "sourceArtifactId": {
           "anyOf": [
             {
               "$ref": "#/definitions/ResumeArtifact/properties/id"
@@ -72,15 +52,6 @@
             "uploaded_resume"
           ]
         },
-        "sourceType": {
-          "type": "string",
-          "enum": [
-            "uploaded",
-            "generated",
-            "imported",
-            "manual"
-          ]
-        },
         "title": {
           "type": "string",
           "minLength": 1
@@ -88,6 +59,39 @@
         "content": {
           "type": "string",
           "minLength": 1
+        },
+        "formatMetadata": {
+          "type": "object",
+          "properties": {
+            "primaryFormat": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "docx",
+                "md",
+                "txt",
+                "html"
+              ]
+            },
+            "availableFormats": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResumeArtifact/properties/formatMetadata/properties/primaryFormat"
+              },
+              "default": []
+            },
+            "contentHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "primaryFormat",
+            "contentHash"
+          ],
+          "additionalProperties": false
         },
         "generationMetadata": {
           "type": "object",
@@ -221,20 +225,13 @@
           ],
           "additionalProperties": false
         },
-        "exportFormats": {
+        "exportMetadata": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "format": {
-                "type": "string",
-                "enum": [
-                  "pdf",
-                  "docx",
-                  "md",
-                  "txt",
-                  "html"
-                ]
+                "$ref": "#/definitions/ResumeArtifact/properties/formatMetadata/properties/primaryFormat"
               },
               "exportedAt": {
                 "anyOf": [
@@ -413,27 +410,7 @@
             "null"
           ]
         },
-        "status": {
-          "type": "string",
-          "enum": [
-            "draft",
-            "reviewed",
-            "approved",
-            "exported",
-            "archived"
-          ]
-        },
-        "exportedAt": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ResumeArtifact/properties/createdAt"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "artifactMetadata": {
+        "metadata": {
           "type": "object",
           "additionalProperties": {}
         }
@@ -442,24 +419,20 @@
         "contractVersion",
         "createdAt",
         "updatedAt",
-        "archivedAt",
-        "deletedAt",
         "id",
         "workspaceId",
-        "sourceResumeId",
-        "targetOpportunityId",
+        "opportunityId",
+        "sourceArtifactId",
         "artifactType",
-        "sourceType",
         "title",
         "content",
+        "formatMetadata",
         "generationMetadata",
         "revision",
         "uploadMetadata",
         "parsingMetadata",
         "tailoringNotes",
-        "status",
-        "exportedAt",
-        "artifactMetadata"
+        "metadata"
       ],
       "additionalProperties": false
     }

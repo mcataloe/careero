@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { WorkspaceSearchCategorySchema, WorkspaceStatusSchema } from "./enums.js";
 import {
-  AuditTimestampsSchema,
+  ArchivableTimestampFieldsSchema,
   ContractEnvelopeSchema,
   IdSchema,
   MetadataSchema,
@@ -21,17 +21,17 @@ export const WorkspacePreferencesSchema = z.object({
   notes: z.string().nullable(),
 });
 
-export const WorkspaceSchema = ContractEnvelopeSchema.merge(AuditTimestampsSchema).extend({
+export const WorkspaceSchema = ContractEnvelopeSchema.merge(ArchivableTimestampFieldsSchema).extend({
   id: IdSchema,
-  ownerUserId: IdSchema,
+  userId: IdSchema,
   title: z.string().min(1).max(160),
   description: z.string().nullable(),
-  searchCategory: WorkspaceSearchCategorySchema,
+  workspaceType: WorkspaceSearchCategorySchema,
   status: WorkspaceStatusSchema,
   preferences: WorkspacePreferencesSchema,
-  workspaceMetadata: MetadataSchema,
   aiContextSummary: z.string().nullable(),
   tags: TagsSchema,
+  metadata: MetadataSchema,
 });
 
 export type WorkspacePreferences = z.infer<typeof WorkspacePreferencesSchema>;
