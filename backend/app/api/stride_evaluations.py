@@ -14,6 +14,7 @@ from app.services.stride_evaluations import (
     StrideEvaluationRoleNotFoundError,
     StrideEvaluationSeedMissingError,
     StrideEvaluationService,
+    StrideEvaluationWorkspaceInactiveError,
 )
 
 router = APIRouter(tags=["stride-evaluations"])
@@ -46,6 +47,8 @@ def create_stride_evaluation(
         return result.evaluation
     except StrideEvaluationRoleNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except StrideEvaluationWorkspaceInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except StrideEvaluationSeedMissingError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 

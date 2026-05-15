@@ -226,7 +226,7 @@ npm run validate
 
 ## Current Boundaries
 
-Layer 2 is local-first and evaluation-focused only. It does not include authentication, tenants, workspace persistence/runtime switching, billing, cloud deployment, automated discovery, resume or cover letter generation, application packets, or automated application submission.
+Layer 2 is local-first and evaluation-focused only. Later layers add workspace-aware artifact generation, but the app still does not include authentication, tenants, frontend workspace switching, billing, cloud deployment, automated discovery, application packets, or automated application submission.
 
 ## Layer 2 Completion
 

@@ -30,8 +30,10 @@ def build_cover_letter_artifact_prompt(
     tone: str,
     evaluation: StrideEvaluation | None = None,
     source_version: ResumeSourceVersion | None = None,
+    workspace_context: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     payload = {
+        "workspace_context": workspace_context,
         "target_role": _role_payload(role),
         "stride_evaluation": _evaluation_payload(evaluation),
         "resume_source": _source_payload(source_version),

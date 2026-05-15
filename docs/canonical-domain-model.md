@@ -55,8 +55,8 @@ Responsibilities:
 
 Persistence guidance:
 
-- Future persistence should add a workspace table beneath `users`.
-- Current single-user ownership can map existing records into a default workspace during migration.
+- Backend persistence includes a workspace table beneath `users`.
+- Existing local records map into a default workspace during migration.
 - Do not overload user-level fields with workspace-specific preferences.
 
 Frontend guidance:
@@ -248,8 +248,8 @@ Current models remain operational. Future migration guidance:
 - Current `Application` maps toward `ApplicationState`.
 - Current `GeneratedArtifact` maps toward `ResumeArtifact` and `CoverLetterArtifact`.
 - Current `ResumeSource` and resume source versions map toward source inputs and lineage for `ResumeArtifact`.
-- Current single-user `user_id` ownership remains valid until workspace persistence is implemented.
-- A future default workspace can backfill existing local records without introducing tenants or workspaces prematurely.
+- Current single-user `user_id` ownership remains valid alongside workspace ownership.
+- The default workspace backfills existing local records without introducing tenants.
 
 ## Contract Versioning Philosophy
 
@@ -273,6 +273,6 @@ Recommended tests:
 
 ## Backlog Notes
 
-- Add workspace persistence after current single-user local workflows remain stable.
+- Add frontend workspace switching after backend workspace-aware workflows remain stable.
 - Add profile fact extraction only after resume/profile source storage and grounding behavior are stable.
 - Add artifact generation only after evaluation outputs are reliable and auditable.

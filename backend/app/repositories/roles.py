@@ -14,6 +14,7 @@ class RoleRepository:
         self,
         *,
         user_id: uuid.UUID,
+        workspace_id: uuid.UUID,
         company_id: uuid.UUID,
         source_id: uuid.UUID | None,
         title: str,
@@ -32,6 +33,7 @@ class RoleRepository:
     ) -> Role:
         role = Role(
             user_id=user_id,
+            workspace_id=workspace_id,
             company_id=company_id,
             source_id=source_id,
             title=title,

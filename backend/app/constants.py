@@ -8,6 +8,22 @@ class RoleStatus(StrEnum):
     ARCHIVED = "archived"
 
 
+class WorkspaceStatus(StrEnum):
+    ACTIVE = "active"
+    PAUSED = "paused"
+    ARCHIVED = "archived"
+    COMPLETED = "completed"
+
+
+class WorkspaceType(StrEnum):
+    FULL_TIME_LEADERSHIP = "full_time_leadership"
+    FULL_TIME_INDIVIDUAL_CONTRIBUTOR = "full_time_individual_contributor"
+    CONTRACT_CONSULTING = "contract_consulting"
+    EXPLORATION = "exploration"
+    RELOCATION = "relocation"
+    OTHER = "other"
+
+
 class SourceType(StrEnum):
     MANUAL = "manual"
     LINKEDIN_MANUAL = "linkedin_manual"

@@ -16,6 +16,8 @@ from app.services.roles import (
     RoleDependencyNotFoundError,
     RoleNotFoundError,
     RoleSeedMissingError,
+    RoleWorkspaceInactiveError,
+    RoleWorkspaceNotFoundError,
     RoleService,
 )
 
@@ -37,8 +39,10 @@ def create_role(
 ):
     try:
         return service.create_role(payload)
-    except RoleDependencyNotFoundError as exc:
+    except (RoleDependencyNotFoundError, RoleWorkspaceNotFoundError) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except RoleWorkspaceInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except RoleSeedMissingError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 

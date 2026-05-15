@@ -65,11 +65,15 @@ def evaluation_input_hash(
     ruleset_version: str,
     ai_enabled: bool,
     model_name: str,
+    workspace_id: str | None = None,
+    workspace_context: dict[str, Any] | None = None,
 ) -> str:
     return _hash_payload(
         {
             "role_content_hash": role_hash,
             "source_hash": source_hash,
+            "workspace_id": workspace_id,
+            "workspace_context": workspace_context or {},
             "user_notes": user_notes,
             "user_context": user_context,
             "prompt_version": prompt_version,

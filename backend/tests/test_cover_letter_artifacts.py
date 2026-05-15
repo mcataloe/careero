@@ -16,7 +16,8 @@ from app.schemas.cover_letter_artifacts import CoverLetterArtifactGenerateReques
 from app.schemas.resume_sources import ResumeSourceCreate
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
 from app.schemas.stride_evaluations import StrideEvaluationCreate
-from app.seed import seed_local_data
+from app.schemas.workspaces import WorkspaceCreate
+from app.seed import DEFAULT_WORKSPACE_ID, seed_local_data
 from app.services.cover_letter_artifact_ai import (
     CoverLetterArtifactGenerationUnavailableError,
 )
@@ -25,13 +26,15 @@ from app.services.cover_letter_artifacts import (
     CoverLetterArtifactSourceNotFoundError,
     CoverLetterArtifactTruthfulnessError,
     CoverLetterArtifactValidationError,
+    CoverLetterArtifactWorkspaceMismatchError,
 )
 from app.services.resume_sources import ResumeSourceService
 from app.services.roles import RoleService
 from app.services.stride_evaluations import StrideEvaluationService
+from app.services.workspaces import WorkspaceService
 
 
-WORKSPACE_ID = UUID("22222222-2222-4222-8222-222222222222")
+WORKSPACE_ID = DEFAULT_WORKSPACE_ID
 
 
 class FakeCoverLetterGenerator:
@@ -181,6 +184,7 @@ def generate_artifact(
     evaluation_id: UUID | None = None,
     source_version_id: UUID | None = None,
     tone: str = "direct",
+    workspace_id: UUID = WORKSPACE_ID,
 ) -> dict[str, Any]:
     service = CoverLetterArtifactService(
         db_session,
@@ -190,7 +194,7 @@ def generate_artifact(
     return service.generate_for_role(
         role_id=role_id,
         payload=CoverLetterArtifactGenerateRequest(
-            workspace_id=WORKSPACE_ID,
+            workspace_id=workspace_id,
             evaluation_id=evaluation_id,
             source_version_id=source_version_id,
             tone=tone,
@@ -426,3 +430,20 @@ def test_invalid_role_or_explicit_evaluation_returns_404(
 
     assert missing_role_response.status_code == 404
     assert missing_evaluation_response.status_code == 404
+
+
+def test_role_workspace_mismatch_is_rejected(
+    seeded_session: Session,
+) -> None:
+    role = create_role(seeded_session)
+    create_source(seeded_session)
+    other_workspace = WorkspaceService(seeded_session).create_workspace(
+        WorkspaceCreate(title="Other active search")
+    )
+
+    with pytest.raises(CoverLetterArtifactWorkspaceMismatchError):
+        generate_artifact(
+            seeded_session,
+            role_id=role.id,
+            workspace_id=other_workspace.id,
+        )

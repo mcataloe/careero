@@ -19,6 +19,7 @@ class StrideEvaluationResponse(BaseModel):
 
     id: uuid.UUID
     user_id: uuid.UUID
+    workspace_id: uuid.UUID
     role_id: uuid.UUID
     evaluation_status: StrideEvaluationStatus
     overall_score: Decimal | None

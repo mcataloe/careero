@@ -63,6 +63,7 @@ class RoleBase(BaseModel):
 
 
 class RoleCreate(RoleBase):
+    workspace_id: uuid.UUID | None = None
     title: str = Field(min_length=1, max_length=255)
     company: CompanyLookup
     source: SourceLookup
@@ -110,6 +111,7 @@ class RoleResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    workspace_id: uuid.UUID
     title: str
     company_id: uuid.UUID
     source_id: uuid.UUID | None

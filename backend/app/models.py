@@ -58,6 +58,47 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
         back_populates="user"
     )
     resume_sources: Mapped[list["ResumeSource"]] = relationship(back_populates="user")
+    workspaces: Mapped[list["Workspace"]] = relationship(back_populates="user")
+
+
+class Workspace(TimestampMixin, Base):
+    __tablename__ = "workspaces"
+    __table_args__ = (
+        Index("ix_workspaces_user_id", "user_id"),
+        Index("ix_workspaces_status", "status"),
+        Index("ix_workspaces_user_status", "user_id", "status"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    workspace_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(100), nullable=False, default="active")
+    preferences: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    ai_context_summary: Mapped[str | None] = mapped_column(Text)
+    tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    workspace_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    user: Mapped[User] = relationship(back_populates="workspaces")
+    roles: Mapped[list["Role"]] = relationship(back_populates="workspace")
+    stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
+        back_populates="workspace"
+    )
 
 
 class Company(TimestampMixin, SoftDeleteMixin, Base):
@@ -86,6 +127,7 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "roles"
     __table_args__ = (
         Index("ix_roles_user_id", "user_id"),
+        Index("ix_roles_workspace_id", "workspace_id"),
         Index("ix_roles_company_id", "company_id"),
         Index("ix_roles_source_id", "source_id"),
         Index("ix_roles_status", "status"),
@@ -100,6 +142,11 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
         nullable=False,
     )
     company_id: Mapped[uuid.UUID] = mapped_column(
@@ -130,6 +177,7 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     date_posted: Mapped[date | None] = mapped_column(Date)
 
     user: Mapped[User] = relationship(back_populates="roles")
+    workspace: Mapped[Workspace] = relationship(back_populates="roles")
     company: Mapped[Company] = relationship(back_populates="roles")
     source: Mapped["JobSource | None"] = relationship(back_populates="roles")
     stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
@@ -228,6 +276,7 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "stride_evaluations"
     __table_args__ = (
         Index("ix_stride_evaluations_user_id", "user_id"),
+        Index("ix_stride_evaluations_workspace_id", "workspace_id"),
         Index("ix_stride_evaluations_role_id", "role_id"),
         Index("ix_stride_evaluations_status", "evaluation_status"),
         Index("ix_stride_evaluations_role_created_at", "role_id", "created_at"),
@@ -248,6 +297,11 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
         nullable=False,
     )
     role_id: Mapped[uuid.UUID] = mapped_column(
@@ -317,6 +371,7 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
     )
 
     user: Mapped[User] = relationship(back_populates="stride_evaluations")
+    workspace: Mapped[Workspace] = relationship(back_populates="stride_evaluations")
     role: Mapped[Role] = relationship(back_populates="stride_evaluations")
 
 
@@ -357,6 +412,7 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "generated_artifacts"
     __table_args__ = (
         Index("ix_generated_artifacts_user_id", "user_id"),
+        Index("ix_generated_artifacts_workspace_id", "workspace_id"),
         Index("ix_generated_artifacts_application_id", "application_id"),
         Index("ix_generated_artifacts_role_id", "role_id"),
     )
@@ -369,6 +425,11 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
         nullable=False,
     )
     application_id: Mapped[uuid.UUID | None] = mapped_column(

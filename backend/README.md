@@ -65,6 +65,7 @@ python -m app.seed
 ```
 
 The seed command is idempotent. It creates or updates `local-user@careero.local` and the canonical job sources: `manual`, `linkedin_manual`, `greenhouse`, `lever`, `ashby`, `workable`, and `other`.
+It also creates a default active workspace used by local workflows when no explicit workspace is supplied.
 
 ## Run
 
@@ -84,6 +85,66 @@ http://127.0.0.1:8000/health/database
 ## Role Intake API
 
 Role intake is manual-only in this phase. Paste role details discovered from LinkedIn or another source into Careero; the backend does not scrape LinkedIn, poll job boards, or call OpenAI.
+Roles belong to exactly one workspace. If `workspace_id` is omitted, Careero uses the seeded default active workspace.
+
+## Workspace API
+
+Workspaces scope career-search preferences, notes, tags, AI context summary, roles, evaluations, and generated artifacts. The local seed creates a default active workspace for compatibility with existing local flows.
+
+Create a workspace:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/workspaces `
+  -ContentType "application/json" `
+  -Body '{
+    "title": "Staff Engineer full-time search",
+    "workspace_type": "full_time_individual_contributor",
+    "preferences": {
+      "targetTitles": ["Staff Engineer"],
+      "preferredRemoteTypes": ["remote"],
+      "targetKeywords": ["python", "platform"],
+      "notes": "Prioritize senior IC platform roles."
+    },
+    "ai_context_summary": "Staff Engineer search focused on platform engineering.",
+    "tags": ["staff", "platform"],
+    "metadata": {
+      "contextPreferences": {
+        "employmentType": "full_time",
+        "preferredIndustries": ["SaaS"],
+        "preferredTechnologies": ["Python", "PostgreSQL"]
+      }
+    }
+  }'
+```
+
+List active workspaces:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/workspaces
+```
+
+Include archived and completed workspaces:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/api/workspaces?include_inactive=true"
+```
+
+Update, archive, and reactivate:
+
+```powershell
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/workspaces/{workspace_id} `
+  -ContentType "application/json" `
+  -Body '{ "status": "paused", "tags": ["staff", "paused"] }'
+
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/workspaces/{workspace_id}/archive
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/workspaces/{workspace_id}/reactivate
+```
+
+Archived and completed workspaces remain inspectable, but they are rejected for new roles, evaluations, and artifact generation.
 
 Create a role from a LinkedIn manual paste:
 
@@ -93,6 +154,7 @@ Invoke-RestMethod `
   -Uri http://127.0.0.1:8000/api/roles `
   -ContentType "application/json" `
   -Body '{
+    "workspace_id": "optional-workspace-uuid",
     "title": "Senior Backend Engineer",
     "company": {
       "name": "Example Company",
@@ -256,6 +318,8 @@ Only one resume source version can be active for the default local user. STRIDE 
 
 STRIDE evaluation support always starts with deterministic local rules. The deterministic score remains the canonical baseline. Optional OpenAI enrichment can add grounded structured analysis, but it does not replace the baseline score, infer resume facts, generate resumes or cover letters, scrape jobs, poll sources, or perform external research.
 
+STRIDE uses the target role's workspace context. Workspace preferences are merged into evaluation context, and explicit request `user_context` values override workspace defaults for that run. Workspace context is included in prompt metadata and the evaluation input hash so cache results do not bleed across searches.
+
 The first-pass dimensions are equally weighted:
 
 - strategic fit
@@ -395,7 +459,7 @@ The Layer 2 local flow does not add auth, automated discovery, cover letters, ge
 
 ## Resume Artifact Generation
 
-Resume artifact generation is optional and disabled by default. It creates a validated canonical `ResumeArtifact` draft for a supplied `workspace_id`, target role, STRIDE evaluation, and active or requested resume source version. It does not render resumes or export files.
+Resume artifact generation is optional and disabled by default. It creates a validated canonical `ResumeArtifact` draft for a supplied `workspace_id`, target role, STRIDE evaluation, and active or requested resume source version. The supplied workspace must exist, be active or paused, and own the target role. It does not render resumes or export files.
 
 Enable locally with:
 
@@ -425,7 +489,7 @@ The generated resume is stored in `generated_artifacts`, with the complete canon
 
 ## Cover Letter Artifact Generation
 
-Cover letter artifact generation is optional and disabled by default. It creates a validated canonical `CoverLetterArtifact` draft for a supplied `workspace_id` and target role. STRIDE evaluation and resume/profile source inputs are used when available, but missing evaluation or missing source does not block generation; the artifact records warnings in generation metadata.
+Cover letter artifact generation is optional and disabled by default. It creates a validated canonical `CoverLetterArtifact` draft for a supplied `workspace_id` and target role. The supplied workspace must exist, be active or paused, and own the target role. STRIDE evaluation and resume/profile source inputs are used when available, but missing evaluation or missing source does not block generation; the artifact records warnings in generation metadata.
 
 The default tone is `direct`, which maps to Careero's neutral, forward-looking professional standard for cold applications. Generated openings must avoid overly enthusiastic phrasing such as "I'm excited to apply."
 

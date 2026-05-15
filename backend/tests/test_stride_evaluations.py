@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.config import Settings, get_settings
 from app.database import get_db
 from app.main import create_app
-from app.models import ActivityLog, Company, Role, StrideEvaluation, User
+from app.models import ActivityLog, Company, Role, StrideEvaluation, User, Workspace
 from app.seed import DEFAULT_LOCAL_USER_ID, seed_local_data
 from app.schemas.stride_evaluations import StrideEvaluationCreate
 from app.services.stride_evaluations import StrideEvaluationService
@@ -88,8 +88,20 @@ def add_other_user_role(db_session: Session) -> Role:
     company = Company(user_id=user.id, name="Other Company")
     db_session.add(company)
     db_session.flush()
+    workspace = Workspace(
+        user_id=user.id,
+        title="Other Workspace",
+        workspace_type="full_time_individual_contributor",
+        status="active",
+        preferences={},
+        tags=[],
+        workspace_metadata={},
+    )
+    db_session.add(workspace)
+    db_session.flush()
     role = Role(
         user_id=user.id,
+        workspace_id=workspace.id,
         company_id=company.id,
         title="Wrong Scope Role",
         status="found",

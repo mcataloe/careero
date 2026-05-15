@@ -15,6 +15,9 @@ from app.services.resume_artifacts import (
     ResumeArtifactSourceNotFoundError,
     ResumeArtifactUnavailableError,
     ResumeArtifactValidationError,
+    ResumeArtifactWorkspaceInactiveError,
+    ResumeArtifactWorkspaceMismatchError,
+    ResumeArtifactWorkspaceNotFoundError,
 )
 
 router = APIRouter(tags=["resume-artifacts"])
@@ -40,6 +43,8 @@ def generate_resume_artifact(
         ResumeArtifactRoleNotFoundError,
         ResumeArtifactEvaluationNotFoundError,
         ResumeArtifactSourceNotFoundError,
+        ResumeArtifactWorkspaceMismatchError,
+        ResumeArtifactWorkspaceNotFoundError,
     ) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ResumeArtifactSeedMissingError as exc:
@@ -49,5 +54,7 @@ def generate_resume_artifact(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         )
+    except ResumeArtifactWorkspaceInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except (ResumeArtifactValidationError, ResumeArtifactProviderError) as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))

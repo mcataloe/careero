@@ -89,6 +89,7 @@ class OpenAIStrideEvaluator:
         payload: StrideEvaluationCreate,
         baseline: StrideRuleResult,
         active_resume_source: ResumeSourceVersion | None = None,
+        workspace_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not self.settings.enable_ai_evaluations:
             return self._skipped("AI evaluations are disabled", ai_enabled=False)
@@ -109,6 +110,7 @@ class OpenAIStrideEvaluator:
                 baseline=baseline,
                 user_notes=payload.user_notes,
                 user_context=payload.user_context,
+                workspace_context=workspace_context,
                 active_resume_source=active_resume_source,
             )
             response = client.responses.parse(

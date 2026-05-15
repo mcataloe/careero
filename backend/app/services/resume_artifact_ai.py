@@ -57,6 +57,7 @@ class OpenAIResumeArtifactGenerator:
         role: Role,
         evaluation: StrideEvaluation,
         source_version: ResumeSourceVersion,
+        workspace_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not self.settings.enable_ai_resume_generation:
             raise ResumeArtifactGenerationUnavailableError(
@@ -75,6 +76,7 @@ class OpenAIResumeArtifactGenerator:
                 role=role,
                 evaluation=evaluation,
                 source_version=source_version,
+                workspace_context=workspace_context,
             )
             response = client.responses.parse(
                 model=self.settings.openai_default_resume_generation_model,

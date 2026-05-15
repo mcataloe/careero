@@ -32,6 +32,12 @@ from app.services.cover_letter_artifact_ai import (
 )
 from app.services.cover_letter_artifact_prompt import PROMPT_VERSION
 from app.services.evaluation_hashing import resume_source_hash, role_content_hash
+from app.services.workspace_context import workspace_prompt_context
+from app.services.workspaces import (
+    WorkspaceInactiveError,
+    WorkspaceNotFoundError,
+    WorkspaceService,
+)
 
 
 class CoverLetterArtifactError(Exception):
@@ -51,6 +57,18 @@ class CoverLetterArtifactEvaluationNotFoundError(CoverLetterArtifactError):
 
 
 class CoverLetterArtifactSourceNotFoundError(CoverLetterArtifactError):
+    pass
+
+
+class CoverLetterArtifactWorkspaceNotFoundError(CoverLetterArtifactError):
+    pass
+
+
+class CoverLetterArtifactWorkspaceInactiveError(CoverLetterArtifactError):
+    pass
+
+
+class CoverLetterArtifactWorkspaceMismatchError(CoverLetterArtifactError):
     pass
 
 
@@ -101,9 +119,26 @@ class CoverLetterArtifactService:
         role = self._get_active_role(role_id=role_id, user_id=user.id)
         if role is None:
             raise CoverLetterArtifactRoleNotFoundError("Role not found")
+        try:
+            workspace = WorkspaceService(self.db).resolve_active_workspace(
+                user_id=user.id,
+                workspace_id=payload.workspace_id,
+            )
+        except WorkspaceNotFoundError as exc:
+            raise CoverLetterArtifactWorkspaceNotFoundError("Workspace not found") from exc
+        except WorkspaceInactiveError as exc:
+            raise CoverLetterArtifactWorkspaceInactiveError(
+                "Workspace is not active"
+            ) from exc
+        if role.workspace_id != workspace.id:
+            raise CoverLetterArtifactWorkspaceMismatchError(
+                "Role does not belong to workspace"
+            )
+        workspace_context = workspace_prompt_context(workspace)
 
         evaluation = self._get_evaluation(
             user_id=user.id,
+            workspace_id=workspace.id,
             role_id=role.id,
             evaluation_id=payload.evaluation_id,
         )
@@ -144,6 +179,7 @@ class CoverLetterArtifactService:
                 tone=payload.tone,
                 evaluation=evaluation,
                 source_version=source_version,
+                workspace_context=workspace_context,
             )
             artifact = self._build_artifact_contract(
                 artifact_id=artifact_id,
@@ -152,6 +188,7 @@ class CoverLetterArtifactService:
                 evaluation=evaluation,
                 source_version=source_version,
                 tone=payload.tone,
+                workspace_context=workspace_context,
                 ai_result=ai_result,
                 user_id=user.id,
             )
@@ -160,6 +197,7 @@ class CoverLetterArtifactService:
             persisted = GeneratedArtifact(
                 id=artifact_id,
                 user_id=user.id,
+                workspace_id=workspace.id,
                 role_id=role.id,
                 artifact_type="cover_letter",
                 title=artifact["title"],
@@ -243,6 +281,7 @@ class CoverLetterArtifactService:
         evaluation: StrideEvaluation | None,
         source_version: ResumeSourceVersion | None,
         tone: str,
+        workspace_context: dict[str, Any],
         ai_result: dict[str, Any],
         user_id: uuid.UUID,
     ) -> dict[str, Any]:
@@ -259,6 +298,7 @@ class CoverLetterArtifactService:
                 "role_content_hash": role_content_hash(role),
                 "source_hash": source_hash,
                 "evaluation_id": str(evaluation.id) if evaluation is not None else None,
+                "workspace_context": workspace_context,
                 "prompt_version": PROMPT_VERSION,
                 "model_name": ai_result["model"],
                 "tone": tone,
@@ -330,6 +370,7 @@ class CoverLetterArtifactService:
                 "generationStatus": ai_result.get("status"),
                 "toneStandard": "neutral_professional",
                 "contentHash": _prefixed_hash(output["content"]),
+                "workspace": workspace_context,
             },
             "createdAt": now,
             "updatedAt": now,
@@ -381,7 +422,11 @@ class CoverLetterArtifactService:
     def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
         return self.db.scalar(
             select(Role)
-            .options(joinedload(Role.company), joinedload(Role.source))
+            .options(
+                joinedload(Role.company),
+                joinedload(Role.source),
+                joinedload(Role.workspace),
+            )
             .where(
                 Role.id == role_id,
                 Role.user_id == user_id,
@@ -394,11 +439,13 @@ class CoverLetterArtifactService:
         self,
         *,
         user_id: uuid.UUID,
+        workspace_id: uuid.UUID,
         role_id: uuid.UUID,
         evaluation_id: uuid.UUID | None,
     ) -> StrideEvaluation | None:
         filters = [
             StrideEvaluation.user_id == user_id,
+            StrideEvaluation.workspace_id == workspace_id,
             StrideEvaluation.role_id == role_id,
             StrideEvaluation.deleted_at.is_(None),
         ]
@@ -445,19 +492,14 @@ class CoverLetterArtifactService:
             select(GeneratedArtifact)
             .where(
                 GeneratedArtifact.user_id == user_id,
+                GeneratedArtifact.workspace_id == workspace_id,
                 GeneratedArtifact.role_id == role_id,
                 GeneratedArtifact.artifact_type == "cover_letter",
                 GeneratedArtifact.deleted_at.is_(None),
             )
             .order_by(GeneratedArtifact.created_at.desc(), GeneratedArtifact.id.desc())
         )
-        for artifact in self.db.scalars(statement):
-            contract = artifact.artifact_metadata.get("contract")
-            if isinstance(contract, dict) and contract.get("workspaceId") == str(
-                workspace_id
-            ):
-                return artifact
-        return None
+        return self.db.scalar(statement)
 
     def _rollback_and_log_failure(
         self,

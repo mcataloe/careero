@@ -11,6 +11,11 @@ from app.repositories.roles import RoleRepository
 from app.schemas.roles import CompanyLookup, RoleCreate, RoleUpdate, SourceLookup
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.workspaces import (
+    WorkspaceInactiveError,
+    WorkspaceNotFoundError,
+    WorkspaceService,
+)
 
 
 class RoleIntakeError(Exception):
@@ -26,6 +31,14 @@ class RoleDependencyNotFoundError(RoleIntakeError):
 
 
 class RoleSeedMissingError(RoleIntakeError):
+    pass
+
+
+class RoleWorkspaceNotFoundError(RoleIntakeError):
+    pass
+
+
+class RoleWorkspaceInactiveError(RoleIntakeError):
     pass
 
 
@@ -45,7 +58,11 @@ class RoleService:
         user = self.get_default_user()
         statement = (
             select(Role)
-            .options(joinedload(Role.company), joinedload(Role.source))
+            .options(
+                joinedload(Role.company),
+                joinedload(Role.source),
+                joinedload(Role.workspace),
+            )
             .where(
                 Role.user_id == user.id,
                 Role.deleted_at.is_(None),
@@ -66,9 +83,19 @@ class RoleService:
         user = self.get_default_user()
         company = self._resolve_company(user_id=user.id, company=payload.company)
         source = self._resolve_source(user_id=user.id, source=payload.source)
+        try:
+            workspace = WorkspaceService(self.db).resolve_active_workspace(
+                user_id=user.id,
+                workspace_id=payload.workspace_id,
+            )
+        except WorkspaceNotFoundError as exc:
+            raise RoleWorkspaceNotFoundError("Workspace not found") from exc
+        except WorkspaceInactiveError as exc:
+            raise RoleWorkspaceInactiveError("Workspace is not active") from exc
 
         role = self.repository.create(
             user_id=user.id,
+            workspace_id=workspace.id,
             company_id=company.id,
             source_id=source.id,
             title=payload.title,
@@ -89,7 +116,7 @@ class RoleService:
             user_id=user.id,
             entity_id=role.id,
             action="role.created",
-            details={"title": role.title},
+            details={"title": role.title, "workspace_id": str(workspace.id)},
         )
         self.db.commit()
         return self._load_role(role.id, user.id)
@@ -164,7 +191,11 @@ class RoleService:
     def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
         statement = (
             select(Role)
-            .options(joinedload(Role.company), joinedload(Role.source))
+            .options(
+                joinedload(Role.company),
+                joinedload(Role.source),
+                joinedload(Role.workspace),
+            )
             .where(
                 Role.id == role_id,
                 Role.user_id == user_id,

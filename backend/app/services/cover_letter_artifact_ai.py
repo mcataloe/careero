@@ -63,6 +63,7 @@ class OpenAICoverLetterArtifactGenerator:
         tone: str,
         evaluation: StrideEvaluation | None = None,
         source_version: ResumeSourceVersion | None = None,
+        workspace_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not self.settings.enable_ai_cover_letter_generation:
             raise CoverLetterArtifactGenerationUnavailableError(
@@ -82,6 +83,7 @@ class OpenAICoverLetterArtifactGenerator:
                 tone=tone,
                 evaluation=evaluation,
                 source_version=source_version,
+                workspace_context=workspace_context,
             )
             response = client.responses.parse(
                 model=self.settings.openai_default_cover_letter_generation_model,

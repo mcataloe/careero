@@ -30,7 +30,8 @@ Recommendation thresholds:
 
 GROUNDING_INSTRUCTIONS = """
 Use only the role data, deterministic baseline, user context, and active resume
-source supplied in this request. Do not invent resume facts, user experience,
+source supplied in this request. Workspace context is scoped to this workspace
+only and must not be copied from other searches. Do not invent resume facts, user experience,
 company facts, compensation facts, or external research. If the supplied data is
 insufficient, return an insufficient_data status with a brief reason. Identify
 gaps instead of inventing experience. Distinguish strong_match, partial_match,
@@ -45,6 +46,7 @@ def build_stride_evaluation_prompt(
     baseline: StrideRuleResult,
     user_notes: str | None,
     user_context: dict[str, Any],
+    workspace_context: dict[str, Any] | None = None,
     active_resume_source: ResumeSourceVersion | None = None,
 ) -> list[dict[str, str]]:
     payload = {
@@ -74,6 +76,7 @@ def build_stride_evaluation_prompt(
         },
         "user_notes": user_notes,
         "user_context": user_context,
+        "workspace_context": workspace_context,
         "active_resume_source": _active_resume_source_payload(active_resume_source),
         "deterministic_baseline": _baseline_payload(baseline),
         "stride_rules": STRIDE_RULES_TEXT,

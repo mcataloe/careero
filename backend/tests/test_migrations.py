@@ -6,6 +6,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
 
     assert {
         "users",
+        "workspaces",
         "companies",
         "roles",
         "job_sources",
@@ -19,6 +20,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
 
     role_columns = {column["name"] for column in inspector.get_columns("roles")}
     assert {
+        "workspace_id",
         "source_id",
         "job_url",
         "remote_type",
@@ -37,6 +39,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         column["name"] for column in inspector.get_columns("stride_evaluations")
     }
     assert {
+        "workspace_id",
         "evaluation_status",
         "overall_score",
         "recommendation",
@@ -114,3 +117,33 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         index["name"] for index in inspector.get_indexes("resume_source_versions")
     }
     assert "uq_resume_source_versions_active_user" in resume_source_version_indexes
+
+    workspace_columns = {column["name"] for column in inspector.get_columns("workspaces")}
+    assert {
+        "id",
+        "user_id",
+        "title",
+        "description",
+        "workspace_type",
+        "status",
+        "preferences",
+        "ai_context_summary",
+        "tags",
+        "metadata",
+        "archived_at",
+        "created_at",
+        "updated_at",
+    }.issubset(workspace_columns)
+
+    generated_artifact_columns = {
+        column["name"] for column in inspector.get_columns("generated_artifacts")
+    }
+    assert "workspace_id" in generated_artifact_columns
+
+    role_indexes = {index["name"] for index in inspector.get_indexes("roles")}
+    generated_artifact_indexes = {
+        index["name"] for index in inspector.get_indexes("generated_artifacts")
+    }
+    assert "ix_roles_workspace_id" in role_indexes
+    assert "ix_stride_evaluations_workspace_id" in stride_indexes
+    assert "ix_generated_artifacts_workspace_id" in generated_artifact_indexes

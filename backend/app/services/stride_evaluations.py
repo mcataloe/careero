@@ -20,6 +20,11 @@ from app.services.evaluation_hashing import (
 from app.services.stride_ai import OpenAIStrideEvaluator, merge_ai_analysis
 from app.services.stride_prompt import PROMPT_VERSION
 from app.services.stride_rules import RULESET_VERSION, evaluate_role
+from app.services.workspace_context import (
+    is_workspace_active_for_new_work,
+    merge_workspace_context,
+    workspace_prompt_context,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +39,10 @@ class StrideEvaluationSeedMissingError(StrideEvaluationError):
 
 
 class StrideEvaluationRoleNotFoundError(StrideEvaluationError):
+    pass
+
+
+class StrideEvaluationWorkspaceInactiveError(StrideEvaluationError):
     pass
 
 
@@ -77,7 +86,14 @@ class StrideEvaluationService:
         role = self._get_active_role(role_id=role_id, user_id=user.id)
         if role is None:
             raise StrideEvaluationRoleNotFoundError("Role not found")
+        if not is_workspace_active_for_new_work(role.workspace):
+            raise StrideEvaluationWorkspaceInactiveError("Workspace is not active")
 
+        workspace_context = workspace_prompt_context(role.workspace)
+        effective_user_context = merge_workspace_context(
+            workspace=role.workspace,
+            request_context=payload.user_context,
+        )
         active_resume_source = self._get_active_resume_source_version(user.id)
         role_hash = role_content_hash(role)
         source_hash = resume_source_hash(active_resume_source)
@@ -85,16 +101,19 @@ class StrideEvaluationService:
             role_hash=role_hash,
             source_hash=source_hash,
             user_notes=payload.user_notes,
-            user_context=payload.user_context,
+            user_context=effective_user_context,
             prompt_version=PROMPT_VERSION,
             ruleset_version=RULESET_VERSION,
             ai_enabled=self.settings.enable_ai_evaluations,
             model_name=self.settings.openai_default_evaluation_model,
+            workspace_id=str(role.workspace_id),
+            workspace_context=workspace_context,
         )
 
         if not payload.force:
             cached = self._get_cached_evaluation(
                 user_id=user.id,
+                workspace_id=role.workspace_id,
                 role_id=role.id,
                 input_hash=input_hash,
             )
@@ -105,6 +124,7 @@ class StrideEvaluationService:
                     action="stride_evaluation.cached_result_reused",
                     details={
                         "role_id": str(role.id),
+                        "workspace_id": str(role.workspace_id),
                         "evaluation_input_hash": input_hash,
                     },
                 )
@@ -129,6 +149,7 @@ class StrideEvaluationService:
             action="stride_evaluation.started",
             details={
                 "role_id": str(role.id),
+                "workspace_id": str(role.workspace_id),
                 "evaluation_input_hash": input_hash,
                 "force": payload.force,
             },
@@ -137,14 +158,19 @@ class StrideEvaluationService:
         try:
             baseline = evaluate_role(
                 role,
-                payload.user_context,
+                effective_user_context,
                 payload.user_notes,
             )
             ai_metadata = self.ai_evaluator.enrich(
                 role=role,
-                payload=payload,
+                payload=StrideEvaluationCreate(
+                    user_notes=payload.user_notes,
+                    user_context=effective_user_context,
+                    force=payload.force,
+                ),
                 baseline=baseline,
                 active_resume_source=active_resume_source,
+                workspace_context=workspace_context,
             )
             evaluation_data = merge_ai_analysis(
                 baseline,
@@ -165,6 +191,9 @@ class StrideEvaluationService:
             raw["role_content_hash"] = role_hash
             raw["source_hash"] = source_hash
             raw["evaluation_input_hash"] = input_hash
+            raw["workspace"] = workspace_context
+            raw["request_user_context"] = payload.user_context
+            raw["effective_user_context"] = effective_user_context
             raw["run_metadata"] = {
                 "model_used": ai_metadata.get("ai_model"),
                 "prompt_version": PROMPT_VERSION,
@@ -181,6 +210,7 @@ class StrideEvaluationService:
             evaluation = StrideEvaluation(
                 id=evaluation_id,
                 user_id=user.id,
+                workspace_id=role.workspace_id,
                 role_id=role.id,
                 model_used=ai_metadata.get("ai_model"),
                 prompt_version=PROMPT_VERSION,
@@ -205,6 +235,7 @@ class StrideEvaluationService:
                     action="stride_evaluation.failed",
                     details={
                         "role_id": str(role.id),
+                        "workspace_id": str(role.workspace_id),
                         "error_type": ai_metadata.get("ai_error_type"),
                     },
                 )
@@ -214,6 +245,7 @@ class StrideEvaluationService:
                 action="stride_evaluation.completed",
                 details={
                     "role_id": str(role.id),
+                    "workspace_id": str(role.workspace_id),
                     "ai_status": ai_status,
                     "latency_ms": latency_ms,
                     "evaluation_input_hash": input_hash,
@@ -241,6 +273,7 @@ class StrideEvaluationService:
                 action="stride_evaluation.failed",
                 details={
                     "role_id": str(role.id),
+                    "workspace_id": str(role.workspace_id),
                     "error_type": type(exc).__name__,
                 },
             )
@@ -315,6 +348,7 @@ class StrideEvaluationService:
         statement = (
             select(Role)
             .options(joinedload(Role.company), joinedload(Role.source))
+            .options(joinedload(Role.workspace))
             .where(
                 Role.id == role_id,
                 Role.user_id == user_id,
@@ -347,6 +381,7 @@ class StrideEvaluationService:
         self,
         *,
         user_id: uuid.UUID,
+        workspace_id: uuid.UUID,
         role_id: uuid.UUID,
         input_hash: str,
     ) -> StrideEvaluation | None:
@@ -354,6 +389,7 @@ class StrideEvaluationService:
             select(StrideEvaluation)
             .where(
                 StrideEvaluation.user_id == user_id,
+                StrideEvaluation.workspace_id == workspace_id,
                 StrideEvaluation.role_id == role_id,
                 StrideEvaluation.deleted_at.is_(None),
                 StrideEvaluation.evaluation_status

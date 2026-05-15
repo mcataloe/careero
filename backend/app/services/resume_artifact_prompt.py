@@ -23,8 +23,10 @@ def build_resume_artifact_prompt(
     role: Role,
     evaluation: StrideEvaluation,
     source_version: ResumeSourceVersion,
+    workspace_context: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     payload = {
+        "workspace_context": workspace_context,
         "target_role": _role_payload(role),
         "stride_evaluation": _evaluation_payload(evaluation),
         "resume_source": _source_payload(source_version),

@@ -53,6 +53,7 @@ def drop_known_schema(database_url: str) -> None:
                             resume_source_versions,
                             resume_sources,
                             roles,
+                            workspaces,
                             job_sources,
                             companies,
                             users,

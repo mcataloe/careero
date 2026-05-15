@@ -15,6 +15,9 @@ from app.services.cover_letter_artifacts import (
     CoverLetterArtifactSourceNotFoundError,
     CoverLetterArtifactUnavailableError,
     CoverLetterArtifactValidationError,
+    CoverLetterArtifactWorkspaceInactiveError,
+    CoverLetterArtifactWorkspaceMismatchError,
+    CoverLetterArtifactWorkspaceNotFoundError,
 )
 
 router = APIRouter(tags=["cover-letter-artifacts"])
@@ -42,6 +45,8 @@ def generate_cover_letter_artifact(
         CoverLetterArtifactRoleNotFoundError,
         CoverLetterArtifactEvaluationNotFoundError,
         CoverLetterArtifactSourceNotFoundError,
+        CoverLetterArtifactWorkspaceMismatchError,
+        CoverLetterArtifactWorkspaceNotFoundError,
     ) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except CoverLetterArtifactSeedMissingError as exc:
@@ -51,5 +56,7 @@ def generate_cover_letter_artifact(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         )
+    except CoverLetterArtifactWorkspaceInactiveError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except (CoverLetterArtifactValidationError, CoverLetterArtifactProviderError) as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))

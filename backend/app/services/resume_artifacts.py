@@ -32,6 +32,12 @@ from app.services.resume_artifact_ai import (
     ResumeArtifactProviderError as AIResumeArtifactProviderError,
 )
 from app.services.resume_artifact_prompt import PROMPT_VERSION
+from app.services.workspace_context import workspace_prompt_context
+from app.services.workspaces import (
+    WorkspaceInactiveError,
+    WorkspaceNotFoundError,
+    WorkspaceService,
+)
 
 
 class ResumeArtifactError(Exception):
@@ -51,6 +57,18 @@ class ResumeArtifactEvaluationNotFoundError(ResumeArtifactError):
 
 
 class ResumeArtifactSourceNotFoundError(ResumeArtifactError):
+    pass
+
+
+class ResumeArtifactWorkspaceNotFoundError(ResumeArtifactError):
+    pass
+
+
+class ResumeArtifactWorkspaceInactiveError(ResumeArtifactError):
+    pass
+
+
+class ResumeArtifactWorkspaceMismatchError(ResumeArtifactError):
     pass
 
 
@@ -101,8 +119,23 @@ class ResumeArtifactService:
         role = self._get_active_role(role_id=role_id, user_id=user.id)
         if role is None:
             raise ResumeArtifactRoleNotFoundError("Role not found")
+        try:
+            workspace = WorkspaceService(self.db).resolve_active_workspace(
+                user_id=user.id,
+                workspace_id=payload.workspace_id,
+            )
+        except WorkspaceNotFoundError as exc:
+            raise ResumeArtifactWorkspaceNotFoundError("Workspace not found") from exc
+        except WorkspaceInactiveError as exc:
+            raise ResumeArtifactWorkspaceInactiveError("Workspace is not active") from exc
+        if role.workspace_id != workspace.id:
+            raise ResumeArtifactWorkspaceMismatchError(
+                "Role does not belong to workspace"
+            )
+        workspace_context = workspace_prompt_context(workspace)
         evaluation = self._get_evaluation(
             user_id=user.id,
+            workspace_id=workspace.id,
             role_id=role.id,
             evaluation_id=payload.evaluation_id,
         )
@@ -134,6 +167,7 @@ class ResumeArtifactService:
                 role=role,
                 evaluation=evaluation,
                 source_version=source_version,
+                workspace_context=workspace_context,
             )
             artifact = self._build_artifact_contract(
                 artifact_id=artifact_id,
@@ -141,6 +175,7 @@ class ResumeArtifactService:
                 role=role,
                 evaluation=evaluation,
                 source_version=source_version,
+                workspace_context=workspace_context,
                 ai_result=ai_result,
                 user_id=user.id,
             )
@@ -149,6 +184,7 @@ class ResumeArtifactService:
             persisted = GeneratedArtifact(
                 id=artifact_id,
                 user_id=user.id,
+                workspace_id=workspace.id,
                 role_id=role.id,
                 artifact_type=artifact["artifactType"],
                 title=artifact["title"],
@@ -225,6 +261,7 @@ class ResumeArtifactService:
         role: Role,
         evaluation: StrideEvaluation,
         source_version: ResumeSourceVersion,
+        workspace_context: dict[str, Any],
         ai_result: dict[str, Any],
         user_id: uuid.UUID,
     ) -> dict[str, Any]:
@@ -241,6 +278,7 @@ class ResumeArtifactService:
                 "role_content_hash": role_content_hash(role),
                 "source_hash": source_hash,
                 "evaluation_id": str(evaluation.id),
+                "workspace_context": workspace_context,
                 "prompt_version": PROMPT_VERSION,
                 "model_name": ai_result["model"],
             }
@@ -315,6 +353,7 @@ class ResumeArtifactService:
                 "targetEvaluationId": str(evaluation.id),
                 "sourceResume": _source_resume_metadata(source_version),
                 "generationStatus": ai_result.get("status"),
+                "workspace": workspace_context,
             },
             "createdAt": now,
             "updatedAt": now,
@@ -357,7 +396,11 @@ class ResumeArtifactService:
     def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
         return self.db.scalar(
             select(Role)
-            .options(joinedload(Role.company), joinedload(Role.source))
+            .options(
+                joinedload(Role.company),
+                joinedload(Role.source),
+                joinedload(Role.workspace),
+            )
             .where(
                 Role.id == role_id,
                 Role.user_id == user_id,
@@ -370,11 +413,13 @@ class ResumeArtifactService:
         self,
         *,
         user_id: uuid.UUID,
+        workspace_id: uuid.UUID,
         role_id: uuid.UUID,
         evaluation_id: uuid.UUID | None,
     ) -> StrideEvaluation | None:
         filters = [
             StrideEvaluation.user_id == user_id,
+            StrideEvaluation.workspace_id == workspace_id,
             StrideEvaluation.role_id == role_id,
             StrideEvaluation.deleted_at.is_(None),
         ]
@@ -421,19 +466,14 @@ class ResumeArtifactService:
             select(GeneratedArtifact)
             .where(
                 GeneratedArtifact.user_id == user_id,
+                GeneratedArtifact.workspace_id == workspace_id,
                 GeneratedArtifact.role_id == role_id,
                 GeneratedArtifact.artifact_type == "tailored_resume",
                 GeneratedArtifact.deleted_at.is_(None),
             )
             .order_by(GeneratedArtifact.created_at.desc(), GeneratedArtifact.id.desc())
         )
-        for artifact in self.db.scalars(statement):
-            contract = artifact.artifact_metadata.get("contract")
-            if isinstance(contract, dict) and contract.get("workspaceId") == str(
-                workspace_id
-            ):
-                return artifact
-        return None
+        return self.db.scalar(statement)
 
     def _rollback_and_log_failure(
         self,
