@@ -33,6 +33,17 @@ export const ApplicationNoteSchema = z.object({
   body: z.string().min(1),
 });
 
+export const ApplicationInterviewStageSchema = z.object({
+  id: IdSchema,
+  stageType: z.string().min(1),
+  title: z.string().min(1),
+  scheduledAt: IsoDateTimeSchema.nullable(),
+  completedAt: IsoDateTimeSchema.nullable(),
+  location: z.string().nullable(),
+  notes: z.string().nullable(),
+  metadata: MetadataSchema,
+});
+
 export const ApplicationStateSchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
   id: IdSchema,
   workspaceId: IdSchema,
@@ -41,6 +52,7 @@ export const ApplicationStateSchema = ContractEnvelopeSchema.merge(TimestampFiel
   stateHistory: z.array(ApplicationStateHistoryEntrySchema).min(1),
   reminders: z.array(ApplicationReminderSchema).default([]),
   notes: z.array(ApplicationNoteSchema).default([]),
+  interviewStages: z.array(ApplicationInterviewStageSchema).default([]),
   externalLinks: z.array(LinkSchema).default([]),
   metadata: MetadataSchema,
 });

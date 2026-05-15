@@ -8,6 +8,17 @@ class RoleStatus(StrEnum):
     ARCHIVED = "archived"
 
 
+class ApplicationWorkflowState(StrEnum):
+    DISCOVERED = "discovered"
+    INTERESTED = "interested"
+    APPLIED = "applied"
+    INTERVIEWING = "interviewing"
+    OFFER = "offer"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+    ARCHIVED = "archived"
+
+
 class WorkspaceStatus(StrEnum):
     ACTIVE = "active"
     PAUSED = "paused"

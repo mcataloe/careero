@@ -271,6 +271,18 @@ export const applicationStateExample: ApplicationState = {
       body: "Review hybrid expectations before applying.",
     },
   ],
+  interviewStages: [
+    {
+      id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      stageType: "recruiter_screen",
+      title: "Recruiter screen",
+      scheduledAt: "2026-05-22T16:00:00.000Z",
+      completedAt: null,
+      location: "Video",
+      notes: "Discuss role scope and hybrid expectations.",
+      metadata: {},
+    },
+  ],
   externalLinks: [{ label: "Job posting", url: "https://example.com/jobs/123", type: "posting" }],
   metadata: {},
   createdAt: now,

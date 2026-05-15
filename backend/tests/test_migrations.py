@@ -14,6 +14,11 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "resume_sources",
         "resume_source_versions",
         "applications",
+        "application_state_history",
+        "application_notes",
+        "application_reminders",
+        "application_interview_stages",
+        "application_external_links",
         "generated_artifacts",
         "activity_log",
     }.issubset(set(inspector.get_table_names()))
@@ -139,6 +144,42 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         column["name"] for column in inspector.get_columns("generated_artifacts")
     }
     assert "workspace_id" in generated_artifact_columns
+
+    application_columns = {
+        column["name"] for column in inspector.get_columns("applications")
+    }
+    assert {
+        "workspace_id",
+        "current_state",
+        "applied_at",
+        "next_action_at",
+        "archived_at",
+        "reactivated_at",
+        "workflow_metadata",
+    }.issubset(application_columns)
+
+    application_indexes = {
+        index["name"] for index in inspector.get_indexes("applications")
+    }
+    assert {
+        "ix_applications_workspace_id",
+        "ix_applications_role_id",
+        "ix_applications_current_state",
+        "ix_applications_workspace_state",
+        "ix_applications_next_action_at",
+        "ix_applications_archived_at",
+        "uq_applications_active_role_id",
+    }.issubset(application_indexes)
+
+    for table_name in (
+        "application_state_history",
+        "application_notes",
+        "application_reminders",
+        "application_interview_stages",
+        "application_external_links",
+    ):
+        columns = {column["name"] for column in inspector.get_columns(table_name)}
+        assert {"id", "application_id", "user_id", "workspace_id"}.issubset(columns)
 
     role_indexes = {index["name"] for index in inspector.get_indexes("roles")}
     generated_artifact_indexes = {

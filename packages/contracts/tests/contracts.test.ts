@@ -64,6 +64,12 @@ describe("canonical contract validation", () => {
     expect(ApplicationStateSchema.safeParse(invalid).success).toBe(false);
   });
 
+  it("supports structured interview stages for application state", () => {
+    const parsed = ApplicationStateSchema.parse(canonicalExamples.ApplicationState);
+
+    expect(parsed.interviewStages[0].stageType).toBe("recruiter_screen");
+  });
+
   it("rejects invalid timestamp formats", () => {
     const invalid = { ...canonicalExamples.Workspace, createdAt: "May 13, 2026" };
 

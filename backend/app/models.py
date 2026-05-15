@@ -99,6 +99,7 @@ class Workspace(TimestampMixin, Base):
     stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
         back_populates="workspace"
     )
+    applications: Mapped[list["Application"]] = relationship(back_populates="workspace")
 
 
 class Company(TimestampMixin, SoftDeleteMixin, Base):
@@ -183,6 +184,7 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
         back_populates="role"
     )
+    applications: Mapped[list["Application"]] = relationship(back_populates="role")
 
 
 class JobSource(TimestampMixin, SoftDeleteMixin, Base):
@@ -379,8 +381,19 @@ class Application(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "applications"
     __table_args__ = (
         Index("ix_applications_user_id", "user_id"),
+        Index("ix_applications_workspace_id", "workspace_id"),
         Index("ix_applications_role_id", "role_id"),
         Index("ix_applications_job_source_id", "job_source_id"),
+        Index("ix_applications_current_state", "current_state"),
+        Index("ix_applications_workspace_state", "workspace_id", "current_state"),
+        Index("ix_applications_next_action_at", "next_action_at"),
+        Index("ix_applications_archived_at", "archived_at"),
+        Index(
+            "uq_applications_active_role_id",
+            "role_id",
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -393,6 +406,11 @@ class Application(TimestampMixin, SoftDeleteMixin, Base):
         ForeignKey("users.id"),
         nullable=False,
     )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
     role_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("roles.id"),
@@ -403,9 +421,245 @@ class Application(TimestampMixin, SoftDeleteMixin, Base):
         ForeignKey("job_sources.id"),
     )
     status: Mapped[str] = mapped_column(String(100), nullable=False)
+    current_state: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="discovered",
+    )
     applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     next_action_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reactivated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     notes: Mapped[str | None] = mapped_column(Text)
+    workflow_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+    workspace: Mapped[Workspace] = relationship(back_populates="applications")
+    role: Mapped[Role] = relationship(back_populates="applications")
+    state_history: Mapped[list["ApplicationStateHistory"]] = relationship(
+        back_populates="application",
+        order_by="ApplicationStateHistory.changed_at",
+    )
+    note_entries: Mapped[list["ApplicationNote"]] = relationship(
+        back_populates="application",
+        order_by="ApplicationNote.created_at",
+    )
+    reminders: Mapped[list["ApplicationReminder"]] = relationship(
+        back_populates="application",
+        order_by="ApplicationReminder.due_at",
+    )
+    interview_stages: Mapped[list["ApplicationInterviewStage"]] = relationship(
+        back_populates="application",
+        order_by="ApplicationInterviewStage.scheduled_at",
+    )
+    external_links: Mapped[list["ApplicationExternalLink"]] = relationship(
+        back_populates="application",
+        order_by="ApplicationExternalLink.created_at",
+    )
+
+
+class ApplicationStateHistory(TimestampMixin, Base):
+    __tablename__ = "application_state_history"
+    __table_args__ = (
+        Index("ix_application_state_history_application_id", "application_id"),
+        Index("ix_application_state_history_workspace_id", "workspace_id"),
+        Index("ix_application_state_history_changed_at", "changed_at"),
+        Index("ix_application_state_history_to_state", "to_state"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+        nullable=False,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    from_state: Mapped[str | None] = mapped_column(String(100))
+    to_state: Mapped[str] = mapped_column(String(100), nullable=False)
+    changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    changed_by: Mapped[str] = mapped_column(String(100), nullable=False, default="user")
+    reason: Mapped[str | None] = mapped_column(Text)
+    history_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+    application: Mapped[Application] = relationship(back_populates="state_history")
+
+
+class ApplicationNote(TimestampMixin, Base):
+    __tablename__ = "application_notes"
+    __table_args__ = (
+        Index("ix_application_notes_application_id", "application_id"),
+        Index("ix_application_notes_workspace_id", "workspace_id"),
+        Index("ix_application_notes_created_at", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+        nullable=False,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    author: Mapped[str | None] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+
+    application: Mapped[Application] = relationship(back_populates="note_entries")
+
+
+class ApplicationReminder(TimestampMixin, Base):
+    __tablename__ = "application_reminders"
+    __table_args__ = (
+        Index("ix_application_reminders_application_id", "application_id"),
+        Index("ix_application_reminders_workspace_id", "workspace_id"),
+        Index("ix_application_reminders_due_at", "due_at"),
+        Index("ix_application_reminders_completed_at", "completed_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+        nullable=False,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    application: Mapped[Application] = relationship(back_populates="reminders")
+
+
+class ApplicationInterviewStage(TimestampMixin, Base):
+    __tablename__ = "application_interview_stages"
+    __table_args__ = (
+        Index("ix_application_interview_stages_application_id", "application_id"),
+        Index("ix_application_interview_stages_workspace_id", "workspace_id"),
+        Index("ix_application_interview_stages_scheduled_at", "scheduled_at"),
+        Index("ix_application_interview_stages_completed_at", "completed_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+        nullable=False,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    stage_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    location: Mapped[str | None] = mapped_column(String(255))
+    notes: Mapped[str | None] = mapped_column(Text)
+    stage_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+    application: Mapped[Application] = relationship(back_populates="interview_stages")
+
+
+class ApplicationExternalLink(TimestampMixin, Base):
+    __tablename__ = "application_external_links"
+    __table_args__ = (
+        Index("ix_application_external_links_application_id", "application_id"),
+        Index("ix_application_external_links_workspace_id", "workspace_id"),
+        Index("ix_application_external_links_link_type", "link_type"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+        nullable=False,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    label: Mapped[str] = mapped_column(String(255), nullable=False)
+    url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    link_type: Mapped[str | None] = mapped_column(String(100))
+    link_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+    application: Mapped[Application] = relationship(back_populates="external_links")
 
 
 class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):

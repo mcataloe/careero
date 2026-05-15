@@ -154,6 +154,72 @@
           },
           "default": []
         },
+        "interviewStages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/ApplicationState/properties/id"
+              },
+              "stageType": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scheduledAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completedAt": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/ApplicationState/properties/createdAt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "location": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metadata": {
+                "$ref": "#/definitions/ApplicationState/properties/stateHistory/items/properties/metadata"
+              }
+            },
+            "required": [
+              "id",
+              "stageType",
+              "title",
+              "scheduledAt",
+              "completedAt",
+              "location",
+              "notes",
+              "metadata"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
         "externalLinks": {
           "type": "array",
           "items": {
