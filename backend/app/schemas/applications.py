@@ -1,9 +1,84 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
+import uuid
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 from app.constants import ApplicationWorkflowState
+
+
+class ApplicationCompanySummary(BaseModel):
+    id: uuid.UUID
+    name: str
+    website_url: str | None = None
+
+
+class ApplicationRoleSummary(BaseModel):
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    title: str
+    status: str
+    company: ApplicationCompanySummary
+    job_url: str | None = None
+    location: str | None = None
+    remote_type: str | None = None
+
+
+class ApplicationStrideSummary(BaseModel):
+    id: uuid.UUID
+    evaluation_status: str
+    recommendation: str | None = None
+    overall_score: Decimal | None = None
+    summary: str | None = None
+    updated_at: datetime
+
+
+class ApplicationArtifactSummary(BaseModel):
+    id: uuid.UUID
+    artifact_type: str
+    title: str
+    status: str | None = None
+    revision_number: int | None = None
+    updated_at: datetime
+
+
+class ApplicationWorkflowCounts(BaseModel):
+    notes: int = 0
+    reminders: int = 0
+    interviews: int = 0
+
+
+class ApplicationListItemResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    role_id: uuid.UUID
+    workspace_id: uuid.UUID
+    title: str
+    company: ApplicationCompanySummary
+    current_state: ApplicationWorkflowState
+    applied_at: datetime | None = None
+    next_action_at: datetime | None = None
+    updated_at: datetime
+    archived_at: datetime | None = None
+    stride: ApplicationStrideSummary | None = None
+    resume_artifact: ApplicationArtifactSummary | None = None
+    cover_letter_artifact: ApplicationArtifactSummary | None = None
+    counts: ApplicationWorkflowCounts
+
+
+class ApplicationDetailResponse(ApplicationListItemResponse):
+    workflow_metadata: dict[str, Any]
+    application_state: dict[str, Any]
+    state_history: list[dict[str, Any]]
+    role: ApplicationRoleSummary
+
+
+class ApplicationMetadataUpdate(BaseModel):
+    workflow_metadata: dict[str, Any] | None = None
+    applied_at: datetime | None = None
+    next_action_at: datetime | None = None
 
 
 class ApplicationStateTransitionRequest(BaseModel):

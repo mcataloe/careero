@@ -10,7 +10,7 @@ from typing import Any
 from jsonschema import Draft7Validator, FormatChecker
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState, RoleStatus
 from app.models import (
@@ -20,8 +20,11 @@ from app.models import (
     ApplicationNote,
     ApplicationReminder,
     ApplicationStateHistory,
+    GeneratedArtifact,
     Role,
+    StrideEvaluation,
     User,
+    Workspace,
 )
 from app.schemas.applications import (
     ApplicationExternalLinkCreate,
@@ -32,6 +35,7 @@ from app.schemas.applications import (
     ApplicationNoteUpdate,
     ApplicationReminderCreate,
     ApplicationReminderUpdate,
+    ApplicationMetadataUpdate,
     ApplicationStateTransitionRequest,
 )
 from app.seed import DEFAULT_LOCAL_USER_ID, DEFAULT_LOCAL_USER_DISPLAY_NAME
@@ -55,6 +59,10 @@ class ApplicationWorkflowNotFoundError(ApplicationWorkflowError):
 
 
 class ApplicationWorkflowWorkspaceInactiveError(ApplicationWorkflowError):
+    pass
+
+
+class ApplicationWorkflowWorkspaceNotFoundError(ApplicationWorkflowError):
     pass
 
 
@@ -87,7 +95,7 @@ class ApplicationWorkflowService:
             user_id=user.id,
         )
         if existing is not None:
-            return self.serialize(existing)
+            return self.detail(existing)
 
         if not is_workspace_active_for_new_work(role.workspace):
             raise ApplicationWorkflowWorkspaceInactiveError(
@@ -125,9 +133,22 @@ class ApplicationWorkflowService:
         self.db.commit()
         return self.get_application(application.id)
 
-    def list_applications(self, *, include_inactive: bool = False) -> list[dict[str, Any]]:
+    def list_applications(
+        self,
+        *,
+        workspace_id: uuid.UUID | None = None,
+        include_inactive: bool = False,
+    ) -> list[dict[str, Any]]:
         user = self.get_default_user()
         filters = [Application.user_id == user.id, Application.deleted_at.is_(None)]
+        if workspace_id is not None:
+            workspace = self._get_workspace_for_user(
+                workspace_id=workspace_id,
+                user_id=user.id,
+            )
+            if workspace is None:
+                raise ApplicationWorkflowWorkspaceNotFoundError("Workspace not found")
+            filters.append(Application.workspace_id == workspace.id)
         if not include_inactive:
             filters.extend(
                 [
@@ -141,13 +162,46 @@ class ApplicationWorkflowService:
             .options(*_application_load_options())
             .order_by(Application.updated_at.desc(), Application.created_at.desc())
         )
-        return [self.serialize(application) for application in self.db.scalars(statement)]
+        return [self.summary(application) for application in self.db.scalars(statement)]
 
     def get_application(self, application_id: uuid.UUID) -> dict[str, Any]:
         application = self._get_application(application_id)
         if application is None:
             raise ApplicationWorkflowNotFoundError("Application workflow not found")
-        return self.serialize(application)
+        return self.detail(application)
+
+    def update_application(
+        self,
+        application_id: uuid.UUID,
+        payload: ApplicationMetadataUpdate,
+    ) -> dict[str, Any]:
+        application = self._require_application(application_id)
+        updates = payload.model_dump(exclude_unset=True)
+        changed_fields: list[str] = []
+        if "workflow_metadata" in updates and updates["workflow_metadata"] is not None:
+            application.workflow_metadata = {
+                **(application.workflow_metadata or {}),
+                **updates["workflow_metadata"],
+            }
+            changed_fields.append("workflow_metadata")
+        if "applied_at" in updates:
+            application.applied_at = updates["applied_at"]
+            changed_fields.append("applied_at")
+        if "next_action_at" in updates:
+            application.next_action_at = updates["next_action_at"]
+            changed_fields.append("next_action_at")
+
+        if changed_fields:
+            self._log_activity(
+                user_id=application.user_id,
+                application=application,
+                action="application.updated",
+                details={"changed_fields": sorted(changed_fields)},
+            )
+            self.db.commit()
+        else:
+            self.db.rollback()
+        return self.get_application(application.id)
 
     def transition_state(
         self,
@@ -159,7 +213,7 @@ class ApplicationWorkflowService:
         next_state = payload.state.value
         if previous_state == next_state:
             self.db.rollback()
-            return self.serialize(application)
+            return self.detail(application)
 
         now = datetime.now(timezone.utc)
         application.current_state = next_state
@@ -191,6 +245,66 @@ class ApplicationWorkflowService:
         )
         self.db.commit()
         return self.get_application(application.id)
+
+    def summary(self, application: Application) -> dict[str, Any]:
+        role = application.role
+        company = role.company
+        latest_stride = self._latest_stride_summary(application)
+        return {
+            "id": application.id,
+            "role_id": application.role_id,
+            "workspace_id": application.workspace_id,
+            "title": role.title,
+            "company": {
+                "id": company.id,
+                "name": company.name,
+                "website_url": company.website_url,
+            },
+            "current_state": application.current_state,
+            "applied_at": application.applied_at,
+            "next_action_at": application.next_action_at,
+            "updated_at": application.updated_at,
+            "archived_at": application.archived_at,
+            "stride": latest_stride,
+            "resume_artifact": self._latest_artifact_summary(
+                application,
+                artifact_type="tailored_resume",
+            ),
+            "cover_letter_artifact": self._latest_artifact_summary(
+                application,
+                artifact_type="cover_letter",
+            ),
+            "counts": {
+                "notes": len(application.note_entries),
+                "reminders": len(application.reminders),
+                "interviews": len(application.interview_stages),
+            },
+        }
+
+    def detail(self, application: Application) -> dict[str, Any]:
+        role = application.role
+        company = role.company
+        application_state = self.serialize(application)
+        return {
+            **self.summary(application),
+            "workflow_metadata": application.workflow_metadata or {},
+            "application_state": application_state,
+            "state_history": application_state["stateHistory"],
+            "role": {
+                "id": role.id,
+                "workspace_id": role.workspace_id,
+                "title": role.title,
+                "status": role.status,
+                "company": {
+                    "id": company.id,
+                    "name": company.name,
+                    "website_url": company.website_url,
+                },
+                "job_url": role.job_url,
+                "location": role.location,
+                "remote_type": role.remote_type,
+            },
+        }
 
     def create_note(
         self,
@@ -541,7 +655,7 @@ class ApplicationWorkflowService:
                 Role.deleted_at.is_(None),
                 Role.status != RoleStatus.ARCHIVED.value,
             )
-            .options(selectinload(Role.workspace))
+            .options(joinedload(Role.company), selectinload(Role.workspace))
         )
         return self.db.scalar(statement)
 
@@ -559,6 +673,18 @@ class ApplicationWorkflowService:
                 Application.deleted_at.is_(None),
             )
             .options(*_application_load_options())
+        )
+        return self.db.scalar(statement)
+
+    def _get_workspace_for_user(
+        self,
+        *,
+        workspace_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> Workspace | None:
+        statement = select(Workspace).where(
+            Workspace.id == workspace_id,
+            Workspace.user_id == user_id,
         )
         return self.db.scalar(statement)
 
@@ -638,9 +764,72 @@ class ApplicationWorkflowService:
             },
         )
 
+    def _latest_stride_summary(self, application: Application) -> dict[str, Any] | None:
+        evaluation = self.db.scalar(
+            select(StrideEvaluation)
+            .where(
+                StrideEvaluation.user_id == application.user_id,
+                StrideEvaluation.workspace_id == application.workspace_id,
+                StrideEvaluation.role_id == application.role_id,
+                StrideEvaluation.deleted_at.is_(None),
+            )
+            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .limit(1)
+        )
+        if evaluation is None:
+            return None
+        return {
+            "id": evaluation.id,
+            "evaluation_status": evaluation.evaluation_status,
+            "recommendation": evaluation.recommendation,
+            "overall_score": evaluation.overall_score,
+            "summary": evaluation.summary,
+            "updated_at": evaluation.updated_at,
+        }
+
+    def _latest_artifact_summary(
+        self,
+        application: Application,
+        *,
+        artifact_type: str,
+    ) -> dict[str, Any] | None:
+        artifact = self.db.scalar(
+            select(GeneratedArtifact)
+            .where(
+                GeneratedArtifact.user_id == application.user_id,
+                GeneratedArtifact.workspace_id == application.workspace_id,
+                GeneratedArtifact.role_id == application.role_id,
+                GeneratedArtifact.artifact_type == artifact_type,
+                GeneratedArtifact.deleted_at.is_(None),
+            )
+            .order_by(GeneratedArtifact.created_at.desc(), GeneratedArtifact.id.desc())
+            .limit(1)
+        )
+        if artifact is None:
+            return None
+        contract = (
+            artifact.artifact_metadata.get("contract")
+            if artifact.artifact_metadata
+            else None
+        )
+        revision = contract.get("revision", {}) if isinstance(contract, dict) else {}
+        return {
+            "id": artifact.id,
+            "artifact_type": artifact.artifact_type,
+            "title": artifact.title,
+            "status": (
+                contract.get("lifecycleStatus")
+                if isinstance(contract, dict)
+                else None
+            ),
+            "revision_number": revision.get("revisionNumber"),
+            "updated_at": artifact.updated_at,
+        }
+
 
 def _application_load_options():
     return (
+        joinedload(Application.role).joinedload(Role.company),
         selectinload(Application.state_history),
         selectinload(Application.note_entries),
         selectinload(Application.reminders),

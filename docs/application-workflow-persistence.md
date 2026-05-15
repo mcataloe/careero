@@ -1,9 +1,10 @@
 # Application Workflow Persistence
 
-Layer 4A makes the existing `Application` row the workflow aggregate for a
-saved role/opportunity. It does not duplicate role parsing, STRIDE evaluation,
-resume artifact generation, cover letter generation, document export,
-automation, calendar, or email behavior.
+Layer 4 makes the existing `Application` row the workflow aggregate for a saved
+role/opportunity and exposes workspace-aware service/API operations for list,
+detail, ensure, state transition, and metadata update. It does not duplicate
+role parsing, STRIDE evaluation, resume artifact generation, cover letter
+generation, document export, automation, calendar, or email behavior.
 
 ## Role And Application
 
@@ -45,6 +46,30 @@ truth for workflow rendering.
 Every application is linked to a workspace. New application workflows can only
 be created for roles in active or paused workspaces. Archived and completed
 workspaces remain inspectable, and migrated application history is preserved.
+
+The application list endpoints are active-only by default. Use
+`include_inactive=true` to include archived workflows. Use either
+`GET /api/applications?workspace_id={workspace_id}` or
+`GET /api/workspaces/{workspace_id}/applications` for workspace-scoped lists.
+
+## Service And API Boundary
+
+`POST /api/roles/{role_id}/application` is a safe ensure flow. It returns the
+existing active workflow for the role when one exists, or creates one without
+duplicating records.
+
+`GET /api/applications` and workspace-scoped list endpoints return compact
+summaries for the Applications page: role title, company, state, dates, latest
+STRIDE summary/status, latest resume and cover letter artifact summaries, and
+note/reminder/interview counts. They do not return full STRIDE or artifact
+payloads and do not trigger generation.
+
+`GET /api/applications/{application_id}` returns richer detail, including the
+canonical `ApplicationState` contract under `application_state`.
+
+`PATCH /api/applications/{application_id}` updates workflow metadata and dates.
+It does not change `Application.current_state`; state changes must use the
+state-transition operation.
 
 ## Migration Behavior
 

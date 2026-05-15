@@ -537,6 +537,32 @@ List workflows:
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/api/applications
 Invoke-RestMethod "http://127.0.0.1:8000/api/applications?include_inactive=true"
+Invoke-RestMethod "http://127.0.0.1:8000/api/applications?workspace_id={workspace_id}"
+Invoke-RestMethod http://127.0.0.1:8000/api/workspaces/{workspace_id}/applications
+```
+
+Get workflow detail:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}
+```
+
+List endpoints return compact summaries for the Applications page: role title,
+company, current state, application dates, latest STRIDE status, latest resume
+and cover letter artifact summaries, and note/reminder/interview counts. They do
+not return full STRIDE or artifact payloads and do not trigger generation.
+
+Update workflow metadata or dates without changing state:
+
+```powershell
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id} `
+  -ContentType "application/json" `
+  -Body '{
+    "workflow_metadata": { "priority": "high" },
+    "next_action_at": "2026-05-20T15:00:00Z"
+  }'
 ```
 
 Change workflow state:
@@ -549,7 +575,7 @@ Invoke-RestMethod `
   -Body '{ "state": "interviewing", "reason": "Recruiter screen scheduled." }'
 ```
 
-Applications are workspace-scoped. New workflows can only be created for roles in active or paused workspaces; archived/completed workspaces remain inspectable. State history, notes, reminders, interview stages, and external links use typed tables. `ActivityLog` records broad audit events but does not replace workflow persistence. Existing role statuses are backfilled into application workflows during migration, and existing application notes are copied into typed notes.
+Applications are workspace-scoped. New workflows can only be created for roles in active or paused workspaces; archived/completed workspaces remain inspectable with `include_inactive=true`. State history, notes, reminders, interview stages, and external links use typed tables, but Layer 4B list/detail endpoints expose only summary counts for notes, reminders, and interviews. `ActivityLog` records broad audit events but does not replace workflow persistence. Existing role statuses are backfilled into application workflows during migration, and existing application notes are copied into typed notes.
 
 Future automation may suggest application workflow changes, but it must not silently mutate `Application.current_state`.
 
