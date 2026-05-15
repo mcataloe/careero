@@ -17,6 +17,7 @@ import type { ReactNode } from "react";
 
 import type { Role, RoleStatus, RoleUpdatePayload } from "../types/roles";
 import { ExpandableTextSection } from "./ExpandableTextSection";
+import { MarkdownPreviewBlock } from "./MarkdownPreviewBlock";
 
 const statusOptions: { label: string; value: RoleStatus }[] = [
   { label: "Found", value: "found" },
@@ -124,13 +125,13 @@ export function RoleDetail({
           <Title order={3}>Description</Title>
           <div id="role-description">
             <ExpandableTextSection title="Raw description">
-              {valueOrDash(role.raw_description)}
+              <MarkdownPreviewBlock value={valueOrDash(role.raw_description)} />
             </ExpandableTextSection>
           </div>
           <Divider />
           <div id="role-normalized-description">
             <ExpandableTextSection title="Normalized description">
-              {valueOrDash(role.normalized_description)}
+              <MarkdownPreviewBlock value={valueOrDash(role.normalized_description)} />
             </ExpandableTextSection>
           </div>
         </Stack>
@@ -164,6 +165,7 @@ export function RoleDetail({
                 <Textarea
                   label="Normalized description"
                   minRows={4}
+                  maxRows={10}
                   autosize
                   {...form.getInputProps("normalizedDescription")}
                 />

@@ -9,7 +9,8 @@ export function ApplicationsPage() {
       </div>
       <Paper withBorder radius="md" p="lg">
         <Text c="dimmed">
-          No application workflow is implemented yet. Use Roles to capture opportunities.
+          Application workflow tracking is available through saved roles. A full
+          workflow dashboard will build on those records in a later UI layer.
         </Text>
       </Paper>
     </Stack>

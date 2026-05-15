@@ -32,8 +32,9 @@ export function SectionNavigation({ items }: { items: SectionNavigationItem[] })
               key={item.targetId}
               component="a"
               href={`#${item.targetId}`}
-              variant="subtle"
+              variant="default"
               size="sm"
+              className="section-navigation__link"
               onClick={(event) => {
                 event.preventDefault();
                 scrollToSection(item.targetId);

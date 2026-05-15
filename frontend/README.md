@@ -60,9 +60,16 @@ Resume/profile grounding source:
 - Open `/settings`.
 - Create an active local `master_resume` source by pasting source text or importing a local file.
 - File import supports `.txt`, `.md`, `.docx`, and text-based `.pdf` files up to 5 MB.
-- Imported text is copied into the editable raw text field and is not saved until you submit the form.
-- When an active source exists, submit a new version to replace the active version.
+- Imported text is copied into the draft raw text field and is not saved until you submit the form.
+- When an active source exists, the settings page is read-only by default. Use `Create new version` or `Import file` to enter draft editing.
+- Canceling a draft restores the currently active source values. Saving an active-source draft creates and activates a new version; it does not mutate the existing version in place.
 - The backend uses the active source to ground STRIDE evaluations when available.
+
+Long and structured text:
+
+- Read-only resume/profile, role description, and STRIDE text uses expandable preview blocks so pages stay scannable without hiding full content.
+- Markdown-like text is rendered safely as React text nodes. Basic headings, bullets, numbered lists, paragraphs, and fenced code blocks are displayed with lightweight structure.
+- Editable long text fields use bounded autosizing instead of expanding without limit.
 
 Careero does not run OCR, import Google Docs, generate resumes, cover letters, application packets, or automated discovery output from this UI phase.
 

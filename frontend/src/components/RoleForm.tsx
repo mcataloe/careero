@@ -419,6 +419,7 @@ export function RoleForm({
             <Textarea
               label="Raw description"
               minRows={6}
+              maxRows={12}
               autosize
               placeholder="Paste the original job description."
               {...form.getInputProps("rawDescription")}
@@ -428,6 +429,7 @@ export function RoleForm({
             <Textarea
               label="Normalized description"
               minRows={4}
+              maxRows={10}
               autosize
               placeholder="Optional notes or cleaned-up description."
               {...form.getInputProps("normalizedDescription")}

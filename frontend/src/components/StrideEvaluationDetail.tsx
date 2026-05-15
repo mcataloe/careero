@@ -20,6 +20,7 @@ import type {
   StrideEvaluation,
 } from "../types/strideEvaluations";
 import { ExpandableTextSection } from "./ExpandableTextSection";
+import { MarkdownPreviewBlock } from "./MarkdownPreviewBlock";
 import { EmptyState } from "./States";
 
 function titleize(value: string | null | undefined) {
@@ -156,7 +157,7 @@ function AlignmentSection({
           </Text>
         ) : null}
         <ExpandableTextSection maxHeight={180}>
-          {sectionSummary(section)}
+          <MarkdownPreviewBlock value={sectionSummary(section)} />
         </ExpandableTextSection>
         {Array.isArray(section?.evidence) && section.evidence.length > 0 ? (
           <Text size="sm" c="dimmed">
@@ -334,7 +335,7 @@ export function StrideEvaluationDetail({
 
         <EvaluationSectionBlock id="stride-summary" title="Summary">
           <ExpandableTextSection maxHeight={220}>
-            {evaluation.summary ?? "No summary available."}
+            <MarkdownPreviewBlock value={evaluation.summary ?? "No summary available."} />
           </ExpandableTextSection>
         </EvaluationSectionBlock>
 
@@ -457,7 +458,12 @@ export function StrideEvaluationDetail({
               {titleize(decision)}
             </Badge>
             <ExpandableTextSection maxHeight={180}>
-              {evaluation.recommendations?.rationale ?? "No recommendation rationale recorded."}
+              <MarkdownPreviewBlock
+                value={
+                  evaluation.recommendations?.rationale ??
+                  "No recommendation rationale recorded."
+                }
+              />
             </ExpandableTextSection>
           </Stack>
         </EvaluationSectionBlock>
@@ -473,7 +479,12 @@ export function StrideEvaluationDetail({
                     <Progress value={(evaluation.confidence.score ?? 0) * 100} />
                   ) : null}
                   <ExpandableTextSection maxHeight={160}>
-                    {evaluation.confidence?.rationale ?? "No confidence rationale recorded."}
+                    <MarkdownPreviewBlock
+                      value={
+                        evaluation.confidence?.rationale ??
+                        "No confidence rationale recorded."
+                      }
+                    />
                   </ExpandableTextSection>
                 </Stack>
               </Paper>
