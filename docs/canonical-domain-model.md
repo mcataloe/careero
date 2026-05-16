@@ -225,21 +225,6 @@ Timeline guidance:
 - State history, notes, reminders, and interview stages can render as a unified timeline.
 - Timeline rendering must not become the persistence model; use typed structures as the source.
 
-### Application Workflow State Machine
-
-- **Role Status vs Application State**: Role status tracks ingestion/parsing (`found`, `evaluating`, `evaluated`). The Application Workflow State tracks the active candidate pipeline independently.
-- **Allowed Transitions**:
-  - `discovered` -> `interested`, `withdrawn`, `archived`
-  - `interested` -> `applied`, `withdrawn`, `archived`
-  - `applied` -> `interviewing`, `rejected`, `withdrawn`, `archived`
-  - `interviewing` -> `offer`, `rejected`, `withdrawn`, `archived`
-  - `offer` -> `withdrawn`, `archived`
-  - `rejected` -> `archived`
-  - `withdrawn` -> `archived`
-  - `archived` -> `discovered`, `interested` (Explicit reactivation only)
-- **Archived State Behavior**: Archived applications are explicitly removed from the active status pipeline. They can only be viewed in historical contexts or explicitly included via queries.
-- **Automation Boundary**: Transitions support a `changed_by` field (`user`, `system`, `automation`). AI and automation must not silently transition workflow states. All transitions must append an auditable history record and an ActivityLog event. Future automation may propose state changes, but the backend state machine strictly enforces validity.
-
 ## AI Orchestration Boundaries
 
 Keep these layers separate:
