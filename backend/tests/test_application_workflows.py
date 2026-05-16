@@ -417,6 +417,96 @@ def test_service_available_next_states_and_pipeline(db_session: Session) -> None
     ]
 
 
+def test_service_timeline_includes_creation_state_changes_and_orders_events(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application = db_session.get(Application, UUID(detail["id"]))
+    assert application is not None
+    service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(state=ApplicationWorkflowState.INTERESTED),
+    )
+    service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(state=ApplicationWorkflowState.ARCHIVED),
+    )
+    service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(
+            state=ApplicationWorkflowState.DISCOVERED,
+            reactivate=True,
+        ),
+    )
+
+    timeline = service.get_timeline(application.id)
+
+    event_types = [event["event_type"] for event in timeline]
+    assert "application.created" in event_types
+    assert "application.state_changed" in event_types
+    assert "application.archived" in event_types
+    assert "application.reactivated" in event_types
+    assert [event["occurred_at"] for event in timeline] == sorted(
+        [event["occurred_at"] for event in timeline],
+        reverse=True,
+    )
+
+
+def test_service_timeline_includes_typed_children_evaluations_and_artifacts(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application = db_session.get(Application, UUID(detail["id"]))
+    assert application is not None
+    add_workflow_children(db_session, application)
+    add_summary_sources(db_session, application)
+    reminder = application.reminders[0]
+    reminder.completed_at = datetime.now(timezone.utc)
+    stage = application.interview_stages[0]
+    stage.completed_at = datetime.now(timezone.utc)
+    db_session.commit()
+
+    timeline = service.get_timeline(application.id)
+
+    by_type = {event["event_type"]: event for event in timeline}
+    assert "note.created" in by_type
+    assert "reminder.created" in by_type
+    assert "reminder.completed" in by_type
+    assert "interview.created" in by_type
+    assert "interview.completed" in by_type
+    assert "stride.completed" in by_type
+    assert "artifact.resume.created" in by_type
+    assert "artifact.cover_letter.created" in by_type
+    assert "content" not in by_type["artifact.resume.created"]["metadata"]
+
+
+def test_api_application_timeline_and_missing_application(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+    application_id = application_client.post(
+        f"/api/roles/{role.id}/application"
+    ).json()["id"]
+
+    timeline_response = application_client.get(
+        f"/api/applications/{application_id}/timeline"
+    )
+    assert timeline_response.status_code == 200
+    assert "application.created" in [
+        event["event_type"] for event in timeline_response.json()
+    ]
+
+    missing_response = application_client.get(f"/api/applications/{uuid4()}/timeline")
+    assert missing_response.status_code == 404
+
+
 def test_api_list_detail_ensure_filter_and_update(
     application_client: TestClient,
     db_session: Session,

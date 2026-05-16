@@ -35,6 +35,24 @@ export interface ApplicationSummary {
   counts: ApplicationWorkflowCounts;
 }
 
+export interface ApplicationRoleSummary {
+  id: string;
+  workspace_id: string;
+  title: string;
+  status: string;
+  company: ApplicationCompanySummary;
+  job_url: string | null;
+  location: string | null;
+  remote_type: string | null;
+}
+
+export interface ApplicationDetail extends ApplicationSummary {
+  workflow_metadata: Record<string, unknown>;
+  application_state: Record<string, unknown>;
+  state_history: Record<string, unknown>[];
+  role: ApplicationRoleSummary;
+}
+
 export interface ApplicationPipelineResponse {
   workspace_id: string | null;
   include_inactive: boolean;
@@ -47,4 +65,17 @@ export interface ApplicationStateTransitionPayload {
   changed_by?: "user" | "system" | "automation";
   metadata?: Record<string, unknown>;
   reactivate?: boolean;
+}
+
+export interface ApplicationTimelineEvent {
+  id: string;
+  application_id: string;
+  event_type: string;
+  title: string;
+  description: string | null;
+  occurred_at: string;
+  actor: string;
+  source_type: string;
+  source_id: string;
+  metadata: Record<string, unknown>;
 }

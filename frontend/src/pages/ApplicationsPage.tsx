@@ -11,6 +11,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import {
   getApplicationsPipeline,
@@ -190,7 +191,12 @@ function ApplicationPipelineCard({
     <Card withBorder radius="md" p="md">
       <Stack gap="sm">
         <div>
-          <Text fw={600} lineClamp={2}>
+          <Text
+            component={Link}
+            to={`/applications/${application.id}`}
+            fw={600}
+            lineClamp={2}
+          >
             {application.title}
           </Text>
           <Text c="dimmed" size="sm">

@@ -72,6 +72,12 @@ excluded unless `include_inactive=true` is supplied.
 `GET /api/applications/{application_id}` returns richer detail, including the
 canonical `ApplicationState` contract under `application_state`.
 
+`GET /api/applications/{application_id}/timeline` returns a reverse
+chronological timeline view. It aggregates existing typed workflow rows,
+completed STRIDE evaluations, generated resume/cover-letter artifacts, and
+selected ActivityLog entries. The timeline stores no rows of its own and must
+not become the workflow source of truth.
+
 `PATCH /api/applications/{application_id}` updates workflow metadata and dates.
 It does not change `Application.current_state`; state changes must use the
 state-transition operation.
@@ -112,3 +118,13 @@ Every migrated application receives an initial state history row with
 AI and future automation layers may suggest workflow actions, but user-visible
 state changes must go through backend workflow persistence and append typed
 state history. Layer 7 automation must not silently mutate application state.
+
+## Timeline Event Types
+
+Timeline event types are stable labels for rendering and filtering. Core events
+include `application.created`, `application.state_changed`,
+`application.archived`, `application.reactivated`, `note.created`,
+`reminder.created`, `reminder.completed`, `interview.created`,
+`interview.completed`, `stride.completed`, `artifact.resume.created`, and
+`artifact.cover_letter.created`. ActivityLog may enrich update/delete events,
+but it does not replace typed workflow records.

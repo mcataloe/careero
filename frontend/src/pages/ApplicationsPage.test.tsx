@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 
 import { ApplicationsPage } from "./ApplicationsPage";
@@ -74,7 +75,11 @@ describe("ApplicationsPage", () => {
   it("renders loading and empty states", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(emptyPipeline)));
 
-    render(<ApplicationsPage />);
+    render(
+      <MemoryRouter>
+        <ApplicationsPage />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByText("Loading applications")).toBeInTheDocument();
     expect(await screen.findByText("No application workflows yet.")).toBeInTheDocument();
@@ -86,7 +91,11 @@ describe("ApplicationsPage", () => {
       vi.fn().mockResolvedValue(jsonResponse({ detail: "Backend unavailable" }, 500)),
     );
 
-    render(<ApplicationsPage />);
+    render(
+      <MemoryRouter>
+        <ApplicationsPage />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByText("Backend unavailable")).toBeInTheDocument();
   });
@@ -94,9 +103,17 @@ describe("ApplicationsPage", () => {
   it("groups applications by backend pipeline state", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(populatedPipeline)));
 
-    render(<ApplicationsPage />);
+    render(
+      <MemoryRouter>
+        <ApplicationsPage />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByText("Staff Platform Engineer")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Staff Platform Engineer" })).toHaveAttribute(
+      "href",
+      "/applications/app-1",
+    );
     expect(screen.getByText("Example Company")).toBeInTheDocument();
     expect(screen.getByText("1 notes")).toBeInTheDocument();
     expect(screen.getByText("2 reminders")).toBeInTheDocument();
@@ -118,7 +135,11 @@ describe("ApplicationsPage", () => {
       .mockResolvedValueOnce(jsonResponse(emptyPipeline));
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<ApplicationsPage />);
+    render(
+      <MemoryRouter>
+        <ApplicationsPage />
+      </MemoryRouter>,
+    );
 
     await userEvent.click(await screen.findByText("Move to interested"));
 
@@ -150,7 +171,11 @@ describe("ApplicationsPage", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<ApplicationsPage />);
+    render(
+      <MemoryRouter>
+        <ApplicationsPage />
+      </MemoryRouter>,
+    );
 
     await userEvent.click(await screen.findByLabelText("Include archived"));
 

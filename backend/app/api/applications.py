@@ -10,6 +10,7 @@ from app.schemas.applications import (
     ApplicationMetadataUpdate,
     ApplicationPipelineResponse,
     ApplicationStateTransitionRequest,
+    ApplicationTimelineEventResponse,
 )
 from app.services.applications import (
     ApplicationWorkflowNotFoundError,
@@ -144,6 +145,22 @@ def get_application(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ApplicationWorkflowValidationError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/applications/{application_id}/timeline",
+    response_model=list[ApplicationTimelineEventResponse],
+)
+def get_application_timeline(
+    application_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.get_timeline(application_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ApplicationWorkflowSeedMissingError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 

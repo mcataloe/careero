@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppShellLayout } from "./components/AppShellLayout";
+import { ApplicationDetailPage } from "./pages/ApplicationDetailPage";
 import { ApplicationsPage } from "./pages/ApplicationsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { RoleDetailPage } from "./pages/RoleDetailPage";
@@ -18,6 +19,7 @@ function App() {
         <Route path="/roles/new" element={<RoleNewPage />} />
         <Route path="/roles/:roleId" element={<RoleDetailPage />} />
         <Route path="/applications" element={<ApplicationsPage />} />
+        <Route path="/applications/:applicationId" element={<ApplicationDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -555,6 +555,19 @@ Get workflow detail:
 Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}
 ```
 
+Get the application timeline:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}/timeline
+```
+
+The timeline is a read-only view over typed workflow persistence. It includes
+application creation, state history, notes, reminders, interview stages,
+completed STRIDE evaluations, generated resume and cover-letter artifacts, and
+selected ActivityLog update/delete events. It does not store duplicate timeline
+rows and does not expose raw prompts, source resume text, generated document
+content, or raw model payloads.
+
 List endpoints return compact summaries for the Applications page: role title,
 company, current state, application dates, latest STRIDE status, latest resume
 and cover letter artifact summaries, and note/reminder/interview counts. They do

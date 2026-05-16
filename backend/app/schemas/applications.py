@@ -96,6 +96,19 @@ class ApplicationPipelineResponse(BaseModel):
     states: dict[str, list[ApplicationListItemResponse]]
 
 
+class ApplicationTimelineEventResponse(BaseModel):
+    id: str
+    application_id: uuid.UUID
+    event_type: str
+    title: str
+    description: str | None = None
+    occurred_at: datetime
+    actor: str
+    source_type: str
+    source_id: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class ApplicationNoteCreate(BaseModel):
     body: str = Field(min_length=1)
     author: str | None = Field(default=None, max_length=200)

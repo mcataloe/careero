@@ -1,8 +1,10 @@
 import { apiRequest } from "./client";
 import type {
+  ApplicationDetail,
   ApplicationPipelineResponse,
   ApplicationStateTransitionPayload,
   ApplicationSummary,
+  ApplicationTimelineEvent,
 } from "../types/applications";
 
 function appendPipelineParams(
@@ -43,6 +45,18 @@ export function getWorkspaceApplicationsPipeline(
     appendPipelineParams(`/api/workspaces/${workspaceId}/applications/pipeline`, {
       includeInactive: options?.includeInactive,
     }),
+  );
+}
+
+export function getApplication(applicationId: string): Promise<ApplicationDetail> {
+  return apiRequest<ApplicationDetail>(`/api/applications/${applicationId}`);
+}
+
+export function getApplicationTimeline(
+  applicationId: string,
+): Promise<ApplicationTimelineEvent[]> {
+  return apiRequest<ApplicationTimelineEvent[]>(
+    `/api/applications/${applicationId}/timeline`,
   );
 }
 

@@ -9,11 +9,12 @@ from typing import Any
 
 from jsonschema import Draft7Validator, FormatChecker
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState, RoleStatus
 from app.models import (
+    ActivityLog,
     Application,
     ApplicationExternalLink,
     ApplicationInterviewStage,
@@ -48,6 +49,23 @@ from app.services.workspace_context import is_workspace_active_for_new_work
 
 
 CONTRACT_VERSION = "careero.contracts.v1"
+
+_TIMELINE_APPLICATION_ACTIVITY = {
+    "application.updated",
+    "application.note.updated",
+    "application.note.deleted",
+    "application.reminder.updated",
+    "application.interview_stage.updated",
+    "application.external_link.created",
+    "application.external_link.updated",
+    "application.external_link.deleted",
+}
+
+_TIMELINE_ROLE_ACTIVITY = {
+    "role.created",
+    "role.updated",
+    "role.archived",
+}
 
 
 class ApplicationWorkflowError(Exception):
@@ -200,6 +218,131 @@ class ApplicationWorkflowService:
         if application is None:
             raise ApplicationWorkflowNotFoundError("Application workflow not found")
         return self.detail(application)
+
+    def get_timeline(self, application_id: uuid.UUID) -> list[dict[str, Any]]:
+        application = self._require_application(application_id)
+        events: list[dict[str, Any]] = [
+            _timeline_event(
+                application=application,
+                event_id=f"application-created-{application.id}",
+                event_type="application.created",
+                title="Application tracked",
+                description=f"Started tracking {application.role.title}.",
+                occurred_at=application.created_at,
+                actor="system",
+                source_type="application",
+                source_id=str(application.id),
+                metadata={"state": application.current_state},
+            )
+        ]
+
+        for history in application.state_history:
+            event_type = _state_history_event_type(history)
+            events.append(
+                _timeline_event(
+                    application=application,
+                    event_id=f"state-history-{history.id}",
+                    event_type=event_type,
+                    title=_state_history_title(history),
+                    description=history.reason,
+                    occurred_at=history.changed_at,
+                    actor=history.changed_by,
+                    source_type="application_state_history",
+                    source_id=str(history.id),
+                    metadata={
+                        "from_state": history.from_state,
+                        "to_state": history.to_state,
+                        **(history.history_metadata or {}),
+                    },
+                )
+            )
+
+        for note in application.note_entries:
+            events.append(
+                _timeline_event(
+                    application=application,
+                    event_id=f"note-created-{note.id}",
+                    event_type="note.created",
+                    title="Note added",
+                    description=_truncate(note.body),
+                    occurred_at=note.created_at,
+                    actor=note.author or "user",
+                    source_type="application_note",
+                    source_id=str(note.id),
+                    metadata={},
+                )
+            )
+
+        for reminder in application.reminders:
+            events.append(
+                _timeline_event(
+                    application=application,
+                    event_id=f"reminder-created-{reminder.id}",
+                    event_type="reminder.created",
+                    title=f"Reminder added: {reminder.title}",
+                    description=reminder.notes,
+                    occurred_at=reminder.created_at,
+                    actor="user",
+                    source_type="application_reminder",
+                    source_id=str(reminder.id),
+                    metadata={"due_at": _isoformat(reminder.due_at)},
+                )
+            )
+            if reminder.completed_at is not None:
+                events.append(
+                    _timeline_event(
+                        application=application,
+                        event_id=f"reminder-completed-{reminder.id}",
+                        event_type="reminder.completed",
+                        title=f"Reminder completed: {reminder.title}",
+                        description=None,
+                        occurred_at=reminder.completed_at,
+                        actor="user",
+                        source_type="application_reminder",
+                        source_id=str(reminder.id),
+                        metadata={"due_at": _isoformat(reminder.due_at)},
+                    )
+                )
+
+        for stage in application.interview_stages:
+            events.append(
+                _timeline_event(
+                    application=application,
+                    event_id=f"interview-created-{stage.id}",
+                    event_type="interview.created",
+                    title=f"Interview stage added: {stage.title}",
+                    description=stage.notes,
+                    occurred_at=stage.created_at,
+                    actor="user",
+                    source_type="application_interview_stage",
+                    source_id=str(stage.id),
+                    metadata={
+                        "stage_type": stage.stage_type,
+                        "scheduled_at": _isoformat(stage.scheduled_at),
+                    },
+                )
+            )
+            if stage.completed_at is not None:
+                events.append(
+                    _timeline_event(
+                        application=application,
+                        event_id=f"interview-completed-{stage.id}",
+                        event_type="interview.completed",
+                        title=f"Interview stage completed: {stage.title}",
+                        description=None,
+                        occurred_at=stage.completed_at,
+                        actor="user",
+                        source_type="application_interview_stage",
+                        source_id=str(stage.id),
+                        metadata={"stage_type": stage.stage_type},
+                    )
+                )
+
+        events.extend(self._timeline_evaluations(application))
+        events.extend(self._timeline_artifacts(application))
+        events.extend(self._timeline_activity(application))
+        events.sort(key=lambda event: (event["occurred_at"], event["id"]), reverse=True)
+        return events
 
     def update_application(
         self,
@@ -814,6 +957,125 @@ class ApplicationWorkflowService:
             },
         )
 
+    def _timeline_evaluations(self, application: Application) -> list[dict[str, Any]]:
+        evaluations = self.db.scalars(
+            select(StrideEvaluation)
+            .where(
+                StrideEvaluation.user_id == application.user_id,
+                StrideEvaluation.workspace_id == application.workspace_id,
+                StrideEvaluation.role_id == application.role_id,
+                StrideEvaluation.deleted_at.is_(None),
+                StrideEvaluation.evaluation_status == "completed",
+            )
+            .order_by(StrideEvaluation.updated_at.desc(), StrideEvaluation.id.desc())
+        )
+        return [
+            _timeline_event(
+                application=application,
+                event_id=f"stride-completed-{evaluation.id}",
+                event_type="stride.completed",
+                title="STRIDE evaluation completed",
+                description=evaluation.summary,
+                occurred_at=evaluation.updated_at,
+                actor="ai" if evaluation.ai_enabled else "system",
+                source_type="stride_evaluation",
+                source_id=str(evaluation.id),
+                metadata={
+                    "recommendation": evaluation.recommendation,
+                    "overall_score": (
+                        str(evaluation.overall_score)
+                        if evaluation.overall_score is not None
+                        else None
+                    ),
+                    "confidence_level": evaluation.confidence_level,
+                },
+            )
+            for evaluation in evaluations
+        ]
+
+    def _timeline_artifacts(self, application: Application) -> list[dict[str, Any]]:
+        artifacts = self.db.scalars(
+            select(GeneratedArtifact)
+            .where(
+                GeneratedArtifact.user_id == application.user_id,
+                GeneratedArtifact.workspace_id == application.workspace_id,
+                GeneratedArtifact.role_id == application.role_id,
+                GeneratedArtifact.deleted_at.is_(None),
+                GeneratedArtifact.artifact_type.in_(
+                    ["tailored_resume", "cover_letter"]
+                ),
+            )
+            .order_by(GeneratedArtifact.created_at.desc(), GeneratedArtifact.id.desc())
+        )
+        events: list[dict[str, Any]] = []
+        for artifact in artifacts:
+            if artifact.artifact_type == "tailored_resume":
+                event_type = "artifact.resume.created"
+                title = "Resume artifact generated"
+            else:
+                event_type = "artifact.cover_letter.created"
+                title = "Cover letter artifact generated"
+            contract = (
+                artifact.artifact_metadata.get("contract")
+                if artifact.artifact_metadata
+                else None
+            )
+            revision = contract.get("revision", {}) if isinstance(contract, dict) else {}
+            events.append(
+                _timeline_event(
+                    application=application,
+                    event_id=f"{event_type}-{artifact.id}",
+                    event_type=event_type,
+                    title=title,
+                    description=artifact.title,
+                    occurred_at=artifact.created_at,
+                    actor="ai",
+                    source_type="generated_artifact",
+                    source_id=str(artifact.id),
+                    metadata={
+                        "artifact_type": artifact.artifact_type,
+                        "revision_number": revision.get("revisionNumber"),
+                    },
+                )
+            )
+        return events
+
+    def _timeline_activity(self, application: Application) -> list[dict[str, Any]]:
+        logs = self.db.scalars(
+            select(ActivityLog)
+            .where(
+                ActivityLog.user_id == application.user_id,
+                or_(
+                    and_(
+                        ActivityLog.entity_type == "application",
+                        ActivityLog.entity_id == application.id,
+                        ActivityLog.action.in_(_TIMELINE_APPLICATION_ACTIVITY),
+                    ),
+                    and_(
+                        ActivityLog.entity_type == "role",
+                        ActivityLog.entity_id == application.role_id,
+                        ActivityLog.action.in_(_TIMELINE_ROLE_ACTIVITY),
+                    ),
+                ),
+            )
+            .order_by(ActivityLog.created_at.desc(), ActivityLog.id.desc())
+        )
+        return [
+            _timeline_event(
+                application=application,
+                event_id=f"activity-{log.id}",
+                event_type=_activity_event_type(log),
+                title=_activity_title(log),
+                description=None,
+                occurred_at=log.created_at,
+                actor=_activity_actor(log),
+                source_type="activity_log",
+                source_id=str(log.id),
+                metadata=_safe_activity_metadata(log),
+            )
+            for log in logs
+        ]
+
     def _latest_stride_summary(self, application: Application) -> dict[str, Any] | None:
         evaluation = self.db.scalar(
             select(StrideEvaluation)
@@ -907,6 +1169,119 @@ def _pipeline_states(*, include_inactive: bool) -> tuple[ApplicationWorkflowStat
     return tuple(
         state for state in states if state != ApplicationWorkflowState.ARCHIVED
     )
+
+
+def _timeline_event(
+    *,
+    application: Application,
+    event_id: str,
+    event_type: str,
+    title: str,
+    description: str | None,
+    occurred_at: datetime,
+    actor: str,
+    source_type: str,
+    source_id: str,
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "id": event_id,
+        "application_id": application.id,
+        "event_type": event_type,
+        "title": title,
+        "description": description,
+        "occurred_at": occurred_at,
+        "actor": actor,
+        "source_type": source_type,
+        "source_id": source_id,
+        "metadata": {key: value for key, value in metadata.items() if value is not None},
+    }
+
+
+def _state_history_event_type(history: ApplicationStateHistory) -> str:
+    if history.to_state == ApplicationWorkflowState.ARCHIVED.value:
+        return "application.archived"
+    if history.from_state == ApplicationWorkflowState.ARCHIVED.value:
+        return "application.reactivated"
+    return "application.state_changed"
+
+
+def _state_history_title(history: ApplicationStateHistory) -> str:
+    if history.from_state is None:
+        return f"Initial state: {history.to_state}"
+    if history.to_state == ApplicationWorkflowState.ARCHIVED.value:
+        return "Application archived"
+    if history.from_state == ApplicationWorkflowState.ARCHIVED.value:
+        return f"Application reactivated to {history.to_state}"
+    return f"State changed to {history.to_state}"
+
+
+def _activity_event_type(log: ActivityLog) -> str:
+    mapping = {
+        "application.note.updated": "note.updated",
+        "application.note.deleted": "note.deleted",
+        "application.reminder.updated": "reminder.updated",
+        "application.interview_stage.updated": "interview.updated",
+        "application.external_link.created": "external_link.created",
+        "application.external_link.updated": "external_link.updated",
+        "application.external_link.deleted": "external_link.deleted",
+    }
+    return mapping.get(log.action, log.action)
+
+
+def _activity_title(log: ActivityLog) -> str:
+    titles = {
+        "application.updated": "Application details updated",
+        "application.note.updated": "Note updated",
+        "application.note.deleted": "Note deleted",
+        "application.reminder.updated": "Reminder updated",
+        "application.interview_stage.updated": "Interview stage updated",
+        "application.external_link.created": "External link added",
+        "application.external_link.updated": "External link updated",
+        "application.external_link.deleted": "External link deleted",
+        "role.created": "Role captured",
+        "role.updated": "Role updated",
+        "role.archived": "Role archived",
+    }
+    return titles.get(log.action, log.action.replace(".", " "))
+
+
+def _activity_actor(log: ActivityLog) -> str:
+    changed_by = log.details.get("changed_by") if log.details else None
+    return str(changed_by) if changed_by else "user"
+
+
+def _safe_activity_metadata(log: ActivityLog) -> dict[str, Any]:
+    if not log.details:
+        return {"action": log.action}
+    allowed_keys = {
+        "action",
+        "changed_fields",
+        "from_state",
+        "to_state",
+        "reactivate",
+        "role_id",
+        "workspace_id",
+        "note_id",
+        "reminder_id",
+        "stage_id",
+        "stage_type",
+        "link_id",
+        "link_type",
+    }
+    metadata = {
+        key: value
+        for key, value in log.details.items()
+        if key in allowed_keys and isinstance(value, (str, int, float, bool, list, type(None)))
+    }
+    metadata["action"] = log.action
+    return metadata
+
+
+def _truncate(value: str, limit: int = 240) -> str:
+    if len(value) <= limit:
+        return value
+    return f"{value[: limit - 3].rstrip()}..."
 
 
 def _isoformat(value: datetime | None) -> str | None:
