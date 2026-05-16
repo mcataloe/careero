@@ -6,8 +6,14 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.applications import (
     ApplicationDetailResponse,
+    ApplicationExternalLinkCreate,
+    ApplicationExternalLinkResponse,
+    ApplicationExternalLinkUpdate,
     ApplicationListItemResponse,
     ApplicationMetadataUpdate,
+    ApplicationNoteCreate,
+    ApplicationNoteResponse,
+    ApplicationNoteUpdate,
     ApplicationPipelineResponse,
     ApplicationStateTransitionRequest,
     ApplicationTimelineEventResponse,
@@ -159,6 +165,144 @@ def get_application_timeline(
 ):
     try:
         return service.get_timeline(application_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/applications/{application_id}/notes",
+    response_model=list[ApplicationNoteResponse],
+)
+def list_application_notes(
+    application_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.list_notes(application_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/notes",
+    response_model=ApplicationNoteResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_application_note(
+    application_id: uuid.UUID,
+    payload: ApplicationNoteCreate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.create_note(application_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.patch(
+    "/applications/{application_id}/notes/{note_id}",
+    response_model=ApplicationNoteResponse,
+)
+def update_application_note(
+    application_id: uuid.UUID,
+    note_id: uuid.UUID,
+    payload: ApplicationNoteUpdate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.update_note(application_id, note_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.delete(
+    "/applications/{application_id}/notes/{note_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_application_note(
+    application_id: uuid.UUID,
+    note_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        service.delete_note(application_id, note_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/applications/{application_id}/links",
+    response_model=list[ApplicationExternalLinkResponse],
+)
+def list_application_links(
+    application_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.list_external_links(application_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/links",
+    response_model=ApplicationExternalLinkResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_application_link(
+    application_id: uuid.UUID,
+    payload: ApplicationExternalLinkCreate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.create_external_link(application_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.patch(
+    "/applications/{application_id}/links/{link_id}",
+    response_model=ApplicationExternalLinkResponse,
+)
+def update_application_link(
+    application_id: uuid.UUID,
+    link_id: uuid.UUID,
+    payload: ApplicationExternalLinkUpdate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.update_external_link(application_id, link_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.delete(
+    "/applications/{application_id}/links/{link_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_application_link(
+    application_id: uuid.UUID,
+    link_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        service.delete_external_link(application_id, link_id)
     except ApplicationWorkflowNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ApplicationWorkflowSeedMissingError as exc:

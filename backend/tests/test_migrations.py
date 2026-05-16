@@ -185,6 +185,30 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
     generated_artifact_indexes = {
         index["name"] for index in inspector.get_indexes("generated_artifacts")
     }
+    application_note_columns = {
+        column["name"] for column in inspector.get_columns("application_notes")
+    }
+    application_external_link_columns = {
+        column["name"]
+        for column in inspector.get_columns("application_external_links")
+    }
+    application_note_indexes = {
+        index["name"] for index in inspector.get_indexes("application_notes")
+    }
+    application_external_link_indexes = {
+        index["name"]
+        for index in inspector.get_indexes("application_external_links")
+    }
     assert "ix_roles_workspace_id" in role_indexes
     assert "ix_stride_evaluations_workspace_id" in stride_indexes
     assert "ix_generated_artifacts_workspace_id" in generated_artifact_indexes
+    assert {"note_type", "deleted_at"}.issubset(application_note_columns)
+    assert "deleted_at" in application_external_link_columns
+    assert {
+        "ix_application_notes_deleted_at",
+        "ix_application_notes_note_type",
+    }.issubset(application_note_indexes)
+    assert (
+        "ix_application_external_links_deleted_at"
+        in application_external_link_indexes
+    )

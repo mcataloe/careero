@@ -505,12 +505,14 @@ class ApplicationStateHistory(TimestampMixin, Base):
     application: Mapped[Application] = relationship(back_populates="state_history")
 
 
-class ApplicationNote(TimestampMixin, Base):
+class ApplicationNote(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "application_notes"
     __table_args__ = (
         Index("ix_application_notes_application_id", "application_id"),
         Index("ix_application_notes_workspace_id", "workspace_id"),
         Index("ix_application_notes_created_at", "created_at"),
+        Index("ix_application_notes_deleted_at", "deleted_at"),
+        Index("ix_application_notes_note_type", "note_type"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -534,6 +536,7 @@ class ApplicationNote(TimestampMixin, Base):
         nullable=False,
     )
     author: Mapped[str | None] = mapped_column(String(200))
+    note_type: Mapped[str] = mapped_column(String(100), nullable=False, default="general")
     body: Mapped[str] = mapped_column(Text, nullable=False)
 
     application: Mapped[Application] = relationship(back_populates="note_entries")
@@ -621,12 +624,13 @@ class ApplicationInterviewStage(TimestampMixin, Base):
     application: Mapped[Application] = relationship(back_populates="interview_stages")
 
 
-class ApplicationExternalLink(TimestampMixin, Base):
+class ApplicationExternalLink(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "application_external_links"
     __table_args__ = (
         Index("ix_application_external_links_application_id", "application_id"),
         Index("ix_application_external_links_workspace_id", "workspace_id"),
         Index("ix_application_external_links_link_type", "link_type"),
+        Index("ix_application_external_links_deleted_at", "deleted_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

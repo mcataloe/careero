@@ -37,6 +37,14 @@ Application workflow data is stored in typed relational tables:
 - `application_interview_stages` stores structured interview steps.
 - `application_external_links` stores posting, portal, and related links.
 
+Notes and external links are first-class workflow records. Notes support
+`general`, `recruiter`, `compensation`, `follow_up`, and `interview` types.
+External links support conventions such as `job_posting`, `company_careers`,
+`recruiter_profile`, `application_portal`, `interview_prep`, `email_thread`,
+and `other`. Deleting either record is a soft delete: active lists and counts
+exclude deleted rows, while ActivityLog keeps a safe audit event for the
+timeline.
+
 `ActivityLog` remains a broad audit stream for events such as
 `application.created` and `application.state_changed`. It is not the source of
 truth for workflow rendering.
@@ -77,6 +85,25 @@ chronological timeline view. It aggregates existing typed workflow rows,
 completed STRIDE evaluations, generated resume/cover-letter artifacts, and
 selected ActivityLog entries. The timeline stores no rows of its own and must
 not become the workflow source of truth.
+
+Notes:
+
+- `GET /api/applications/{application_id}/notes`
+- `POST /api/applications/{application_id}/notes`
+- `PATCH /api/applications/{application_id}/notes/{note_id}`
+- `DELETE /api/applications/{application_id}/notes/{note_id}`
+
+External links:
+
+- `GET /api/applications/{application_id}/links`
+- `POST /api/applications/{application_id}/links`
+- `PATCH /api/applications/{application_id}/links/{link_id}`
+- `DELETE /api/applications/{application_id}/links/{link_id}`
+
+Notes are not reminders and are not interview stages. External links are
+manually attached resources such as job postings, portals, recruiter profiles,
+and prep material. Email/calendar integrations and automatic imports remain out
+of scope.
 
 `PATCH /api/applications/{application_id}` updates workflow metadata and dates.
 It does not change `Application.current_state`; state changes must use the
@@ -124,7 +151,9 @@ state history. Layer 7 automation must not silently mutate application state.
 Timeline event types are stable labels for rendering and filtering. Core events
 include `application.created`, `application.state_changed`,
 `application.archived`, `application.reactivated`, `note.created`,
-`reminder.created`, `reminder.completed`, `interview.created`,
-`interview.completed`, `stride.completed`, `artifact.resume.created`, and
-`artifact.cover_letter.created`. ActivityLog may enrich update/delete events,
-but it does not replace typed workflow records.
+`external_link.created`, `reminder.created`, `reminder.completed`,
+`interview.created`, `interview.completed`, `stride.completed`,
+`artifact.resume.created`, and `artifact.cover_letter.created`. ActivityLog may
+enrich update/delete events such as `note.updated`, `note.deleted`,
+`external_link.updated`, and `external_link.deleted`, but it does not replace
+typed workflow records.

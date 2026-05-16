@@ -14,6 +14,7 @@ from app.main import create_app
 from app.models import (
     ActivityLog,
     Application,
+    ApplicationExternalLink,
     ApplicationInterviewStage,
     ApplicationNote,
     ApplicationReminder,
@@ -22,7 +23,11 @@ from app.models import (
     User,
 )
 from app.schemas.applications import (
+    ApplicationExternalLinkCreate,
+    ApplicationExternalLinkUpdate,
     ApplicationMetadataUpdate,
+    ApplicationNoteCreate,
+    ApplicationNoteUpdate,
     ApplicationStateTransitionRequest,
 )
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
@@ -486,6 +491,200 @@ def test_service_timeline_includes_typed_children_evaluations_and_artifacts(
     assert "content" not in by_type["artifact.resume.created"]["metadata"]
 
 
+def test_service_note_crud_uses_soft_delete_and_updates_counts(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application_id = UUID(detail["id"])
+
+    created = service.create_note(
+        application_id,
+        ApplicationNoteCreate(
+            body="Ask about platform ownership.",
+            note_type="recruiter",
+        ),
+    )
+    assert created["note_type"] == "recruiter"
+    assert created["body"] == "Ask about platform ownership."
+    assert service.get_application(application_id)["counts"]["notes"] == 1
+
+    notes = service.list_notes(application_id)
+    assert [note["id"] for note in notes] == [created["id"]]
+
+    updated = service.update_note(
+        application_id,
+        created["id"],
+        ApplicationNoteUpdate(
+            body="Ask about platform ownership and scope.",
+            note_type="follow_up",
+        ),
+    )
+    assert updated["note_type"] == "follow_up"
+    assert updated["body"] == "Ask about platform ownership and scope."
+
+    service.delete_note(application_id, created["id"])
+    deleted_note = db_session.get(ApplicationNote, created["id"])
+    assert deleted_note is not None
+    assert deleted_note.deleted_at is not None
+    assert service.list_notes(application_id) == []
+    assert service.get_application(application_id)["counts"]["notes"] == 0
+    with pytest.raises(ApplicationWorkflowNotFoundError):
+        service.update_note(
+            application_id,
+            created["id"],
+            ApplicationNoteUpdate(body="Should not update deleted notes."),
+        )
+
+    actions = list(
+        db_session.scalars(
+            select(ActivityLog.action).where(ActivityLog.entity_id == application_id)
+        )
+    )
+    assert "application.note.created" in actions
+    assert "application.note.updated" in actions
+    assert "application.note.deleted" in actions
+
+
+def test_service_external_link_crud_uses_soft_delete(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application_id = UUID(detail["id"])
+
+    created = service.create_external_link(
+        application_id,
+        ApplicationExternalLinkCreate(
+            label="Job posting",
+            url="https://example.com/jobs/1",
+            type="job_posting",
+            metadata={"source": "manual"},
+        ),
+    )
+    assert created["label"] == "Job posting"
+    assert created["type"] == "job_posting"
+    assert created["metadata"] == {"source": "manual"}
+    assert service.list_external_links(application_id)[0]["id"] == created["id"]
+
+    updated = service.update_external_link(
+        application_id,
+        created["id"],
+        ApplicationExternalLinkUpdate(
+            label="Application portal",
+            type="application_portal",
+        ),
+    )
+    assert updated["label"] == "Application portal"
+    assert updated["type"] == "application_portal"
+
+    service.delete_external_link(application_id, created["id"])
+    deleted_link = db_session.get(ApplicationExternalLink, created["id"])
+    assert deleted_link is not None
+    assert deleted_link.deleted_at is not None
+    assert service.list_external_links(application_id) == []
+    with pytest.raises(ApplicationWorkflowNotFoundError):
+        service.update_external_link(
+            application_id,
+            created["id"],
+            ApplicationExternalLinkUpdate(label="Should not update deleted links."),
+        )
+
+    actions = list(
+        db_session.scalars(
+            select(ActivityLog.action).where(ActivityLog.entity_id == application_id)
+        )
+    )
+    assert "application.external_link.created" in actions
+    assert "application.external_link.updated" in actions
+    assert "application.external_link.deleted" in actions
+
+
+def test_service_notes_links_are_scoped_to_application(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    service = ApplicationWorkflowService(db_session)
+    first = service.get_or_create_for_role(create_role(db_session, title="First").id)
+    second = service.get_or_create_for_role(create_role(db_session, title="Second").id)
+    first_id = UUID(first["id"])
+    second_id = UUID(second["id"])
+    note = service.create_note(
+        first_id,
+        ApplicationNoteCreate(body="Private to first application."),
+    )
+    link = service.create_external_link(
+        first_id,
+        ApplicationExternalLinkCreate(
+            label="First posting",
+            url="https://example.com/first",
+        ),
+    )
+
+    with pytest.raises(ApplicationWorkflowNotFoundError):
+        service.update_note(second_id, note["id"], ApplicationNoteUpdate(body="Nope."))
+    with pytest.raises(ApplicationWorkflowNotFoundError):
+        service.update_external_link(
+            second_id,
+            link["id"],
+            ApplicationExternalLinkUpdate(label="Nope."),
+        )
+
+
+def test_service_timeline_includes_note_link_activity_without_deleted_body(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application_id = UUID(detail["id"])
+    note = service.create_note(
+        application_id,
+        ApplicationNoteCreate(
+            body="Sensitive recruiter note that should not appear after delete.",
+            note_type="recruiter",
+        ),
+    )
+    link = service.create_external_link(
+        application_id,
+        ApplicationExternalLinkCreate(
+            label="Recruiter profile",
+            url="https://example.com/recruiter",
+            type="recruiter_profile",
+        ),
+    )
+    service.update_note(
+        application_id,
+        note["id"],
+        ApplicationNoteUpdate(body="Updated recruiter note."),
+    )
+    service.update_external_link(
+        application_id,
+        link["id"],
+        ApplicationExternalLinkUpdate(label="Updated recruiter profile."),
+    )
+    service.delete_note(application_id, note["id"])
+    service.delete_external_link(application_id, link["id"])
+
+    timeline = service.get_timeline(application_id)
+    event_types = [event["event_type"] for event in timeline]
+    assert "note.created" not in event_types
+    assert "external_link.created" not in event_types
+    assert "note.updated" in event_types
+    assert "note.deleted" in event_types
+    assert "external_link.updated" in event_types
+    assert "external_link.deleted" in event_types
+    assert all(
+        event["description"] != "Sensitive recruiter note that should not appear after delete."
+        for event in timeline
+    )
+
+
 def test_api_application_timeline_and_missing_application(
     application_client: TestClient,
     db_session: Session,
@@ -505,6 +704,84 @@ def test_api_application_timeline_and_missing_application(
 
     missing_response = application_client.get(f"/api/applications/{uuid4()}/timeline")
     assert missing_response.status_code == 404
+
+
+def test_api_note_and_link_crud(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+    application_id = application_client.post(
+        f"/api/roles/{role.id}/application"
+    ).json()["id"]
+
+    note_create_response = application_client.post(
+        f"/api/applications/{application_id}/notes",
+        json={"body": "Ask about team scope.", "note_type": "recruiter"},
+    )
+    assert note_create_response.status_code == 201
+    note = note_create_response.json()
+    assert note["note_type"] == "recruiter"
+
+    note_list_response = application_client.get(
+        f"/api/applications/{application_id}/notes"
+    )
+    assert note_list_response.status_code == 200
+    assert [item["id"] for item in note_list_response.json()] == [note["id"]]
+
+    note_update_response = application_client.patch(
+        f"/api/applications/{application_id}/notes/{note['id']}",
+        json={"body": "Ask about team scope and roadmap.", "note_type": "follow_up"},
+    )
+    assert note_update_response.status_code == 200
+    assert note_update_response.json()["note_type"] == "follow_up"
+
+    link_create_response = application_client.post(
+        f"/api/applications/{application_id}/links",
+        json={
+            "label": "Job posting",
+            "url": "https://example.com/jobs/1",
+            "type": "job_posting",
+            "metadata": {"source": "manual"},
+        },
+    )
+    assert link_create_response.status_code == 201
+    link = link_create_response.json()
+    assert link["type"] == "job_posting"
+
+    invalid_link_response = application_client.post(
+        f"/api/applications/{application_id}/links",
+        json={"label": "Broken", "url": "not-a-url"},
+    )
+    assert invalid_link_response.status_code == 422
+
+    link_list_response = application_client.get(
+        f"/api/applications/{application_id}/links"
+    )
+    assert link_list_response.status_code == 200
+    assert [item["id"] for item in link_list_response.json()] == [link["id"]]
+
+    link_update_response = application_client.patch(
+        f"/api/applications/{application_id}/links/{link['id']}",
+        json={"label": "Application portal", "type": "application_portal"},
+    )
+    assert link_update_response.status_code == 200
+    assert link_update_response.json()["label"] == "Application portal"
+
+    note_delete_response = application_client.delete(
+        f"/api/applications/{application_id}/notes/{note['id']}"
+    )
+    link_delete_response = application_client.delete(
+        f"/api/applications/{application_id}/links/{link['id']}"
+    )
+    assert note_delete_response.status_code == 204
+    assert link_delete_response.status_code == 204
+    assert application_client.get(
+        f"/api/applications/{application_id}/notes"
+    ).json() == []
+    assert application_client.get(
+        f"/api/applications/{application_id}/links"
+    ).json() == []
 
 
 def test_api_list_detail_ensure_filter_and_update(

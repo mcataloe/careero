@@ -5,6 +5,8 @@ import { ApplicationDetailPage } from "./ApplicationDetailPage";
 import { render, screen } from "../test-utils";
 import type {
   ApplicationDetail,
+  ApplicationExternalLink,
+  ApplicationNote,
   ApplicationTimelineEvent,
 } from "../types/applications";
 
@@ -72,6 +74,33 @@ const timeline: ApplicationTimelineEvent[] = [
   },
 ];
 
+const notes: ApplicationNote[] = [
+  {
+    id: "note-1",
+    application_id: "app-1",
+    workspace_id: "workspace-1",
+    author: "Local User",
+    note_type: "recruiter",
+    body: "Ask about team scope.",
+    created_at: "2026-05-16T15:00:00Z",
+    updated_at: "2026-05-16T15:00:00Z",
+  },
+];
+
+const links: ApplicationExternalLink[] = [
+  {
+    id: "link-1",
+    application_id: "app-1",
+    workspace_id: "workspace-1",
+    label: "Job posting",
+    url: "https://example.com/jobs/1",
+    type: "job_posting",
+    metadata: {},
+    created_at: "2026-05-16T15:00:00Z",
+    updated_at: "2026-05-16T15:00:00Z",
+  },
+];
+
 function renderDetailPage() {
   render(
     <MemoryRouter initialEntries={["/applications/app-1"]}>
@@ -93,7 +122,9 @@ describe("ApplicationDetailPage", () => {
       vi
         .fn()
         .mockResolvedValueOnce(jsonResponse(application))
-        .mockResolvedValueOnce(jsonResponse(timeline)),
+        .mockResolvedValueOnce(jsonResponse(timeline))
+        .mockResolvedValueOnce(jsonResponse(notes))
+        .mockResolvedValueOnce(jsonResponse(links)),
     );
 
     renderDetailPage();
@@ -102,6 +133,11 @@ describe("ApplicationDetailPage", () => {
     expect(await screen.findByText("Staff Platform Engineer")).toBeInTheDocument();
     expect(screen.getByText("Example Company")).toBeInTheDocument();
     expect(screen.getByText("Application tracked")).toBeInTheDocument();
+    expect(screen.getByText("Ask about team scope.")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Job posting" })[1]).toHaveAttribute(
+      "rel",
+      "noreferrer noopener",
+    );
     expect(screen.getByText(/Notes: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
   });
 

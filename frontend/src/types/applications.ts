@@ -79,3 +79,55 @@ export interface ApplicationTimelineEvent {
   source_id: string;
   metadata: Record<string, unknown>;
 }
+
+export type ApplicationNoteType =
+  | "general"
+  | "recruiter"
+  | "compensation"
+  | "follow_up"
+  | "interview";
+
+export interface ApplicationNote {
+  id: string;
+  application_id: string;
+  workspace_id: string;
+  author: string | null;
+  note_type: ApplicationNoteType;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApplicationNotePayload {
+  body: string;
+  author?: string | null;
+  note_type?: ApplicationNoteType;
+}
+
+export type ApplicationExternalLinkType =
+  | "job_posting"
+  | "company_careers"
+  | "recruiter_profile"
+  | "application_portal"
+  | "interview_prep"
+  | "email_thread"
+  | "other";
+
+export interface ApplicationExternalLink {
+  id: string;
+  application_id: string;
+  workspace_id: string;
+  label: string;
+  url: string;
+  type: ApplicationExternalLinkType | string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApplicationExternalLinkPayload {
+  label: string;
+  url: string;
+  type?: ApplicationExternalLinkType | string | null;
+  metadata?: Record<string, unknown>;
+}

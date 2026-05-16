@@ -2,11 +2,20 @@ import { Badge, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { getApplication, getApplicationTimeline } from "../api/applications";
+import {
+  getApplication,
+  getApplicationTimeline,
+  listApplicationLinks,
+  listApplicationNotes,
+} from "../api/applications";
+import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
+import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
 import { ApplicationTimeline } from "../components/ApplicationTimeline";
 import { ErrorState, LoadingState } from "../components/States";
 import type {
   ApplicationDetail,
+  ApplicationExternalLink,
+  ApplicationNote,
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
 } from "../types/applications";
@@ -26,6 +35,8 @@ export function ApplicationDetailPage() {
   const { applicationId } = useParams();
   const [application, setApplication] = useState<ApplicationDetail | null>(null);
   const [timeline, setTimeline] = useState<ApplicationTimelineEvent[]>([]);
+  const [notes, setNotes] = useState<ApplicationNote[]>([]);
+  const [links, setLinks] = useState<ApplicationExternalLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,12 +49,16 @@ export function ApplicationDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [nextApplication, nextTimeline] = await Promise.all([
+      const [nextApplication, nextTimeline, nextNotes, nextLinks] = await Promise.all([
         getApplication(applicationId),
         getApplicationTimeline(applicationId),
+        listApplicationNotes(applicationId),
+        listApplicationLinks(applicationId),
       ]);
       setApplication(nextApplication);
       setTimeline(nextTimeline);
+      setNotes(nextNotes);
+      setLinks(nextLinks);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load application");
     } finally {
@@ -100,6 +115,18 @@ export function ApplicationDetailPage() {
           ) : null}
         </Stack>
       </Card>
+
+      <ApplicationNotesPanel
+        applicationId={application.id}
+        notes={notes}
+        onChanged={loadApplication}
+      />
+
+      <ApplicationLinksPanel
+        applicationId={application.id}
+        links={links}
+        onChanged={loadApplication}
+      />
 
       <Stack gap="sm">
         <Title order={2}>Timeline</Title>

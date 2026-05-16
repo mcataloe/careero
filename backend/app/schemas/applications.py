@@ -1,11 +1,19 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 import uuid
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 from app.constants import ApplicationWorkflowState
+
+ApplicationNoteType = Literal[
+    "general",
+    "recruiter",
+    "compensation",
+    "follow_up",
+    "interview",
+]
 
 
 class ApplicationCompanySummary(BaseModel):
@@ -112,11 +120,26 @@ class ApplicationTimelineEventResponse(BaseModel):
 class ApplicationNoteCreate(BaseModel):
     body: str = Field(min_length=1)
     author: str | None = Field(default=None, max_length=200)
+    note_type: ApplicationNoteType = "general"
 
 
 class ApplicationNoteUpdate(BaseModel):
     body: str | None = Field(default=None, min_length=1)
     author: str | None = Field(default=None, max_length=200)
+    note_type: ApplicationNoteType | None = None
+
+
+class ApplicationNoteResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    application_id: uuid.UUID
+    workspace_id: uuid.UUID
+    author: str | None = None
+    note_type: str
+    body: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class ApplicationReminderCreate(BaseModel):
@@ -163,3 +186,15 @@ class ApplicationExternalLinkUpdate(BaseModel):
     url: HttpUrl | None = None
     type: str | None = Field(default=None, max_length=100)
     metadata: dict[str, Any] | None = None
+
+
+class ApplicationExternalLinkResponse(BaseModel):
+    id: uuid.UUID
+    application_id: uuid.UUID
+    workspace_id: uuid.UUID
+    label: str
+    url: str
+    type: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+    updated_at: datetime

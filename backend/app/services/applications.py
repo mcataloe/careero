@@ -56,7 +56,6 @@ _TIMELINE_APPLICATION_ACTIVITY = {
     "application.note.deleted",
     "application.reminder.updated",
     "application.interview_stage.updated",
-    "application.external_link.created",
     "application.external_link.updated",
     "application.external_link.deleted",
 }
@@ -257,7 +256,7 @@ class ApplicationWorkflowService:
                 )
             )
 
-        for note in application.note_entries:
+        for note in _active_notes(application):
             events.append(
                 _timeline_event(
                     application=application,
@@ -270,6 +269,22 @@ class ApplicationWorkflowService:
                     source_type="application_note",
                     source_id=str(note.id),
                     metadata={},
+                )
+            )
+
+        for link in _active_external_links(application):
+            events.append(
+                _timeline_event(
+                    application=application,
+                    event_id=f"external-link-created-{link.id}",
+                    event_type="external_link.created",
+                    title=f"External link added: {link.label}",
+                    description=link.url,
+                    occurred_at=link.created_at,
+                    actor="user",
+                    source_type="application_external_link",
+                    source_id=str(link.id),
+                    metadata={"link_type": link.link_type},
                 )
             )
 
@@ -468,7 +483,7 @@ class ApplicationWorkflowService:
                 artifact_type="cover_letter",
             ),
             "counts": {
-                "notes": len(application.note_entries),
+                "notes": len(_active_notes(application)),
                 "reminders": len(application.reminders),
                 "interviews": len(application.interview_stages),
             },
@@ -510,17 +525,31 @@ class ApplicationWorkflowService:
             user_id=application.user_id,
             workspace_id=application.workspace_id,
             author=payload.author or DEFAULT_LOCAL_USER_DISPLAY_NAME,
+            note_type=payload.note_type,
             body=payload.body,
         )
         self.db.add(note)
+        self.db.flush()
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.note.created",
-            details={},
+            details={"note_id": str(note.id), "note_type": note.note_type},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _note_response(note)
+
+    def list_notes(self, application_id: uuid.UUID) -> list[dict[str, Any]]:
+        application = self._require_application(application_id)
+        notes = self.db.scalars(
+            select(ApplicationNote)
+            .where(
+                ApplicationNote.application_id == application.id,
+                ApplicationNote.deleted_at.is_(None),
+            )
+            .order_by(ApplicationNote.created_at.desc(), ApplicationNote.id.desc())
+        )
+        return [_note_response(note) for note in notes]
 
     def update_note(
         self,
@@ -533,26 +562,28 @@ class ApplicationWorkflowService:
         updates = payload.model_dump(exclude_unset=True)
         if "author" in updates:
             note.author = updates["author"]
+        if "note_type" in updates and updates["note_type"] is not None:
+            note.note_type = updates["note_type"]
         if "body" in updates:
             note.body = updates["body"]
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.note.updated",
-            details={"note_id": str(note.id)},
+            details={"note_id": str(note.id), "note_type": note.note_type},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _note_response(note)
 
     def delete_note(self, application_id: uuid.UUID, note_id: uuid.UUID) -> None:
         application = self._require_application(application_id)
         note = self._require_child(ApplicationNote, application, note_id)
-        self.db.delete(note)
+        note.deleted_at = datetime.now(timezone.utc)
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.note.deleted",
-            details={"note_id": str(note.id)},
+            details={"note_id": str(note.id), "note_type": note.note_type},
         )
         self.db.commit()
 
@@ -701,17 +732,33 @@ class ApplicationWorkflowService:
             label=payload.label,
             url=str(payload.url),
             link_type=payload.type,
-            link_metadata=payload.metadata,
+            link_metadata=payload.metadata or {},
         )
         self.db.add(link)
+        self.db.flush()
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.external_link.created",
-            details={"link_type": link.link_type},
+            details={"link_id": str(link.id), "link_type": link.link_type},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _external_link_response(link)
+
+    def list_external_links(self, application_id: uuid.UUID) -> list[dict[str, Any]]:
+        application = self._require_application(application_id)
+        links = self.db.scalars(
+            select(ApplicationExternalLink)
+            .where(
+                ApplicationExternalLink.application_id == application.id,
+                ApplicationExternalLink.deleted_at.is_(None),
+            )
+            .order_by(
+                ApplicationExternalLink.created_at.desc(),
+                ApplicationExternalLink.id.desc(),
+            )
+        )
+        return [_external_link_response(link) for link in links]
 
     def update_external_link(
         self,
@@ -734,20 +781,20 @@ class ApplicationWorkflowService:
             user_id=application.user_id,
             application=application,
             action="application.external_link.updated",
-            details={"link_id": str(link.id)},
+            details={"link_id": str(link.id), "link_type": link.link_type},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _external_link_response(link)
 
     def delete_external_link(self, application_id: uuid.UUID, link_id: uuid.UUID) -> None:
         application = self._require_application(application_id)
         link = self._require_child(ApplicationExternalLink, application, link_id)
-        self.db.delete(link)
+        link.deleted_at = datetime.now(timezone.utc)
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.external_link.deleted",
-            details={"link_id": str(link.id)},
+            details={"link_id": str(link.id), "link_type": link.link_type},
         )
         self.db.commit()
 
@@ -797,7 +844,7 @@ class ApplicationWorkflowService:
                     "author": note.author,
                     "body": note.body,
                 }
-                for note in application.note_entries
+                for note in _active_notes(application)
             ],
             "interviewStages": [
                 {
@@ -818,7 +865,7 @@ class ApplicationWorkflowService:
                     "url": link.url,
                     "type": link.link_type,
                 }
-                for link in application.external_links
+                for link in _active_external_links(application)
             ],
             "metadata": {
                 **(application.workflow_metadata or {}),
@@ -902,7 +949,11 @@ class ApplicationWorkflowService:
 
     def _require_child(self, model, application: Application, child_id: uuid.UUID):
         child = self.db.get(model, child_id)
-        if child is None or child.application_id != application.id:
+        if (
+            child is None
+            or child.application_id != application.id
+            or getattr(child, "deleted_at", None) is not None
+        ):
             raise ApplicationWorkflowNotFoundError("Application workflow child not found")
         return child
 
@@ -1171,6 +1222,41 @@ def _pipeline_states(*, include_inactive: bool) -> tuple[ApplicationWorkflowStat
     )
 
 
+def _active_notes(application: Application) -> list[ApplicationNote]:
+    return [note for note in application.note_entries if note.deleted_at is None]
+
+
+def _active_external_links(application: Application) -> list[ApplicationExternalLink]:
+    return [link for link in application.external_links if link.deleted_at is None]
+
+
+def _note_response(note: ApplicationNote) -> dict[str, Any]:
+    return {
+        "id": note.id,
+        "application_id": note.application_id,
+        "workspace_id": note.workspace_id,
+        "author": note.author,
+        "note_type": note.note_type,
+        "body": note.body,
+        "created_at": note.created_at,
+        "updated_at": note.updated_at,
+    }
+
+
+def _external_link_response(link: ApplicationExternalLink) -> dict[str, Any]:
+    return {
+        "id": link.id,
+        "application_id": link.application_id,
+        "workspace_id": link.workspace_id,
+        "label": link.label,
+        "url": link.url,
+        "type": link.link_type,
+        "metadata": link.link_metadata or {},
+        "created_at": link.created_at,
+        "updated_at": link.updated_at,
+    }
+
+
 def _timeline_event(
     *,
     application: Application,
@@ -1263,6 +1349,7 @@ def _safe_activity_metadata(log: ActivityLog) -> dict[str, Any]:
         "role_id",
         "workspace_id",
         "note_id",
+        "note_type",
         "reminder_id",
         "stage_id",
         "stage_type",

@@ -568,6 +568,67 @@ selected ActivityLog update/delete events. It does not store duplicate timeline
 rows and does not expose raw prompts, source resume text, generated document
 content, or raw model payloads.
 
+Manage workflow notes:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}/notes
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/notes `
+  -ContentType "application/json" `
+  -Body '{
+    "note_type": "recruiter",
+    "body": "Ask about team scope and hiring timeline."
+  }'
+
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/notes/{note_id} `
+  -ContentType "application/json" `
+  -Body '{ "note_type": "follow_up", "body": "Follow up next week." }'
+
+Invoke-RestMethod `
+  -Method Delete `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/notes/{note_id}
+```
+
+Supported note types are `general`, `recruiter`, `compensation`, `follow_up`,
+and `interview`. Notes are for freeform workflow context; reminders and
+interview stages remain separate typed concepts.
+
+Manage external links:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}/links
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/links `
+  -ContentType "application/json" `
+  -Body '{
+    "label": "Application portal",
+    "url": "https://example.com/apply",
+    "type": "application_portal"
+  }'
+
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/links/{link_id} `
+  -ContentType "application/json" `
+  -Body '{ "label": "Updated portal", "type": "application_portal" }'
+
+Invoke-RestMethod `
+  -Method Delete `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/links/{link_id}
+```
+
+Suggested link types are `job_posting`, `company_careers`,
+`recruiter_profile`, `application_portal`, `interview_prep`, `email_thread`,
+and `other`. Link URLs are validated. Deleting notes or links soft-deletes the
+row: active lists and counts exclude the record, while safe create/update/delete
+events remain available in the timeline.
+
 List endpoints return compact summaries for the Applications page: role title,
 company, current state, application dates, latest STRIDE status, latest resume
 and cover letter artifact summaries, and note/reminder/interview counts. They do
@@ -605,7 +666,7 @@ Allowed workflow transitions are enforced by the backend:
 `withdrawn -> archived`. Reactivating an archived workflow requires
 `"reactivate": true` and can move only to `discovered` or `interested`.
 
-Applications are workspace-scoped. New workflows can only be created for roles in active or paused workspaces; archived/completed workspaces remain inspectable with `include_inactive=true`. State history, notes, reminders, interview stages, and external links use typed tables, but Layer 4B list/detail endpoints expose only summary counts for notes, reminders, and interviews. `ActivityLog` records broad audit events but does not replace workflow persistence. Existing role statuses are backfilled into application workflows during migration, and existing application notes are copied into typed notes.
+Applications are workspace-scoped. New workflows can only be created for roles in active or paused workspaces; archived/completed workspaces remain inspectable with `include_inactive=true`. State history, notes, reminders, interview stages, and external links use typed tables. `ActivityLog` records broad audit events and note/link update-delete events but does not replace workflow persistence. Existing role statuses are backfilled into application workflows during migration, and existing application notes are copied into typed notes.
 
 Future automation may suggest application workflow changes, but it must not silently mutate `Application.current_state`.
 
