@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.constants import StrideEvaluationStatus
+from app.constants import ApplicationWorkflowState, StrideEvaluationStatus
 from app.database import get_db
 from app.main import create_app
 from app.models import (
@@ -21,7 +21,10 @@ from app.models import (
     StrideEvaluation,
     User,
 )
-from app.schemas.applications import ApplicationMetadataUpdate
+from app.schemas.applications import (
+    ApplicationMetadataUpdate,
+    ApplicationStateTransitionRequest,
+)
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
 from app.schemas.workspaces import WorkspaceCreate
 from app.seed import DEFAULT_LOCAL_USER_ID, DEFAULT_WORKSPACE_ID, seed_local_data
@@ -29,6 +32,7 @@ from app.services.applications import (
     ApplicationWorkflowNotFoundError,
     ApplicationWorkflowSeedMissingError,
     ApplicationWorkflowService,
+    ApplicationWorkflowTransitionError,
     ApplicationWorkflowWorkspaceInactiveError,
 )
 from app.services.roles import RoleService
@@ -233,6 +237,186 @@ def test_service_detail_and_metadata_update(db_session: Session) -> None:
     assert "application.updated" in actions
 
 
+@pytest.mark.parametrize(
+    ("from_state", "to_state"),
+    [
+        ("discovered", "interested"),
+        ("discovered", "withdrawn"),
+        ("discovered", "archived"),
+        ("interested", "applied"),
+        ("interested", "withdrawn"),
+        ("interested", "archived"),
+        ("applied", "interviewing"),
+        ("applied", "rejected"),
+        ("applied", "withdrawn"),
+        ("applied", "archived"),
+        ("interviewing", "offer"),
+        ("interviewing", "rejected"),
+        ("interviewing", "withdrawn"),
+        ("interviewing", "archived"),
+        ("offer", "withdrawn"),
+        ("offer", "archived"),
+        ("rejected", "archived"),
+        ("withdrawn", "archived"),
+    ],
+)
+def test_service_allows_explicit_transition_matrix(
+    db_session: Session,
+    from_state: str,
+    to_state: str,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application = db_session.get(Application, UUID(detail["id"]))
+    assert application is not None
+    application.current_state = from_state
+    application.status = from_state
+    application.archived_at = (
+        datetime.now(timezone.utc)
+        if from_state == ApplicationWorkflowState.ARCHIVED.value
+        else None
+    )
+    db_session.commit()
+
+    updated = service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(state=ApplicationWorkflowState(to_state)),
+    )
+
+    assert updated["current_state"] == to_state
+    db_session.refresh(application)
+    assert application.status == to_state
+    assert application.role.status == "found"
+    history = application.state_history[-1]
+    assert history.from_state == from_state
+    assert history.to_state == to_state
+    assert "application.state_changed" in list(
+        db_session.scalars(
+            select(ActivityLog.action).where(ActivityLog.entity_id == application.id)
+        )
+    )
+
+
+def test_service_rejects_invalid_transition_without_history(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application = db_session.get(Application, UUID(detail["id"]))
+    assert application is not None
+    initial_history_count = len(application.state_history)
+
+    with pytest.raises(ApplicationWorkflowTransitionError):
+        service.transition_state(
+            application.id,
+            ApplicationStateTransitionRequest(state=ApplicationWorkflowState.OFFER),
+        )
+
+    db_session.refresh(application)
+    assert application.current_state == ApplicationWorkflowState.DISCOVERED.value
+    assert len(application.state_history) == initial_history_count
+
+
+def test_service_same_state_transition_is_idempotent(db_session: Session) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application = db_session.get(Application, UUID(detail["id"]))
+    assert application is not None
+    initial_history_count = len(application.state_history)
+
+    updated = service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(
+            state=ApplicationWorkflowState.DISCOVERED,
+            reason="No change.",
+        ),
+    )
+
+    assert updated["current_state"] == ApplicationWorkflowState.DISCOVERED.value
+    assert len(application.state_history) == initial_history_count
+
+
+def test_service_requires_explicit_reactivation(db_session: Session) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application = db_session.get(Application, UUID(detail["id"]))
+    assert application is not None
+    service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(state=ApplicationWorkflowState.ARCHIVED),
+    )
+
+    with pytest.raises(ApplicationWorkflowTransitionError):
+        service.transition_state(
+            application.id,
+            ApplicationStateTransitionRequest(state=ApplicationWorkflowState.INTERESTED),
+        )
+
+    reactivated = service.transition_state(
+        application.id,
+        ApplicationStateTransitionRequest(
+            state=ApplicationWorkflowState.INTERESTED,
+            reactivate=True,
+        ),
+    )
+
+    db_session.refresh(application)
+    assert reactivated["current_state"] == ApplicationWorkflowState.INTERESTED.value
+    assert application.archived_at is None
+    assert application.reactivated_at is not None
+
+
+def test_service_available_next_states_and_pipeline(db_session: Session) -> None:
+    seed_local_data(db_session)
+    service = ApplicationWorkflowService(db_session)
+    discovered = create_role(db_session, company_name="Discovered Co")
+    applied = create_role(db_session, company_name="Applied Co", status="applied")
+    archived = create_role(db_session, company_name="Archived Co")
+    discovered_detail = service.get_or_create_for_role(discovered.id)
+    applied_detail = service.get_or_create_for_role(applied.id)
+    archived_detail = service.get_or_create_for_role(archived.id)
+    archived_application = db_session.get(Application, UUID(archived_detail["id"]))
+    assert archived_application is not None
+    service.transition_state(
+        archived_application.id,
+        ApplicationStateTransitionRequest(state=ApplicationWorkflowState.ARCHIVED),
+    )
+
+    assert discovered_detail["available_next_states"] == [
+        ApplicationWorkflowState.INTERESTED,
+        ApplicationWorkflowState.WITHDRAWN,
+        ApplicationWorkflowState.ARCHIVED,
+    ]
+    assert applied_detail["available_next_states"] == [
+        ApplicationWorkflowState.INTERVIEWING,
+        ApplicationWorkflowState.REJECTED,
+        ApplicationWorkflowState.WITHDRAWN,
+        ApplicationWorkflowState.ARCHIVED,
+    ]
+
+    active_pipeline = service.get_pipeline()
+    assert "archived" not in active_pipeline["states"]
+    assert [item["role_id"] for item in active_pipeline["states"]["discovered"]] == [
+        discovered.id
+    ]
+    assert [item["role_id"] for item in active_pipeline["states"]["applied"]] == [
+        applied.id
+    ]
+
+    inactive_pipeline = service.get_pipeline(include_inactive=True)
+    assert [item["role_id"] for item in inactive_pipeline["states"]["archived"]] == [
+        archived.id
+    ]
+
+
 def test_api_list_detail_ensure_filter_and_update(
     application_client: TestClient,
     db_session: Session,
@@ -282,6 +466,11 @@ def test_api_list_detail_ensure_filter_and_update(
     assert detail_response.status_code == 200
     assert detail_response.json()["role"]["company"]["name"] == "Default API Co"
     assert detail_response.json()["application_state"]["currentState"] == "discovered"
+    assert detail_response.json()["available_next_states"] == [
+        "interested",
+        "withdrawn",
+        "archived",
+    ]
 
     update_response = application_client.patch(
         f"/api/applications/{application_id}",
@@ -293,6 +482,38 @@ def test_api_list_detail_ensure_filter_and_update(
     assert update_response.status_code == 200
     assert update_response.json()["workflow_metadata"]["priority"] == "medium"
     assert update_response.json()["next_action_at"] is not None
+
+
+def test_api_transition_validation_and_pipeline(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+    application_id = application_client.post(
+        f"/api/roles/{role.id}/application"
+    ).json()["id"]
+
+    invalid_response = application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={"state": "offer", "reason": "Invalid jump."},
+    )
+    assert invalid_response.status_code == 409
+
+    transition_response = application_client.post(
+        f"/api/applications/{application_id}/transition",
+        json={"state": "interested", "reason": "Worth pursuing."},
+    )
+    assert transition_response.status_code == 200
+    assert transition_response.json()["current_state"] == "interested"
+
+    pipeline_response = application_client.get("/api/applications/pipeline")
+    assert pipeline_response.status_code == 200
+    pipeline = pipeline_response.json()
+    assert pipeline["include_inactive"] is False
+    assert [item["id"] for item in pipeline["states"]["interested"]] == [
+        application_id
+    ]
+    assert "archived" not in pipeline["states"]
 
 
 def test_api_workspace_scope_and_inactive_filtering(

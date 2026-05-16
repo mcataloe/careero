@@ -40,6 +40,10 @@ from app.schemas.applications import (
 )
 from app.seed import DEFAULT_LOCAL_USER_ID, DEFAULT_LOCAL_USER_DISPLAY_NAME
 from app.services.activity_log import ActivityLogService
+from app.services.application_state_machine import (
+    can_transition,
+    get_available_transitions,
+)
 from app.services.workspace_context import is_workspace_active_for_new_work
 
 
@@ -67,6 +71,10 @@ class ApplicationWorkflowWorkspaceNotFoundError(ApplicationWorkflowError):
 
 
 class ApplicationWorkflowValidationError(ApplicationWorkflowError):
+    pass
+
+
+class ApplicationWorkflowTransitionError(ApplicationWorkflowError):
     pass
 
 
@@ -164,6 +172,29 @@ class ApplicationWorkflowService:
         )
         return [self.summary(application) for application in self.db.scalars(statement)]
 
+    def get_pipeline(
+        self,
+        *,
+        workspace_id: uuid.UUID | None = None,
+        include_inactive: bool = False,
+    ) -> dict[str, Any]:
+        items = self.list_applications(
+            workspace_id=workspace_id,
+            include_inactive=include_inactive,
+        )
+        states = {
+            state.value: []
+            for state in _pipeline_states(include_inactive=include_inactive)
+        }
+        for item in items:
+            current_state = item["current_state"]
+            states.setdefault(current_state, []).append(item)
+        return {
+            "workspace_id": workspace_id,
+            "include_inactive": include_inactive,
+            "states": states,
+        }
+
     def get_application(self, application_id: uuid.UUID) -> dict[str, Any]:
         application = self._get_application(application_id)
         if application is None:
@@ -214,13 +245,25 @@ class ApplicationWorkflowService:
         if previous_state == next_state:
             self.db.rollback()
             return self.detail(application)
+        if not can_transition(
+            previous_state,
+            next_state,
+            reactivate=payload.reactivate,
+        ):
+            raise ApplicationWorkflowTransitionError(
+                f"Invalid application state transition from "
+                f"'{previous_state}' to '{next_state}'"
+            )
 
         now = datetime.now(timezone.utc)
         application.current_state = next_state
         application.status = next_state
         if next_state == ApplicationWorkflowState.ARCHIVED.value:
             application.archived_at = now
-        elif previous_state == ApplicationWorkflowState.ARCHIVED.value:
+        elif (
+            previous_state == ApplicationWorkflowState.ARCHIVED.value
+            and payload.reactivate
+        ):
             application.archived_at = None
             application.reactivated_at = now
         if next_state == ApplicationWorkflowState.APPLIED.value and application.applied_at is None:
@@ -241,6 +284,9 @@ class ApplicationWorkflowService:
             details={
                 "from_state": previous_state,
                 "to_state": next_state,
+                "changed_by": payload.changed_by,
+                "reason": payload.reason,
+                "reactivate": payload.reactivate,
             },
         )
         self.db.commit()
@@ -265,6 +311,10 @@ class ApplicationWorkflowService:
             "next_action_at": application.next_action_at,
             "updated_at": application.updated_at,
             "archived_at": application.archived_at,
+            "available_next_states": get_available_transitions(
+                application.current_state,
+                include_reactivation=True,
+            ),
             "stride": latest_stride,
             "resume_artifact": self._latest_artifact_summary(
                 application,
@@ -848,6 +898,15 @@ def _workflow_state_for_role_status(status: str) -> ApplicationWorkflowState:
     if status in {state.value for state in ApplicationWorkflowState}:
         return ApplicationWorkflowState(status)
     return mapping.get(status, ApplicationWorkflowState.DISCOVERED)
+
+
+def _pipeline_states(*, include_inactive: bool) -> tuple[ApplicationWorkflowState, ...]:
+    states = tuple(ApplicationWorkflowState)
+    if include_inactive:
+        return states
+    return tuple(
+        state for state in states if state != ApplicationWorkflowState.ARCHIVED
+    )
 
 
 def _isoformat(value: datetime | None) -> str | None:

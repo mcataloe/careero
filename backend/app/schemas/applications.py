@@ -62,6 +62,7 @@ class ApplicationListItemResponse(BaseModel):
     next_action_at: datetime | None = None
     updated_at: datetime
     archived_at: datetime | None = None
+    available_next_states: list[ApplicationWorkflowState] = Field(default_factory=list)
     stride: ApplicationStrideSummary | None = None
     resume_artifact: ApplicationArtifactSummary | None = None
     cover_letter_artifact: ApplicationArtifactSummary | None = None
@@ -86,6 +87,13 @@ class ApplicationStateTransitionRequest(BaseModel):
     reason: str | None = Field(default=None, max_length=5000)
     changed_by: str = Field(default="user", pattern="^(user|system|automation)$")
     metadata: dict[str, Any] = Field(default_factory=dict)
+    reactivate: bool = False
+
+
+class ApplicationPipelineResponse(BaseModel):
+    workspace_id: uuid.UUID | None = None
+    include_inactive: bool = False
+    states: dict[str, list[ApplicationListItemResponse]]
 
 
 class ApplicationNoteCreate(BaseModel):

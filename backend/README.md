@@ -541,6 +541,14 @@ Invoke-RestMethod "http://127.0.0.1:8000/api/applications?workspace_id={workspac
 Invoke-RestMethod http://127.0.0.1:8000/api/workspaces/{workspace_id}/applications
 ```
 
+List workflows grouped for the Applications pipeline:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/pipeline
+Invoke-RestMethod "http://127.0.0.1:8000/api/applications/pipeline?include_inactive=true"
+Invoke-RestMethod http://127.0.0.1:8000/api/workspaces/{workspace_id}/applications/pipeline
+```
+
 Get workflow detail:
 
 ```powershell
@@ -574,6 +582,15 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body '{ "state": "interviewing", "reason": "Recruiter screen scheduled." }'
 ```
+
+Allowed workflow transitions are enforced by the backend:
+`discovered -> interested|withdrawn|archived`,
+`interested -> applied|withdrawn|archived`,
+`applied -> interviewing|rejected|withdrawn|archived`,
+`interviewing -> offer|rejected|withdrawn|archived`,
+`offer -> withdrawn|archived`, `rejected -> archived`, and
+`withdrawn -> archived`. Reactivating an archived workflow requires
+`"reactivate": true` and can move only to `discovered` or `interested`.
 
 Applications are workspace-scoped. New workflows can only be created for roles in active or paused workspaces; archived/completed workspaces remain inspectable with `include_inactive=true`. State history, notes, reminders, interview stages, and external links use typed tables, but Layer 4B list/detail endpoints expose only summary counts for notes, reminders, and interviews. `ActivityLog` records broad audit events but does not replace workflow persistence. Existing role statuses are backfilled into application workflows during migration, and existing application notes are copied into typed notes.
 

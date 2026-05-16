@@ -8,12 +8,14 @@ from app.schemas.applications import (
     ApplicationDetailResponse,
     ApplicationListItemResponse,
     ApplicationMetadataUpdate,
+    ApplicationPipelineResponse,
     ApplicationStateTransitionRequest,
 )
 from app.services.applications import (
     ApplicationWorkflowNotFoundError,
     ApplicationWorkflowSeedMissingError,
     ApplicationWorkflowService,
+    ApplicationWorkflowTransitionError,
     ApplicationWorkflowValidationError,
     ApplicationWorkflowWorkspaceInactiveError,
     ApplicationWorkflowWorkspaceNotFoundError,
@@ -90,6 +92,47 @@ def list_workspace_applications(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
+@router.get("/applications/pipeline", response_model=ApplicationPipelineResponse)
+def get_applications_pipeline(
+    workspace_id: uuid.UUID | None = None,
+    include_inactive: bool = False,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.get_pipeline(
+            workspace_id=workspace_id,
+            include_inactive=include_inactive,
+        )
+    except ApplicationWorkflowWorkspaceNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/workspaces/{workspace_id}/applications/pipeline",
+    response_model=ApplicationPipelineResponse,
+)
+def get_workspace_applications_pipeline(
+    workspace_id: uuid.UUID,
+    include_inactive: bool = False,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.get_pipeline(
+            workspace_id=workspace_id,
+            include_inactive=include_inactive,
+        )
+    except ApplicationWorkflowWorkspaceNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
 @router.get("/applications/{application_id}", response_model=ApplicationDetailResponse)
 def get_application(
     application_id: uuid.UUID,
@@ -122,6 +165,18 @@ def update_application(
 
 
 @router.post(
+    "/applications/{application_id}/transition",
+    response_model=ApplicationDetailResponse,
+)
+def transition_application_state_alias(
+    application_id: uuid.UUID,
+    payload: ApplicationStateTransitionRequest,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    return _transition_application_state(application_id, payload, service)
+
+
+@router.post(
     "/applications/{application_id}/state-transitions",
     response_model=ApplicationDetailResponse,
 )
@@ -130,10 +185,20 @@ def transition_application_state(
     payload: ApplicationStateTransitionRequest,
     service: ApplicationWorkflowService = Depends(get_application_workflow_service),
 ):
+    return _transition_application_state(application_id, payload, service)
+
+
+def _transition_application_state(
+    application_id: uuid.UUID,
+    payload: ApplicationStateTransitionRequest,
+    service: ApplicationWorkflowService,
+):
     try:
         return service.transition_state(application_id, payload)
     except ApplicationWorkflowNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowTransitionError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except ApplicationWorkflowValidationError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
     except ApplicationWorkflowSeedMissingError as exc:

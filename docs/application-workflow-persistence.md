@@ -64,12 +64,34 @@ STRIDE summary/status, latest resume and cover letter artifact summaries, and
 note/reminder/interview counts. They do not return full STRIDE or artifact
 payloads and do not trigger generation.
 
+`GET /api/applications/pipeline` and
+`GET /api/workspaces/{workspace_id}/applications/pipeline` return the same
+summary rows grouped by application workflow state. Archived workflows are
+excluded unless `include_inactive=true` is supplied.
+
 `GET /api/applications/{application_id}` returns richer detail, including the
 canonical `ApplicationState` contract under `application_state`.
 
 `PATCH /api/applications/{application_id}` updates workflow metadata and dates.
 It does not change `Application.current_state`; state changes must use the
 state-transition operation.
+
+## State Machine
+
+Application workflow transitions are explicit and enforced by the backend:
+
+- `discovered` -> `interested`, `withdrawn`, `archived`
+- `interested` -> `applied`, `withdrawn`, `archived`
+- `applied` -> `interviewing`, `rejected`, `withdrawn`, `archived`
+- `interviewing` -> `offer`, `rejected`, `withdrawn`, `archived`
+- `offer` -> `withdrawn`, `archived`
+- `rejected` -> `archived`
+- `withdrawn` -> `archived`
+
+`archived` can move back to `discovered` or `interested` only when the
+transition request includes `reactivate=true`. Every non-idempotent transition
+updates `Application.current_state`, mirrors `applications.status`, appends a
+typed state history row, and logs `application.state_changed`.
 
 ## Migration Behavior
 
