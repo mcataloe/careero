@@ -240,14 +240,6 @@ Timeline guidance:
 - **Archived State Behavior**: Archived applications are explicitly removed from the active status pipeline. They can only be viewed in historical contexts or explicitly included via queries.
 - **Automation Boundary**: Transitions support a `changed_by` field (`user`, `system`, `automation`). AI and automation must not silently transition workflow states. All transitions must append an auditable history record and an ActivityLog event. Future automation may propose state changes, but the backend state machine strictly enforces validity.
 
-### Application Timeline View
-
-- **Timeline as a View**: The timeline is an aggregated, read-only view of typed domain events, not a single persistence model. State history, ActivityLog entries, notes, reminders, and evaluations remain separate typed structures in the database.
-- **Aggregation Sources**: The backend timeline service dynamically queries `ApplicationStateHistory`, `ActivityLog` (for general system events), and typed entities like `StrideEvaluation` or artifacts linked to the application or opportunity.
-- **Event Type Conventions**: Timeline events use standard dot-notation scopes (e.g., `application.created`, `application.state_changed`, `stride.completed`).
-- **No Duplicate Persistence**: Events are constructed dynamically on read. The system does not insert generic "timeline rows" when a typed record is created, preserving single sources of truth.
-- **Redaction**: Internal AI prompt details and sensitive raw model payloads are never rendered into the timeline API.
-
 ## AI Orchestration Boundaries
 
 Keep these layers separate:
