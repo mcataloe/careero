@@ -67,6 +67,7 @@ class ApplicationArtifactSummary(BaseModel):
 
 class ApplicationWorkflowCounts(BaseModel):
     notes: int = 0
+    external_links: int = 0
     reminders: int = 0
     interviews: int = 0
 

@@ -69,7 +69,7 @@ duplicating records.
 `GET /api/applications` and workspace-scoped list endpoints return compact
 summaries for the Applications page: role title, company, state, dates, latest
 STRIDE summary/status, latest resume and cover letter artifact summaries, and
-note/reminder/interview counts. They do not return full STRIDE or artifact
+note/link/reminder/interview counts. They do not return full STRIDE or artifact
 payloads and do not trigger generation.
 
 `GET /api/applications/pipeline` and
