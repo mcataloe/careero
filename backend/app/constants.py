@@ -19,6 +19,26 @@ class ApplicationWorkflowState(StrEnum):
     ARCHIVED = "archived"
 
 
+class ApplicationInterviewStageType(StrEnum):
+    RECRUITER_SCREEN = "recruiter_screen"
+    HIRING_MANAGER = "hiring_manager"
+    TECHNICAL = "technical"
+    SYSTEM_DESIGN = "system_design"
+    BEHAVIORAL = "behavioral"
+    PANEL = "panel"
+    FINAL = "final"
+    OFFER_DISCUSSION = "offer_discussion"
+    OTHER = "other"
+
+
+class ApplicationInterviewStatus(StrEnum):
+    PLANNED = "planned"
+    SCHEDULED = "scheduled"
+    COMPLETED = "completed"
+    CANCELED = "canceled"
+    NO_SHOW = "no_show"
+
+
 class WorkspaceStatus(StrEnum):
     ACTIVE = "active"
     PAUSED = "paused"

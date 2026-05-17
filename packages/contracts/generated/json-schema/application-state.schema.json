@@ -164,7 +164,17 @@
               },
               "stageType": {
                 "type": "string",
-                "minLength": 1
+                "enum": [
+                  "recruiter_screen",
+                  "hiring_manager",
+                  "technical",
+                  "system_design",
+                  "behavioral",
+                  "panel",
+                  "final",
+                  "offer_discussion",
+                  "other"
+                ]
               },
               "title": {
                 "type": "string",
@@ -190,13 +200,42 @@
                   }
                 ]
               },
-              "location": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "planned",
+                  "scheduled",
+                  "completed",
+                  "canceled",
+                  "no_show"
+                ]
+              },
+              "interviewerNames": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "locationOrMeetingLink": {
                 "type": [
                   "string",
                   "null"
                 ]
               },
               "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "preparationNotes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "outcomeNotes": {
                 "type": [
                   "string",
                   "null"
@@ -212,8 +251,11 @@
               "title",
               "scheduledAt",
               "completedAt",
-              "location",
+              "status",
+              "locationOrMeetingLink",
               "notes",
+              "preparationNotes",
+              "outcomeNotes",
               "metadata"
             ],
             "additionalProperties": false

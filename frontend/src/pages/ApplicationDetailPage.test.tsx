@@ -6,6 +6,7 @@ import { render, screen } from "../test-utils";
 import type {
   ApplicationDetail,
   ApplicationExternalLink,
+  ApplicationInterviewStage,
   ApplicationNote,
   ApplicationTimelineEvent,
 } from "../types/applications";
@@ -87,6 +88,28 @@ const notes: ApplicationNote[] = [
   },
 ];
 
+const interviews: ApplicationInterviewStage[] = [
+  {
+    id: "interview-1",
+    application_id: "app-1",
+    workspace_id: "workspace-1",
+    stage_type: "recruiter_screen",
+    title: "Recruiter screen",
+    scheduled_at: "2026-05-20T15:00:00Z",
+    completed_at: null,
+    status: "scheduled",
+    interviewer_names: ["Recruiter One"],
+    location_or_meeting_link: "https://meet.example.com/one",
+    notes: null,
+    preparation_notes: null,
+    outcome_notes: null,
+    metadata: {},
+    state_transition_suggestion: "interviewing",
+    created_at: "2026-05-16T15:00:00Z",
+    updated_at: "2026-05-16T15:00:00Z",
+  },
+];
+
 const links: ApplicationExternalLink[] = [
   {
     id: "link-1",
@@ -124,7 +147,8 @@ describe("ApplicationDetailPage", () => {
         .mockResolvedValueOnce(jsonResponse(application))
         .mockResolvedValueOnce(jsonResponse(timeline))
         .mockResolvedValueOnce(jsonResponse(notes))
-        .mockResolvedValueOnce(jsonResponse(links)),
+        .mockResolvedValueOnce(jsonResponse(links))
+        .mockResolvedValueOnce(jsonResponse(interviews)),
     );
 
     renderDetailPage();
@@ -134,6 +158,7 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByText("Example Company")).toBeInTheDocument();
     expect(screen.getByText("Application tracked")).toBeInTheDocument();
     expect(screen.getByText("Ask about team scope.")).toBeInTheDocument();
+    expect(screen.getAllByText("Recruiter screen").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Job posting" })[1]).toHaveAttribute(
       "rel",
       "noreferrer noopener",

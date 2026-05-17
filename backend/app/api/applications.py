@@ -9,6 +9,11 @@ from app.schemas.applications import (
     ApplicationExternalLinkCreate,
     ApplicationExternalLinkResponse,
     ApplicationExternalLinkUpdate,
+    ApplicationInterviewCancelRequest,
+    ApplicationInterviewCompleteRequest,
+    ApplicationInterviewStageCreate,
+    ApplicationInterviewStageResponse,
+    ApplicationInterviewStageUpdate,
     ApplicationListItemResponse,
     ApplicationMetadataUpdate,
     ApplicationNoteCreate,
@@ -234,6 +239,119 @@ def delete_application_note(
 ):
     try:
         service.delete_note(application_id, note_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/applications/{application_id}/interviews",
+    response_model=list[ApplicationInterviewStageResponse],
+)
+def list_application_interviews(
+    application_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.list_interview_stages(application_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/interviews",
+    response_model=ApplicationInterviewStageResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_application_interview(
+    application_id: uuid.UUID,
+    payload: ApplicationInterviewStageCreate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.create_interview_stage(application_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.patch(
+    "/applications/{application_id}/interviews/{interview_id}",
+    response_model=ApplicationInterviewStageResponse,
+)
+def update_application_interview(
+    application_id: uuid.UUID,
+    interview_id: uuid.UUID,
+    payload: ApplicationInterviewStageUpdate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.update_interview_stage(application_id, interview_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/interviews/{interview_id}/complete",
+    response_model=ApplicationInterviewStageResponse,
+)
+def complete_application_interview(
+    application_id: uuid.UUID,
+    interview_id: uuid.UUID,
+    payload: ApplicationInterviewCompleteRequest | None = None,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.complete_interview_stage(application_id, interview_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/interviews/{interview_id}/cancel",
+    response_model=ApplicationInterviewStageResponse,
+)
+def cancel_application_interview(
+    application_id: uuid.UUID,
+    interview_id: uuid.UUID,
+    payload: ApplicationInterviewCancelRequest | None = None,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.cancel_interview_stage(application_id, interview_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.delete(
+    "/applications/{application_id}/interviews/{interview_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_application_interview(
+    application_id: uuid.UUID,
+    interview_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        service.delete_interview_stage(application_id, interview_id)
     except ApplicationWorkflowNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ApplicationWorkflowSeedMissingError as exc:

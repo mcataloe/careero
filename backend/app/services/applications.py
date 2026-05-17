@@ -12,7 +12,11 @@ from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.constants import ApplicationWorkflowState, RoleStatus
+from app.constants import (
+    ApplicationInterviewStatus,
+    ApplicationWorkflowState,
+    RoleStatus,
+)
 from app.models import (
     ActivityLog,
     Application,
@@ -30,6 +34,8 @@ from app.models import (
 from app.schemas.applications import (
     ApplicationExternalLinkCreate,
     ApplicationExternalLinkUpdate,
+    ApplicationInterviewCancelRequest,
+    ApplicationInterviewCompleteRequest,
     ApplicationInterviewStageCreate,
     ApplicationInterviewStageUpdate,
     ApplicationNoteCreate,
@@ -56,6 +62,8 @@ _TIMELINE_APPLICATION_ACTIVITY = {
     "application.note.deleted",
     "application.reminder.updated",
     "application.interview_stage.updated",
+    "application.interview_stage.canceled",
+    "application.interview_stage.deleted",
     "application.external_link.updated",
     "application.external_link.deleted",
 }
@@ -319,7 +327,7 @@ class ApplicationWorkflowService:
                     )
                 )
 
-        for stage in application.interview_stages:
+        for stage in _active_interview_stages(application):
             events.append(
                 _timeline_event(
                     application=application,
@@ -333,6 +341,7 @@ class ApplicationWorkflowService:
                     source_id=str(stage.id),
                     metadata={
                         "stage_type": stage.stage_type,
+                        "status": stage.status,
                         "scheduled_at": _isoformat(stage.scheduled_at),
                     },
                 )
@@ -349,7 +358,7 @@ class ApplicationWorkflowService:
                         actor="user",
                         source_type="application_interview_stage",
                         source_id=str(stage.id),
-                        metadata={"stage_type": stage.stage_type},
+                        metadata={"stage_type": stage.stage_type, "status": stage.status},
                     )
                 )
 
@@ -485,7 +494,7 @@ class ApplicationWorkflowService:
             "counts": {
                 "notes": len(_active_notes(application)),
                 "reminders": len(application.reminders),
-                "interviews": len(application.interview_stages),
+                "interviews": len(_active_interview_stages(application)),
             },
         }
 
@@ -653,32 +662,61 @@ class ApplicationWorkflowService:
         self.db.commit()
         return self.get_application(application.id)
 
+    def list_interview_stages(
+        self,
+        application_id: uuid.UUID,
+    ) -> list[dict[str, Any]]:
+        application = self._require_application(application_id)
+        stages = self.db.scalars(
+            select(ApplicationInterviewStage).where(
+                ApplicationInterviewStage.application_id == application.id,
+                ApplicationInterviewStage.deleted_at.is_(None),
+            )
+        )
+        return [_interview_stage_response(stage, application) for stage in _sort_interview_stages(stages)]
+
     def create_interview_stage(
         self,
         application_id: uuid.UUID,
         payload: ApplicationInterviewStageCreate,
     ) -> dict[str, Any]:
         application = self._require_application(application_id)
+        status_value = (payload.status or _default_interview_status(payload.scheduled_at, payload.completed_at)).value
+        _validate_interview_status(status_value)
+        completed_at = payload.completed_at
+        if status_value == ApplicationInterviewStatus.COMPLETED.value and completed_at is None:
+            completed_at = datetime.now(timezone.utc)
         stage = ApplicationInterviewStage(
             application_id=application.id,
             user_id=application.user_id,
             workspace_id=application.workspace_id,
-            stage_type=payload.stage_type,
+            stage_type=payload.stage_type.value,
             title=payload.title,
             scheduled_at=payload.scheduled_at,
-            location=payload.location,
+            completed_at=completed_at,
+            status=status_value,
+            interviewer_names=_clean_names(payload.interviewer_names),
+            location_or_meeting_link=payload.location_or_meeting_link,
             notes=payload.notes,
+            preparation_notes=payload.preparation_notes,
+            outcome_notes=payload.outcome_notes,
             stage_metadata=payload.metadata,
         )
         self.db.add(stage)
+        self.db.flush()
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.interview_stage.created",
-            details={"stage_type": stage.stage_type},
+            details={
+                "stage_id": str(stage.id),
+                "stage_type": stage.stage_type,
+                "status": stage.status,
+                "state_transition_suggestion": _interview_state_suggestion(application),
+            },
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _interview_stage_response(stage, application)
 
     def update_interview_stage(
         self,
@@ -691,33 +729,84 @@ class ApplicationWorkflowService:
         updates = payload.model_dump(exclude_unset=True)
         if "metadata" in updates:
             stage.stage_metadata = updates.pop("metadata") or {}
+        if "stage_type" in updates and updates["stage_type"] is not None:
+            updates["stage_type"] = updates["stage_type"].value
+        if "status" in updates and updates["status"] is not None:
+            updates["status"] = updates["status"].value
+            _validate_interview_status(updates["status"])
+        if "interviewer_names" in updates and updates["interviewer_names"] is not None:
+            updates["interviewer_names"] = _clean_names(updates["interviewer_names"])
         for field_name, value in updates.items():
             setattr(stage, field_name, value)
+        if stage.status == ApplicationInterviewStatus.COMPLETED.value and stage.completed_at is None:
+            stage.completed_at = datetime.now(timezone.utc)
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.interview_stage.updated",
-            details={"stage_id": str(stage.id)},
+            details={"stage_id": str(stage.id), "stage_type": stage.stage_type, "status": stage.status},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _interview_stage_response(stage, application)
 
     def complete_interview_stage(
         self,
         application_id: uuid.UUID,
         stage_id: uuid.UUID,
+        payload: ApplicationInterviewCompleteRequest | None = None,
     ) -> dict[str, Any]:
         application = self._require_application(application_id)
         stage = self._require_child(ApplicationInterviewStage, application, stage_id)
-        stage.completed_at = datetime.now(timezone.utc)
+        payload = payload or ApplicationInterviewCompleteRequest()
+        if payload.status not in {ApplicationInterviewStatus.COMPLETED, ApplicationInterviewStatus.NO_SHOW}:
+            raise ApplicationWorkflowValidationError("Complete status must be completed or no_show")
+        stage.status = payload.status.value
+        stage.completed_at = payload.completed_at or datetime.now(timezone.utc)
+        if payload.outcome_notes is not None:
+            stage.outcome_notes = payload.outcome_notes
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.interview_stage.completed",
-            details={"stage_id": str(stage.id)},
+            details={"stage_id": str(stage.id), "stage_type": stage.stage_type, "status": stage.status},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _interview_stage_response(stage, application)
+
+    def cancel_interview_stage(
+        self,
+        application_id: uuid.UUID,
+        stage_id: uuid.UUID,
+        payload: ApplicationInterviewCancelRequest | None = None,
+    ) -> dict[str, Any]:
+        application = self._require_application(application_id)
+        stage = self._require_child(ApplicationInterviewStage, application, stage_id)
+        payload = payload or ApplicationInterviewCancelRequest()
+        if payload.status not in {ApplicationInterviewStatus.CANCELED, ApplicationInterviewStatus.NO_SHOW}:
+            raise ApplicationWorkflowValidationError("Cancel status must be canceled or no_show")
+        stage.status = payload.status.value
+        if payload.outcome_notes is not None:
+            stage.outcome_notes = payload.outcome_notes
+        self._log_activity(
+            user_id=application.user_id,
+            application=application,
+            action="application.interview_stage.canceled",
+            details={"stage_id": str(stage.id), "stage_type": stage.stage_type, "status": stage.status},
+        )
+        self.db.commit()
+        return _interview_stage_response(stage, application)
+
+    def delete_interview_stage(self, application_id: uuid.UUID, stage_id: uuid.UUID) -> None:
+        application = self._require_application(application_id)
+        stage = self._require_child(ApplicationInterviewStage, application, stage_id)
+        stage.deleted_at = datetime.now(timezone.utc)
+        self._log_activity(
+            user_id=application.user_id,
+            application=application,
+            action="application.interview_stage.deleted",
+            details={"stage_id": str(stage.id), "stage_type": stage.stage_type, "status": stage.status},
+        )
+        self.db.commit()
 
     def create_external_link(
         self,
@@ -853,11 +942,15 @@ class ApplicationWorkflowService:
                     "title": stage.title,
                     "scheduledAt": _isoformat(stage.scheduled_at),
                     "completedAt": _isoformat(stage.completed_at),
-                    "location": stage.location,
+                    "status": stage.status,
+                    "interviewerNames": stage.interviewer_names or [],
+                    "locationOrMeetingLink": stage.location_or_meeting_link,
                     "notes": stage.notes,
+                    "preparationNotes": stage.preparation_notes,
+                    "outcomeNotes": stage.outcome_notes,
                     "metadata": stage.stage_metadata or {},
                 }
-                for stage in application.interview_stages
+                for stage in _active_interview_stages(application)
             ],
             "externalLinks": [
                 {
@@ -1230,6 +1323,81 @@ def _active_external_links(application: Application) -> list[ApplicationExternal
     return [link for link in application.external_links if link.deleted_at is None]
 
 
+def _active_interview_stages(application: Application) -> list[ApplicationInterviewStage]:
+    return [stage for stage in application.interview_stages if stage.deleted_at is None]
+
+
+def _default_interview_status(
+    scheduled_at: datetime | None,
+    completed_at: datetime | None,
+) -> ApplicationInterviewStatus:
+    if completed_at is not None:
+        return ApplicationInterviewStatus.COMPLETED
+    if scheduled_at is not None:
+        return ApplicationInterviewStatus.SCHEDULED
+    return ApplicationInterviewStatus.PLANNED
+
+
+def _validate_interview_status(status: str) -> None:
+    if status not in {item.value for item in ApplicationInterviewStatus}:
+        raise ApplicationWorkflowValidationError(f"Invalid interview status: {status}")
+
+
+def _clean_names(names: list[str]) -> list[str]:
+    return [name.strip() for name in names if name.strip()]
+
+
+def _interview_state_suggestion(application: Application) -> str | None:
+    if application.current_state != ApplicationWorkflowState.INTERVIEWING.value and can_transition(
+        application.current_state,
+        ApplicationWorkflowState.INTERVIEWING,
+    ):
+        return ApplicationWorkflowState.INTERVIEWING.value
+    return None
+
+
+def _sort_interview_stages(stages) -> list[ApplicationInterviewStage]:
+    active_statuses = {
+        ApplicationInterviewStatus.PLANNED.value,
+        ApplicationInterviewStatus.SCHEDULED.value,
+    }
+    active = [stage for stage in stages if stage.status in active_statuses]
+    inactive = [stage for stage in stages if stage.status not in active_statuses]
+    distant_future = datetime.max.replace(tzinfo=timezone.utc)
+    distant_past = datetime.min.replace(tzinfo=timezone.utc)
+    active.sort(key=lambda stage: (stage.scheduled_at or distant_future, stage.created_at, stage.id))
+    inactive.sort(
+        key=lambda stage: (stage.completed_at or stage.scheduled_at or stage.updated_at or distant_past, stage.id),
+        reverse=True,
+    )
+    return [*active, *inactive]
+
+
+def _interview_stage_response(
+    stage: ApplicationInterviewStage,
+    application: Application,
+) -> dict[str, Any]:
+    return {
+        "id": stage.id,
+        "application_id": stage.application_id,
+        "workspace_id": stage.workspace_id,
+        "stage_type": stage.stage_type,
+        "title": stage.title,
+        "scheduled_at": stage.scheduled_at,
+        "completed_at": stage.completed_at,
+        "status": stage.status,
+        "interviewer_names": stage.interviewer_names or [],
+        "location_or_meeting_link": stage.location_or_meeting_link,
+        "notes": stage.notes,
+        "preparation_notes": stage.preparation_notes,
+        "outcome_notes": stage.outcome_notes,
+        "metadata": stage.stage_metadata or {},
+        "state_transition_suggestion": _interview_state_suggestion(application),
+        "created_at": stage.created_at,
+        "updated_at": stage.updated_at,
+    }
+
+
 def _note_response(note: ApplicationNote) -> dict[str, Any]:
     return {
         "id": note.id,
@@ -1308,6 +1476,8 @@ def _activity_event_type(log: ActivityLog) -> str:
         "application.note.deleted": "note.deleted",
         "application.reminder.updated": "reminder.updated",
         "application.interview_stage.updated": "interview.updated",
+        "application.interview_stage.canceled": "interview.canceled",
+        "application.interview_stage.deleted": "interview.deleted",
         "application.external_link.created": "external_link.created",
         "application.external_link.updated": "external_link.updated",
         "application.external_link.deleted": "external_link.deleted",
@@ -1322,6 +1492,8 @@ def _activity_title(log: ActivityLog) -> str:
         "application.note.deleted": "Note deleted",
         "application.reminder.updated": "Reminder updated",
         "application.interview_stage.updated": "Interview stage updated",
+        "application.interview_stage.canceled": "Interview stage canceled",
+        "application.interview_stage.deleted": "Interview stage deleted",
         "application.external_link.created": "External link added",
         "application.external_link.updated": "External link updated",
         "application.external_link.deleted": "External link deleted",
@@ -1353,6 +1525,8 @@ def _safe_activity_metadata(log: ActivityLog) -> dict[str, Any]:
         "reminder_id",
         "stage_id",
         "stage_type",
+        "status",
+        "state_transition_suggestion",
         "link_id",
         "link_type",
     }

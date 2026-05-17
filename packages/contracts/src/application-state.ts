@@ -33,14 +33,38 @@ export const ApplicationNoteSchema = z.object({
   body: z.string().min(1),
 });
 
+export const ApplicationInterviewStageTypeSchema = z.enum([
+  "recruiter_screen",
+  "hiring_manager",
+  "technical",
+  "system_design",
+  "behavioral",
+  "panel",
+  "final",
+  "offer_discussion",
+  "other",
+]);
+
+export const ApplicationInterviewStatusSchema = z.enum([
+  "planned",
+  "scheduled",
+  "completed",
+  "canceled",
+  "no_show",
+]);
+
 export const ApplicationInterviewStageSchema = z.object({
   id: IdSchema,
-  stageType: z.string().min(1),
+  stageType: ApplicationInterviewStageTypeSchema,
   title: z.string().min(1),
   scheduledAt: IsoDateTimeSchema.nullable(),
   completedAt: IsoDateTimeSchema.nullable(),
-  location: z.string().nullable(),
+  status: ApplicationInterviewStatusSchema,
+  interviewerNames: z.array(z.string()).default([]),
+  locationOrMeetingLink: z.string().nullable(),
   notes: z.string().nullable(),
+  preparationNotes: z.string().nullable(),
+  outcomeNotes: z.string().nullable(),
   metadata: MetadataSchema,
 });
 
