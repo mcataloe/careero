@@ -104,7 +104,8 @@ export function ApplicationDetailPage() {
         <Stack gap="xs">
           <Text fw={600}>Workflow summary</Text>
           <Text size="sm" c="dimmed">
-            Notes: {application.counts.notes} - Reminders:{" "}
+            Notes: {application.counts.notes} - Links:{" "}
+            {application.counts.external_links} - Reminders:{" "}
             {application.counts.reminders} - Interviews:{" "}
             {application.counts.interviews}
           </Text>

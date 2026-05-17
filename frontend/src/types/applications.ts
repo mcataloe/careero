@@ -16,6 +16,7 @@ export interface ApplicationCompanySummary {
 
 export interface ApplicationWorkflowCounts {
   notes: number;
+  external_links: number;
   reminders: number;
   interviews: number;
 }
