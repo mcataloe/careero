@@ -212,6 +212,9 @@ function ApplicationPipelineCard({
             {application.counts.notes} notes
           </Text>
           <Text c="dimmed" size="xs">
+            {application.counts.external_links} links
+          </Text>
+          <Text c="dimmed" size="xs">
             {application.counts.reminders} reminders
           </Text>
           <Text c="dimmed" size="xs">

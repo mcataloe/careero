@@ -37,6 +37,7 @@ const application: ApplicationDetail = {
   available_next_states: ["applied", "withdrawn", "archived"],
   counts: {
     notes: 1,
+    external_links: 2,
     reminders: 0,
     interviews: 2,
   },
@@ -138,7 +139,7 @@ describe("ApplicationDetailPage", () => {
       "rel",
       "noreferrer noopener",
     );
-    expect(screen.getByText(/Notes: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/Notes: 1 - Links: 2 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
   });
 
   it("renders an error state", async () => {

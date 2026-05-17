@@ -484,6 +484,7 @@ class ApplicationWorkflowService:
             ),
             "counts": {
                 "notes": len(_active_notes(application)),
+                "external_links": len(_active_external_links(application)),
                 "reminders": len(application.reminders),
                 "interviews": len(application.interview_stages),
             },

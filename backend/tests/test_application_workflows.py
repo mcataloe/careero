@@ -91,6 +91,14 @@ def add_workflow_children(db_session: Session, application: Application) -> None
                 author="Local User",
                 body="Follow up on platform ownership.",
             ),
+            ApplicationExternalLink(
+                application_id=application.id,
+                user_id=application.user_id,
+                workspace_id=application.workspace_id,
+                label="Job posting",
+                url="https://example.com/jobs/1",
+                link_type="job_posting",
+            ),
             ApplicationReminder(
                 application_id=application.id,
                 user_id=application.user_id,
@@ -211,7 +219,12 @@ def test_service_lists_by_workspace_and_aggregates_summaries(
     assert item["stride"]["summary"] == "Strong platform fit."
     assert item["resume_artifact"]["revision_number"] == 2
     assert item["cover_letter_artifact"]["revision_number"] == 1
-    assert item["counts"] == {"notes": 1, "reminders": 1, "interviews": 1}
+    assert item["counts"] == {
+        "notes": 1,
+        "external_links": 1,
+        "reminders": 1,
+        "interviews": 1,
+    }
 
 
 def test_service_detail_and_metadata_update(db_session: Session) -> None:
