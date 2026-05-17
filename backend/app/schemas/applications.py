@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any, Literal
 import uuid
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 from app.constants import ApplicationWorkflowState
 
@@ -14,6 +14,20 @@ ApplicationNoteType = Literal[
     "follow_up",
     "interview",
 ]
+
+ApplicationReminderType = Literal[
+    "follow_up",
+    "deadline",
+    "next_action",
+    "interview_prep",
+    "thank_you",
+    "status_check",
+    "revisit",
+    "submit_application",
+    "other",
+]
+
+ApplicationReminderPriority = Literal["low", "normal", "high"]
 
 
 class ApplicationCompanySummary(BaseModel):
@@ -146,13 +160,52 @@ class ApplicationReminderCreate(BaseModel):
     due_at: datetime
     title: str = Field(min_length=1, max_length=255)
     notes: str | None = None
+    reminder_type: ApplicationReminderType = "follow_up"
+    priority: ApplicationReminderPriority = "normal"
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("due_at")
+    @classmethod
+    def due_at_must_be_timezone_aware(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("due_at must include timezone information")
+        return value
 
 
 class ApplicationReminderUpdate(BaseModel):
     due_at: datetime | None = None
     title: str | None = Field(default=None, min_length=1, max_length=255)
     notes: str | None = None
+    reminder_type: ApplicationReminderType | None = None
+    priority: ApplicationReminderPriority | None = None
+    metadata: dict[str, Any] | None = None
+
+    @field_validator("due_at")
+    @classmethod
+    def due_at_must_be_timezone_aware(cls, value: datetime | None) -> datetime | None:
+        if value is not None and (value.tzinfo is None or value.utcoffset() is None):
+            raise ValueError("due_at must include timezone information")
+        return value
+
+
+class ApplicationReminderResponse(BaseModel):
+    id: uuid.UUID
+    application_id: uuid.UUID
+    workspace_id: uuid.UUID
+    title: str
+    notes: str | None = None
+    due_at: datetime
     completed_at: datetime | None = None
+    reminder_type: str
+    priority: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+    updated_at: datetime
+
+
+class WorkspaceReminderResponse(ApplicationReminderResponse):
+    application_title: str
+    company_name: str
 
 
 class ApplicationInterviewStageCreate(BaseModel):

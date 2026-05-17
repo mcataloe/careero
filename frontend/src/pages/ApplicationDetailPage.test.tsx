@@ -7,6 +7,7 @@ import type {
   ApplicationDetail,
   ApplicationExternalLink,
   ApplicationNote,
+  ApplicationReminder,
   ApplicationTimelineEvent,
 } from "../types/applications";
 
@@ -87,6 +88,8 @@ const notes: ApplicationNote[] = [
   },
 ];
 
+const reminders: ApplicationReminder[] = [];
+
 const links: ApplicationExternalLink[] = [
   {
     id: "link-1",
@@ -124,7 +127,8 @@ describe("ApplicationDetailPage", () => {
         .mockResolvedValueOnce(jsonResponse(application))
         .mockResolvedValueOnce(jsonResponse(timeline))
         .mockResolvedValueOnce(jsonResponse(notes))
-        .mockResolvedValueOnce(jsonResponse(links)),
+        .mockResolvedValueOnce(jsonResponse(links))
+        .mockResolvedValueOnce(jsonResponse(reminders)),
     );
 
     renderDetailPage();

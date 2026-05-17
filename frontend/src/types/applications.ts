@@ -131,3 +131,45 @@ export interface ApplicationExternalLinkPayload {
   type?: ApplicationExternalLinkType | string | null;
   metadata?: Record<string, unknown>;
 }
+
+export type ApplicationReminderType =
+  | "follow_up"
+  | "deadline"
+  | "next_action"
+  | "interview_prep"
+  | "thank_you"
+  | "status_check"
+  | "revisit"
+  | "submit_application"
+  | "other";
+
+export type ApplicationReminderPriority = "low" | "normal" | "high";
+
+export interface ApplicationReminder {
+  id: string;
+  application_id: string;
+  workspace_id: string;
+  title: string;
+  notes: string | null;
+  due_at: string;
+  completed_at: string | null;
+  reminder_type: ApplicationReminderType | string;
+  priority: ApplicationReminderPriority | string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkspaceReminder extends ApplicationReminder {
+  application_title: string;
+  company_name: string;
+}
+
+export interface ApplicationReminderPayload {
+  title: string;
+  notes?: string | null;
+  due_at: string;
+  reminder_type?: ApplicationReminderType | string;
+  priority?: ApplicationReminderPriority | string;
+  metadata?: Record<string, unknown>;
+}

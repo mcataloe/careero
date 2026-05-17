@@ -7,15 +7,18 @@ import {
   getApplicationTimeline,
   listApplicationLinks,
   listApplicationNotes,
+  listApplicationReminders,
 } from "../api/applications";
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
 import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
+import { ApplicationRemindersPanel } from "../components/ApplicationRemindersPanel";
 import { ApplicationTimeline } from "../components/ApplicationTimeline";
 import { ErrorState, LoadingState } from "../components/States";
 import type {
   ApplicationDetail,
   ApplicationExternalLink,
   ApplicationNote,
+  ApplicationReminder,
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
 } from "../types/applications";
@@ -37,6 +40,7 @@ export function ApplicationDetailPage() {
   const [timeline, setTimeline] = useState<ApplicationTimelineEvent[]>([]);
   const [notes, setNotes] = useState<ApplicationNote[]>([]);
   const [links, setLinks] = useState<ApplicationExternalLink[]>([]);
+  const [reminders, setReminders] = useState<ApplicationReminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,16 +53,24 @@ export function ApplicationDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [nextApplication, nextTimeline, nextNotes, nextLinks] = await Promise.all([
+      const [
+        nextApplication,
+        nextTimeline,
+        nextNotes,
+        nextLinks,
+        nextReminders,
+      ] = await Promise.all([
         getApplication(applicationId),
         getApplicationTimeline(applicationId),
         listApplicationNotes(applicationId),
         listApplicationLinks(applicationId),
+        listApplicationReminders(applicationId),
       ]);
       setApplication(nextApplication);
       setTimeline(nextTimeline);
       setNotes(nextNotes);
       setLinks(nextLinks);
+      setReminders(nextReminders);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load application");
     } finally {
@@ -119,6 +131,12 @@ export function ApplicationDetailPage() {
       <ApplicationNotesPanel
         applicationId={application.id}
         notes={notes}
+        onChanged={loadApplication}
+      />
+
+      <ApplicationRemindersPanel
+        applicationId={application.id}
+        reminders={reminders}
         onChanged={loadApplication}
       />
 

@@ -9,7 +9,7 @@ from typing import Any
 
 from jsonschema import Draft7Validator, FormatChecker
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState, RoleStatus
@@ -47,7 +47,6 @@ from app.services.application_state_machine import (
 )
 from app.services.workspace_context import is_workspace_active_for_new_work
 
-
 CONTRACT_VERSION = "careero.contracts.v1"
 
 _TIMELINE_APPLICATION_ACTIVITY = {
@@ -55,6 +54,9 @@ _TIMELINE_APPLICATION_ACTIVITY = {
     "application.note.updated",
     "application.note.deleted",
     "application.reminder.updated",
+    "application.reminder.completed",
+    "application.reminder.reopened",
+    "application.reminder.deleted",
     "application.interview_stage.updated",
     "application.external_link.updated",
     "application.external_link.deleted",
@@ -178,7 +180,8 @@ class ApplicationWorkflowService:
             filters.extend(
                 [
                     Application.archived_at.is_(None),
-                    Application.current_state != ApplicationWorkflowState.ARCHIVED.value,
+                    Application.current_state
+                    != ApplicationWorkflowState.ARCHIVED.value,
                 ]
             )
         statement = (
@@ -288,7 +291,7 @@ class ApplicationWorkflowService:
                 )
             )
 
-        for reminder in application.reminders:
+        for reminder in _active_reminders(application):
             events.append(
                 _timeline_event(
                     application=application,
@@ -300,7 +303,11 @@ class ApplicationWorkflowService:
                     actor="user",
                     source_type="application_reminder",
                     source_id=str(reminder.id),
-                    metadata={"due_at": _isoformat(reminder.due_at)},
+                    metadata={
+                        "due_at": _isoformat(reminder.due_at),
+                        "reminder_type": reminder.reminder_type,
+                        "priority": reminder.priority,
+                    },
                 )
             )
             if reminder.completed_at is not None:
@@ -315,7 +322,11 @@ class ApplicationWorkflowService:
                         actor="user",
                         source_type="application_reminder",
                         source_id=str(reminder.id),
-                        metadata={"due_at": _isoformat(reminder.due_at)},
+                        metadata={
+                            "due_at": _isoformat(reminder.due_at),
+                            "reminder_type": reminder.reminder_type,
+                            "priority": reminder.priority,
+                        },
                     )
                 )
 
@@ -424,7 +435,10 @@ class ApplicationWorkflowService:
         ):
             application.archived_at = None
             application.reactivated_at = now
-        if next_state == ApplicationWorkflowState.APPLIED.value and application.applied_at is None:
+        if (
+            next_state == ApplicationWorkflowState.APPLIED.value
+            and application.applied_at is None
+        ):
             application.applied_at = now
 
         self._append_history(
@@ -484,7 +498,7 @@ class ApplicationWorkflowService:
             ),
             "counts": {
                 "notes": len(_active_notes(application)),
-                "reminders": len(application.reminders),
+                "reminders": len(_active_reminders(application)),
                 "interviews": len(application.interview_stages),
             },
         }
@@ -587,6 +601,24 @@ class ApplicationWorkflowService:
         )
         self.db.commit()
 
+    def list_reminders(
+        self,
+        application_id: uuid.UUID,
+        *,
+        status_filter: str | None = None,
+    ) -> list[dict[str, Any]]:
+        application = self._require_application(application_id)
+        statement = select(ApplicationReminder).where(
+            ApplicationReminder.application_id == application.id,
+            ApplicationReminder.deleted_at.is_(None),
+        )
+        if status_filter == "active":
+            statement = statement.where(ApplicationReminder.completed_at.is_(None))
+        elif status_filter == "completed":
+            statement = statement.where(ApplicationReminder.completed_at.is_not(None))
+        reminders = self.db.scalars(_order_reminders(statement))
+        return [_reminder_response(reminder) for reminder in reminders]
+
     def create_reminder(
         self,
         application_id: uuid.UUID,
@@ -600,6 +632,9 @@ class ApplicationWorkflowService:
             due_at=payload.due_at,
             title=payload.title,
             notes=payload.notes,
+            reminder_type=payload.reminder_type,
+            priority=payload.priority,
+            reminder_metadata=payload.metadata,
         )
         self.db.add(reminder)
         self.db.flush()
@@ -608,10 +643,16 @@ class ApplicationWorkflowService:
             user_id=application.user_id,
             application=application,
             action="application.reminder.created",
-            details={"reminder_id": str(reminder.id)},
+            details={
+                "reminder_id": str(reminder.id),
+                "title": reminder.title,
+                "due_at": reminder.due_at.isoformat(),
+                "reminder_type": reminder.reminder_type,
+                "priority": reminder.priority,
+            },
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _reminder_response(reminder)
 
     def update_reminder(
         self,
@@ -621,18 +662,22 @@ class ApplicationWorkflowService:
     ) -> dict[str, Any]:
         application = self._require_application(application_id)
         reminder = self._require_child(ApplicationReminder, application, reminder_id)
-        for field_name, value in payload.model_dump(exclude_unset=True).items():
-            setattr(reminder, field_name, value)
+        updates = payload.model_dump(exclude_unset=True)
+        for field_name, value in updates.items():
+            if field_name == "metadata":
+                reminder.reminder_metadata = value or {}
+            else:
+                setattr(reminder, field_name, value)
         self.db.flush()
         self._sync_next_action(application)
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.reminder.updated",
-            details={"reminder_id": str(reminder.id)},
+            details={"reminder_id": str(reminder.id), "title": reminder.title},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _reminder_response(reminder)
 
     def complete_reminder(
         self,
@@ -641,17 +686,85 @@ class ApplicationWorkflowService:
     ) -> dict[str, Any]:
         application = self._require_application(application_id)
         reminder = self._require_child(ApplicationReminder, application, reminder_id)
-        reminder.completed_at = datetime.now(timezone.utc)
+        if reminder.completed_at is None:
+            reminder.completed_at = datetime.now(timezone.utc)
         self.db.flush()
         self._sync_next_action(application)
         self._log_activity(
             user_id=application.user_id,
             application=application,
             action="application.reminder.completed",
-            details={"reminder_id": str(reminder.id)},
+            details={"reminder_id": str(reminder.id), "title": reminder.title},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        return _reminder_response(reminder)
+
+    def reopen_reminder(
+        self,
+        application_id: uuid.UUID,
+        reminder_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        application = self._require_application(application_id)
+        reminder = self._require_child(ApplicationReminder, application, reminder_id)
+        reminder.completed_at = None
+        self.db.flush()
+        self._sync_next_action(application)
+        self._log_activity(
+            user_id=application.user_id,
+            application=application,
+            action="application.reminder.reopened",
+            details={"reminder_id": str(reminder.id), "title": reminder.title},
+        )
+        self.db.commit()
+        return _reminder_response(reminder)
+
+    def delete_reminder(
+        self, application_id: uuid.UUID, reminder_id: uuid.UUID
+    ) -> None:
+        application = self._require_application(application_id)
+        reminder = self._require_child(ApplicationReminder, application, reminder_id)
+        reminder.deleted_at = datetime.now(timezone.utc)
+        self.db.flush()
+        self._sync_next_action(application)
+        self._log_activity(
+            user_id=application.user_id,
+            application=application,
+            action="application.reminder.deleted",
+            details={"reminder_id": str(reminder.id), "title": reminder.title},
+        )
+        self.db.commit()
+
+    def list_workspace_reminders(
+        self,
+        workspace_id: uuid.UUID,
+        *,
+        window: str,
+        now: datetime | None = None,
+        limit: int = 25,
+    ) -> list[dict[str, Any]]:
+        user = self.get_default_user()
+        workspace = self._get_workspace(workspace_id=workspace_id, user_id=user.id)
+        if workspace is None:
+            raise ApplicationWorkflowWorkspaceNotFoundError("Workspace not found")
+        current_time = now or datetime.now(timezone.utc)
+        statement = (
+            select(ApplicationReminder)
+            .join(Application, Application.id == ApplicationReminder.application_id)
+            .where(
+                ApplicationReminder.workspace_id == workspace.id,
+                ApplicationReminder.user_id == user.id,
+                ApplicationReminder.deleted_at.is_(None),
+                ApplicationReminder.completed_at.is_(None),
+                Application.deleted_at.is_(None),
+            )
+            .limit(limit)
+        )
+        if window == "overdue":
+            statement = statement.where(ApplicationReminder.due_at < current_time)
+        elif window == "upcoming":
+            statement = statement.where(ApplicationReminder.due_at >= current_time)
+        reminders = self.db.scalars(_order_reminders(statement))
+        return [_workspace_reminder_response(reminder) for reminder in reminders]
 
     def create_interview_stage(
         self,
@@ -786,7 +899,9 @@ class ApplicationWorkflowService:
         self.db.commit()
         return _external_link_response(link)
 
-    def delete_external_link(self, application_id: uuid.UUID, link_id: uuid.UUID) -> None:
+    def delete_external_link(
+        self, application_id: uuid.UUID, link_id: uuid.UUID
+    ) -> None:
         application = self._require_application(application_id)
         link = self._require_child(ApplicationExternalLink, application, link_id)
         link.deleted_at = datetime.now(timezone.utc)
@@ -886,7 +1001,9 @@ class ApplicationWorkflowService:
             ) from exc
         return contract
 
-    def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
+    def _get_active_role(
+        self, *, role_id: uuid.UUID, user_id: uuid.UUID
+    ) -> Role | None:
         statement = (
             select(Role)
             .where(
@@ -954,7 +1071,9 @@ class ApplicationWorkflowService:
             or child.application_id != application.id
             or getattr(child, "deleted_at", None) is not None
         ):
-            raise ApplicationWorkflowNotFoundError("Application workflow child not found")
+            raise ApplicationWorkflowNotFoundError(
+                "Application workflow child not found"
+            )
         return child
 
     def _append_history(
@@ -985,6 +1104,7 @@ class ApplicationWorkflowService:
             select(func.min(ApplicationReminder.due_at)).where(
                 ApplicationReminder.application_id == application.id,
                 ApplicationReminder.completed_at.is_(None),
+                ApplicationReminder.deleted_at.is_(None),
             )
         )
 
@@ -1071,7 +1191,9 @@ class ApplicationWorkflowService:
                 if artifact.artifact_metadata
                 else None
             )
-            revision = contract.get("revision", {}) if isinstance(contract, dict) else {}
+            revision = (
+                contract.get("revision", {}) if isinstance(contract, dict) else {}
+            )
             events.append(
                 _timeline_event(
                     application=application,
@@ -1181,9 +1303,7 @@ class ApplicationWorkflowService:
             "artifact_type": artifact.artifact_type,
             "title": artifact.title,
             "status": (
-                contract.get("lifecycleStatus")
-                if isinstance(contract, dict)
-                else None
+                contract.get("lifecycleStatus") if isinstance(contract, dict) else None
             ),
             "revision_number": revision.get("revisionNumber"),
             "updated_at": artifact.updated_at,
@@ -1226,6 +1346,12 @@ def _active_notes(application: Application) -> list[ApplicationNote]:
     return [note for note in application.note_entries if note.deleted_at is None]
 
 
+def _active_reminders(application: Application) -> list[ApplicationReminder]:
+    return [
+        reminder for reminder in application.reminders if reminder.deleted_at is None
+    ]
+
+
 def _active_external_links(application: Application) -> list[ApplicationExternalLink]:
     return [link for link in application.external_links if link.deleted_at is None]
 
@@ -1240,6 +1366,52 @@ def _note_response(note: ApplicationNote) -> dict[str, Any]:
         "body": note.body,
         "created_at": note.created_at,
         "updated_at": note.updated_at,
+    }
+
+
+def _order_reminders(statement):
+    now = datetime.now(timezone.utc)
+    return statement.order_by(
+        case((ApplicationReminder.completed_at.is_(None), 0), else_=1),
+        case(
+            (
+                and_(
+                    ApplicationReminder.completed_at.is_(None),
+                    ApplicationReminder.due_at < now,
+                ),
+                0,
+            ),
+            else_=1,
+        ),
+        ApplicationReminder.due_at.asc(),
+        ApplicationReminder.completed_at.desc().nullslast(),
+        ApplicationReminder.id.asc(),
+    )
+
+
+def _reminder_response(reminder: ApplicationReminder) -> dict[str, Any]:
+    return {
+        "id": reminder.id,
+        "application_id": reminder.application_id,
+        "workspace_id": reminder.workspace_id,
+        "title": reminder.title,
+        "notes": reminder.notes,
+        "due_at": reminder.due_at,
+        "completed_at": reminder.completed_at,
+        "reminder_type": reminder.reminder_type,
+        "priority": reminder.priority,
+        "metadata": reminder.reminder_metadata or {},
+        "created_at": reminder.created_at,
+        "updated_at": reminder.updated_at,
+    }
+
+
+def _workspace_reminder_response(reminder: ApplicationReminder) -> dict[str, Any]:
+    role = reminder.application.role
+    return {
+        **_reminder_response(reminder),
+        "application_title": role.title,
+        "company_name": role.company.name,
     }
 
 
@@ -1280,7 +1452,9 @@ def _timeline_event(
         "actor": actor,
         "source_type": source_type,
         "source_id": source_id,
-        "metadata": {key: value for key, value in metadata.items() if value is not None},
+        "metadata": {
+            key: value for key, value in metadata.items() if value is not None
+        },
     }
 
 
@@ -1306,7 +1480,11 @@ def _activity_event_type(log: ActivityLog) -> str:
     mapping = {
         "application.note.updated": "note.updated",
         "application.note.deleted": "note.deleted",
+        "application.reminder.created": "reminder.created",
         "application.reminder.updated": "reminder.updated",
+        "application.reminder.completed": "reminder.completed",
+        "application.reminder.reopened": "reminder.reopened",
+        "application.reminder.deleted": "reminder.deleted",
         "application.interview_stage.updated": "interview.updated",
         "application.external_link.created": "external_link.created",
         "application.external_link.updated": "external_link.updated",
@@ -1320,7 +1498,11 @@ def _activity_title(log: ActivityLog) -> str:
         "application.updated": "Application details updated",
         "application.note.updated": "Note updated",
         "application.note.deleted": "Note deleted",
+        "application.reminder.created": "Reminder added",
         "application.reminder.updated": "Reminder updated",
+        "application.reminder.completed": "Reminder completed",
+        "application.reminder.reopened": "Reminder reopened",
+        "application.reminder.deleted": "Reminder archived",
         "application.interview_stage.updated": "Interview stage updated",
         "application.external_link.created": "External link added",
         "application.external_link.updated": "External link updated",
@@ -1359,7 +1541,8 @@ def _safe_activity_metadata(log: ActivityLog) -> dict[str, Any]:
     metadata = {
         key: value
         for key, value in log.details.items()
-        if key in allowed_keys and isinstance(value, (str, int, float, bool, list, type(None)))
+        if key in allowed_keys
+        and isinstance(value, (str, int, float, bool, list, type(None)))
     }
     metadata["action"] = log.action
     return metadata

@@ -536,19 +536,24 @@ class ApplicationNote(TimestampMixin, SoftDeleteMixin, Base):
         nullable=False,
     )
     author: Mapped[str | None] = mapped_column(String(200))
-    note_type: Mapped[str] = mapped_column(String(100), nullable=False, default="general")
+    note_type: Mapped[str] = mapped_column(
+        String(100), nullable=False, default="general"
+    )
     body: Mapped[str] = mapped_column(Text, nullable=False)
 
     application: Mapped[Application] = relationship(back_populates="note_entries")
 
 
-class ApplicationReminder(TimestampMixin, Base):
+class ApplicationReminder(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "application_reminders"
     __table_args__ = (
         Index("ix_application_reminders_application_id", "application_id"),
         Index("ix_application_reminders_workspace_id", "workspace_id"),
         Index("ix_application_reminders_due_at", "due_at"),
         Index("ix_application_reminders_completed_at", "completed_at"),
+        Index("ix_application_reminders_deleted_at", "deleted_at"),
+        Index("ix_application_reminders_type", "reminder_type"),
+        Index("ix_application_reminders_priority", "priority"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -575,6 +580,22 @@ class ApplicationReminder(TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reminder_type: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="follow_up",
+    )
+    priority: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="normal",
+    )
+    reminder_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
 
     application: Mapped[Application] = relationship(back_populates="reminders")
 

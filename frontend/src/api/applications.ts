@@ -6,6 +6,9 @@ import type {
   ApplicationNote,
   ApplicationNotePayload,
   ApplicationPipelineResponse,
+  ApplicationReminder,
+  ApplicationReminderPayload,
+  WorkspaceReminder,
   ApplicationStateTransitionPayload,
   ApplicationSummary,
   ApplicationTimelineEvent,
@@ -158,4 +161,88 @@ export function deleteApplicationLink(
   return apiRequest<void>(`/api/applications/${applicationId}/links/${linkId}`, {
     method: "DELETE",
   });
+}
+
+
+export function listApplicationReminders(
+  applicationId: string,
+  status?: "active" | "completed",
+): Promise<ApplicationReminder[]> {
+  const params = new URLSearchParams();
+  if (status) {
+    params.set("status_filter", status);
+  }
+  const query = params.toString();
+  return apiRequest<ApplicationReminder[]>(
+    `/api/applications/${applicationId}/reminders${query ? `?${query}` : ""}`,
+  );
+}
+
+export function createApplicationReminder(
+  applicationId: string,
+  payload: ApplicationReminderPayload,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders`,
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export function updateApplicationReminder(
+  applicationId: string,
+  reminderId: string,
+  payload: Partial<ApplicationReminderPayload>,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders/${reminderId}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+  );
+}
+
+export function completeApplicationReminder(
+  applicationId: string,
+  reminderId: string,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders/${reminderId}/complete`,
+    { method: "POST" },
+  );
+}
+
+export function reopenApplicationReminder(
+  applicationId: string,
+  reminderId: string,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders/${reminderId}/reopen`,
+    { method: "POST" },
+  );
+}
+
+export function deleteApplicationReminder(
+  applicationId: string,
+  reminderId: string,
+): Promise<void> {
+  return apiRequest<void>(
+    `/api/applications/${applicationId}/reminders/${reminderId}`,
+    { method: "DELETE" },
+  );
+}
+
+export function listUpcomingWorkspaceReminders(
+  workspaceId: string,
+  limit = 25,
+): Promise<WorkspaceReminder[]> {
+  return apiRequest<WorkspaceReminder[]>(
+    `/api/workspaces/${workspaceId}/reminders/upcoming?limit=${limit}`,
+  );
+}
+
+export function listOverdueWorkspaceReminders(
+  workspaceId: string,
+  limit = 25,
+): Promise<WorkspaceReminder[]> {
+  return apiRequest<WorkspaceReminder[]>(
+    `/api/workspaces/${workspaceId}/reminders/overdue?limit=${limit}`,
+  );
 }

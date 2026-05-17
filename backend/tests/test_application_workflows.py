@@ -28,6 +28,8 @@ from app.schemas.applications import (
     ApplicationMetadataUpdate,
     ApplicationNoteCreate,
     ApplicationNoteUpdate,
+    ApplicationReminderCreate,
+    ApplicationReminderUpdate,
     ApplicationStateTransitionRequest,
 )
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
@@ -169,7 +171,9 @@ def test_service_ensures_workflow_and_prevents_duplicate(
     assert first["id"] == second["id"]
     assert first["current_state"] == "interested"
     assert first["role"]["id"] == role.id
-    applications = list(db_session.scalars(select(Application).where(Application.role_id == role.id)))
+    applications = list(
+        db_session.scalars(select(Application).where(Application.role_id == role.id))
+    )
     assert len(applications) == 1
     assert applications[0].status == applications[0].current_state
 
@@ -236,7 +240,9 @@ def test_service_detail_and_metadata_update(db_session: Session) -> None:
 
     actions = list(
         db_session.scalars(
-            select(ActivityLog.action).where(ActivityLog.entity_id == UUID(detail["id"]))
+            select(ActivityLog.action).where(
+                ActivityLog.entity_id == UUID(detail["id"])
+            )
         )
     )
     assert "application.updated" in actions
@@ -362,7 +368,9 @@ def test_service_requires_explicit_reactivation(db_session: Session) -> None:
     with pytest.raises(ApplicationWorkflowTransitionError):
         service.transition_state(
             application.id,
-            ApplicationStateTransitionRequest(state=ApplicationWorkflowState.INTERESTED),
+            ApplicationStateTransitionRequest(
+                state=ApplicationWorkflowState.INTERESTED
+            ),
         )
 
     reactivated = service.transition_state(
@@ -548,6 +556,152 @@ def test_service_note_crud_uses_soft_delete_and_updates_counts(
     assert "application.note.deleted" in actions
 
 
+def test_service_reminder_lifecycle_queries_and_activity(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application_id = UUID(detail["id"])
+
+    created = service.create_reminder(
+        application_id,
+        ApplicationReminderCreate(
+            title="Follow up with recruiter",
+            notes="Ask for timeline.",
+            due_at=datetime(2026, 5, 15, 15, 0, tzinfo=timezone.utc),
+            reminder_type="follow_up",
+            priority="high",
+            metadata={"source": "test"},
+        ),
+    )
+
+    assert created["title"] == "Follow up with recruiter"
+    assert created["reminder_type"] == "follow_up"
+    assert created["priority"] == "high"
+    assert created["metadata"] == {"source": "test"}
+    assert (
+        service.get_application(application_id)["next_action_at"] == created["due_at"]
+    )
+    assert [
+        reminder["id"]
+        for reminder in service.list_reminders(application_id, status_filter="active")
+    ] == [created["id"]]
+
+    updated = service.update_reminder(
+        application_id,
+        created["id"],
+        ApplicationReminderUpdate(
+            title="Send thank-you note", reminder_type="thank_you"
+        ),
+    )
+    assert updated["title"] == "Send thank-you note"
+    assert updated["reminder_type"] == "thank_you"
+
+    completed = service.complete_reminder(application_id, created["id"])
+    assert completed["completed_at"] is not None
+    assert service.list_reminders(application_id, status_filter="active") == []
+    assert [
+        reminder["id"]
+        for reminder in service.list_reminders(
+            application_id, status_filter="completed"
+        )
+    ] == [created["id"]]
+    assert service.get_application(application_id)["next_action_at"] is None
+
+    reopened = service.reopen_reminder(application_id, created["id"])
+    assert reopened["completed_at"] is None
+    assert (
+        service.list_reminders(application_id, status_filter="active")[0]["id"]
+        == created["id"]
+    )
+
+    timeline = service.get_timeline(application_id)
+    event_types = [event["event_type"] for event in timeline]
+    assert "reminder.created" in event_types
+    assert "reminder.completed" in event_types
+
+    service.delete_reminder(application_id, created["id"])
+    deleted = db_session.get(ApplicationReminder, created["id"])
+    assert deleted is not None
+    assert deleted.deleted_at is not None
+    assert service.list_reminders(application_id) == []
+
+    actions = list(
+        db_session.scalars(
+            select(ActivityLog.action).where(ActivityLog.entity_id == application_id)
+        )
+    )
+    assert "application.reminder.created" in actions
+    assert "application.reminder.updated" in actions
+    assert "application.reminder.completed" in actions
+    assert "application.reminder.reopened" in actions
+    assert "application.reminder.deleted" in actions
+
+
+def test_service_workspace_reminder_queries_are_scoped_and_exclude_completed(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    other_workspace = WorkspaceService(db_session).create_workspace(
+        WorkspaceCreate(title="Second workspace")
+    )
+    service = ApplicationWorkflowService(db_session)
+    default_app = service.get_or_create_for_role(
+        create_role(db_session, title="Default role").id
+    )
+    other_app = service.get_or_create_for_role(
+        create_role(db_session, title="Other role", workspace_id=other_workspace.id).id
+    )
+
+    overdue = service.create_reminder(
+        UUID(default_app["id"]),
+        ApplicationReminderCreate(
+            title="Overdue action",
+            due_at=datetime(2026, 5, 10, 12, 0, tzinfo=timezone.utc),
+        ),
+    )
+    upcoming = service.create_reminder(
+        UUID(default_app["id"]),
+        ApplicationReminderCreate(
+            title="Upcoming action",
+            due_at=datetime(2026, 5, 20, 12, 0, tzinfo=timezone.utc),
+        ),
+    )
+    other = service.create_reminder(
+        UUID(other_app["id"]),
+        ApplicationReminderCreate(
+            title="Other workspace action",
+            due_at=datetime(2026, 5, 9, 12, 0, tzinfo=timezone.utc),
+        ),
+    )
+    service.complete_reminder(UUID(default_app["id"]), upcoming["id"])
+
+    now = datetime(2026, 5, 16, 12, 0, tzinfo=timezone.utc)
+    overdue_items = service.list_workspace_reminders(
+        DEFAULT_WORKSPACE_ID,
+        window="overdue",
+        now=now,
+    )
+    upcoming_items = service.list_workspace_reminders(
+        DEFAULT_WORKSPACE_ID,
+        window="upcoming",
+        now=now,
+    )
+    other_items = service.list_workspace_reminders(
+        other_workspace.id,
+        window="overdue",
+        now=now,
+    )
+
+    assert [item["id"] for item in overdue_items] == [overdue["id"]]
+    assert upcoming_items == []
+    assert [item["id"] for item in other_items] == [other["id"]]
+    assert overdue_items[0]["application_title"] == "Default role"
+    assert overdue_items[0]["company_name"] == "Workflow Co"
+
+
 def test_service_external_link_crud_uses_soft_delete(
     db_session: Session,
 ) -> None:
@@ -680,7 +834,8 @@ def test_service_timeline_includes_note_link_activity_without_deleted_body(
     assert "external_link.updated" in event_types
     assert "external_link.deleted" in event_types
     assert all(
-        event["description"] != "Sensitive recruiter note that should not appear after delete."
+        event["description"]
+        != "Sensitive recruiter note that should not appear after delete."
         for event in timeline
     )
 
@@ -776,12 +931,12 @@ def test_api_note_and_link_crud(
     )
     assert note_delete_response.status_code == 204
     assert link_delete_response.status_code == 204
-    assert application_client.get(
-        f"/api/applications/{application_id}/notes"
-    ).json() == []
-    assert application_client.get(
-        f"/api/applications/{application_id}/links"
-    ).json() == []
+    assert (
+        application_client.get(f"/api/applications/{application_id}/notes").json() == []
+    )
+    assert (
+        application_client.get(f"/api/applications/{application_id}/links").json() == []
+    )
 
 
 def test_api_list_detail_ensure_filter_and_update(
@@ -798,8 +953,12 @@ def test_api_list_detail_ensure_filter_and_update(
         workspace_id=other_workspace.id,
     )
 
-    default_response = application_client.post(f"/api/roles/{default_role.id}/application")
-    duplicate_response = application_client.post(f"/api/roles/{default_role.id}/application")
+    default_response = application_client.post(
+        f"/api/roles/{default_role.id}/application"
+    )
+    duplicate_response = application_client.post(
+        f"/api/roles/{default_role.id}/application"
+    )
     other_response = application_client.post(f"/api/roles/{other_role.id}/application")
 
     assert default_response.status_code == 201
@@ -877,9 +1036,7 @@ def test_api_transition_validation_and_pipeline(
     assert pipeline_response.status_code == 200
     pipeline = pipeline_response.json()
     assert pipeline["include_inactive"] is False
-    assert [item["id"] for item in pipeline["states"]["interested"]] == [
-        application_id
-    ]
+    assert [item["id"] for item in pipeline["states"]["interested"]] == [application_id]
     assert "archived" not in pipeline["states"]
 
 
@@ -928,7 +1085,10 @@ def test_archived_workspace_rejects_new_application_workflow(
     response = application_client.post(f"/api/roles/{role.id}/application")
 
     assert response.status_code == 409
-    assert db_session.scalar(select(Application).where(Application.role_id == role.id)) is None
+    assert (
+        db_session.scalar(select(Application).where(Application.role_id == role.id))
+        is None
+    )
 
 
 def test_service_not_found_and_seed_missing_errors(db_session: Session) -> None:
