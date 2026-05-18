@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { getCompensationIntelligence } from "../api/compensationIntelligence";
+import { getRecommendations } from "../api/recommendations";
 import { getSearchAnalytics } from "../api/searchAnalytics";
 import { getSearchHealth } from "../api/searchHealth";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
@@ -21,6 +22,7 @@ import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
+import type { RecommendationListResponse } from "../types/recommendations";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 import type { SearchHealthResponse } from "../types/searchHealth";
 import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
@@ -37,6 +39,8 @@ export function DashboardPage() {
   const [compensationIntelligence, setCompensationIntelligence] =
     useState<CompensationIntelligenceResponse | null>(null);
   const [searchHealth, setSearchHealth] = useState<SearchHealthResponse | null>(null);
+  const [recommendations, setRecommendations] =
+    useState<RecommendationListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +55,7 @@ export function DashboardPage() {
         sourceAnalytics,
         compensationAnalytics,
         searchHealthAnalytics,
+        recommendationData,
       ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
@@ -58,6 +63,7 @@ export function DashboardPage() {
         getSourceIntelligence(),
         getCompensationIntelligence(),
         getSearchHealth(),
+        getRecommendations(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
@@ -65,6 +71,7 @@ export function DashboardPage() {
       setSourceIntelligence(sourceAnalytics);
       setCompensationIntelligence(compensationAnalytics);
       setSearchHealth(searchHealthAnalytics);
+      setRecommendations(recommendationData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -105,9 +112,50 @@ export function DashboardPage() {
             />
           ) : null}
           {searchHealth ? <SearchHealthPanel health={searchHealth} /> : null}
+          {recommendations ? (
+            <RecommendationsPanel recommendations={recommendations} />
+          ) : null}
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function RecommendationsPanel({
+  recommendations,
+}: {
+  recommendations: RecommendationListResponse;
+}) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Title order={3}>Recommendations</Title>
+      <Text c="dimmed" size="sm" mt="xs">
+        Read-only next steps with visible reasons.
+      </Text>
+      <Stack gap="sm" mt="md">
+        {recommendations.recommendations.length > 0 ? (
+          recommendations.recommendations.slice(0, 8).map((recommendation) => (
+            <div key={recommendation.id}>
+              <Group justify="space-between" align="flex-start">
+                <Text fw={600}>{recommendation.title}</Text>
+                <Badge variant="light">{recommendation.confidence}</Badge>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {recommendation.action.replaceAll("_", " ")}:{" "}
+                {recommendation.reason}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {recommendation.basis}
+              </Text>
+            </div>
+          ))
+        ) : (
+          <Text c="dimmed" size="sm">
+            No recommendations are active from the current insight signals.
+          </Text>
+        )}
+      </Stack>
+    </Paper>
   );
 }
 

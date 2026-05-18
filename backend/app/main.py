@@ -7,6 +7,7 @@ from app.api.artifact_performance import router as artifact_performance_router
 from app.api.applications import router as applications_router
 from app.api.compensation_intelligence import router as compensation_intelligence_router
 from app.api.cover_letter_artifacts import router as cover_letter_artifacts_router
+from app.api.recommendations import router as recommendations_router
 from app.api.resume_sources import router as resume_sources_router
 from app.api.resume_artifacts import router as resume_artifacts_router
 from app.api.roles import router as roles_router
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(applications_router, prefix="/api")
     app.include_router(compensation_intelligence_router, prefix="/api")
     app.include_router(cover_letter_artifacts_router, prefix="/api")
+    app.include_router(recommendations_router, prefix="/api")
     app.include_router(resume_sources_router, prefix="/api")
     app.include_router(resume_artifacts_router, prefix="/api")
     app.include_router(roles_router, prefix="/api")
