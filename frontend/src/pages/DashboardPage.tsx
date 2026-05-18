@@ -15,12 +15,14 @@ import { useEffect, useState } from "react";
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { getCompensationIntelligence } from "../api/compensationIntelligence";
 import { getSearchAnalytics } from "../api/searchAnalytics";
+import { getSearchHealth } from "../api/searchHealth";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
 import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
+import type { SearchHealthResponse } from "../types/searchHealth";
 import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
 import type { StrideInsightsResponse } from "../types/strideInsights";
 
@@ -34,6 +36,7 @@ export function DashboardPage() {
     useState<SourceIntelligenceResponse | null>(null);
   const [compensationIntelligence, setCompensationIntelligence] =
     useState<CompensationIntelligenceResponse | null>(null);
+  const [searchHealth, setSearchHealth] = useState<SearchHealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,18 +50,21 @@ export function DashboardPage() {
         strideAnalytics,
         sourceAnalytics,
         compensationAnalytics,
+        searchHealthAnalytics,
       ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
         getStrideInsights(),
         getSourceIntelligence(),
         getCompensationIntelligence(),
+        getSearchHealth(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
       setStrideInsights(strideAnalytics);
       setSourceIntelligence(sourceAnalytics);
       setCompensationIntelligence(compensationAnalytics);
+      setSearchHealth(searchHealthAnalytics);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -98,9 +104,44 @@ export function DashboardPage() {
               intelligence={compensationIntelligence}
             />
           ) : null}
+          {searchHealth ? <SearchHealthPanel health={searchHealth} /> : null}
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function SearchHealthPanel({ health }: { health: SearchHealthResponse }) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Title order={3}>Search health</Title>
+      <Text c="dimmed" size="sm" mt="xs">
+        Gentle sustainability signals based on tracked search activity.
+      </Text>
+      <Stack gap="sm" mt="md">
+        {health.signals.length > 0 ? (
+          health.signals.map((signal) => (
+            <div key={signal.signal_type}>
+              <Group justify="space-between" align="flex-start">
+                <Text fw={600}>{signal.label}</Text>
+                <Badge variant="light">{signal.confidence}</Badge>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {signal.message}
+              </Text>
+              <Text size="sm">{signal.gentle_guidance}</Text>
+              <Text size="xs" c="dimmed">
+                {signal.basis}
+              </Text>
+            </div>
+          ))
+        ) : (
+          <Text c="dimmed" size="sm">
+            No search-health signals are active from the current tracked activity.
+          </Text>
+        )}
+      </Stack>
+    </Paper>
   );
 }
 
