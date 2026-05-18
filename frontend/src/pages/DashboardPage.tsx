@@ -11,12 +11,16 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 
+import { getArtifactPerformance } from "../api/artifactPerformance";
 import { getSearchAnalytics } from "../api/searchAnalytics";
 import { ErrorState, LoadingState } from "../components/States";
+import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 
 export function DashboardPage() {
   const [analytics, setAnalytics] = useState<SearchAnalyticsResponse | null>(null);
+  const [artifactPerformance, setArtifactPerformance] =
+    useState<ArtifactPerformanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +28,12 @@ export function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      setAnalytics(await getSearchAnalytics());
+      const [searchAnalytics, artifactAnalytics] = await Promise.all([
+        getSearchAnalytics(),
+        getArtifactPerformance(),
+      ]);
+      setAnalytics(searchAnalytics);
+      setArtifactPerformance(artifactAnalytics);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -50,9 +59,61 @@ export function DashboardPage() {
         <ErrorState message={error} onRetry={loadAnalytics} />
       ) : null}
       {!loading && !error && analytics ? (
-        <SearchAnalyticsPanel analytics={analytics} />
+        <>
+          <SearchAnalyticsPanel analytics={analytics} />
+          {artifactPerformance ? (
+            <ArtifactPerformancePanel performance={artifactPerformance} />
+          ) : null}
+        </>
       ) : null}
     </Stack>
+  );
+}
+
+function ArtifactPerformancePanel({
+  performance,
+}: {
+  performance: ArtifactPerformanceResponse;
+}) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Title order={3}>Artifact performance</Title>
+      {performance.insufficient_data.length > 0 ? (
+        <Text c="dimmed" size="sm" mt="xs">
+          {performance.insufficient_data[0]}
+        </Text>
+      ) : null}
+      <Table mt="md" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Variant</Table.Th>
+            <Table.Th>Uses</Table.Th>
+            <Table.Th>Response rate</Table.Th>
+            <Table.Th>Interview rate</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {performance.by_variant.length > 0 ? (
+            performance.by_variant.slice(0, 6).map((metric) => (
+              <Table.Tr key={metric.label}>
+                <Table.Td>{metric.label}</Table.Td>
+                <Table.Td>{metric.total}</Table.Td>
+                <Table.Td>{formatRate(metric.response_rate)}</Table.Td>
+                <Table.Td>{formatRate(metric.interview_rate)}</Table.Td>
+              </Table.Tr>
+            ))
+          ) : (
+            <Table.Tr>
+              <Table.Td colSpan={4}>
+                <Text c="dimmed" size="sm">
+                  Generate and use resume or cover-letter artifacts to build observed performance history.
+                </Text>
+              </Table.Td>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
+      </Table>
+    </Paper>
   );
 }
 
