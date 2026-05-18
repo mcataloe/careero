@@ -1,5 +1,6 @@
 import {
   Alert,
+  Badge,
   Grid,
   Group,
   Paper,
@@ -13,14 +14,18 @@ import { useEffect, useState } from "react";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { getSearchAnalytics } from "../api/searchAnalytics";
+import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
+import type { StrideInsightsResponse } from "../types/strideInsights";
 
 export function DashboardPage() {
   const [analytics, setAnalytics] = useState<SearchAnalyticsResponse | null>(null);
   const [artifactPerformance, setArtifactPerformance] =
     useState<ArtifactPerformanceResponse | null>(null);
+  const [strideInsights, setStrideInsights] =
+    useState<StrideInsightsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,12 +33,14 @@ export function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [searchAnalytics, artifactAnalytics] = await Promise.all([
+      const [searchAnalytics, artifactAnalytics, strideAnalytics] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
+        getStrideInsights(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
+      setStrideInsights(strideAnalytics);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -64,9 +71,54 @@ export function DashboardPage() {
           {artifactPerformance ? (
             <ArtifactPerformancePanel performance={artifactPerformance} />
           ) : null}
+          {strideInsights ? <StrideInsightsPanel insights={strideInsights} /> : null}
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function StrideInsightsPanel({
+  insights,
+}: {
+  insights: StrideInsightsResponse;
+}) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Group justify="space-between" align="flex-start">
+        <div>
+          <Title order={3}>STRIDE search trends</Title>
+          <Text c="dimmed" size="sm">
+            Average score:{" "}
+            {insights.average_stride_score === null
+              ? "Not enough data"
+              : insights.average_stride_score.toFixed(1)}
+          </Text>
+        </div>
+      </Group>
+      <Stack gap="sm" mt="md">
+        {insights.insights.length > 0 ? (
+          insights.insights.map((insight) => (
+            <div key={insight.label}>
+              <Group justify="space-between" align="flex-start">
+                <Text fw={600}>{insight.label}</Text>
+                <Badge variant="light">{insight.confidence}</Badge>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {insight.message}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {insight.basis}
+              </Text>
+            </div>
+          ))
+        ) : (
+          <Text c="dimmed" size="sm">
+            Complete STRIDE evaluations to build search-level trend insight.
+          </Text>
+        )}
+      </Stack>
+    </Paper>
   );
 }
 
