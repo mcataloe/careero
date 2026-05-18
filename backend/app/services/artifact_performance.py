@@ -18,6 +18,7 @@ from app.models import (
     User,
 )
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.insight_governance import governed_insight
 
 
 POSITIVE_RESPONSE_STATES = {
@@ -228,12 +229,13 @@ def _insights(records: list[ArtifactPerformanceRecord]) -> list[dict[str, Any]]:
     if meaningful:
         best = max(meaningful, key=lambda metric: metric["response_rate"] or 0)
         insights.append(
-            {
-                "label": "Observed artifact traction",
-                "message": f"{best['label']} has the strongest observed response rate among variants with at least three uses.",
-                "basis": "Simple observed response rate by artifact variant. This is correlation, not proof.",
-                "confidence": "weak" if best["total"] < 6 else "moderate",
-            }
+            governed_insight(
+                label="Observed artifact traction",
+                message=f"{best['label']} has the strongest observed response rate among variants with at least three uses.",
+                basis="Simple observed response rate by artifact variant. This is correlation, not proof.",
+                confidence="weak" if best["total"] < 6 else "moderate",
+                source_inputs={"variant": best["label"], "uses": best["total"], "response_rate": best["response_rate"]},
+            )
         )
     return insights
 

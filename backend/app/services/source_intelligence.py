@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.constants import ApplicationWorkflowState, SOURCE_DISPLAY_NAMES
 from app.models import Application, ApplicationNote, Role, StrideEvaluation, User
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.insight_governance import governed_insight
 
 
 RESPONSE_STATES = {
@@ -203,12 +204,13 @@ def _source_insights(summaries: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return []
     best = max(eligible, key=lambda summary: summary["response_rate"] or 0)
     return [
-        {
-            "label": "Highest observed source traction",
-            "message": f"{best['label']} currently has the strongest observed response rate among sources with at least two submitted applications.",
-            "basis": "Simple private conversion by source type; this is not a public recruiter or source rating.",
-            "confidence": "weak" if best["applications"] < 5 else "moderate",
-        }
+        governed_insight(
+            label="Highest observed source traction",
+            message=f"{best['label']} currently has the strongest observed response rate among sources with at least two submitted applications.",
+            basis="Simple private conversion by source type; this is not a public recruiter or source rating.",
+            confidence="weak" if best["applications"] < 5 else "moderate",
+            source_inputs={"source_type": best["source_type"], "applications": best["applications"], "response_rate": best["response_rate"]},
+        )
     ]
 
 

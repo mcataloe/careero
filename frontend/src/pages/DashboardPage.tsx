@@ -21,6 +21,7 @@ import { getSearchHealth } from "../api/searchHealth";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
 import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
+import { InsightMeta } from "../components/InsightMeta";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
 import type { HistoricalLearningResponse } from "../types/historicalLearning";
@@ -189,17 +190,15 @@ function RecommendationsPanel({
         {recommendations.recommendations.length > 0 ? (
           recommendations.recommendations.slice(0, 8).map((recommendation) => (
             <div key={recommendation.id}>
-              <Group justify="space-between" align="flex-start">
-                <Text fw={600}>{recommendation.title}</Text>
-                <Badge variant="light">{recommendation.confidence}</Badge>
-              </Group>
+              <Text fw={600}>{recommendation.title}</Text>
               <Text size="sm" c="dimmed">
                 {recommendation.action.replaceAll("_", " ")}:{" "}
                 {recommendation.reason}
               </Text>
-              <Text size="xs" c="dimmed">
-                {recommendation.basis}
-              </Text>
+              <InsightMeta
+                confidence={recommendation.confidence}
+                basis={recommendation.basis}
+              />
             </div>
           ))
         ) : (

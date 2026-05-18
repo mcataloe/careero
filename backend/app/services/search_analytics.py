@@ -21,6 +21,7 @@ from app.models import (
     Workspace,
 )
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.insight_governance import governed_insight
 
 
 RESPONSE_STATES = {
@@ -436,12 +437,13 @@ def _focus_signals(
         rate = len(responded) / len(submitted)
         if rate < 0.15:
             signals.append(
-                {
-                    "label": "Low observed response rate",
-                    "message": "Recent traction appears limited; review fit and source quality before increasing application volume.",
-                    "basis": "Interviews or positive responses divided by submitted applications.",
-                    "confidence": "weak" if len(submitted) < 8 else "moderate",
-                }
+                governed_insight(
+                    label="Low observed response rate",
+                    message="Recent traction appears limited; review fit and source quality before increasing application volume.",
+                    basis="Interviews or positive responses divided by submitted applications.",
+                    confidence="weak" if len(submitted) < 8 else "moderate",
+                    source_inputs={"submitted": len(submitted), "responses": len(responded)},
+                )
             )
     high_fit_apps = [
         application
@@ -451,12 +453,13 @@ def _focus_signals(
     ]
     if high_fit_apps and sum(1 for app in high_fit_apps if _has_response(app)) > 0:
         signals.append(
-            {
-                "label": "High-fit opportunities are producing traction",
-                "message": "Prioritize opportunities with similar STRIDE fit signals before expanding the search.",
-                "basis": "At least one high-STRIDE-fit opportunity has reached an interview or offer signal.",
-                "confidence": "weak" if len(high_fit_apps) < 5 else "moderate",
-            }
+            governed_insight(
+                label="High-fit opportunities are producing traction",
+                message="Prioritize opportunities with similar STRIDE fit signals before expanding the search.",
+                basis="At least one high-STRIDE-fit opportunity has reached an interview or offer signal.",
+                confidence="weak" if len(high_fit_apps) < 5 else "moderate",
+                source_inputs={"high_fit_opportunities": len(high_fit_apps)},
+            )
         )
     return signals
 
