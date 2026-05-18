@@ -14,10 +14,12 @@ import { useEffect, useState } from "react";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { getSearchAnalytics } from "../api/searchAnalytics";
+import { getSourceIntelligence } from "../api/sourceIntelligence";
 import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
+import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
 import type { StrideInsightsResponse } from "../types/strideInsights";
 
 export function DashboardPage() {
@@ -26,6 +28,8 @@ export function DashboardPage() {
     useState<ArtifactPerformanceResponse | null>(null);
   const [strideInsights, setStrideInsights] =
     useState<StrideInsightsResponse | null>(null);
+  const [sourceIntelligence, setSourceIntelligence] =
+    useState<SourceIntelligenceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,14 +37,21 @@ export function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [searchAnalytics, artifactAnalytics, strideAnalytics] = await Promise.all([
+      const [
+        searchAnalytics,
+        artifactAnalytics,
+        strideAnalytics,
+        sourceAnalytics,
+      ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
         getStrideInsights(),
+        getSourceIntelligence(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
       setStrideInsights(strideAnalytics);
+      setSourceIntelligence(sourceAnalytics);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -72,9 +83,57 @@ export function DashboardPage() {
             <ArtifactPerformancePanel performance={artifactPerformance} />
           ) : null}
           {strideInsights ? <StrideInsightsPanel insights={strideInsights} /> : null}
+          {sourceIntelligence ? (
+            <SourceIntelligencePanel intelligence={sourceIntelligence} />
+          ) : null}
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function SourceIntelligencePanel({
+  intelligence,
+}: {
+  intelligence: SourceIntelligenceResponse;
+}) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Title order={3}>Recruiter & source intelligence</Title>
+      <Text c="dimmed" size="sm" mt="xs">
+        Private source performance based on your own tracked opportunities.
+      </Text>
+      <Table mt="md" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Source</Table.Th>
+            <Table.Th>Applications</Table.Th>
+            <Table.Th>Response rate</Table.Th>
+            <Table.Th>Recruiter contacts</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {intelligence.summaries.length > 0 ? (
+            intelligence.summaries.map((summary) => (
+              <Table.Tr key={summary.source_type}>
+                <Table.Td>{summary.label}</Table.Td>
+                <Table.Td>{summary.applications}</Table.Td>
+                <Table.Td>{formatRate(summary.response_rate)}</Table.Td>
+                <Table.Td>{summary.recruiter_contacts}</Table.Td>
+              </Table.Tr>
+            ))
+          ) : (
+            <Table.Tr>
+              <Table.Td colSpan={4}>
+                <Text c="dimmed" size="sm">
+                  Add source metadata to opportunities to compare private traction by channel.
+                </Text>
+              </Table.Td>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
+      </Table>
+    </Paper>
   );
 }
 
