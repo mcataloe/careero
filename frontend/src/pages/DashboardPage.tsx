@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { getCompensationIntelligence } from "../api/compensationIntelligence";
+import { getHistoricalLearning } from "../api/historicalLearning";
 import { getRecommendations } from "../api/recommendations";
 import { getSearchAnalytics } from "../api/searchAnalytics";
 import { getSearchHealth } from "../api/searchHealth";
@@ -22,6 +23,7 @@ import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
+import type { HistoricalLearningResponse } from "../types/historicalLearning";
 import type { RecommendationListResponse } from "../types/recommendations";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 import type { SearchHealthResponse } from "../types/searchHealth";
@@ -41,6 +43,8 @@ export function DashboardPage() {
   const [searchHealth, setSearchHealth] = useState<SearchHealthResponse | null>(null);
   const [recommendations, setRecommendations] =
     useState<RecommendationListResponse | null>(null);
+  const [historicalLearning, setHistoricalLearning] =
+    useState<HistoricalLearningResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +60,7 @@ export function DashboardPage() {
         compensationAnalytics,
         searchHealthAnalytics,
         recommendationData,
+        historicalData,
       ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
@@ -64,6 +69,7 @@ export function DashboardPage() {
         getCompensationIntelligence(),
         getSearchHealth(),
         getRecommendations(),
+        getHistoricalLearning(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
@@ -72,6 +78,7 @@ export function DashboardPage() {
       setCompensationIntelligence(compensationAnalytics);
       setSearchHealth(searchHealthAnalytics);
       setRecommendations(recommendationData);
+      setHistoricalLearning(historicalData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -115,9 +122,55 @@ export function DashboardPage() {
           {recommendations ? (
             <RecommendationsPanel recommendations={recommendations} />
           ) : null}
+          {historicalLearning ? (
+            <HistoricalLearningPanel learning={historicalLearning} />
+          ) : null}
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function HistoricalLearningPanel({
+  learning,
+}: {
+  learning: HistoricalLearningResponse;
+}) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Title order={3}>Historical learning</Title>
+      <Text c="dimmed" size="sm" mt="xs">
+        Patterns from completed, archived, and prior tracked search activity.
+      </Text>
+      <Table mt="md" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Question</Table.Th>
+            <Table.Th>Observed answer</Table.Th>
+            <Table.Th>Confidence</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {learning.summaries.length > 0 ? (
+            learning.summaries.slice(0, 8).map((summary) => (
+              <Table.Tr key={summary.label}>
+                <Table.Td>{summary.label}</Table.Td>
+                <Table.Td>{summary.value ?? "Not enough data"}</Table.Td>
+                <Table.Td>{summary.confidence}</Table.Td>
+              </Table.Tr>
+            ))
+          ) : (
+            <Table.Tr>
+              <Table.Td colSpan={3}>
+                <Text c="dimmed" size="sm">
+                  Archive or complete a search track to build reusable historical learning.
+                </Text>
+              </Table.Td>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
+      </Table>
+    </Paper>
   );
 }
 
