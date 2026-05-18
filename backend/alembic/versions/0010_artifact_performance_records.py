@@ -1,6 +1,6 @@
 """artifact performance records
 
-Revision ID: 0010_artifact_performance_records
+Revision ID: 0010_artifact_perf
 Revises: 0009_application_notes_links
 Create Date: 2026-05-18
 """
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-revision = "0010_artifact_performance_records"
+revision = "0010_artifact_perf"
 down_revision = "0009_application_notes_links"
 branch_labels = None
 depends_on = None
