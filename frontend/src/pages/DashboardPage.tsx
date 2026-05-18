@@ -13,11 +13,13 @@ import {
 import { useEffect, useState } from "react";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
+import { getCompensationIntelligence } from "../api/compensationIntelligence";
 import { getSearchAnalytics } from "../api/searchAnalytics";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
 import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
+import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
 import type { StrideInsightsResponse } from "../types/strideInsights";
@@ -30,6 +32,8 @@ export function DashboardPage() {
     useState<StrideInsightsResponse | null>(null);
   const [sourceIntelligence, setSourceIntelligence] =
     useState<SourceIntelligenceResponse | null>(null);
+  const [compensationIntelligence, setCompensationIntelligence] =
+    useState<CompensationIntelligenceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,16 +46,19 @@ export function DashboardPage() {
         artifactAnalytics,
         strideAnalytics,
         sourceAnalytics,
+        compensationAnalytics,
       ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
         getStrideInsights(),
         getSourceIntelligence(),
+        getCompensationIntelligence(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
       setStrideInsights(strideAnalytics);
       setSourceIntelligence(sourceAnalytics);
+      setCompensationIntelligence(compensationAnalytics);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -86,9 +93,51 @@ export function DashboardPage() {
           {sourceIntelligence ? (
             <SourceIntelligencePanel intelligence={sourceIntelligence} />
           ) : null}
+          {compensationIntelligence ? (
+            <CompensationIntelligencePanel
+              intelligence={compensationIntelligence}
+            />
+          ) : null}
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function CompensationIntelligencePanel({
+  intelligence,
+}: {
+  intelligence: CompensationIntelligenceResponse;
+}) {
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Title order={3}>Compensation intelligence</Title>
+      <Text c="dimmed" size="sm" mt="xs">
+        Uses stated ranges only; no external salary guesses are generated.
+      </Text>
+      <Stack gap="sm" mt="md">
+        {intelligence.insights.length > 0 ? (
+          intelligence.insights.map((insight) => (
+            <div key={insight.label}>
+              <Group justify="space-between" align="flex-start">
+                <Text fw={600}>{insight.label}</Text>
+                <Badge variant="light">{insight.confidence}</Badge>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {insight.message}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {insight.basis}
+              </Text>
+            </div>
+          ))
+        ) : (
+          <Text c="dimmed" size="sm">
+            Add stated compensation ranges to saved roles to compare against search-track targets.
+          </Text>
+        )}
+      </Stack>
+    </Paper>
   );
 }
 
