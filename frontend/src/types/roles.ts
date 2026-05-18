@@ -52,7 +52,26 @@ export interface RoleParseMetadata {
   confidence?: Record<string, number>;
   userEditedFields?: string[];
   extractedSkills?: string[];
+  opportunityIntelligence?: OpportunityIntelligence;
   [key: string]: unknown;
+}
+
+export interface OpportunitySignal {
+  type: string;
+  label: string;
+  severity: "low" | "medium" | "high" | string;
+  reason: string;
+  basis: string;
+  confidence: string;
+  evidence: unknown[];
+}
+
+export interface OpportunityIntelligence {
+  version: string;
+  evaluatedAt: string;
+  signals: OpportunitySignal[];
+  categories: string[];
+  summary: string;
 }
 
 export interface RoleCreatePayload {

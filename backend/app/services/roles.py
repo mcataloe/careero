@@ -11,6 +11,7 @@ from app.repositories.roles import RoleRepository
 from app.schemas.roles import CompanyLookup, RoleCreate, RoleUpdate, SourceLookup
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.opportunity_intelligence import OpportunityIntelligenceService
 from app.services.workspaces import (
     WorkspaceInactiveError,
     WorkspaceNotFoundError,
@@ -47,6 +48,7 @@ class RoleService:
         self.db = db
         self.repository = RoleRepository(db)
         self.activity_log = ActivityLogService(db)
+        self.opportunity_intelligence = OpportunityIntelligenceService(db)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
@@ -118,6 +120,7 @@ class RoleService:
             action="role.created",
             details={"title": role.title, "workspace_id": str(workspace.id)},
         )
+        self.opportunity_intelligence.refresh_role(role)
         self.db.commit()
         return self._load_role(role.id, user.id)
 
@@ -158,6 +161,7 @@ class RoleService:
                 changed_fields.append(field_name)
 
         if changed_fields:
+            self.opportunity_intelligence.refresh_role(role)
             self._log_activity(
                 user_id=user.id,
                 entity_id=role.id,
@@ -168,6 +172,21 @@ class RoleService:
         else:
             self.db.rollback()
 
+        return self._load_role(role.id, user.id)
+
+    def refresh_opportunity_intelligence(self, role_id: uuid.UUID) -> Role:
+        user = self.get_default_user()
+        role = self._get_active_role(role_id=role_id, user_id=user.id)
+        if role is None:
+            raise RoleNotFoundError("Role not found")
+        self.opportunity_intelligence.refresh_role(role)
+        self._log_activity(
+            user_id=user.id,
+            entity_id=role.id,
+            action="role.opportunity_intelligence.refreshed",
+            details={},
+        )
+        self.db.commit()
         return self._load_role(role.id, user.id)
 
     def archive_role(self, role_id: uuid.UUID) -> Role:

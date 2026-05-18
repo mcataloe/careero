@@ -39,6 +39,12 @@ export function updateRole(
   });
 }
 
+export function refreshOpportunityIntelligence(roleId: string): Promise<Role> {
+  return apiRequest<Role>(`/api/roles/${roleId}/opportunity-intelligence`, {
+    method: "POST",
+  });
+}
+
 export function archiveRole(roleId: string): Promise<void> {
   return apiRequest<void>(`/api/roles/${roleId}`, {
     method: "DELETE",
