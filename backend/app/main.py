@@ -8,6 +8,7 @@ from app.api.cover_letter_artifacts import router as cover_letter_artifacts_rout
 from app.api.resume_sources import router as resume_sources_router
 from app.api.resume_artifacts import router as resume_artifacts_router
 from app.api.roles import router as roles_router
+from app.api.search_analytics import router as search_analytics_router
 from app.api.stride_evaluations import router as stride_evaluations_router
 from app.api.workspaces import router as workspaces_router
 from app.config import Settings, get_settings
@@ -32,6 +33,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(resume_sources_router, prefix="/api")
     app.include_router(resume_artifacts_router, prefix="/api")
     app.include_router(roles_router, prefix="/api")
+    app.include_router(search_analytics_router, prefix="/api")
     app.include_router(stride_evaluations_router, prefix="/api")
     app.include_router(workspaces_router, prefix="/api")
 
