@@ -709,6 +709,65 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
     )
 
 
+class ArtifactPerformanceRecord(TimestampMixin, Base):
+    __tablename__ = "artifact_performance_records"
+    __table_args__ = (
+        Index("ix_artifact_performance_records_user_id", "user_id"),
+        Index("ix_artifact_performance_records_workspace_id", "workspace_id"),
+        Index("ix_artifact_performance_records_role_id", "role_id"),
+        Index("ix_artifact_performance_records_application_id", "application_id"),
+        Index("ix_artifact_performance_records_artifact_id", "artifact_id"),
+        Index("ix_artifact_performance_records_artifact_type", "artifact_type"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    role_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("roles.id"),
+        nullable=False,
+    )
+    application_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+    )
+    artifact_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("generated_artifacts.id"),
+        nullable=False,
+    )
+    artifact_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    variant_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    version_label: Mapped[str | None] = mapped_column(String(100))
+    targeted_role_category: Mapped[str | None] = mapped_column(String(100))
+    application_state_when_used: Mapped[str | None] = mapped_column(String(100))
+    response_outcome: Mapped[str | None] = mapped_column(String(100))
+    interview_outcome: Mapped[str | None] = mapped_column(String(100))
+    recruiter_engagement_outcome: Mapped[str | None] = mapped_column(String(100))
+    stride_alignment: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    record_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+
 class ActivityLog(Base):
     __tablename__ = "activity_log"
     __table_args__ = (

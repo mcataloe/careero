@@ -27,6 +27,8 @@
           "enum": [
             "manual",
             "linkedin_manual",
+            "linkedin",
+            "recruiter",
             "greenhouse",
             "lever",
             "ashby",
@@ -35,6 +37,9 @@
             "recruiter_email",
             "job_board",
             "referral",
+            "networking",
+            "direct_outreach",
+            "internal_referral",
             "other"
           ]
         },

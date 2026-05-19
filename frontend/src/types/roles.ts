@@ -3,6 +3,14 @@ export type RoleStatus = "found" | "interested" | "applied" | "archived";
 export type SourceType =
   | "manual"
   | "linkedin_manual"
+  | "linkedin"
+  | "recruiter"
+  | "referral"
+  | "company_site"
+  | "job_board"
+  | "networking"
+  | "direct_outreach"
+  | "internal_referral"
   | "greenhouse"
   | "lever"
   | "ashby"
@@ -52,7 +60,26 @@ export interface RoleParseMetadata {
   confidence?: Record<string, number>;
   userEditedFields?: string[];
   extractedSkills?: string[];
+  opportunityIntelligence?: OpportunityIntelligence;
   [key: string]: unknown;
+}
+
+export interface OpportunitySignal {
+  type: string;
+  label: string;
+  severity: "low" | "medium" | "high" | string;
+  reason: string;
+  basis: string;
+  confidence: string;
+  evidence: unknown[];
+}
+
+export interface OpportunityIntelligence {
+  version: string;
+  evaluatedAt: string;
+  signals: OpportunitySignal[];
+  categories: string[];
+  summary: string;
 }
 
 export interface RoleCreatePayload {

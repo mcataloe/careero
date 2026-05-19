@@ -45,6 +45,7 @@ export function RoleDetailPage() {
     : [];
   const sectionNavItems = [
     { label: "Overview", targetId: "role-overview" },
+    { label: "Opportunity Intelligence", targetId: "opportunity-intelligence" },
     { label: "Description", targetId: "role-description" },
     { label: "Normalized Description", targetId: "role-normalized-description" },
     { label: "Edit Role", targetId: "role-edit" },

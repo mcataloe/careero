@@ -24,6 +24,7 @@ from app.models import (
 from app.schemas.cover_letter_artifacts import CoverLetterArtifactGenerateRequest
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.artifact_performance import ArtifactPerformanceService
 from app.services.cover_letter_artifact_ai import (
     CoverLetterArtifactGenerationUnavailableError,
     CoverLetterArtifactOutputValidationError,
@@ -99,6 +100,7 @@ class CoverLetterArtifactService:
         self.settings = settings or get_settings()
         self.generator = generator or OpenAICoverLetterArtifactGenerator(self.settings)
         self.activity_log = ActivityLogService(db)
+        self.artifact_performance = ArtifactPerformanceService(db)
         self._schema_validator = _cover_letter_artifact_validator()
 
     def get_default_user(self) -> User:
@@ -213,6 +215,12 @@ class CoverLetterArtifactService:
                 },
             )
             self.db.add(persisted)
+            self.db.flush()
+            self.artifact_performance.record_generated_artifact(
+                artifact=persisted,
+                role=role,
+                evaluation=evaluation,
+            )
             self._log_activity(
                 user_id=user.id,
                 entity_id=artifact_id,
