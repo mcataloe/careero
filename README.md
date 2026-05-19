@@ -4,6 +4,12 @@ Careero is a local-first career operations application for managing a personal j
 
 Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/profile grounding, deterministic scoring, optional OpenAI enrichment, audit metadata, cache reuse, and frontend review.
 
+## Strategic Roadmap
+
+The Careero Layer 0-12 strategic roadmap is tracked in [`docs/strategic-layer-roadmap.md`](docs/strategic-layer-roadmap.md).
+
+That document defines the product-layer strategy, current layer status, planned future layers, recommended build sequence, and maintenance rules without bloating this README.
+
 ## Current Layer Includes
 
 - Local FastAPI backend with a health check endpoint.
@@ -74,14 +80,14 @@ If PowerShell blocks local scripts, run them with:
 powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 ```
 
-| Command | Purpose |
-| --- | --- |
-| `.\scripts\start-backend.ps1` | Start FastAPI on `127.0.0.1:8000`. |
-| `.\scripts\start-frontend.ps1` | Start Vite on `127.0.0.1:5173`. |
-| `.\scripts\migrate.ps1` | Apply Alembic migrations. |
-| `.\scripts\seed.ps1` | Seed the default local user and canonical job sources. |
-| `.\scripts\test.ps1` | Run backend unit tests, DB tests when reachable, frontend tests, and frontend build. |
-| `.\scripts\check-local.ps1` | Check backend, database, frontend, and role API proxy health. |
+| Command                        | Purpose                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------ |
+| `.\scripts\start-backend.ps1`  | Start FastAPI on `127.0.0.1:8000`.                                                   |
+| `.\scripts\start-frontend.ps1` | Start Vite on `127.0.0.1:5173`.                                                      |
+| `.\scripts\migrate.ps1`        | Apply Alembic migrations.                                                            |
+| `.\scripts\seed.ps1`           | Seed the default local user and canonical job sources.                               |
+| `.\scripts\test.ps1`           | Run backend unit tests, DB tests when reachable, frontend tests, and frontend build. |
+| `.\scripts\check-local.ps1`    | Check backend, database, frontend, and role API proxy health.                        |
 
 ## Local Readiness Checklist
 
