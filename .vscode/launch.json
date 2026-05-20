@@ -8,33 +8,45 @@
       "module": "uvicorn",
       "args": [
         "app.main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
         "--reload"
       ],
       "cwd": "${workspaceFolder}\\backend",
       "python": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe",
-      "envFile": "${workspaceFolder}\\backend\\.env",
+      "console": "integratedTerminal",
       "jinja": true,
-      "justMyCode": true
+      "justMyCode": true,
+      "subProcess": true
+    },
+    {
+      "name": "Careero: Run Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\scripts\\start-backend.ps1\"",
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Careero: Run Frontend",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm.cmd run dev",
-      "cwd": "${workspaceFolder}\\frontend"
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\scripts\\start-frontend.ps1\"",
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Careero: Start All Services",
       "type": "node-terminal",
       "request": "launch",
-      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\start-all.ps1",
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\scripts\\start-all.ps1\"",
       "cwd": "${workspaceFolder}"
     },
     {
       "name": "Careero: Stop All Services",
       "type": "node-terminal",
       "request": "launch",
-      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\stop-all.ps1",
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\scripts\\stop-all.ps1\"",
       "cwd": "${workspaceFolder}"
     },
     {
@@ -56,6 +68,14 @@
       "name": "Careero: Debug Backend + Run Frontend",
       "configurations": [
         "Careero: Debug Backend API",
+        "Careero: Run Frontend"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "Careero: Run Backend + Frontend",
+      "configurations": [
+        "Careero: Run Backend",
         "Careero: Run Frontend"
       ],
       "stopAll": true
