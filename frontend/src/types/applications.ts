@@ -131,3 +131,66 @@ export interface ApplicationExternalLinkPayload {
   type?: ApplicationExternalLinkType | string | null;
   metadata?: Record<string, unknown>;
 }
+
+export type ApplicationInterviewStageType =
+  | "recruiter_screen"
+  | "hiring_manager"
+  | "technical"
+  | "system_design"
+  | "behavioral"
+  | "panel"
+  | "final"
+  | "offer_discussion"
+  | "other";
+
+export type ApplicationInterviewStatus =
+  | "planned"
+  | "scheduled"
+  | "completed"
+  | "canceled"
+  | "no_show";
+
+export interface ApplicationInterviewStage {
+  id: string;
+  application_id: string;
+  workspace_id: string;
+  stage_type: ApplicationInterviewStageType | string;
+  title: string;
+  scheduled_at: string | null;
+  completed_at: string | null;
+  status: ApplicationInterviewStatus | string;
+  interviewer_names: string[];
+  location_or_meeting_link: string | null;
+  notes: string | null;
+  preparation_notes: string | null;
+  outcome_notes: string | null;
+  metadata: Record<string, unknown>;
+  state_transition_suggestion: ApplicationWorkflowState | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApplicationInterviewStagePayload {
+  stage_type?: ApplicationInterviewStageType | string;
+  title: string;
+  scheduled_at?: string | null;
+  completed_at?: string | null;
+  status?: ApplicationInterviewStatus | string | null;
+  interviewer_names?: string[];
+  location_or_meeting_link?: string | null;
+  notes?: string | null;
+  preparation_notes?: string | null;
+  outcome_notes?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ApplicationInterviewCompletePayload {
+  completed_at?: string | null;
+  outcome_notes?: string | null;
+  status?: "completed" | "no_show";
+}
+
+export interface ApplicationInterviewCancelPayload {
+  outcome_notes?: string | null;
+  status?: "canceled" | "no_show";
+}

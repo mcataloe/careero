@@ -10,4 +10,5 @@ Layer 1 documents the local-first foundation. Layer 2 begins defining STRIDE wit
 - [Strategic layer roadmap](strategic-layer-roadmap.md)
 - [Local development](local-development.md)
 - [Canonical domain model](canonical-domain-model.md)
+- [Application interview tracking](application-interview-tracking.md)
 - [Application workflow persistence](application-workflow-persistence.md)

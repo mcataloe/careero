@@ -3,9 +3,13 @@ from decimal import Decimal
 from typing import Any, Literal
 import uuid
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-from app.constants import ApplicationWorkflowState
+from app.constants import (
+    ApplicationInterviewStageType,
+    ApplicationInterviewStatus,
+    ApplicationWorkflowState,
+)
 
 ApplicationNoteType = Literal[
     "general",
@@ -155,23 +159,77 @@ class ApplicationReminderUpdate(BaseModel):
     completed_at: datetime | None = None
 
 
+def _require_timezone(value: datetime | None) -> datetime | None:
+    if value is not None and value.tzinfo is None:
+        raise ValueError("datetime values must include timezone information")
+    return value
+
+
 class ApplicationInterviewStageCreate(BaseModel):
-    stage_type: str = Field(min_length=1, max_length=100)
+    stage_type: ApplicationInterviewStageType = ApplicationInterviewStageType.OTHER
     title: str = Field(min_length=1, max_length=255)
     scheduled_at: datetime | None = None
-    location: str | None = Field(default=None, max_length=255)
+    completed_at: datetime | None = None
+    status: ApplicationInterviewStatus | None = None
+    interviewer_names: list[str] = Field(default_factory=list)
+    location_or_meeting_link: str | None = Field(default=None, max_length=2048)
     notes: str | None = None
+    preparation_notes: str | None = None
+    outcome_notes: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    _scheduled_at_timezone = field_validator("scheduled_at")(_require_timezone)
+    _completed_at_timezone = field_validator("completed_at")(_require_timezone)
 
 
 class ApplicationInterviewStageUpdate(BaseModel):
-    stage_type: str | None = Field(default=None, min_length=1, max_length=100)
+    stage_type: ApplicationInterviewStageType | None = None
     title: str | None = Field(default=None, min_length=1, max_length=255)
     scheduled_at: datetime | None = None
     completed_at: datetime | None = None
-    location: str | None = Field(default=None, max_length=255)
+    status: ApplicationInterviewStatus | None = None
+    interviewer_names: list[str] | None = None
+    location_or_meeting_link: str | None = Field(default=None, max_length=2048)
     notes: str | None = None
+    preparation_notes: str | None = None
+    outcome_notes: str | None = None
     metadata: dict[str, Any] | None = None
+
+    _scheduled_at_timezone = field_validator("scheduled_at")(_require_timezone)
+    _completed_at_timezone = field_validator("completed_at")(_require_timezone)
+
+
+class ApplicationInterviewCompleteRequest(BaseModel):
+    completed_at: datetime | None = None
+    outcome_notes: str | None = None
+    status: ApplicationInterviewStatus = ApplicationInterviewStatus.COMPLETED
+
+    _completed_at_timezone = field_validator("completed_at")(_require_timezone)
+
+
+class ApplicationInterviewCancelRequest(BaseModel):
+    outcome_notes: str | None = None
+    status: ApplicationInterviewStatus = ApplicationInterviewStatus.CANCELED
+
+
+class ApplicationInterviewStageResponse(BaseModel):
+    id: uuid.UUID
+    application_id: uuid.UUID
+    workspace_id: uuid.UUID
+    stage_type: ApplicationInterviewStageType | str
+    title: str
+    scheduled_at: datetime | None = None
+    completed_at: datetime | None = None
+    status: ApplicationInterviewStatus | str
+    interviewer_names: list[str] = Field(default_factory=list)
+    location_or_meeting_link: str | None = None
+    notes: str | None = None
+    preparation_notes: str | None = None
+    outcome_notes: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    state_transition_suggestion: ApplicationWorkflowState | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 class ApplicationExternalLinkCreate(BaseModel):

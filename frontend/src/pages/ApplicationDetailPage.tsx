@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import {
   getApplication,
   getApplicationTimeline,
+  listApplicationInterviews,
   listApplicationLinks,
   listApplicationNotes,
 } from "../api/applications";
+import { ApplicationInterviewPanel } from "../components/ApplicationInterviewPanel";
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
 import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
 import { ApplicationTimeline } from "../components/ApplicationTimeline";
@@ -15,6 +17,7 @@ import { ErrorState, LoadingState } from "../components/States";
 import type {
   ApplicationDetail,
   ApplicationExternalLink,
+  ApplicationInterviewStage,
   ApplicationNote,
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
@@ -37,6 +40,7 @@ export function ApplicationDetailPage() {
   const [timeline, setTimeline] = useState<ApplicationTimelineEvent[]>([]);
   const [notes, setNotes] = useState<ApplicationNote[]>([]);
   const [links, setLinks] = useState<ApplicationExternalLink[]>([]);
+  const [interviews, setInterviews] = useState<ApplicationInterviewStage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,16 +53,19 @@ export function ApplicationDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [nextApplication, nextTimeline, nextNotes, nextLinks] = await Promise.all([
-        getApplication(applicationId),
-        getApplicationTimeline(applicationId),
-        listApplicationNotes(applicationId),
-        listApplicationLinks(applicationId),
-      ]);
+      const [nextApplication, nextTimeline, nextNotes, nextLinks, nextInterviews] =
+        await Promise.all([
+          getApplication(applicationId),
+          getApplicationTimeline(applicationId),
+          listApplicationNotes(applicationId),
+          listApplicationLinks(applicationId),
+          listApplicationInterviews(applicationId),
+        ]);
       setApplication(nextApplication);
       setTimeline(nextTimeline);
       setNotes(nextNotes);
       setLinks(nextLinks);
+      setInterviews(nextInterviews);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load application");
     } finally {
@@ -115,6 +122,13 @@ export function ApplicationDetailPage() {
           ) : null}
         </Stack>
       </Card>
+
+      <ApplicationInterviewPanel
+        applicationId={application.id}
+        currentState={application.current_state}
+        interviews={interviews}
+        onChanged={loadApplication}
+      />
 
       <ApplicationNotesPanel
         applicationId={application.id}

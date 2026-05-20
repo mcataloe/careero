@@ -3,6 +3,10 @@ import type {
   ApplicationDetail,
   ApplicationExternalLink,
   ApplicationExternalLinkPayload,
+  ApplicationInterviewCancelPayload,
+  ApplicationInterviewCompletePayload,
+  ApplicationInterviewStage,
+  ApplicationInterviewStagePayload,
   ApplicationNote,
   ApplicationNotePayload,
   ApplicationPipelineResponse,
@@ -158,4 +162,78 @@ export function deleteApplicationLink(
   return apiRequest<void>(`/api/applications/${applicationId}/links/${linkId}`, {
     method: "DELETE",
   });
+}
+
+
+export function listApplicationInterviews(
+  applicationId: string,
+): Promise<ApplicationInterviewStage[]> {
+  return apiRequest<ApplicationInterviewStage[]>(
+    `/api/applications/${applicationId}/interviews`,
+  );
+}
+
+export function createApplicationInterview(
+  applicationId: string,
+  payload: ApplicationInterviewStagePayload,
+): Promise<ApplicationInterviewStage> {
+  return apiRequest<ApplicationInterviewStage>(
+    `/api/applications/${applicationId}/interviews`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateApplicationInterview(
+  applicationId: string,
+  interviewId: string,
+  payload: Partial<ApplicationInterviewStagePayload>,
+): Promise<ApplicationInterviewStage> {
+  return apiRequest<ApplicationInterviewStage>(
+    `/api/applications/${applicationId}/interviews/${interviewId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function completeApplicationInterview(
+  applicationId: string,
+  interviewId: string,
+  payload: ApplicationInterviewCompletePayload = {},
+): Promise<ApplicationInterviewStage> {
+  return apiRequest<ApplicationInterviewStage>(
+    `/api/applications/${applicationId}/interviews/${interviewId}/complete`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function cancelApplicationInterview(
+  applicationId: string,
+  interviewId: string,
+  payload: ApplicationInterviewCancelPayload = {},
+): Promise<ApplicationInterviewStage> {
+  return apiRequest<ApplicationInterviewStage>(
+    `/api/applications/${applicationId}/interviews/${interviewId}/cancel`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteApplicationInterview(
+  applicationId: string,
+  interviewId: string,
+): Promise<void> {
+  return apiRequest<void>(
+    `/api/applications/${applicationId}/interviews/${interviewId}`,
+    { method: "DELETE" },
+  );
 }

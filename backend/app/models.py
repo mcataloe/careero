@@ -579,13 +579,15 @@ class ApplicationReminder(TimestampMixin, Base):
     application: Mapped[Application] = relationship(back_populates="reminders")
 
 
-class ApplicationInterviewStage(TimestampMixin, Base):
+class ApplicationInterviewStage(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "application_interview_stages"
     __table_args__ = (
         Index("ix_application_interview_stages_application_id", "application_id"),
         Index("ix_application_interview_stages_workspace_id", "workspace_id"),
         Index("ix_application_interview_stages_scheduled_at", "scheduled_at"),
         Index("ix_application_interview_stages_completed_at", "completed_at"),
+        Index("ix_application_interview_stages_status", "status"),
+        Index("ix_application_interview_stages_deleted_at", "deleted_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -612,8 +614,12 @@ class ApplicationInterviewStage(TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    location: Mapped[str | None] = mapped_column(String(255))
+    status: Mapped[str] = mapped_column(String(100), nullable=False, default="planned")
+    interviewer_names: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    location_or_meeting_link: Mapped[str | None] = mapped_column(String(2048))
     notes: Mapped[str | None] = mapped_column(Text)
+    preparation_notes: Mapped[str | None] = mapped_column(Text)
+    outcome_notes: Mapped[str | None] = mapped_column(Text)
     stage_metadata: Mapped[dict] = mapped_column(
         "metadata",
         JSONB,

@@ -25,6 +25,10 @@ from app.models import (
 from app.schemas.applications import (
     ApplicationExternalLinkCreate,
     ApplicationExternalLinkUpdate,
+    ApplicationInterviewCancelRequest,
+    ApplicationInterviewCompleteRequest,
+    ApplicationInterviewStageCreate,
+    ApplicationInterviewStageUpdate,
     ApplicationMetadataUpdate,
     ApplicationNoteCreate,
     ApplicationNoteUpdate,
@@ -548,6 +552,128 @@ def test_service_note_crud_uses_soft_delete_and_updates_counts(
     assert "application.note.deleted" in actions
 
 
+
+def test_service_interview_stage_crud_completion_cancel_and_suggestion(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session, status="applied")
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application_id = UUID(detail["id"])
+
+    created = service.create_interview_stage(
+        application_id,
+        ApplicationInterviewStageCreate(
+            stage_type="technical",
+            title="Technical interview",
+            scheduled_at="2026-05-20T15:00:00Z",
+            interviewer_names=["Ada Lovelace", ""],
+            location_or_meeting_link="https://meet.example.com/tech",
+            preparation_notes="Review architecture notes.",
+            metadata={"source": "manual"},
+        ),
+    )
+
+    assert created["status"] == "scheduled"
+    assert created["interviewer_names"] == ["Ada Lovelace"]
+    assert created["state_transition_suggestion"] == "interviewing"
+    assert service.get_application(application_id)["current_state"] == "applied"
+    assert service.get_application(application_id)["counts"]["interviews"] == 1
+
+    listed = service.list_interview_stages(application_id)
+    assert [stage["id"] for stage in listed] == [created["id"]]
+
+    updated = service.update_interview_stage(
+        application_id,
+        created["id"],
+        ApplicationInterviewStageUpdate(
+            title="Technical screen",
+            status="planned",
+            notes="Bring examples.",
+        ),
+    )
+    assert updated["title"] == "Technical screen"
+    assert updated["status"] == "planned"
+
+    completed = service.complete_interview_stage(
+        application_id,
+        created["id"],
+        ApplicationInterviewCompleteRequest(outcome_notes="Advanced to panel."),
+    )
+    assert completed["status"] == "completed"
+    assert completed["completed_at"] is not None
+    assert completed["outcome_notes"] == "Advanced to panel."
+
+    canceled = service.create_interview_stage(
+        application_id,
+        ApplicationInterviewStageCreate(stage_type="panel", title="Panel interview"),
+    )
+    canceled = service.cancel_interview_stage(
+        application_id,
+        canceled["id"],
+        ApplicationInterviewCancelRequest(outcome_notes="Company rescheduled."),
+    )
+    assert canceled["status"] == "canceled"
+    assert canceled["outcome_notes"] == "Company rescheduled."
+
+    service.delete_interview_stage(application_id, canceled["id"])
+    deleted = db_session.get(ApplicationInterviewStage, canceled["id"])
+    assert deleted is not None
+    assert deleted.deleted_at is not None
+    assert [stage["id"] for stage in service.list_interview_stages(application_id)] == [
+        created["id"]
+    ]
+
+    actions = list(
+        db_session.scalars(
+            select(ActivityLog.action).where(ActivityLog.entity_id == application_id)
+        )
+    )
+    assert "application.interview_stage.created" in actions
+    assert "application.interview_stage.updated" in actions
+    assert "application.interview_stage.completed" in actions
+    assert "application.interview_stage.canceled" in actions
+    assert "application.interview_stage.deleted" in actions
+
+
+def test_service_interview_validation_timeline_and_scoping(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    service = ApplicationWorkflowService(db_session)
+    first = service.get_or_create_for_role(create_role(db_session, title="First").id)
+    second = service.get_or_create_for_role(create_role(db_session, title="Second").id)
+    first_id = UUID(first["id"])
+    second_id = UUID(second["id"])
+
+    created = service.create_interview_stage(
+        first_id,
+        ApplicationInterviewStageCreate(
+            stage_type="recruiter_screen",
+            title="Recruiter screen",
+        ),
+    )
+
+    with pytest.raises(ApplicationWorkflowNotFoundError):
+        service.update_interview_stage(
+            second_id,
+            created["id"],
+            ApplicationInterviewStageUpdate(title="Nope"),
+        )
+
+    with pytest.raises(ValueError):
+        ApplicationInterviewStageCreate(
+            stage_type="technical",
+            title="Naive datetime",
+            scheduled_at="2026-05-20T15:00:00",
+        )
+
+    timeline = service.get_timeline(first_id)
+    event_types = [event["event_type"] for event in timeline]
+    assert "interview.created" in event_types
+
+
 def test_service_external_link_crud_uses_soft_delete(
     db_session: Session,
 ) -> None:
@@ -704,6 +830,76 @@ def test_api_application_timeline_and_missing_application(
 
     missing_response = application_client.get(f"/api/applications/{uuid4()}/timeline")
     assert missing_response.status_code == 404
+
+
+
+def test_api_interview_stage_crud(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session, status="applied")
+    application_id = application_client.post(
+        f"/api/roles/{role.id}/application"
+    ).json()["id"]
+
+    create_response = application_client.post(
+        f"/api/applications/{application_id}/interviews",
+        json={
+            "stage_type": "recruiter_screen",
+            "title": "Recruiter screen",
+            "scheduled_at": "2026-05-20T15:00:00Z",
+            "interviewer_names": ["Recruiter One"],
+            "location_or_meeting_link": "https://meet.example.com/one",
+        },
+    )
+    assert create_response.status_code == 201
+    interview = create_response.json()
+    assert interview["status"] == "scheduled"
+    assert interview["state_transition_suggestion"] == "interviewing"
+
+    list_response = application_client.get(
+        f"/api/applications/{application_id}/interviews"
+    )
+    assert list_response.status_code == 200
+    assert [item["id"] for item in list_response.json()] == [interview["id"]]
+
+    invalid_response = application_client.post(
+        f"/api/applications/{application_id}/interviews",
+        json={
+            "stage_type": "not_real",
+            "title": "Invalid",
+        },
+    )
+    assert invalid_response.status_code == 422
+
+    update_response = application_client.patch(
+        f"/api/applications/{application_id}/interviews/{interview['id']}",
+        json={"title": "Updated recruiter screen", "status": "planned"},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["title"] == "Updated recruiter screen"
+
+    complete_response = application_client.post(
+        f"/api/applications/{application_id}/interviews/{interview['id']}/complete",
+        json={"outcome_notes": "Moved forward."},
+    )
+    assert complete_response.status_code == 200
+    assert complete_response.json()["status"] == "completed"
+
+    cancel_response = application_client.post(
+        f"/api/applications/{application_id}/interviews/{interview['id']}/cancel",
+        json={"outcome_notes": "Canceled after completion for test."},
+    )
+    assert cancel_response.status_code == 200
+    assert cancel_response.json()["status"] == "canceled"
+
+    delete_response = application_client.delete(
+        f"/api/applications/{application_id}/interviews/{interview['id']}"
+    )
+    assert delete_response.status_code == 204
+    assert application_client.get(
+        f"/api/applications/{application_id}/interviews"
+    ).json() == []
 
 
 def test_api_note_and_link_crud(
