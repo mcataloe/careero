@@ -58,6 +58,14 @@ class WorkspaceType(StrEnum):
 class SourceType(StrEnum):
     MANUAL = "manual"
     LINKEDIN_MANUAL = "linkedin_manual"
+    LINKEDIN = "linkedin"
+    RECRUITER = "recruiter"
+    REFERRAL = "referral"
+    COMPANY_SITE = "company_site"
+    JOB_BOARD = "job_board"
+    NETWORKING = "networking"
+    DIRECT_OUTREACH = "direct_outreach"
+    INTERNAL_REFERRAL = "internal_referral"
     GREENHOUSE = "greenhouse"
     LEVER = "lever"
     ASHBY = "ashby"
@@ -68,6 +76,14 @@ class SourceType(StrEnum):
 SOURCE_DISPLAY_NAMES: dict[SourceType, str] = {
     SourceType.MANUAL: "Manual",
     SourceType.LINKEDIN_MANUAL: "LinkedIn manual",
+    SourceType.LINKEDIN: "LinkedIn",
+    SourceType.RECRUITER: "Recruiter",
+    SourceType.REFERRAL: "Referral",
+    SourceType.COMPANY_SITE: "Company site",
+    SourceType.JOB_BOARD: "Job board",
+    SourceType.NETWORKING: "Networking",
+    SourceType.DIRECT_OUTREACH: "Direct outreach",
+    SourceType.INTERNAL_REFERRAL: "Internal referral",
     SourceType.GREENHOUSE: "Greenhouse",
     SourceType.LEVER: "Lever",
     SourceType.ASHBY: "Ashby",

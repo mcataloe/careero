@@ -47,6 +47,7 @@ def drop_known_schema(database_url: str) -> None:
                         """
                         DROP TABLE IF EXISTS
                             activity_log,
+                            artifact_performance_records,
                             generated_artifacts,
                             application_external_links,
                             application_interview_stages,

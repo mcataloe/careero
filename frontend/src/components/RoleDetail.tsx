@@ -15,7 +15,12 @@ import {
 import { useForm } from "@mantine/form";
 import type { ReactNode } from "react";
 
-import type { Role, RoleStatus, RoleUpdatePayload } from "../types/roles";
+import type {
+  OpportunitySignal,
+  Role,
+  RoleStatus,
+  RoleUpdatePayload,
+} from "../types/roles";
 import { ExpandableTextSection } from "./ExpandableTextSection";
 import { MarkdownPreviewBlock } from "./MarkdownPreviewBlock";
 
@@ -45,6 +50,7 @@ export function RoleDetail({
   archiving?: boolean;
   sectionNav?: ReactNode;
 }) {
+  const intelligence = role.parse_metadata.opportunityIntelligence;
   const form = useForm({
     initialValues: {
       status: role.status,
@@ -120,6 +126,42 @@ export function RoleDetail({
         </Grid>
       </Paper>
 
+      {intelligence ? (
+        <Paper id="opportunity-intelligence" withBorder radius="md" p="lg">
+          <Stack gap="md">
+            <Group justify="space-between" align="flex-start">
+              <div>
+                <Title order={3}>Opportunity intelligence</Title>
+                <Text c="dimmed" size="sm">
+                  {intelligence.summary}
+                </Text>
+              </div>
+              <Group gap="xs">
+                {intelligence.categories.map((category) => (
+                  <Badge key={category} variant="light">
+                    {category}
+                  </Badge>
+                ))}
+              </Group>
+            </Group>
+            {intelligence.signals.length > 0 ? (
+              <Stack gap="sm">
+                {intelligence.signals.map((signal) => (
+                  <SignalSummary
+                    key={`${signal.type}-${signal.reason}`}
+                    signal={signal}
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <Text size="sm" c="dimmed">
+                No deterministic caution signals were detected from the available fields.
+              </Text>
+            )}
+          </Stack>
+        </Paper>
+      ) : null}
+
       <Paper withBorder radius="md" p="lg">
         <Stack>
           <Title order={3}>Description</Title>
@@ -183,5 +225,27 @@ export function RoleDetail({
         </form>
       </Paper>
     </Stack>
+  );
+}
+
+function SignalSummary({ signal }: { signal: OpportunitySignal }) {
+  return (
+    <div>
+      <Group justify="space-between" align="flex-start">
+        <div>
+          <Text fw={600}>{signal.label}</Text>
+          <Text size="sm" c="dimmed">
+            {signal.reason}
+          </Text>
+        </div>
+        <Badge color={signal.severity === "high" ? "red" : "yellow"} variant="light">
+          {signal.confidence}
+        </Badge>
+      </Group>
+      <Text size="xs" c="dimmed" mt="xs">
+        {signal.basis}
+      </Text>
+      <Divider mt="sm" />
+    </div>
   );
 }

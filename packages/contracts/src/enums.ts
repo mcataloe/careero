@@ -13,6 +13,8 @@ export const WorkspaceSearchCategorySchema = z.enum([
 export const OpportunitySourceTypeSchema = z.enum([
   "manual",
   "linkedin_manual",
+  "linkedin",
+  "recruiter",
   "greenhouse",
   "lever",
   "ashby",
@@ -21,6 +23,9 @@ export const OpportunitySourceTypeSchema = z.enum([
   "recruiter_email",
   "job_board",
   "referral",
+  "networking",
+  "direct_outreach",
+  "internal_referral",
   "other",
 ]);
 

@@ -24,6 +24,7 @@ from app.models import (
 from app.schemas.resume_artifacts import ResumeArtifactGenerateRequest
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.artifact_performance import ArtifactPerformanceService
 from app.services.evaluation_hashing import resume_source_hash, role_content_hash
 from app.services.resume_artifact_ai import (
     OpenAIResumeArtifactGenerator,
@@ -99,6 +100,7 @@ class ResumeArtifactService:
         self.settings = settings or get_settings()
         self.generator = generator or OpenAIResumeArtifactGenerator(self.settings)
         self.activity_log = ActivityLogService(db)
+        self.artifact_performance = ArtifactPerformanceService(db)
         self._schema_validator = _resume_artifact_validator()
 
     def get_default_user(self) -> User:
@@ -197,6 +199,12 @@ class ResumeArtifactService:
                 },
             )
             self.db.add(persisted)
+            self.db.flush()
+            self.artifact_performance.record_generated_artifact(
+                artifact=persisted,
+                role=role,
+                evaluation=evaluation,
+            )
             self._log_activity(
                 user_id=user.id,
                 entity_id=artifact_id,

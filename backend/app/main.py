@@ -3,11 +3,19 @@ import logging
 from fastapi import FastAPI, Response, status
 
 from app.api.activity_log import router as activity_log_router
+from app.api.artifact_performance import router as artifact_performance_router
 from app.api.applications import router as applications_router
+from app.api.compensation_intelligence import router as compensation_intelligence_router
 from app.api.cover_letter_artifacts import router as cover_letter_artifacts_router
+from app.api.historical_learning import router as historical_learning_router
+from app.api.recommendations import router as recommendations_router
 from app.api.resume_sources import router as resume_sources_router
 from app.api.resume_artifacts import router as resume_artifacts_router
 from app.api.roles import router as roles_router
+from app.api.search_analytics import router as search_analytics_router
+from app.api.search_health import router as search_health_router
+from app.api.source_intelligence import router as source_intelligence_router
+from app.api.stride_insights import router as stride_insights_router
 from app.api.stride_evaluations import router as stride_evaluations_router
 from app.api.workspaces import router as workspaces_router
 from app.config import Settings, get_settings
@@ -27,11 +35,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version="0.1.0",
     )
     app.include_router(activity_log_router, prefix="/api")
+    app.include_router(artifact_performance_router, prefix="/api")
     app.include_router(applications_router, prefix="/api")
+    app.include_router(compensation_intelligence_router, prefix="/api")
     app.include_router(cover_letter_artifacts_router, prefix="/api")
+    app.include_router(historical_learning_router, prefix="/api")
+    app.include_router(recommendations_router, prefix="/api")
     app.include_router(resume_sources_router, prefix="/api")
     app.include_router(resume_artifacts_router, prefix="/api")
     app.include_router(roles_router, prefix="/api")
+    app.include_router(search_analytics_router, prefix="/api")
+    app.include_router(search_health_router, prefix="/api")
+    app.include_router(source_intelligence_router, prefix="/api")
+    app.include_router(stride_insights_router, prefix="/api")
     app.include_router(stride_evaluations_router, prefix="/api")
     app.include_router(workspaces_router, prefix="/api")
 
