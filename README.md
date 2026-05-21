@@ -4,11 +4,13 @@ Careero is a local-first career operations application for managing a personal j
 
 Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/profile grounding, deterministic scoring, optional OpenAI enrichment, audit metadata, cache reuse, and frontend review.
 
-## Strategic Roadmap
+## Strategic Plan and Layer Status
 
-The Careero Layer 0-12 strategic roadmap is tracked in [`docs/strategic-layer-roadmap.md`](docs/strategic-layer-roadmap.md).
+The canonical Careero strategic plan, current layer status, and recommended build sequence are tracked in [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md).
 
-That document defines the product-layer strategy, current layer status, planned future layers, recommended build sequence, and maintenance rules without bloating this README.
+Use that document as the source of truth for Careero-specific LEAP Recon, layer planning, and Codex implementation prompts.
+
+Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
 ## Current Layer Includes
 
@@ -117,100 +119,3 @@ python -m app.seed
 ```
 
 Create the local PostgreSQL databases first, then edit `backend/.env` for your local connection URLs. See `backend/README.md` for database creation and all backend configuration variables.
-
-Run the backend:
-
-```powershell
-uvicorn app.main:app --reload
-```
-
-The health check is available at:
-
-```text
-http://127.0.0.1:8000/health
-http://127.0.0.1:8000/health/database
-```
-
-Run backend tests:
-
-```powershell
-pytest
-```
-
-## Frontend Setup
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-The Vite dev server prints the local frontend URL when it starts.
-
-Build the frontend:
-
-```powershell
-npm run build
-```
-
-Preview the production build:
-
-```powershell
-npm run preview
-```
-
-## Local Validation
-
-From `backend`:
-
-```powershell
-pytest
-```
-
-From `frontend`:
-
-```powershell
-npm run build
-```
-
-These checks validate the backend API, database-backed Layer 2 flow, frontend components, and frontend production build.
-
-## Layer 2 Status
-
-Layer 2 is complete when local PostgreSQL credentials are valid, migrations and seed data have been applied, and the evaluation workflow works end to end: create a role, configure an active resume/profile source, run STRIDE evaluation, view it in the frontend, reuse the cached result, force a re-run, and inspect activity-log entries.
-
-## STRIDE Architecture
-
-- Role intake stores manually pasted role details. Careero does not scrape LinkedIn or poll job boards.
-- Resume/profile source storage keeps one active local grounding source for the seeded local user and supports preview-only local imports for `.txt`, `.md`, `.docx`, and text-based `.pdf` files up to 5 MB.
-- Deterministic rules produce the canonical score, recommendation, confidence, concerns, and keyword gaps.
-- Optional OpenAI enrichment adds grounded structured analysis when enabled, but fallback deterministic results are always preserved.
-- Evaluation metadata records model, prompt/ruleset versions, token estimates, latency, AI status, content hashes, and sanitized errors.
-- Activity log entries record role, resume-source, and evaluation lifecycle events.
-- AI-assisted role parsing is staged before persistence: parse pasted content, fill editable fields, and store parse metadata only when the reviewed role is created.
-
-## Canonical Platform Contracts
-
-Careero now includes an additive canonical contracts package at `packages/contracts`.
-
-The package defines versioned Zod/TypeScript contracts and generated JSON Schema for:
-
-- Workspace
-- Opportunity
-- STRIDE Evaluation
-- Resume Artifact
-- Cover Letter Artifact
-- Application State
-
-These contracts are future-facing platform definitions for backend persistence, frontend rendering, AI orchestration, workflow tracking, and export generation. Current role/evaluation APIs remain unchanged until a later migration phase.
-
-See `docs/canonical-domain-model.md` for lifecycle guidance, AI boundaries, versioning strategy, and migration mapping from current `Role`, `StrideEvaluation`, `Application`, `GeneratedArtifact`, and `ResumeSource` models.
-
-## Known Next Steps
-
-- Migrate current role-centered data toward canonical workspace/opportunity contracts after Layer 2 workflows remain stable.
-- Add application tracking workflows on top of evaluated roles.
-- Add artifact generation preparation for resumes and cover letters.
-- Add source discovery connectors only after manual intake and evaluation remain stable.
-- Add Google Docs resume/profile import after OAuth, Drive/Docs scopes, document export, token handling, permission review, and security design are specified.
-- Keep AWS deployment, auth, billing, tenants, workspaces, automated discovery, and application submission out of Layer 2.
