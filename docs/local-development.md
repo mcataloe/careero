@@ -31,7 +31,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 6. Local data is seeded with `.\scripts\seed.ps1`.
 7. Backend and frontend are running.
 8. `.\scripts\check-local.ps1` passes.
-9. Manual role intake works at `http://127.0.0.1:5173/roles/new`.
+9. Manual opportunity intake works at `http://127.0.0.1:5173/opportunities/new`.
 
 If database health fails, fix PostgreSQL credentials or update `backend/.env`, then rerun migrations and seed.
 
@@ -93,20 +93,20 @@ http://127.0.0.1:8000/health
 http://127.0.0.1:8000/health/database
 ```
 
-Manual role intake API:
+Manual opportunity intake API:
 
 ```text
-POST   http://127.0.0.1:8000/api/roles
-POST   http://127.0.0.1:8000/api/roles/parse
-GET    http://127.0.0.1:8000/api/roles
-GET    http://127.0.0.1:8000/api/roles/{role_id}
-PATCH  http://127.0.0.1:8000/api/roles/{role_id}
-DELETE http://127.0.0.1:8000/api/roles/{role_id}
+POST   http://127.0.0.1:8000/api/opportunities
+POST   http://127.0.0.1:8000/api/opportunities/parse
+GET    http://127.0.0.1:8000/api/opportunities
+GET    http://127.0.0.1:8000/api/opportunities/{opportunity_id}
+PATCH  http://127.0.0.1:8000/api/opportunities/{opportunity_id}
+DELETE http://127.0.0.1:8000/api/opportunities/{opportunity_id}
 ```
 
-LinkedIn roles are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 2.
+The older `/api/roles` endpoints remain available as compatibility aliases. LinkedIn opportunities are manually pasted into the API. Careero does not scrape LinkedIn or poll job boards in Layer 2.
 
-The AI parse endpoint accepts `rawText`, optional `source`, and optional `jobUrl`, then returns structured fields for review. It does not save data. The Add Role UI fills empty fields only and requires the user to click `Create role`. Parsing failures do not clear manually entered content.
+The AI parse endpoint accepts `rawText`, optional `source`, and optional `jobUrl`, then returns structured fields for review. It does not save data. The Add Opportunity UI fills empty fields only and requires the user to click `Create opportunity`. Parsing failures do not clear manually entered content.
 
 Resume/profile source API:
 
@@ -152,13 +152,13 @@ GET  http://127.0.0.1:8000/api/stride-evaluations
 GET  http://127.0.0.1:8000/api/activity-log?entity_type=stride_evaluation&entity_id={evaluation_id}
 ```
 
-Posting the same role/source/context inputs reuses a cached completed evaluation. Send `"force": true` to create a new run. Evaluation activity entries include `stride_evaluation.started`, `stride_evaluation.completed`, `stride_evaluation.failed`, and `stride_evaluation.cached_result_reused`.
+Posting the same opportunity/source/context inputs reuses a cached completed evaluation. Send `"force": true` to create a new run. Evaluation activity entries include `stride_evaluation.started`, `stride_evaluation.completed`, `stride_evaluation.failed`, and `stride_evaluation.cached_result_reused`.
 
 Manual browser smoke flow:
 
-1. Open `http://127.0.0.1:5173/roles/new` and create a role.
+1. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
 2. Open `http://127.0.0.1:5173/settings` and create an active resume/profile source.
-3. Open the role detail page and run STRIDE evaluation.
+3. Open the opportunity detail page and run STRIDE evaluation.
 4. Confirm the evaluation shows score, recommendation, confidence, alignments, keyword gaps, and AI fallback/enrichment status.
 5. Re-run the evaluation and confirm a forced new run succeeds.
 
@@ -179,12 +179,12 @@ npm install
 npm run dev
 ```
 
-The Vite dev server proxies `/api` requests to `http://127.0.0.1:8000`, so start the backend first for role intake.
+The Vite dev server proxies `/api` requests to `http://127.0.0.1:8000`, so start the backend first for opportunity intake.
 
-Manual role intake:
+Manual opportunity intake:
 
 ```text
-http://127.0.0.1:5173/roles/new
+http://127.0.0.1:5173/opportunities/new
 ```
 
 Run frontend tests:

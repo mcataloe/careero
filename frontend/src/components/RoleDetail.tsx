@@ -190,7 +190,7 @@ export function RoleDetail({
           )}
         >
           <Stack>
-            <Title order={3}>Edit role</Title>
+            <Title order={3}>Edit opportunity</Title>
             <Grid>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Select
@@ -215,7 +215,7 @@ export function RoleDetail({
             </Grid>
             <Group justify="space-between">
               <Button color="red" variant="light" loading={archiving} onClick={onArchive}>
-                Archive role
+                Archive opportunity
               </Button>
               <Button type="submit" loading={saving}>
                 Save changes

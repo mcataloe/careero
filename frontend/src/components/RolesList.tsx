@@ -16,11 +16,11 @@ export function RolesList({
   if (roles.length === 0) {
     return (
       <EmptyState
-        title="No roles yet"
-        message="Add a role you found manually so it is ready for later STRIDE evaluation."
+        title="No opportunities yet"
+        message="Add an opportunity you found manually so it is ready for later STRIDE evaluation."
         action={
-          <Button component={Link} to="/roles/new">
-            Add role
+          <Button component={Link} to="/opportunities/new">
+            Add opportunity
           </Button>
         }
       />
@@ -33,7 +33,7 @@ export function RolesList({
         <Table verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Role</Table.Th>
+              <Table.Th>Opportunity</Table.Th>
               <Table.Th>Company</Table.Th>
               <Table.Th>Source</Table.Th>
               <Table.Th>Status</Table.Th>
@@ -48,7 +48,7 @@ export function RolesList({
                 <Table.Td>
                   <Stack gap={2}>
                     <Title order={5}>
-                      <Link to={`/roles/${role.id}`}>{role.title}</Link>
+                      <Link to={`/opportunities/${role.id}`}>{role.title}</Link>
                     </Title>
                     {role.job_url ? (
                       <Text size="xs" c="dimmed" truncate="end">

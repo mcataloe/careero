@@ -274,7 +274,7 @@ function CompensationIntelligencePanel({
           ))
         ) : (
           <Text c="dimmed" size="sm">
-            Add stated compensation ranges to saved roles to compare against search-track targets.
+            Add stated compensation ranges to saved opportunities to compare against search-track targets.
           </Text>
         )}
       </Stack>

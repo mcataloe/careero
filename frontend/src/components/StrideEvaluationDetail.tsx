@@ -232,7 +232,7 @@ export function StrideEvaluationDetail({
       <Paper withBorder radius="md" p="lg">
         <EmptyState
           title="Not evaluated"
-          message="Run STRIDE evaluation to create a local recommendation for this role."
+          message="Run STRIDE evaluation to create a local recommendation for this opportunity."
           action={
             <Button loading={running} onClick={() => onRun(false)}>
               Run STRIDE evaluation

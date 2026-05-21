@@ -27,10 +27,10 @@ Current planning hierarchy:
 - Local PostgreSQL persistence with Alembic migrations.
 - Local React + Vite frontend.
 - Workspace/search-track persistence and seeded default local workspace.
-- Manual role/opportunity intake, list, detail, update, and archive workflow.
+- Opportunity-facing intake, list, detail, update, and archive workflow backed by current `Role` persistence.
 - Optional AI-assisted role parsing for pasted job posts, with user review before save.
 - Local resume/profile source storage for STRIDE grounding, with paste or local file import.
-- Deterministic STRIDE scoring for stored roles.
+- Deterministic STRIDE scoring for stored opportunities.
 - Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
 - Backend artifact-generation foundations for resume and cover-letter drafts, with truthfulness checks and generated-artifact persistence.
@@ -52,7 +52,7 @@ Careero does not yet include:
 - Billing or subscriptions.
 - Production deployment architecture.
 - Background job execution.
-- Canonical Opportunity API or migration from current `Role` naming.
+- Destructive persistence migration from current `Role` table/model/foreign-key naming.
 - Mature workspace switching and management UX.
 - Dedicated artifact list/detail/review/edit/approve/archive UX.
 - Submitted artifact tracking.
@@ -116,7 +116,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 | `.\scripts\migrate.ps1`        | Apply Alembic migrations.                                                            |
 | `.\scripts\seed.ps1`           | Seed the default local user and canonical job sources.                               |
 | `.\scripts\test.ps1`           | Run backend unit tests, DB tests when reachable, frontend tests, and frontend build. |
-| `.\scripts\check-local.ps1`    | Check backend, database, frontend, and role API proxy health.                        |
+| `.\scripts\check-local.ps1`    | Check backend, database, frontend, and API proxy health.                             |
 
 ## Local Readiness Checklist
 
@@ -128,9 +128,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 6. Run `.\scripts\seed.ps1`.
 7. Start backend and frontend in separate terminals.
 8. Run `.\scripts\check-local.ps1`.
-9. Open `http://127.0.0.1:5173/roles/new` and create a role.
+9. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
 10. Open `http://127.0.0.1:5173/settings` and add an active resume/profile source.
-11. Open the role detail page and run a STRIDE evaluation.
+11. Open the opportunity detail page and run a STRIDE evaluation.
 
 ## Backend Setup
 

@@ -2,7 +2,7 @@ import { Alert, Paper, Stack, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { createRole } from "../api/roles";
+import { createOpportunity } from "../api/opportunities";
 import { RoleForm } from "../components/RoleForm";
 import type { RoleCreatePayload } from "../types/roles";
 
@@ -15,10 +15,10 @@ export function RoleNewPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const role = await createRole(payload);
-      navigate(`/roles/${role.id}`);
+      const opportunity = await createOpportunity(payload);
+      navigate(`/opportunities/${opportunity.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create role");
+      setError(err instanceof Error ? err.message : "Could not create opportunity");
     } finally {
       setSubmitting(false);
     }
@@ -27,14 +27,14 @@ export function RoleNewPage() {
   return (
     <Stack gap="lg">
       <div>
-        <Title order={1}>Add role</Title>
+        <Title order={1}>Add opportunity</Title>
         <Text c="dimmed">
           Paste details from LinkedIn, a company site, or another manual source.
         </Text>
       </div>
 
       {error ? (
-        <Alert color="red" title="Role was not created">
+        <Alert color="red" title="Opportunity was not created">
           {error}
         </Alert>
       ) : null}

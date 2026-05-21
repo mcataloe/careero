@@ -230,7 +230,7 @@ export function ResumeSourceSettings() {
               {!activeSource ? (
                 <EmptyState
                   title="No active source"
-                  message="Paste a master resume or profile so evaluations can compare roles against your actual background."
+                  message="Paste a master resume or profile so evaluations can compare opportunities against your actual background."
                 />
               ) : (
                 <Alert color="blue" title="Draft version">

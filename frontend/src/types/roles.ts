@@ -145,3 +145,9 @@ export interface RoleUpdatePayload {
   remote_type?: string | null;
   normalized_description?: string | null;
 }
+
+export type Opportunity = Role;
+export type OpportunityCreatePayload = RoleCreatePayload;
+export type OpportunityUpdatePayload = RoleUpdatePayload;
+export type OpportunityParseRequest = RoleParseRequest;
+export type OpportunityParseResponse = RoleParseResponse;

@@ -32,8 +32,8 @@ describe("RolesPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Loading roles")).toBeInTheDocument();
-    expect(await screen.findByText("No roles yet")).toBeInTheDocument();
+    expect(screen.getByText("Loading opportunities")).toBeInTheDocument();
+    expect(await screen.findByText("No opportunities yet")).toBeInTheDocument();
   });
 
   it("renders an error state", async () => {
@@ -63,12 +63,18 @@ describe("RolesPage", () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(screen.queryByText("Loading roles")).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByText("Loading opportunities")).not.toBeInTheDocument(),
+    );
     expect(screen.getByText("Senior Backend Engineer")).toBeInTheDocument();
     expect(screen.getByText("Example Company")).toBeInTheDocument();
     expect(screen.getByText("LinkedIn manual")).toBeInTheDocument();
     expect(await screen.findByText("82.00")).toBeInTheDocument();
     expect(screen.getByText("apply")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/opportunities",
+      expect.any(Object),
+    );
   });
 
   it("renders not evaluated indicators", async () => {

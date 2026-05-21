@@ -2,7 +2,7 @@ import { Button, Group, Stack, Text, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { listRoles } from "../api/roles";
+import { listOpportunities } from "../api/opportunities";
 import { getLatestEvaluation } from "../api/strideEvaluations";
 import { RolesList } from "../components/RolesList";
 import { ErrorState, LoadingState } from "../components/States";
@@ -21,14 +21,14 @@ export function RolesPage() {
     setLoading(true);
     setError(null);
     try {
-      const nextRoles = await listRoles();
+      const nextRoles = await listOpportunities();
       setRoles(nextRoles);
       setEvaluationStates(
         Object.fromEntries(nextRoles.map((role) => [role.id, { status: "loading" }])),
       );
       void loadEvaluationIndicators(nextRoles);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load roles");
+      setError(err instanceof Error ? err.message : "Could not load opportunities");
     } finally {
       setLoading(false);
     }
@@ -66,15 +66,17 @@ export function RolesPage() {
     <Stack gap="lg">
       <Group justify="space-between" align="flex-start">
         <div>
-          <Title order={1}>Roles</Title>
-          <Text c="dimmed">Roles found manually and queued for later evaluation.</Text>
+          <Title order={1}>Opportunities</Title>
+          <Text c="dimmed">
+            Opportunities found manually and queued for later evaluation.
+          </Text>
         </div>
-        <Button component={Link} to="/roles/new">
-          Add role
+        <Button component={Link} to="/opportunities/new">
+          Add opportunity
         </Button>
       </Group>
 
-      {loading ? <LoadingState label="Loading roles" /> : null}
+      {loading ? <LoadingState label="Loading opportunities" /> : null}
       {!loading && error ? <ErrorState message={error} onRetry={loadRoles} /> : null}
       {!loading && !error ? (
         <RolesList roles={roles} evaluationStates={evaluationStates} />

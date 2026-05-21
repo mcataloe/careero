@@ -23,13 +23,13 @@ describe("RoleForm", () => {
 
     render(<RoleForm onSubmit={onSubmit} />);
 
-    await user.click(screen.getByRole("button", { name: /create role/i }));
+    await user.click(screen.getByRole("button", { name: /create opportunity/i }));
 
     expect(await screen.findByText("Title is required")).toBeInTheDocument();
     expect(screen.getByText("Company is required")).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
 
-    fireEvent.change(screen.getByLabelText(/role title/i), {
+    fireEvent.change(screen.getByLabelText(/opportunity title/i), {
       target: { value: "Senior Backend Engineer" },
     });
     fireEvent.change(screen.getByPlaceholderText("Example Company"), {
@@ -38,7 +38,7 @@ describe("RoleForm", () => {
     fireEvent.change(screen.getByLabelText(/job url/i), {
       target: { value: "https://www.linkedin.com/jobs/view/example" },
     });
-    await user.click(screen.getByRole("button", { name: /create role/i }));
+    await user.click(screen.getByRole("button", { name: /create opportunity/i }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
     expect(onSubmit).toHaveBeenCalledWith(
@@ -87,7 +87,7 @@ describe("RoleForm", () => {
 
     render(<RoleForm onSubmit={onSubmit} />);
 
-    fireEvent.change(screen.getByLabelText(/role title/i), {
+    fireEvent.change(screen.getByLabelText(/opportunity title/i), {
       target: { value: "Manual title" },
     });
     fireEvent.change(screen.getByLabelText(/paste job description/i), {
@@ -95,10 +95,10 @@ describe("RoleForm", () => {
         value: "Messy pasted job post with Python and salary $120k-$150k.",
       },
     });
-    await user.click(screen.getByRole("button", { name: /parse role/i }));
+    await user.click(screen.getByRole("button", { name: /parse opportunity/i }));
 
-    expect(await screen.findByText("Parsed role fields")).toBeInTheDocument();
-    expect(screen.getByLabelText(/role title/i)).toHaveValue("Manual title");
+    expect(await screen.findByText("Parsed opportunity fields")).toBeInTheDocument();
+    expect(screen.getByLabelText(/opportunity title/i)).toHaveValue("Manual title");
     expect(screen.getByPlaceholderText("Example Company")).toHaveValue("Parsed Company");
     expect(screen.getByLabelText(/raw description/i)).toHaveValue(
       "Messy pasted job post with Python and salary $120k-$150k.",
@@ -108,7 +108,11 @@ describe("RoleForm", () => {
     fireEvent.change(screen.getByPlaceholderText("Example Company"), {
       target: { value: "Edited Company" },
     });
-    await user.click(screen.getByRole("button", { name: /create role/i }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/opportunities/parse",
+      expect.any(Object),
+    );
+    await user.click(screen.getByRole("button", { name: /create opportunity/i }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
     expect(onSubmit).toHaveBeenCalledWith(
@@ -138,7 +142,7 @@ describe("RoleForm", () => {
 
     render(<RoleForm onSubmit={onSubmit} />);
 
-    fireEvent.change(screen.getByLabelText(/role title/i), {
+    fireEvent.change(screen.getByLabelText(/opportunity title/i), {
       target: { value: "Manual title" },
     });
     fireEvent.change(screen.getByPlaceholderText("Example Company"), {
@@ -148,10 +152,10 @@ describe("RoleForm", () => {
       target: { value: "Messy post" },
     });
 
-    await user.click(screen.getByRole("button", { name: /parse role/i }));
+    await user.click(screen.getByRole("button", { name: /parse opportunity/i }));
 
     expect(await screen.findByText("Parse failed")).toBeInTheDocument();
-    expect(screen.getByLabelText(/role title/i)).toHaveValue("Manual title");
+    expect(screen.getByLabelText(/opportunity title/i)).toHaveValue("Manual title");
     expect(screen.getByPlaceholderText("Example Company")).toHaveValue("Manual Company");
   });
 
@@ -168,7 +172,7 @@ describe("RoleForm", () => {
     });
 
     expect(screen.getByLabelText(/paste job description/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /parse role/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /create role/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /parse opportunity/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create opportunity/i })).toBeInTheDocument();
   });
 });

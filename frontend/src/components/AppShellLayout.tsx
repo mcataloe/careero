@@ -18,7 +18,7 @@ import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: IconGauge },
-  { label: "Roles", to: "/roles", icon: IconBriefcase },
+  { label: "Opportunities", to: "/opportunities", icon: IconBriefcase },
   { label: "Applications", to: "/applications", icon: IconClipboardList },
   { label: "Settings", to: "/settings", icon: IconSettings },
 ];

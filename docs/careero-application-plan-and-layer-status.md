@@ -35,7 +35,7 @@ Careero is no longer just a local job tracker or STRIDE evaluation prototype. Th
 - local-first backend and frontend foundation
 - PostgreSQL persistence
 - workspace/search-track persistence
-- role/opportunity intake
+- Opportunity-facing intake backed by current Role persistence
 - resume/profile source grounding
 - STRIDE evaluation
 - artifact generation foundations
@@ -164,7 +164,7 @@ The repo does not yet fully include:
 - artifact review/edit/approve/archive flow
 - submitted artifact tracking
 - DOCX/PDF/Markdown export workflow
-- canonical Opportunity API and migration from Role naming
+- destructive persistence migration from Role table/model/foreign-key naming
 - Google Docs import
 - Gmail/Outlook integration
 - calendar interview sync
@@ -188,7 +188,7 @@ The repo does not yet fully include:
 | Layer 4 | Application Workflow | Substantially built / reminders still partial | Applications, state transitions, timeline, notes, external links, and structured interview tracking exist. Reminder persistence/count/timeline support exists, but the fuller reminder API/UI branch still needs reconciliation. External-link summary/count refinements also need validation before being called complete. |
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
 | Layer 6 | Advanced STRIDE + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, STRIDE history, evidence mapping, submitted artifacts, and export flow. |
-| Layer 7 | Opportunity Model Strategy | New priority | Define Opportunity as the durable intelligence object and successor to Role. Should come before major external integrations. |
+| Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Planned | Google Docs, Gmail/Outlook, calendar sync, LinkedIn/job-board helpers, browser/share intake, cloud storage, and export integrations. |
 | Layer 9 | Automation Guardrails | Planned | Suggested follow-ups, draft-only generation, review-before-send, approval logs, no-auto-apply boundaries, workspace automation preferences. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Planned | Full-time vs contract strategy, compensation modeling, skill gaps, career narrative, search retrospectives, and role-market positioning. |
@@ -483,13 +483,15 @@ Layer 6 should turn generated output from “AI result” into durable, inspecta
 
 ### Status
 
-New strategic priority.
+In progress / compatibility surface started.
 
 ### Purpose
 
 Define Opportunity as the central durable intelligence object in Careero.
 
 Layer 7A design source of truth: [Opportunity model strategy](opportunity-model-strategy.md).
+
+Layer 7B has started by adding Opportunity-facing API and frontend compatibility surfaces while preserving the current `Role` model, `roles` table, `role_id` foreign keys, and `/roles` compatibility behavior.
 
 ### Why this layer moves ahead of integrations
 
@@ -527,19 +529,19 @@ Current backend naming still uses `Role`, but Careero needs `Opportunity` as the
 - How should opportunity similarity/deduplication work?
 - What historical intelligence should opportunities accumulate?
 
-### Recommended deliverables
+### Recommended deliverables / current status
 
-1. Layer 7A Opportunity strategy document: [Opportunity model strategy](opportunity-model-strategy.md).
-2. Current-state Role-to-Opportunity mapping.
-3. Schema migration plan.
-4. API transition plan.
-5. Frontend naming and route plan.
-6. Analytics integration plan.
-7. LEAP Prompt/LHS implementation slices for Layer 7B and any later destructive migration.
+1. Layer 7A Opportunity strategy document: [Opportunity model strategy](opportunity-model-strategy.md). Done.
+2. Current-state Role-to-Opportunity mapping. Done in the Layer 7A artifact.
+3. Schema migration plan. Defined as hybrid compatibility first, destructive persistence rename later if still justified.
+4. API transition plan. Started with `/api/opportunities` aliases while `/api/roles` remains compatible.
+5. Frontend naming and route plan. Started with `/opportunities` canonical routes and `/roles` redirects.
+6. Analytics integration plan. Defined in the Layer 7A artifact; implementation remains Role-backed.
+7. LEAP Prompt/LHS implementation slices for any later destructive migration. Still future.
 
 ### Guidance
 
-Use the Layer 7A strategy artifact before implementation prompts. Layer 7 implementation remains pending; this layer is architectural enough that jumping straight to code would create avoidable churn.
+Use the Layer 7A strategy artifact before further implementation prompts. Layer 7B compatibility work has started; Layer 7C destructive persistence rename remains a separate future decision.
 
 ---
 
@@ -841,7 +843,7 @@ Recommended order from here:
 2. Layer 4 workflow completion.
 3. Layer 5 insight stabilization.
 4. Layer 6 artifact lifecycle completion.
-5. Layer 7 Opportunity Model Strategy.
+5. Layer 7 Opportunity Model Strategy and compatibility surface.
 6. Layer 8 integrations.
 7. Layer 9 automation guardrails.
 8. Layer 10 advanced search-track strategy.

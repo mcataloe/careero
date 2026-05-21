@@ -16,10 +16,10 @@ function jsonResponse(response: unknown, status = 200) {
 
 function renderPage() {
   render(
-    <MemoryRouter initialEntries={[`/roles/${sampleRole.id}`]}>
+    <MemoryRouter initialEntries={[`/opportunities/${sampleRole.id}`]}>
       <Routes>
-        <Route path="/roles/:roleId" element={<RoleDetailPage />} />
-        <Route path="/roles" element={<div>Roles</div>} />
+        <Route path="/opportunities/:opportunityId" element={<RoleDetailPage />} />
+        <Route path="/opportunities" element={<div>Opportunities</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -42,6 +42,10 @@ describe("RoleDetailPage", () => {
     renderPage();
 
     expect(await screen.findByText("Not evaluated")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/opportunities/${sampleRole.id}`,
+      expect.any(Object),
+    );
     await user.click(screen.getByRole("button", { name: /run stride evaluation/i }));
 
     await waitFor(() =>
@@ -77,7 +81,7 @@ describe("RoleDetailPage", () => {
     expect(
       screen.getByRole("link", { name: /normalized description/i }),
     ).toHaveAttribute("href", "#role-normalized-description");
-    expect(screen.getByRole("link", { name: /edit role/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /edit opportunity/i })).toHaveAttribute(
       "href",
       "#role-edit",
     );

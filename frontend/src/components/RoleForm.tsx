@@ -15,7 +15,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 
-import { parseRole } from "../api/roles";
+import { parseOpportunity } from "../api/opportunities";
 import type {
   ParsedRole,
   RoleCreatePayload,
@@ -180,7 +180,7 @@ export function RoleForm({
 
     setParseState("parsing");
     try {
-      const result = await parseRole({
+      const result = await parseOpportunity({
         rawText: parseInput.rawText,
         source: parseInput.source,
         jobUrl: optionalText(parseInput.jobUrl),
@@ -201,7 +201,7 @@ export function RoleForm({
       setParseState("parsed");
     } catch (err) {
       setParseState("parse_failed");
-      setParseError(err instanceof Error ? err.message : "Could not parse role");
+      setParseError(err instanceof Error ? err.message : "Could not parse opportunity");
     }
   }
 
@@ -293,8 +293,8 @@ export function RoleForm({
             </Alert>
           ) : null}
           {parseState === "parsed" ? (
-            <Alert color="green" title="Parsed role fields">
-              Review the populated fields below before creating the role.
+            <Alert color="green" title="Parsed opportunity fields">
+              Review the populated fields below before creating the opportunity.
             </Alert>
           ) : null}
           {parseWarnings.length > 0 ? (
@@ -326,7 +326,7 @@ export function RoleForm({
               loading={parseState === "parsing"}
               onClick={handleParse}
             >
-              Parse role
+              Parse opportunity
             </Button>
           </Group>
         </Stack>
@@ -336,7 +336,7 @@ export function RoleForm({
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>
             <TextInput
-              label="Role title"
+              label="Opportunity title"
               placeholder="Senior Backend Engineer"
               required
               {...form.getInputProps("title")}
@@ -447,7 +447,7 @@ export function RoleForm({
 
         <Group justify="flex-end">
           <Button type="submit" loading={submitting}>
-            Create role
+            Create opportunity
           </Button>
         </Group>
       </Stack>

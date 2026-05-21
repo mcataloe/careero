@@ -131,3 +131,15 @@ class RoleResponse(BaseModel):
     updated_at: datetime
     company: CompanyResponse
     source: SourceResponse | None = None
+
+
+class OpportunityCreate(RoleCreate):
+    pass
+
+
+class OpportunityUpdate(RoleUpdate):
+    pass
+
+
+class OpportunityResponse(RoleResponse):
+    pass

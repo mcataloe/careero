@@ -2,7 +2,9 @@
 
 Layer 7A design artifact.
 
-This document defines Careero's Opportunity model strategy before any destructive migration or implementation work. It is the source of truth for later Layer 7B implementation prompts.
+This document defines Careero's Opportunity model strategy before any destructive persistence migration. It is the source of truth for Layer 7B compatibility work and later Layer 7C migration decisions.
+
+Layer 7B status: the Opportunity-facing compatibility surface has started. `/api/opportunities` and frontend `/opportunities` routes are the canonical outward surfaces, while `/api/roles` and legacy `/roles` frontend paths remain compatibility surfaces. Persistence remains Role-backed for now.
 
 ## 1. Purpose
 
@@ -16,12 +18,14 @@ Opportunity should become Careero's central durable intelligence object.
 
 - `Role` is the current backend and persistence object.
 - The `roles` table currently stores job/opportunity-like records.
-- `/roles` APIs currently power intake, parse, list, detail, update, opportunity intelligence refresh, and archive behavior.
+- `/api/opportunities` now provides Opportunity-facing aliases for intake, parse, list, detail, update, opportunity intelligence refresh, and archive behavior.
+- `/api/roles` remains available as a compatibility surface for existing local workflows and tests.
+- Frontend `/opportunities`, `/opportunities/new`, and `/opportunities/:opportunityId` routes are canonical; legacy `/roles` routes redirect to the Opportunity routes.
 - `role_id` is currently used by STRIDE evaluations, Applications, GeneratedArtifacts, artifact performance records, analytics, source intelligence, and historical learning services.
 - `OpportunitySchema` already exists in `packages/contracts/src/opportunity.ts`.
 - `OpportunityStatusSchema`, `ApplicationWorkflowStateSchema`, and `ArtifactLifecycleStatusSchema` already exist in `packages/contracts/src/enums.ts`.
 - `OpportunityIntelligenceService` already exists in the backend, but it is currently Role-backed and stores intelligence under `Role.parse_metadata["opportunityIntelligence"]`.
-- The frontend routes and user-visible labels still use `/roles`, `Role`, `Roles`, and `Add role` in the primary intake/list/detail flow.
+- User-visible primary intake/list/detail labels now use Opportunity language, while internal component/type names may remain Role-backed during the compatibility phase.
 
 ## 3. Opportunity Definition
 
@@ -186,21 +190,21 @@ After `/opportunities` aliases, UI naming, tests, and docs are stable, a later L
 
 ## 10. Recommended Layer 7B Implementation Scope
 
-Layer 7B should:
+Layer 7B compatibility scope:
 
-- Add Opportunity-facing backend route aliases for core intake/list/detail/update/archive behavior.
-- Preserve existing `/roles` routes as temporary compatibility aliases.
-- Introduce Opportunity-facing Pydantic schema names or exported aliases while keeping payload compatibility.
-- Keep the physical `roles` table unchanged.
-- Keep the SQLAlchemy `Role` model unchanged for this slice.
-- Keep existing `role_id` database columns unchanged for this slice.
-- Update frontend user-visible labels from Role to Opportunity.
-- Add `/opportunities`, `/opportunities/new`, and `/opportunities/:opportunityId` frontend routes.
-- Add backward-compatible redirects or route aliases from `/roles` paths to the corresponding Opportunity paths.
-- Update tests to assert Opportunity-facing behavior while preserving coverage for `/roles` compatibility.
-- Update docs to make the temporary Role-backed implementation explicit.
+- Opportunity-facing backend route aliases for core intake/list/detail/update/archive behavior.
+- Existing `/roles` routes preserved as temporary compatibility aliases.
+- Opportunity-facing Pydantic schema names or exported aliases while keeping payload compatibility.
+- Physical `roles` table unchanged.
+- SQLAlchemy `Role` model unchanged.
+- Existing `role_id` database columns unchanged.
+- Frontend user-visible labels moved from Role to Opportunity in the primary intake/list/detail flow.
+- `/opportunities`, `/opportunities/new`, and `/opportunities/:opportunityId` frontend routes added.
+- Backward-compatible redirects or route aliases from `/roles` paths to the corresponding Opportunity paths.
+- Tests asserting Opportunity-facing behavior while preserving coverage for `/roles` compatibility.
+- Docs updated to make the temporary Role-backed implementation explicit.
 
-Layer 7B should not:
+Layer 7B does not:
 
 - Rename physical database tables.
 - Rename SQLAlchemy models.

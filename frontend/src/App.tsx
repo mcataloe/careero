@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 
 import { AppShellLayout } from "./components/AppShellLayout";
 import { ApplicationDetailPage } from "./pages/ApplicationDetailPage";
@@ -15,9 +15,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/roles" element={<RolesPage />} />
-        <Route path="/roles/new" element={<RoleNewPage />} />
-        <Route path="/roles/:roleId" element={<RoleDetailPage />} />
+        <Route path="/opportunities" element={<RolesPage />} />
+        <Route path="/opportunities/new" element={<RoleNewPage />} />
+        <Route path="/opportunities/:opportunityId" element={<RoleDetailPage />} />
+        <Route path="/roles" element={<Navigate to="/opportunities" replace />} />
+        <Route path="/roles/new" element={<Navigate to="/opportunities/new" replace />} />
+        <Route path="/roles/:roleId" element={<LegacyRoleDetailRedirect />} />
         <Route path="/applications" element={<ApplicationsPage />} />
         <Route path="/applications/:applicationId" element={<ApplicationDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
@@ -25,6 +28,11 @@ function App() {
       </Routes>
     </AppShellLayout>
   );
+}
+
+function LegacyRoleDetailRedirect() {
+  const { roleId } = useParams();
+  return <Navigate to={`/opportunities/${roleId ?? ""}`} replace />;
 }
 
 export default App;

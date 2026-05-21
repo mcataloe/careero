@@ -2,7 +2,11 @@ import { Alert, Button, Group, Stack } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { archiveRole, getRole, updateRole } from "../api/roles";
+import {
+  archiveOpportunity,
+  getOpportunity,
+  updateOpportunity,
+} from "../api/opportunities";
 import {
   createEvaluationWithStatus,
   getLatestEvaluation,
@@ -15,7 +19,8 @@ import type { Role, RoleUpdatePayload } from "../types/roles";
 import type { StrideEvaluation } from "../types/strideEvaluations";
 
 export function RoleDetailPage() {
-  const { roleId } = useParams();
+  const { opportunityId, roleId } = useParams();
+  const currentOpportunityId = opportunityId ?? roleId;
   const navigate = useNavigate();
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,30 +53,30 @@ export function RoleDetailPage() {
     { label: "Opportunity Intelligence", targetId: "opportunity-intelligence" },
     { label: "Description", targetId: "role-description" },
     { label: "Normalized Description", targetId: "role-normalized-description" },
-    { label: "Edit Role", targetId: "role-edit" },
+    { label: "Edit Opportunity", targetId: "role-edit" },
     { label: "STRIDE Evaluation", targetId: "stride-evaluation" },
     ...evaluationSectionNavItems,
   ];
 
   async function loadRole() {
-    if (!roleId) return;
+    if (!currentOpportunityId) return;
     setLoading(true);
     setError(null);
     try {
-      setRole(await getRole(roleId));
+      setRole(await getOpportunity(currentOpportunityId));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load role");
+      setError(err instanceof Error ? err.message : "Could not load opportunity");
     } finally {
       setLoading(false);
     }
   }
 
   async function loadEvaluation() {
-    if (!roleId) return;
+    if (!currentOpportunityId) return;
     setEvaluationLoading(true);
     setEvaluationError(null);
     try {
-      setEvaluation(await getLatestEvaluation(roleId));
+      setEvaluation(await getLatestEvaluation(currentOpportunityId));
     } catch (err) {
       setEvaluationError(
         err instanceof Error ? err.message : "Could not load evaluation",
@@ -82,40 +87,40 @@ export function RoleDetailPage() {
   }
 
   async function handleUpdate(payload: RoleUpdatePayload) {
-    if (!roleId) return;
+    if (!currentOpportunityId) return;
     setSaving(true);
     setError(null);
     setNotice(null);
     try {
-      setRole(await updateRole(roleId, payload));
-      setNotice("Role updated");
+      setRole(await updateOpportunity(currentOpportunityId, payload));
+      setNotice("Opportunity updated");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update role");
+      setError(err instanceof Error ? err.message : "Could not update opportunity");
     } finally {
       setSaving(false);
     }
   }
 
   async function handleArchive() {
-    if (!roleId) return;
+    if (!currentOpportunityId) return;
     setArchiving(true);
     setError(null);
     try {
-      await archiveRole(roleId);
-      navigate("/roles");
+      await archiveOpportunity(currentOpportunityId);
+      navigate("/opportunities");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not archive role");
+      setError(err instanceof Error ? err.message : "Could not archive opportunity");
       setArchiving(false);
     }
   }
 
   async function handleRunEvaluation(force = false) {
-    if (!roleId) return;
+    if (!currentOpportunityId) return;
     setEvaluating(true);
     setEvaluationError(null);
     setNotice(null);
     try {
-      const result = await createEvaluationWithStatus(roleId, {
+      const result = await createEvaluationWithStatus(currentOpportunityId, {
         user_context: {},
         ...(force ? { force: true } : {}),
       });
@@ -143,18 +148,18 @@ export function RoleDetailPage() {
   useEffect(() => {
     void loadRole();
     void loadEvaluation();
-  }, [roleId]);
+  }, [currentOpportunityId]);
 
   return (
     <Stack gap="lg">
       <Group justify="space-between">
-        <Button component={Link} to="/roles" variant="subtle">
-          Back to roles
+        <Button component={Link} to="/opportunities" variant="subtle">
+          Back to opportunities
         </Button>
       </Group>
 
       {notice ? <Alert color="green">{notice}</Alert> : null}
-      {loading ? <LoadingState label="Loading role" /> : null}
+      {loading ? <LoadingState label="Loading opportunity" /> : null}
       {!loading && error ? <ErrorState message={error} onRetry={loadRole} /> : null}
       {!loading && !error && role ? (
         <>
