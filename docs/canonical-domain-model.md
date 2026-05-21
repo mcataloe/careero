@@ -73,6 +73,8 @@ AI guidance:
 
 `Opportunity` is the canonical successor to the current `Role` concept. It represents a specific role, contract, consulting engagement, or professional opportunity.
 
+Layer 7 strategy guidance: [Opportunity model strategy](opportunity-model-strategy.md).
+
 Responsibilities:
 
 - Preserve raw ingestion content and normalized structured content.

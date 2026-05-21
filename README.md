@@ -10,6 +10,8 @@ The canonical Careero strategic plan, current layer status, and recommended buil
 
 Use that document as the source of truth for Careero-specific LEAP Recon, layer planning, and Codex implementation prompts.
 
+Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md).
+
 Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
 Current planning hierarchy:

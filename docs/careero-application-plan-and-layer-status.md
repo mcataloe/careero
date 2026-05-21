@@ -489,6 +489,8 @@ New strategic priority.
 
 Define Opportunity as the central durable intelligence object in Careero.
 
+Layer 7A design source of truth: [Opportunity model strategy](opportunity-model-strategy.md).
+
 ### Why this layer moves ahead of integrations
 
 The app already has workflow, artifact, evaluation, analytics, and dashboard infrastructure. The next bottleneck is not external data ingestion. The next bottleneck is semantic clarity around the core object.
@@ -527,17 +529,17 @@ Current backend naming still uses `Role`, but Careero needs `Opportunity` as the
 
 ### Recommended deliverables
 
-1. Opportunity strategy document.
+1. Layer 7A Opportunity strategy document: [Opportunity model strategy](opportunity-model-strategy.md).
 2. Current-state Role-to-Opportunity mapping.
 3. Schema migration plan.
 4. API transition plan.
 5. Frontend naming and route plan.
 6. Analytics integration plan.
-7. LEAP Prompt/LHS implementation slices.
+7. LEAP Prompt/LHS implementation slices for Layer 7B and any later destructive migration.
 
 ### Guidance
 
-Run a Layer 7 LEAP Recon before implementation prompts. This layer is architectural enough that jumping straight to Codex would create avoidable churn.
+Use the Layer 7A strategy artifact before implementation prompts. Layer 7 implementation remains pending; this layer is architectural enough that jumping straight to code would create avoidable churn.
 
 ---
 

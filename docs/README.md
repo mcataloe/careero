@@ -26,6 +26,7 @@ Current planning hierarchy:
 - [Careero application plan and layer status](careero-application-plan-and-layer-status.md)
 - [Local development](local-development.md)
 - [Canonical domain model](canonical-domain-model.md)
+- [Opportunity model strategy](opportunity-model-strategy.md)
 - [Application workflow persistence](application-workflow-persistence.md)
 - [Application interview tracking](application-interview-tracking.md)
 - [Resume artifact generation](resume-artifact-generation.md)
