@@ -144,7 +144,8 @@ Every migrated application receives an initial state history row with
 
 AI and future automation layers may suggest workflow actions, but user-visible
 state changes must go through backend workflow persistence and append typed
-state history. Layer 7 automation must not silently mutate application state.
+state history. Layer 9 automation guardrails must not silently mutate
+application state.
 
 ## Timeline Event Types
 

@@ -14,13 +14,23 @@ Older roadmap material has been archived under `docs/archive/` for historical co
 
 General LEAP framework guidance, reusable LEAP prompt patterns, and application-buildout methodology should live in the separate `leap` repository, not in this Careero repo.
 
+Current planning hierarchy:
+
+1. `README.md` - short project entry point and pointer to canonical planning docs.
+2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
+3. `docs/archive/*` - historical context only.
+4. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+
 ## Documents
 
 - [Careero application plan and layer status](careero-application-plan-and-layer-status.md)
 - [Local development](local-development.md)
 - [Canonical domain model](canonical-domain-model.md)
-- [Application interview tracking](application-interview-tracking.md)
 - [Application workflow persistence](application-workflow-persistence.md)
+- [Application interview tracking](application-interview-tracking.md)
+- [Resume artifact generation](resume-artifact-generation.md)
+- [Cover letter artifact generation](cover-letter-artifact-generation.md)
+- [Workspace intelligence context](workspace-intelligence-context.md)
 
 ## Archive
 

@@ -65,13 +65,20 @@ Resume/profile grounding source:
 - Canceling a draft restores the currently active source values. Saving an active-source draft creates and activates a new version; it does not mutate the existing version in place.
 - The backend uses the active source to ground STRIDE evaluations when available.
 
+Application workflow:
+
+- Open `/applications` to view application workflows grouped by pipeline state.
+- Open `/applications/:applicationId` for workflow summary, structured interview tracking, notes, external links, and timeline.
+- Structured interview tracking is manual-only; calendar invites, meeting generation, email, and coaching are intentionally out of scope.
+- Reminder counts can appear from backend workflow data, but the fuller reminder management UI is not merged into `main`.
+
 Long and structured text:
 
 - Read-only resume/profile, role description, and STRIDE text uses expandable preview blocks so pages stay scannable without hiding full content.
 - Markdown-like text is rendered safely as React text nodes. Basic headings, bullets, numbered lists, paragraphs, and fenced code blocks are displayed with lightweight structure.
 - Editable long text fields use bounded autosizing instead of expanding without limit.
 
-Careero does not run OCR, import Google Docs, generate resumes, cover letters, application packets, or automated discovery output from this UI phase.
+Careero does not run OCR, import Google Docs, export artifacts, create application packets, or perform automated discovery output from this UI phase. Backend resume and cover-letter artifact generation foundations exist, but dedicated frontend artifact generation, review, approval, archive, and export workflows are still future/incomplete.
 
 Run component tests:
 

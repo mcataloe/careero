@@ -2,7 +2,7 @@
 
 Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a STRIDE-powered workflow for evaluating role fit, risk, positioning, and application priority.
 
-Layer 2 completes the local STRIDE evaluation loop: manual role intake, resume/profile grounding, deterministic scoring, optional OpenAI enrichment, audit metadata, cache reuse, and frontend review.
+The current repository is beyond the original Layer 2 prototype: it includes local platform, intake, STRIDE, artifact-generation foundations, application workflow, and early intelligence surfaces. It is still a local-first application and should not be treated as production-ready.
 
 ## Strategic Plan and Layer Status
 
@@ -12,18 +12,30 @@ Use that document as the source of truth for Careero-specific LEAP Recon, layer 
 
 Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
-## Current Layer Includes
+Current planning hierarchy:
+
+1. `README.md` - short project entry point and pointer to canonical planning docs.
+2. [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md) - canonical Careero-specific layer status and build order.
+3. `docs/archive/*` - historical context only.
+4. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+
+## Current Local Capabilities
 
 - Local FastAPI backend with a health check endpoint.
 - Local PostgreSQL persistence with Alembic migrations.
-- Local React + Vite frontend for manual role intake.
-- Manual create, list, view, update, and archive role workflow.
+- Local React + Vite frontend.
+- Workspace/search-track persistence and seeded default local workspace.
+- Manual role/opportunity intake, list, detail, update, and archive workflow.
 - Optional AI-assisted role parsing for pasted job posts, with user review before save.
 - Local resume/profile source storage for STRIDE grounding, with paste or local file import.
 - Deterministic STRIDE scoring for stored roles.
 - Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
-- Backend integration tests for the full Layer 2 flow when PostgreSQL is configured.
+- Backend artifact-generation foundations for resume and cover-letter drafts, with truthfulness checks and generated-artifact persistence.
+- Application workflow tracking with state machine, state history, notes, external links, timeline, pipeline views, and structured interview tracking.
+- Local reminder persistence/count/timeline support, while the fuller reminder API/UI branch still needs reconciliation into `main`.
+- Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
+- Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.
 - Reserved directories for future modular growth.
@@ -32,14 +44,27 @@ Older roadmap material is retained only under `docs/archive/` for historical con
 
 Careero does not yet include:
 
-- Authentication.
-- Tenant behavior, workspace persistence/runtime switching, or multi-user behavior.
+- Production authentication.
+- Real multi-user tenant behavior.
+- Production authorization hardening.
 - Billing or subscriptions.
-- AWS or other cloud deployment logic.
+- Production deployment architecture.
 - Background job execution.
+- Canonical Opportunity API or migration from current `Role` naming.
+- Mature workspace switching and management UX.
+- Dedicated artifact list/detail/review/edit/approve/archive UX.
+- Submitted artifact tracking.
+- DOCX/PDF/Markdown artifact export workflow.
+- Google Docs import.
+- Gmail/Outlook integration.
+- Calendar sync.
+- LinkedIn/job-board helpers.
+- Browser extension or share-sheet intake.
 - Automated source discovery or polling.
 - Automated job application submission.
-- Tailored resume or cover letter generation.
+- Automation approval logs and review-before-send workflows.
+- Coach/advisor collaboration.
+- Marketplace or employer-side capabilities.
 
 ## Repository Structure
 

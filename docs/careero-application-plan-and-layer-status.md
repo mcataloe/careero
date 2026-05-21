@@ -17,6 +17,17 @@ Careero-specific product strategy, implementation status, domain model decisions
 
 ---
 
+## Current Planning Hierarchy
+
+1. `README.md` - short project entry point and pointer to canonical planning docs.
+2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
+3. `docs/archive/*` - historical context only.
+4. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+
+Archived roadmap material must not be used for current LEAP Recon or Codex implementation prompts unless a task explicitly asks for historical comparison.
+
+---
+
 ## Strategic Context
 
 Careero is no longer just a local job tracker or STRIDE evaluation prototype. The repo now contains meaningful parts of a career operations platform:
@@ -32,11 +43,12 @@ Careero is no longer just a local job tracker or STRIDE evaluation prototype. Th
 - state history
 - notes
 - external links
+- structured interview tracking
 - analytics and dashboard intelligence surfaces
 
-However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and some branch work needs reconciliation before it should be treated as complete.
+However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and some branch work still needs reconciliation before it should be treated as complete.
 
-The next strategic move is to stabilize current workflow reality and then introduce a deliberate **Layer 7 — Opportunity Model Strategy** before deeper integrations.
+The next strategic move is to stabilize current workflow reality and then introduce a deliberate **Layer 7 - Opportunity Model Strategy** before deeper integrations.
 
 ---
 
@@ -112,6 +124,7 @@ The current repo already includes meaningful implementation for:
 - application pipeline APIs
 - application notes
 - application external links
+- structured application interview tracking
 - application timeline aggregation
 - activity log
 - search analytics endpoint
@@ -124,18 +137,17 @@ The current repo already includes meaningful implementation for:
 - historical learning endpoint
 - dashboard surfaces for analytics and recommendations
 
-### Partially built / needs reconciliation
+### Partially built / needs reconciliation or validation
 
-The current repo also has partially completed or branch-diverged work for:
+The current repo also has partially completed, branch-diverged, or not-yet-fully-validated work for:
 
-- local application reminders
-- structured interview tracking
-- external-link summary/count refinements
+- local application reminders: current `main` has reminder tables, service logic, counts, analytics inputs, and timeline events, but the fuller reminder API routes, frontend panel, and `docs/application-reminders.md` remain on an unmerged branch.
+- external-link summary/count refinements: external-link CRUD is present, but the separate summary/count refinement commit is not an ancestor of `main`.
 - branch drift from Codex-generated feature work
-- Layer 4 workflow completion
+- Layer 4 workflow completion, especially reminder UX and final count validation
 - Layer 5 insight stabilization
 
-These should not be treated as cleanly complete until reconciled into `main`, validated, and reflected in documentation.
+These should not be treated as cleanly complete until reconciled into `main`, validated, and reflected in documentation. During this documentation refresh, repo history and file presence were inspected; full DB-backed test validation was not completed.
 
 ### Not yet built / still future
 
@@ -173,7 +185,7 @@ The repo does not yet fully include:
 | Layer 1 | Local Platform Foundation | Built locally / production incomplete | Local backend, frontend, database, migrations, config, and seed model exist. Production auth, multi-user identity, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
 | Layer 3 | STRIDE + Artifact Foundation | Mostly built / lifecycle incomplete | STRIDE and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
-| Layer 4 | Application Workflow | Substantially built / needs reconciliation | Applications, state transitions, timeline, notes, and links exist. Reminders and structured interview tracking need branch recovery/completion. |
+| Layer 4 | Application Workflow | Substantially built / reminders still partial | Applications, state transitions, timeline, notes, external links, and structured interview tracking exist. Reminder persistence/count/timeline support exists, but the fuller reminder API/UI branch still needs reconciliation. External-link summary/count refinements also need validation before being called complete. |
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
 | Layer 6 | Advanced STRIDE + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, STRIDE history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | New priority | Define Opportunity as the durable intelligence object and successor to Role. Should come before major external integrations. |
@@ -342,7 +354,7 @@ Do not focus next on adding more generation logic. Focus on lifecycle, reviewabi
 
 ### Status
 
-Substantially built / needs reconciliation.
+Substantially built / reminders still partial.
 
 ### Purpose
 
@@ -362,25 +374,28 @@ Manage the day-to-day job-search workflow around saved opportunities.
 - State history.
 - Notes CRUD.
 - External links CRUD.
+- Structured interview tracking APIs.
+- Structured interview tracking frontend panel.
+- Interview-stage timeline events and state-transition suggestion.
+- Reminder persistence tables.
+- Reminder service logic.
+- Reminder counts, analytics input, and timeline events.
 - Metadata updates.
 - ActivityLog integration.
 
 ### Partially accomplished
 
-- Reminders.
-- Structured interview tracking.
-- External-link count refinements.
+- Reminder API routes and frontend panel remain on an unmerged branch.
+- External-link summary/count refinements remain on an unmerged branch and need validation before being treated as current.
 
 ### Remaining work
 
 - Reconcile local reminders branch/work into `main`.
-- Reconcile structured interview tracking branch/work into `main`.
 - Add or restore frontend reminder panel.
-- Add or restore frontend interview panel.
 - Ensure application detail page surfaces all first-class workflow records.
 - Confirm timeline includes notes, links, reminders, interviews, STRIDE, artifacts, and state changes.
-- Confirm pipeline/dashboard counts align with backend records.
-- Validate migrations after branch reconciliation.
+- Confirm pipeline/dashboard counts align with backend records after reminder and external-link count reconciliation.
+- Validate migrations after reminder branch reconciliation.
 - Confirm backend, frontend, and contracts tests pass.
 
 ### Guidance
@@ -464,7 +479,7 @@ Layer 6 should turn generated output from “AI result” into durable, inspecta
 
 ---
 
-## Layer 7 — Opportunity Model Strategy
+## Layer 7 - Opportunity Model Strategy
 
 ### Status
 
@@ -699,7 +714,7 @@ Get `main` into a clean, truthful state before new feature work.
 
 - Review diverged Codex branches.
 - Recover reminder work that belongs in `main`.
-- Recover structured interview tracking work that belongs in `main`.
+- Confirm structured interview tracking remains clean after merge.
 - Recover external-link count refinements if still relevant.
 - Reconcile migrations carefully.
 - Run backend compile/tests.
@@ -724,7 +739,7 @@ Finish the workflow records users expect before modeling Opportunity more deeply
 ### Tasks
 
 - Fully integrate reminders.
-- Fully integrate structured interview tracking.
+- Validate structured interview tracking across backend, frontend, timeline, and tests.
 - Confirm notes, links, reminders, interviews, and timeline work consistently.
 - Ensure application detail page surfaces all first-class workflow records.
 - Confirm pipeline and dashboard counts are accurate.
@@ -787,7 +802,7 @@ Turn generated artifacts into usable product objects.
 
 ---
 
-## Step 5 — Layer 7 LEAP Recon: Opportunity Model Strategy
+## Step 5 - Layer 7 LEAP Recon: Opportunity Model Strategy
 
 ### Goal
 
@@ -857,7 +872,7 @@ Preserve:
 Revise:
 
 - Do not call Layer 1 fully complete until production auth/identity exists.
-- Do not call Layer 4 complete until reminders/interviews are reconciled into `main`.
+- Do not call Layer 4 complete until reminders are fully reconciled into `main` and workflow counts/timeline behavior are validated.
 - Do not call Layer 5 merely next; it is already partially implemented.
 - Move Integrations from Layer 7 to Layer 8.
 - Introduce Opportunity Model Strategy as Layer 7.

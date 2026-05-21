@@ -19,8 +19,10 @@ Workspace ID + Role/Opportunity + STRIDE Evaluation + Resume Source Version
 ```
 
 Current `Role` rows act as target Opportunities until canonical Opportunity
-persistence exists. Workspace persistence is not implemented yet, so callers
-provide `workspace_id`; the value is stored in the canonical artifact contract.
+persistence exists. Workspace persistence exists locally; callers provide
+`workspace_id`, and the backend verifies that the workspace exists, is active or
+paused, and owns the target role before storing the value in the canonical
+artifact contract.
 
 Rendering and export are separate layers. Generated artifacts store markdown
 content with `formatMetadata.primaryFormat = "md"` and

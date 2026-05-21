@@ -1,6 +1,6 @@
 # Backend
 
-The backend is a local FastAPI application for Careero Layer 1.
+The backend is a local FastAPI application for Careero. It now supports the local platform foundation, workspace-scoped role intake, STRIDE evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-authenticated.
 
 ## PostgreSQL
 
@@ -455,7 +455,7 @@ The activity log is scoped to the seeded default local user. It supports optiona
 5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
 6. Inspect lifecycle events with `GET /api/activity-log`.
 
-The Layer 2 local flow does not add auth, automated discovery, cover letters, generated application packets, or application submission.
+The original Layer 2 local flow does not add auth, automated discovery, generated application packets, or application submission. Backend resume and cover-letter artifact generation foundations now exist separately as draft-only services; rendering, review/approval lifecycle, export, and submission remain future work.
 
 ## Resume Artifact Generation
 
