@@ -1,47 +1,35 @@
 # Execution Drift Ledger
 
-## May 24, 2026
+## Purpose
 
-- Branch: `main`
-- Layer: Layer 10 - Advanced Search Tracks / Career Strategy
-- Recon result: Layer 10 starts as derived, read-only strategy synthesis from stored Careero evidence.
+This ledger records product, implementation, and documentation drift that future
+LEAP Recon and Codex prompts must account for. It is not a changelog. It is a
+decision and risk memory for places where implementation reality, roadmap
+language, branch history, or future assumptions can diverge.
 
-## Missing Docs Before This Implementation
+## How To Use It
 
-- Dedicated pressure-test summary.
-- Execution log / drift ledger.
-- Cross-layer impact map.
+- Add an entry when a layer recon changes product direction or exposes drift.
+- Record the source of the decision, the affected files or areas, and the
+  follow-up needed.
+- Keep entries concise and durable.
+- Do not use archived docs as current strategy unless an entry explicitly says a
+  historical comparison is being made.
 
-## Stale Fragments Found
+| Date | Layer | Decision/change | Source | Affected files/areas | Status | Risk | Follow-up |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| May 24, 2026 | Layer 10 | Layer 10 starts as derived, read-only strategy synthesis from stored Careero evidence. | Layer 10 implementation and docs refresh. | Strategy service/API/UI, analytics docs, layer status. | Implemented locally. | Strategy could be mistaken for durable memory or automation. | Keep strategy advisory, source-grounded, and non-mutating until a future approved build. |
+| May 24, 2026 | Layer 11 | Layer 11 Recon approved docs-first productization readiness only. | Layer 11 Recon findings and safe defaults. | Productization, privacy, account lifecycle, AI usage/cost, monetization, deployment docs. | Documented. | Future prompts may confuse readiness documentation with production readiness. | Keep Layer 11 status future/readiness-only until auth, privacy, account lifecycle, deployment, and cost blockers are resolved. |
+| May 24, 2026 | Layer 11 | Productization Readiness Foundation prompt created active Layer 11 readiness source docs. | Layer 11 implementation prompt. | `README.md`, layer-status doc, Layer 11 readiness docs, cross-layer map, drift ledger. | Implemented as docs only. | Docs may be treated as approval to launch production. | Require fresh LEAP Recon before implementation. |
+| May 24, 2026 | Layer 11 | Production auth, billing, and deployment remain missing and future. | README, layer-status doc, local development docs, infra README. | Auth, authorization, tenant isolation, billing, deployment, account lifecycle. | Blocker. | Hosted use would expose privacy/security/ops gaps. | Design and approve account lifecycle, privacy, deployment, and billing boundaries before code. |
+| May 24, 2026 | Layer 7 | Opportunity-facing compatibility exists while persistence remains Role-backed. | `docs/opportunity-model-strategy.md`. | `roles` table/model, `role_id` foreign keys, Opportunity-facing APIs/routes. | Known compatibility debt. | Destructive rename could create broad churn or data loss if rushed. | Keep Role-backed persistence explicit until separate Layer 7C approval. |
+| May 24, 2026 | Layer 4 | Reminder/workflow reconciliation remains a production readiness blocker. | Layer-status doc and current repo reality. | Reminder APIs/UI, counts, timeline, analytics inputs. | Partial. | Analytics, strategy, and hosted workflow claims may overstate completeness. | Reconcile reminders and validate workflow counts before production readiness. |
+| May 24, 2026 | Layer 6 | Artifact lifecycle incompleteness blocks monetization readiness. | Resume and cover-letter artifact docs; layer-status doc. | Artifact list/detail/review/edit/approve/archive, submitted tracking, frontend export UX. | Partial. | Paid artifacts would be premature while drafts are hard to retrieve/review/approve. | Complete artifact lifecycle before paid artifact tiers. |
+| May 24, 2026 | Layer 9 | Automation external actions remain prohibited. | `docs/automation-guardrails.md`. | Automation suggestions, approval logs, workspace preferences, external integrations. | Guardrail active. | Future automation could accidentally become state-changing or externally mutating. | Keep review-before-send, no-auto-apply, and disabled external actions until fresh approval. |
 
-- Markdown/DOCX/PDF export was still listed as Layer 3 remaining work even though backend local export exists.
-- Branch drift language described reminders and external-link count work as current visible unmerged branches. Current local clone exposes only `main` and `origin/main`, with no unmerged branches visible.
+## Verification Limits To Remember
 
-## Verification Limits
-
-- DB-backed backend tests may be blocked without `CAREERO_TEST_DATABASE_URL`.
-- Private GitHub PR state may not be available locally and may still need an external check.
-
-## Implementation Decisions
-
-- Added Layer 10 as read-only derived response models and API responses, not durable strategy tables.
-- Added no DB migrations and no strategy persistence models.
-- Reused existing Layer 5 analytics, search health, source intelligence, compensation intelligence, recommendations, historical learning, and artifact performance services where practical.
-- Kept strategy action candidates advisory and did not create Layer 9 `AutomationSuggestion` records.
-- Added a focused frontend career strategy surface with workspace selection and internal cross-track comparison.
-- Kept compensation wording internal/local and avoided external market claims.
-
-## Tests Run
-
-- `npm.cmd run validate` in `packages/contracts`: passed, 2 files / 29 tests.
-- `.\.venv\Scripts\python.exe -m pytest tests/test_strategy.py tests/test_recommendations.py tests/test_compensation_intelligence.py` in `backend`: 4 non-DB unit tests passed; 4 strategy DB-backed tests were blocked because `CAREERO_TEST_DATABASE_URL` is not set.
-- `python -m compileall app tests/test_strategy.py` in `backend`: passed.
-- `npm.cmd run test -- StrategyPage.test.tsx AutomationSuggestionsPanel.test.tsx` in `frontend`: passed, 2 files / 4 tests.
-- `npm.cmd run build` in `frontend`: passed.
-- Temporary Vite route smoke for `http://127.0.0.1:5173/strategy`: returned HTTP 200 while the dev server job was running; the temporary job exited afterward.
-
-## Unresolved Drift / Follow-Up
-
-- Backend DB-backed tests require `CAREERO_TEST_DATABASE_URL`.
-- Private remote PR state still needs external verification if GitHub access is available.
-- Dashboard analytics still has a broader workspace-scoping follow-up beyond the new strategy surface.
+- DB-backed backend tests may require `CAREERO_TEST_DATABASE_URL`.
+- Private remote PR state may not be visible from the local clone.
+- Layer 11 readiness docs do not certify GDPR, CCPA, SOC 2, HIPAA, or any other
+  legal/compliance framework.

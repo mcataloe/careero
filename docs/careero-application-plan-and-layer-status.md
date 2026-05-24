@@ -21,8 +21,9 @@ Careero-specific product strategy, implementation status, domain model decisions
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
-3. `docs/archive/*` - historical context only.
-4. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+3. Active layer-specific docs, including `docs/opportunity-model-strategy.md` and `docs/productization-readiness.md`.
+4. `docs/archive/*` - historical context only.
+5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
 Archived roadmap material must not be used for current LEAP Recon or Codex implementation prompts unless a task explicitly asks for historical comparison.
 
@@ -196,7 +197,7 @@ The repo does not yet fully include:
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future | Production deployment, auth hardening, privacy model, billing, cost controls, paid AI/artifact tiers, account lifecycle. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness documentation started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future | Coach, reviewer, spouse/advisor review, scoped sharing, comments, shared opportunity packets. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 
@@ -668,7 +669,7 @@ Layer 10 remains stronger as Layer 7, Layer 5, and artifact lifecycle data matur
 
 ### Status
 
-Future.
+Future / readiness documentation started.
 
 ### Purpose
 
@@ -688,9 +689,30 @@ Turn Careero into a sustainable product without compromising user trust.
 - Account deletion/export.
 - Data retention policy.
 
+### Readiness docs
+
+Layer 11 readiness docs now define productization, privacy, account lifecycle,
+AI usage/cost, monetization, and deployment gates:
+
+- [Productization readiness](productization-readiness.md)
+- [Privacy and data governance](privacy-data-governance.md)
+- [Account lifecycle](account-lifecycle.md)
+- [AI usage and cost controls](ai-usage-cost-controls.md)
+- [Monetization boundary](monetization-boundary.md)
+- [Deployment readiness](deployment-readiness.md)
+- [Cross-layer impact map](cross-layer-impact-map.md)
+- [Execution drift ledger](execution-drift-ledger.md)
+
+These documents are readiness and boundary design only. They do not implement
+production auth, billing, tenant isolation, hosted deployment, data export/delete,
+retention enforcement, or AI usage metering.
+
 ### Guidance
 
 Do not productize until the user-side workflow has proven durable value locally.
+Layer 11 implementation should not proceed until local workflow value,
+privacy/account lifecycle, AI usage/cost controls, deployment readiness, and
+production blockers are resolved through a fresh LEAP Recon.
 
 ---
 
@@ -885,7 +907,7 @@ Recommended order from here:
 6. Layer 8 integrations.
 7. Layer 9 automation guardrails.
 8. Layer 10 advanced search-track strategy stabilization.
-9. Layer 11 productization/deployment/monetization.
+9. Layer 11 productization implementation only after readiness gates are satisfied.
 10. Layer 12 advisor/collaboration mode.
 11. Layer 13 marketplace/employer-side exploration.
 

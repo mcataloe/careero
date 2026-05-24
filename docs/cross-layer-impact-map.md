@@ -1,34 +1,35 @@
 # Cross-Layer Impact Map
 
-## Layer 10 - Advanced Search Tracks / Career Strategy
+## Purpose
 
-Layer 10 depends on existing stored evidence and must remain derived, read-only,
-and workspace-scoped until a later user-reviewed persistence build is approved.
+This map records how Layer 11 productization readiness depends on and constrains
+the rest of Careero. It should guide future LEAP Recon and implementation
+prompts so local-first readiness is not confused with production readiness.
 
-Explicit dependencies:
-
-- Layer 4 application workflow.
-- Layer 5 analytics/intelligence.
-- Layer 6 artifact lifecycle.
-- Layer 7 Opportunity compatibility.
-- Layer 8 local integration/export boundaries.
-- Layer 9 automation guardrails.
-
-Layer 10 impact rules:
-
-- Reuse Layer 5 instead of duplicating analytics.
-- Do not require Layer 7C destructive rename.
-- Do not export internal strategy into employer-facing artifacts.
-- Strategy actions must route through Layer 9 only if reviewable and approval-logged.
-- Artifact performance signals are weak/correlational until artifact lifecycle is complete.
-- Follow-up/reminder strategy must not overstate confidence while reminder UX/API is incomplete or partially reconciled.
-
-| Layer | Impact on Layer 10 | Risk | Guardrail | Current status |
+| Layer | What Layer 11 depends on | What Layer 11 must not override | Readiness blockers | Future implementation notes |
 | --- | --- | --- | --- | --- |
-| Layer 4 | Provides application states, outcomes, reminders, notes, links, and interviews. | Partial reminders can weaken follow-up confidence. | Expose sample size and uncertainty. | Substantially built; reminders still partial. |
-| Layer 5 | Provides analytics, health, source, compensation, recommendations, and history. | Duplicated or conflicting insight logic. | Compose existing services first. | Partially built and reused. |
-| Layer 6 | Provides artifact and artifact performance context. | Correlation overstated as causation. | Label artifact signals as correlational. | Artifact generation exists; lifecycle incomplete. |
-| Layer 7 | Provides Opportunity-facing compatibility while persistence remains Role-backed. | Destructive rename scope creep. | Keep Role-backed persistence unchanged. | Compatibility surface started. |
-| Layer 8 | Provides local export boundaries and future integration context. | Internal strategy leaking to exports. | Do not export strategy into artifacts. | Backend export exists; frontend workflow future. |
-| Layer 9 | Provides suggestion and approval guardrails. | Advisory actions become hidden automation. | No `AutomationSuggestion` creation without explicit user action. | Local guardrail foundation exists. |
-| Layer 10 | Synthesizes strategy across stored evidence. | Durable hidden strategy memory. | Read-only response models only in MVP. | Derived strategy MVP started. |
+| Layer 0 Product Foundation | Job-seeker-first posture, AI as advisor, source grounding, marketplace last. | User trust, review-before-send, no-auto-apply, monetization caution. | Any drift toward employer-first incentives. | Productization must preserve Layer 0 principles before pricing or hosting. |
+| Layer 1 Local Platform Foundation | FastAPI, React/Vite, PostgreSQL, Alembic, local scripts, seeded local workspace. | Local-first iteration pace or claims that seeded local user equals auth. | Production auth, authorization, tenant isolation, secrets, and environment model. | Hosted modes require fresh auth/tenancy design and tests. |
+| Layer 2 Intake, Parsing & Grounding | Review-before-save parsing, raw/source material, provenance, active source grounding. | User review, source truth, and manual/local import boundaries. | Parser confidence UX and richer provenance remain incomplete. | Production privacy/export must include raw and parsed source records. |
+| Layer 3 STRIDE + Artifact Foundation | STRIDE evaluation, prompt/ruleset metadata, generated artifact persistence, TruthGuard checks. | STRIDE advisory nature or private strategy separation. | Artifact lifecycle and review UX are incomplete. | Paid artifact/AI tiers should wait for lifecycle clarity. |
+| Layer 4 Application Workflow | Application state machine, history, notes, external links, interviews, reminder foundations. | Application state ownership or reviewable workflow state. | Reminder API/UI reconciliation and count validation. | Production readiness requires coherent workflow records and exports. |
+| Layer 5 Workflow Intelligence / Insights | Analytics, recommendations, compensation/source/search health, historical learning. | Confidence limits or source-basis explanation. | Workspace filtering, deterministic validation, and calibration. | Paid analytics must be transparent and avoid overclaiming. |
+| Layer 6 Advanced STRIDE + Artifact Lifecycle | Artifact lifecycle direction, evidence mapping, submitted artifact tracking goals. | Employer-facing artifact safety boundaries. | Review/edit/approve/archive, submitted tracking, and frontend export UX. | Monetization should wait until artifacts are durable product objects. |
+| Layer 7 Opportunity Model Strategy | Opportunity-facing compatibility and Role-backed persistence documentation. | Destructive Role-to-Opportunity persistence rename. | Compatibility debt and broad `role_id` consumers. | Hosted exports/deletion must account for Role-backed Opportunity records until migration is approved. |
+| Layer 8 Integrations | Local export boundary and future integration constraints. | Deferral of OAuth, token storage, background sync, and external account linking. | Frontend artifact export workflow and integration privacy design. | Hosted integrations require auth, secrets, consent, revocation, and audit design. |
+| Layer 9 Automation Guardrails | Suggestions, approval logs, workspace preferences, disabled external actions. | Suggestion-first, review-first, audit-first automation. | No external executors, batch approvals, or state-changing automation are approved. | Production automation requires fresh approval and safety review per action class. |
+| Layer 10 Advanced Search Tracks / Career Strategy | Read-only strategy synthesis from stored Careero evidence. | Advisory, source-grounded, non-mutating strategy behavior. | Strategy depends on Layer 4/5/6 data maturity. | Strategy may inform paid power-user value only after confidence is calibrated. |
+| Layer 11 Productization / Deployment / Monetization | Readiness docs, privacy/account/deployment/cost/monetization gates. | The fact that implementation remains future. | Auth, billing, deployment, export/delete, retention, metering, and operations. | Implementation requires new LEAP Recon and explicit approvals. |
+| Layer 12 Advisor / Collaboration Mode | Future account roles, scoped sharing, comments, revocation, audit. | Privacy boundaries and user ownership. | No production auth, sharing model, or tenant permissions. | Collaboration should wait for account lifecycle and artifact boundaries. |
+| Layer 13 Marketplace / Employer-Side Exploration | Future user-controlled visibility and strict disclosure. | Marketplace last, no pay-to-rank, no hidden sponsored steering. | No employer-side model, sharing controls, or trust review. | Employer-side work requires a separate trust and incentive review after user-side value is proven. |
+
+## Productization Impact Rules
+
+- Layer 11 readiness can document gates but must not implement production auth,
+  billing, deployment, tenant isolation, or external integrations.
+- Productization cannot make employer-facing artifacts include internal STRIDE,
+  ATS risk, compensation strategy, company commentary, or private rationale.
+- Billing and AI quotas must not create hidden sponsored prioritization.
+- Opportunity-facing language must keep Role-backed persistence explicit until a
+  separate destructive migration is approved.
+- Marketplace/employer-side work stays last.
