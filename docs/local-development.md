@@ -73,7 +73,7 @@ CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 ```
 
-AI role parsing is separately controlled. To enable the Add Role parser, set:
+AI opportunity parsing is separately controlled. To enable the Add opportunity parser, set:
 
 ```dotenv
 CAREERO_ENABLE_AI_ROLE_PARSING=true

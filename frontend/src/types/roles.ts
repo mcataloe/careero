@@ -5,6 +5,7 @@ export type SourceType =
   | "linkedin_manual"
   | "linkedin"
   | "recruiter"
+  | "recruiter_email"
   | "referral"
   | "company_site"
   | "job_board"

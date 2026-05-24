@@ -2,7 +2,9 @@
 
 Resume artifact generation creates a validated canonical `ResumeArtifact` draft for
 one workspace, target opportunity, STRIDE evaluation, and resume/profile source.
-It does not render the resume in the frontend and does not export files.
+It does not render the resume in the frontend. Local Markdown, DOCX, and PDF
+exports are handled by the Layer 8 artifact export API after the artifact is
+persisted.
 
 ## Boundary
 
@@ -24,11 +26,10 @@ persistence exists. Workspace persistence exists locally; callers provide
 paused, and owns the target role before storing the value in the canonical
 artifact contract.
 
-Rendering and export are separate layers. Generated artifacts store markdown
-content with `formatMetadata.primaryFormat = "md"` and
-`availableFormats = ["md"]`. PDF, DOCX, HTML, and other exports should be
-created later from the stored validated artifact and recorded in
-`exportMetadata`.
+Frontend rendering remains a separate layer. Generated artifacts store markdown
+content with `formatMetadata.primaryFormat = "md"`. Local Markdown, DOCX, and
+PDF exports are created from the stored validated artifact and recorded in
+`exportMetadata`. Cloud export and external account sync remain future work.
 
 ## Truthfulness Rule
 

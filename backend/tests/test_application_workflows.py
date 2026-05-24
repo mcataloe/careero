@@ -832,6 +832,22 @@ def test_api_application_timeline_and_missing_application(
     assert missing_response.status_code == 404
 
 
+def test_api_opportunity_application_alias_preserves_role_compatibility(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+
+    opportunity_response = application_client.post(
+        f"/api/opportunities/{role.id}/application"
+    )
+    role_response = application_client.post(f"/api/roles/{role.id}/application")
+
+    assert opportunity_response.status_code == 201
+    assert role_response.status_code == 201
+    assert opportunity_response.json()["id"] == role_response.json()["id"]
+    assert opportunity_response.json()["role_id"] == str(role.id)
+
 
 def test_api_interview_stage_crud(
     application_client: TestClient,

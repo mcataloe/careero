@@ -37,8 +37,29 @@ def generate_resume_artifact(
     payload: ResumeArtifactGenerateRequest,
     service: ResumeArtifactService = Depends(get_resume_artifact_service),
 ):
+    return _generate_resume_artifact_for_opportunity(role_id, payload, service)
+
+
+@router.post(
+    "/opportunities/{opportunity_id}/resume-artifacts",
+    response_model=dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+)
+def generate_opportunity_resume_artifact(
+    opportunity_id: uuid.UUID,
+    payload: ResumeArtifactGenerateRequest,
+    service: ResumeArtifactService = Depends(get_resume_artifact_service),
+):
+    return _generate_resume_artifact_for_opportunity(opportunity_id, payload, service)
+
+
+def _generate_resume_artifact_for_opportunity(
+    opportunity_id: uuid.UUID,
+    payload: ResumeArtifactGenerateRequest,
+    service: ResumeArtifactService,
+):
     try:
-        return service.generate_for_role(role_id=role_id, payload=payload)
+        return service.generate_for_role(role_id=opportunity_id, payload=payload)
     except (
         ResumeArtifactRoleNotFoundError,
         ResumeArtifactEvaluationNotFoundError,

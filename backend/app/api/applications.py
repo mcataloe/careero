@@ -51,8 +51,27 @@ def get_or_create_role_application(
     role_id: uuid.UUID,
     service: ApplicationWorkflowService = Depends(get_application_workflow_service),
 ):
+    return _get_or_create_opportunity_application(role_id, service)
+
+
+@router.post(
+    "/opportunities/{opportunity_id}/application",
+    response_model=ApplicationDetailResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def get_or_create_opportunity_application(
+    opportunity_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    return _get_or_create_opportunity_application(opportunity_id, service)
+
+
+def _get_or_create_opportunity_application(
+    opportunity_id: uuid.UUID,
+    service: ApplicationWorkflowService,
+):
     try:
-        return service.get_or_create_for_role(role_id)
+        return service.get_or_create_for_role(opportunity_id)
     except ApplicationWorkflowNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ApplicationWorkflowWorkspaceInactiveError as exc:

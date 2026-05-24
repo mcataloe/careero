@@ -34,6 +34,7 @@ Current planning hierarchy:
 - Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
 - Backend artifact-generation foundations for resume and cover-letter drafts, with truthfulness checks and generated-artifact persistence.
+- Backend local Markdown/DOCX/PDF export for stored generated artifacts.
 - Application workflow tracking with state machine, state history, notes, external links, timeline, pipeline views, and structured interview tracking.
 - Local reminder persistence/count/timeline support, while the fuller reminder API/UI branch still needs reconciliation into `main`.
 - Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
@@ -56,7 +57,7 @@ Careero does not yet include:
 - Mature workspace switching and management UX.
 - Dedicated artifact list/detail/review/edit/approve/archive UX.
 - Submitted artifact tracking.
-- DOCX/PDF/Markdown artifact export workflow.
+- Dedicated frontend artifact export workflow.
 - Google Docs import.
 - Gmail/Outlook integration.
 - Calendar sync.

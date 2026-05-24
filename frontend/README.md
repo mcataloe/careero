@@ -15,7 +15,7 @@ The frontend expects the backend at:
 http://127.0.0.1:8000
 ```
 
-Before using role intake, STRIDE evaluations, or resume/profile source settings, run the backend database setup:
+Before using opportunity intake, STRIDE evaluations, or resume/profile source settings, run the backend database setup:
 
 ```powershell
 cd ..\backend
@@ -27,33 +27,33 @@ uvicorn app.main:app --reload
 
 AI enrichment is controlled by backend configuration. The frontend works with the deterministic backend fallback when AI is disabled, missing, or unavailable.
 
-Manual role intake is available at:
+Manual opportunity intake is available at:
 
 ```text
-http://127.0.0.1:5173/roles/new
+http://127.0.0.1:5173/opportunities/new
 ```
 
-The Add Role page includes optional AI-assisted parsing:
+The Add opportunity page includes optional AI-assisted parsing:
 
 - Paste a full job post into `Paste job description`.
 - Optionally provide the posting URL and source.
-- Click `Parse role`.
+- Click `Parse opportunity`.
 - Review/edit the populated manual fields.
-- Click `Create role` to save.
+- Click `Create opportunity` to save.
 
 Parsing fills empty fields only, does not auto-save, and keeps manual edits intact. The backend must have `CAREERO_ENABLE_AI_ROLE_PARSING=true` and an OpenAI API key configured for parsing to run.
 
 STRIDE evaluation workflow:
 
-- Open a role at `/roles/:roleId`.
-- Use the compact section navigation near the top of the role detail page to jump between overview, descriptions, edit controls, STRIDE evaluation, and major STRIDE sections.
-- Use `Run STRIDE evaluation` for a role with no evaluation.
+- Open an opportunity at `/opportunities/:opportunityId`.
+- Use the compact section navigation near the top of the opportunity detail page to jump between overview, descriptions, edit controls, STRIDE evaluation, and major STRIDE sections.
+- Use `Run STRIDE evaluation` for an opportunity with no evaluation.
 - Use `Re-run evaluation` to force a new latest evaluation.
 - Use `View latest evaluation` to jump to the evaluation section.
-- The role list shows a non-blocking evaluation indicator for each role.
-- A normal run may reuse the backend cache when role/source/context inputs have not changed.
+- The opportunity list shows a non-blocking evaluation indicator for each opportunity.
+- A normal run may reuse the backend cache when opportunity/source/context inputs have not changed.
 - Completed evaluations render through section blocks for summary, fit analysis, strengths, gaps, risks, ATS findings, compensation, remote fit, interview positioning, recommendations, and assumptions/confidence.
-- Long STRIDE text uses the shared `ExpandableTextSection` pattern so the role detail page stays scannable without hiding full content.
+- Long STRIDE text uses the shared `ExpandableTextSection` pattern so the opportunity detail page stays scannable without hiding full content.
 
 Resume/profile grounding source:
 
@@ -74,11 +74,11 @@ Application workflow:
 
 Long and structured text:
 
-- Read-only resume/profile, role description, and STRIDE text uses expandable preview blocks so pages stay scannable without hiding full content.
+- Read-only resume/profile, opportunity description, and STRIDE text uses expandable preview blocks so pages stay scannable without hiding full content.
 - Markdown-like text is rendered safely as React text nodes. Basic headings, bullets, numbered lists, paragraphs, and fenced code blocks are displayed with lightweight structure.
 - Editable long text fields use bounded autosizing instead of expanding without limit.
 
-Careero does not run OCR, import Google Docs, export artifacts, create application packets, or perform automated discovery output from this UI phase. Backend resume and cover-letter artifact generation foundations exist, but dedicated frontend artifact generation, review, approval, archive, and export workflows are still future/incomplete.
+Careero does not run OCR, import Google Docs, create application packets, or perform automated discovery output from this UI phase. Backend local artifact export APIs exist for Markdown, DOCX, and PDF, but dedicated frontend artifact generation, review, approval, archive, and export workflows are still future/incomplete.
 
 Run component tests:
 

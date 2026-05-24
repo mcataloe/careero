@@ -264,6 +264,35 @@ def test_api_generates_resume_artifact_with_expected_links(
     assert artifact["revision"]["revisionNumber"] == 1
 
 
+def test_api_opportunity_resume_artifact_alias_preserves_role_compatibility(
+    resume_artifact_api_client_with_fake_generator: TestClient,
+    seeded_session: Session,
+) -> None:
+    role = create_role(seeded_session)
+    create_source(seeded_session)
+    evaluation = create_evaluation(seeded_session, role.id)
+
+    opportunity_response = resume_artifact_api_client_with_fake_generator.post(
+        f"/api/opportunities/{role.id}/resume-artifacts",
+        json={
+            "workspace_id": str(WORKSPACE_ID),
+            "evaluation_id": str(evaluation.id),
+        },
+    )
+    role_response = resume_artifact_api_client_with_fake_generator.post(
+        f"/api/roles/{role.id}/resume-artifacts",
+        json={
+            "workspace_id": str(WORKSPACE_ID),
+            "evaluation_id": str(evaluation.id),
+        },
+    )
+
+    assert opportunity_response.status_code == 201
+    assert role_response.status_code == 201
+    assert opportunity_response.json()["opportunityId"] == str(role.id)
+    assert role_response.json()["opportunityId"] == str(role.id)
+
+
 def test_missing_source_resume_fails_without_persisting_artifact(
     seeded_session: Session,
 ) -> None:

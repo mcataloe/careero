@@ -266,6 +266,35 @@ def test_api_generates_cover_letter_artifact_with_expected_links(
     assert artifact["revision"]["revisionNumber"] == 1
 
 
+def test_api_opportunity_cover_letter_alias_preserves_role_compatibility(
+    cover_letter_api_client_with_fake_generator: TestClient,
+    seeded_session: Session,
+) -> None:
+    role = create_role(seeded_session)
+    create_source(seeded_session)
+    evaluation = create_evaluation(seeded_session, role.id)
+
+    opportunity_response = cover_letter_api_client_with_fake_generator.post(
+        f"/api/opportunities/{role.id}/cover-letter-artifacts",
+        json={
+            "workspace_id": str(WORKSPACE_ID),
+            "evaluation_id": str(evaluation.id),
+        },
+    )
+    role_response = cover_letter_api_client_with_fake_generator.post(
+        f"/api/roles/{role.id}/cover-letter-artifacts",
+        json={
+            "workspace_id": str(WORKSPACE_ID),
+            "evaluation_id": str(evaluation.id),
+        },
+    )
+
+    assert opportunity_response.status_code == 201
+    assert role_response.status_code == 201
+    assert opportunity_response.json()["opportunityId"] == str(role.id)
+    assert role_response.json()["opportunityId"] == str(role.id)
+
+
 def test_missing_stride_evaluation_succeeds_with_warning(
     seeded_session: Session,
 ) -> None:

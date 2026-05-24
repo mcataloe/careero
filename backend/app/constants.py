@@ -60,6 +60,7 @@ class SourceType(StrEnum):
     LINKEDIN_MANUAL = "linkedin_manual"
     LINKEDIN = "linkedin"
     RECRUITER = "recruiter"
+    RECRUITER_EMAIL = "recruiter_email"
     REFERRAL = "referral"
     COMPANY_SITE = "company_site"
     JOB_BOARD = "job_board"
@@ -78,6 +79,7 @@ SOURCE_DISPLAY_NAMES: dict[SourceType, str] = {
     SourceType.LINKEDIN_MANUAL: "LinkedIn manual",
     SourceType.LINKEDIN: "LinkedIn",
     SourceType.RECRUITER: "Recruiter",
+    SourceType.RECRUITER_EMAIL: "Recruiter email",
     SourceType.REFERRAL: "Referral",
     SourceType.COMPANY_SITE: "Company site",
     SourceType.JOB_BOARD: "Job board",

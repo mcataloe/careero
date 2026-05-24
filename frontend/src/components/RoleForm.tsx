@@ -29,6 +29,7 @@ const sourceOptions: { label: string; value: SourceType }[] = [
   { label: "LinkedIn manual", value: "linkedin_manual" },
   { label: "LinkedIn", value: "linkedin" },
   { label: "Recruiter", value: "recruiter" },
+  { label: "Recruiter email", value: "recruiter_email" },
   { label: "Referral", value: "referral" },
   { label: "Company site", value: "company_site" },
   { label: "Job board", value: "job_board" },

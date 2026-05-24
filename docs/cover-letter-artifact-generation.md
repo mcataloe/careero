@@ -25,9 +25,10 @@ persistence exists. Workspace persistence exists locally; callers provide
 paused, and owns the target role before storing the value in the canonical
 artifact contract.
 
-Rendering and export are separate layers. Generated cover letters store draft
-content only. PDF, DOCX, HTML, text, and other exports should be created later
-from the stored validated artifact and recorded in `exportMetadata`.
+Frontend rendering remains a separate layer. Generated cover letters store draft
+content only. Local Markdown, DOCX, and PDF exports are created from the stored
+validated artifact and recorded in `exportMetadata`. Cloud export and external
+account sync remain future work.
 
 ## Tone Default
 

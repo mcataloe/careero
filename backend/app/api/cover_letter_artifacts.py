@@ -39,8 +39,33 @@ def generate_cover_letter_artifact(
     payload: CoverLetterArtifactGenerateRequest,
     service: CoverLetterArtifactService = Depends(get_cover_letter_artifact_service),
 ):
+    return _generate_cover_letter_artifact_for_opportunity(role_id, payload, service)
+
+
+@router.post(
+    "/opportunities/{opportunity_id}/cover-letter-artifacts",
+    response_model=dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+)
+def generate_opportunity_cover_letter_artifact(
+    opportunity_id: uuid.UUID,
+    payload: CoverLetterArtifactGenerateRequest,
+    service: CoverLetterArtifactService = Depends(get_cover_letter_artifact_service),
+):
+    return _generate_cover_letter_artifact_for_opportunity(
+        opportunity_id,
+        payload,
+        service,
+    )
+
+
+def _generate_cover_letter_artifact_for_opportunity(
+    opportunity_id: uuid.UUID,
+    payload: CoverLetterArtifactGenerateRequest,
+    service: CoverLetterArtifactService,
+):
     try:
-        return service.generate_for_role(role_id=role_id, payload=payload)
+        return service.generate_for_role(role_id=opportunity_id, payload=payload)
     except (
         CoverLetterArtifactRoleNotFoundError,
         CoverLetterArtifactEvaluationNotFoundError,

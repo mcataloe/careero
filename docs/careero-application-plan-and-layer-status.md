@@ -189,7 +189,7 @@ The repo does not yet fully include:
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
 | Layer 6 | Advanced STRIDE + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, STRIDE history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
-| Layer 8 | Integrations | Planned | Google Docs, Gmail/Outlook, calendar sync, LinkedIn/job-board helpers, browser/share intake, cloud storage, and export integrations. |
+| Layer 8 | Integrations | Planned / begins with Layer 7 compatibility cleanup | Local/manual integration adapters first, Markdown/DOCX/PDF export, and later Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync after OAuth is explicitly re-opened. |
 | Layer 9 | Automation Guardrails | Planned | Suggested follow-ups, draft-only generation, review-before-send, approval logs, no-auto-apply boundaries, workspace automation preferences. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Planned | Full-time vs contract strategy, compensation modeling, skill gaps, career narrative, search retrospectives, and role-market positioning. |
 | Layer 11 | Productization / Deployment / Monetization | Future | Production deployment, auth hardening, privacy model, billing, cost controls, paid AI/artifact tiers, account lifecycle. |
@@ -549,7 +549,7 @@ Use the Layer 7A strategy artifact before further implementation prompts. Layer 
 
 ### Status
 
-Planned.
+Planned / begins with Layer 7 compatibility cleanup.
 
 ### Purpose
 
@@ -568,7 +568,13 @@ Reduce manual entry by connecting Careero to tools job seekers already use.
 
 ### Guidance
 
-Build integrations after Opportunity semantics are stable. Otherwise imported data may land in the wrong places and create unnecessary rework.
+Layer 8 begins with Layer 7 compatibility cleanup. Integration-facing APIs should target Opportunity-facing routes and contracts while persistence remains Role-backed until a separate Layer 7C destructive rename is explicitly approved.
+
+For the first Layer 8 MVP/prototype build, OAuth and account-linked sync are intentionally deferred. Do not implement Gmail/Outlook account linking, Google Docs account import, cloud sync, background polling, or external account token storage in this build. Local/manual integration paths come first: paste, local file import/export, generated files, manual links, and reviewable captured payloads.
+
+Markdown, DOCX, and PDF artifact export belong in this Layer 8 prototype build. Export should be generated from stored, validated artifact content and should record local export metadata without requiring cloud storage.
+
+All integrations must preserve review-before-save, review-before-send, no-auto-apply, and TruthGuard boundaries. Imported content should remain reviewable and source/provenance-aware before it becomes durable Opportunity/Application/Artifact data.
 
 ---
 
