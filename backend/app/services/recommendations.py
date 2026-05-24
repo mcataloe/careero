@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState
-from app.models import Application, ArtifactPerformanceRecord, Role, User
+from app.models import Application, ArtifactPerformanceRecord, Role, StrideEvaluation, User
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.artifact_performance import summarize_artifact_records
 from app.services.search_health import generate_search_health_signals
@@ -43,7 +43,10 @@ class RecommendationService:
         roles = self._roles(user_id=user.id, workspace_id=workspace_id)
         applications = self._applications(user_id=user.id, workspace_id=workspace_id)
         artifacts = self._artifact_records(user_id=user.id, workspace_id=workspace_id)
-        latest_stride = {}
+        latest_stride = self._latest_stride_by_role(
+            user_id=user.id,
+            workspace_id=workspace_id,
+        )
         health_signals = generate_search_health_signals(
             applications=applications,
             roles=roles,
@@ -101,6 +104,28 @@ class RecommendationService:
         if workspace_id is not None:
             filters.append(ArtifactPerformanceRecord.workspace_id == workspace_id)
         return list(self.db.scalars(select(ArtifactPerformanceRecord).where(*filters)))
+
+    def _latest_stride_by_role(
+        self,
+        *,
+        user_id: uuid.UUID,
+        workspace_id: uuid.UUID | None,
+    ) -> dict[uuid.UUID, StrideEvaluation]:
+        filters = [
+            StrideEvaluation.user_id == user_id,
+            StrideEvaluation.deleted_at.is_(None),
+            StrideEvaluation.evaluation_status == "completed",
+        ]
+        if workspace_id is not None:
+            filters.append(StrideEvaluation.workspace_id == workspace_id)
+        latest: dict[uuid.UUID, StrideEvaluation] = {}
+        for evaluation in self.db.scalars(
+            select(StrideEvaluation)
+            .where(*filters)
+            .order_by(StrideEvaluation.role_id, StrideEvaluation.created_at.desc())
+        ):
+            latest.setdefault(evaluation.role_id, evaluation)
+        return latest
 
 
 def generate_recommendations(

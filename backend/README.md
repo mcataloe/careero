@@ -547,6 +547,22 @@ Invoke-WebRequest `
 
 Export is local-only. It does not send email, write to Google Docs, sync cloud storage, or mutate external systems.
 
+## Career Strategy API
+
+Layer 10 strategy synthesis is read-only and workspace-scoped. It uses stored
+Careero evidence only and does not create strategy tables, automation
+suggestions, external market data, or employer-facing artifacts.
+
+```text
+GET http://127.0.0.1:8000/api/strategy/workspaces/{workspace_id}
+GET http://127.0.0.1:8000/api/strategy/workspaces?include_cross_track=true
+```
+
+The response includes summary, basis, confidence, sample size, source inputs,
+known uncertainty, insufficient-data reasons, strategy signals, compensation
+alignment, skill-gap themes, role positioning, career narrative themes,
+retrospective text, advisory action candidates, and warnings.
+
 ## Application Workflow Persistence
 
 Application workflow builds on saved roles. `Role.status` remains a lightweight opportunity status for existing role lists, while `Application.current_state` is the workflow authority and uses the canonical states `discovered`, `interested`, `applied`, `interviewing`, `offer`, `rejected`, `withdrawn`, and `archived`.

@@ -157,6 +157,9 @@ describe("generated JSON Schema exports", () => {
     "automation-suggestion.schema.json",
     "automation-approval-log.schema.json",
     "automation-preferences.schema.json",
+    "search-track-strategy-summary.schema.json",
+    "cross-track-strategy-comparison.schema.json",
+    "career-strategy-summary.schema.json",
     "index.json",
   ];
 

@@ -7,6 +7,12 @@ import type {
 } from "./automation.js";
 import type { Opportunity } from "./opportunity.js";
 import { CONTRACT_VERSION } from "./primitives.js";
+import type {
+  CareerStrategySummary,
+  CrossTrackStrategyComparison,
+  StrategyConfidence,
+  SearchTrackStrategySummary,
+} from "./strategy.js";
 import type { StrideEvaluation } from "./stride-evaluation.js";
 import type { Workspace } from "./workspace.js";
 
@@ -21,6 +27,16 @@ const applicationStateId = "77777777-7777-4777-8777-777777777777";
 const automationSuggestionId = "12121212-1212-4212-8212-121212121212";
 const automationApprovalLogId = "13131313-1313-4313-8313-131313131313";
 const automationPreferencesId = "14141414-1414-4414-8414-141414141414";
+
+const strategyConfidence: StrategyConfidence = {
+  confidence: "weak",
+  basis: "Based on stored opportunities, applications, STRIDE evaluations, and artifact performance records.",
+  sampleSize: 3,
+  sourceInputs: { opportunities: 3, applications: 2, strideEvaluations: 2 },
+  knownUncertainty: ["Outcome history is still thin."],
+  insufficientData: [],
+  userOverrides: null,
+};
 
 export const workspaceExample: Workspace = {
   contractVersion: CONTRACT_VERSION,
@@ -379,6 +395,116 @@ export const automationPreferencesExample: AutomationPreferences = {
   updatedAt: now,
 };
 
+export const searchTrackStrategySummaryExample: SearchTrackStrategySummary = {
+  contractVersion: CONTRACT_VERSION,
+  workspaceId,
+  workspaceName: "Full-time leadership search",
+  generatedAt: now,
+  summary:
+    "Based on your stored Careero data, this search track has early fit signals but limited outcome evidence.",
+  basis:
+    "Derived from local workspace opportunities, application workflow states, latest STRIDE evaluations, compensation observations, source intelligence, historical learning, and artifact performance records.",
+  confidence: strategyConfidence,
+  sampleSize: {
+    opportunities: 3,
+    applications: 2,
+    submittedApplications: 1,
+    responses: 1,
+    strideEvaluations: 2,
+    artifactPerformanceRecords: 1,
+  },
+  sourceInputs: {
+    analytics: "/api/analytics/search",
+    stride: "/api/analytics/stride",
+    compensation: "/api/analytics/compensation",
+  },
+  knownUncertainty: ["This is not external market data."],
+  insufficientData: [],
+  signals: [
+    {
+      id: "stride-fit",
+      category: "stride",
+      label: "High-fit opportunities are producing traction",
+      message:
+        "At least one higher-fit opportunity has a stored interview or offer signal.",
+      basis: "Latest STRIDE scores and application workflow outcomes.",
+      severity: "positive",
+      confidence: strategyConfidence,
+      sourceInputs: { highFitOpportunities: 1 },
+    },
+  ],
+  compensationAlignment: {
+    summary:
+      "Stored stated compensation partially overlaps the workspace target. This is an internal comparison only.",
+    basis:
+      "Compares saved opportunity compensation ranges with workspace target compensation.",
+    confidence: strategyConfidence,
+    observations: [{ statedRanges: 2 }],
+  },
+  skillGapThemes: [],
+  roleMarketPositioning: {
+    summary:
+      "Saved roles appear concentrated around leadership and platform themes in this workspace.",
+    basis:
+      "Uses title-derived categories and repeated STRIDE alignment patterns from stored opportunities.",
+    confidence: strategyConfidence,
+    themes: ["leadership", "platform"],
+  },
+  careerNarrativeThemes: [],
+  retrospective: {
+    summary:
+      "The track has enough stored evidence for directional review, but not enough for strong conclusions.",
+    basis: "Combines stored opportunities, applications, STRIDE results, and outcomes.",
+    confidence: strategyConfidence,
+    notes: ["No external market data was used."],
+  },
+  actionCandidates: [
+    {
+      id: "review-compensation-target",
+      category: "review_compensation_target",
+      title: "Review compensation target",
+      rationale:
+        "Some saved opportunities state compensation below the workspace target.",
+      basis: "Stored stated compensation compared with workspace preferences.",
+      confidence: strategyConfidence,
+      sourceInputs: { underTarget: 1 },
+      advisoryOnly: true,
+    },
+  ],
+  warnings: ["Strategy synthesis is read-only and advisory."],
+};
+
+export const crossTrackStrategyComparisonExample: CrossTrackStrategyComparison = {
+  generatedAt: now,
+  basis: "Compares read-only derived summaries across local workspaces.",
+  confidence: strategyConfidence,
+  tracks: [
+    {
+      workspaceId,
+      workspaceName: "Full-time leadership search",
+      summary: "Early evidence is directional but thin.",
+      sampleSize: searchTrackStrategySummaryExample.sampleSize,
+      signalCount: 1,
+      warningCount: 1,
+    },
+  ],
+  signals: [],
+  insufficientData: [],
+  warnings: ["Cross-track comparison uses internal Careero data only."],
+};
+
+export const careerStrategySummaryExample: CareerStrategySummary = {
+  contractVersion: CONTRACT_VERSION,
+  generatedAt: now,
+  summary: "One search track has a read-only strategy summary available.",
+  workspaceId,
+  workspaceName: "Full-time leadership search",
+  activeTrack: searchTrackStrategySummaryExample,
+  tracks: [searchTrackStrategySummaryExample],
+  crossTrackComparison: crossTrackStrategyComparisonExample,
+  warnings: ["No strategy records are persisted by this response model."],
+};
+
 export const canonicalExamples = {
   Workspace: workspaceExample,
   Opportunity: opportunityExample,
@@ -389,4 +515,7 @@ export const canonicalExamples = {
   AutomationSuggestion: automationSuggestionExample,
   AutomationApprovalLog: automationApprovalLogExample,
   AutomationPreferences: automationPreferencesExample,
+  SearchTrackStrategySummary: searchTrackStrategySummaryExample,
+  CrossTrackStrategyComparison: crossTrackStrategyComparisonExample,
+  CareerStrategySummary: careerStrategySummaryExample,
 } as const;

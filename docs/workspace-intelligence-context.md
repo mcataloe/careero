@@ -64,9 +64,21 @@ but workspace ownership is required.
 Workspace context is input context only. It must not be treated as proof of
 candidate experience, and it must not be copied between workspaces.
 
+## Strategy Synthesis Consumption
+
+Layer 10 uses workspaces/search tracks as the strategy scope. The strategy
+service reads workspace preferences, saved opportunities, applications, STRIDE
+evaluations, source intelligence, compensation intelligence, search health,
+recommendations, historical learning, and artifact performance to produce a
+read-only summary.
+
+This synthesis is derived and transient. It does not mutate workspace
+preferences, create automation suggestions, save retrospectives, or copy
+workspace context into employer-facing artifacts. Cross-workspace comparison is
+an internal comparison across stored local tracks only.
+
 ## Non-Goals
 
-This layer does not add workspace switching UI, embeddings, vector search,
-cross-workspace recommendations, or long-term memory automation. Resume sources
-remain user-level for now; workspace-specific source selection can be added in a
-future layer.
+This layer does not add embeddings, vector search, external market intelligence,
+or long-term memory automation. Resume sources remain user-level for now;
+workspace-specific source selection can be added in a future layer.

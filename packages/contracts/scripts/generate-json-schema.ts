@@ -19,6 +19,9 @@ const fileNames: Record<keyof typeof canonicalSchemaRegistry, string> = {
   AutomationSuggestion: "automation-suggestion.schema.json",
   AutomationApprovalLog: "automation-approval-log.schema.json",
   AutomationPreferences: "automation-preferences.schema.json",
+  SearchTrackStrategySummary: "search-track-strategy-summary.schema.json",
+  CrossTrackStrategyComparison: "cross-track-strategy-comparison.schema.json",
+  CareerStrategySummary: "career-strategy-summary.schema.json",
 };
 
 mkdirSync(outputDir, { recursive: true });

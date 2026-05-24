@@ -30,6 +30,7 @@ packages/contracts/
     artifacts.ts
     application-state.ts
     automation.ts
+    strategy.ts
     primitives.ts
     enums.ts
     examples.ts
@@ -243,6 +244,36 @@ Automation preferences are scoped to workspaces/search tracks first. Future
 external-action settings are disabled in the Layer 9 MVP.
 
 Layer 9 guidance: [Automation guardrails](automation-guardrails.md).
+
+### Career Strategy Summary
+
+`CareerStrategySummary`, `SearchTrackStrategySummary`, and
+`CrossTrackStrategyComparison` are read-only response contracts for Layer 10.
+They are not persistence models and do not authorize durable strategy tables.
+
+Responsibilities:
+
+- Summarize workspace/search-track strategy from stored local evidence.
+- Expose basis, confidence, sample size, source inputs, known uncertainty, and
+  insufficient-data reasons.
+- Keep compensation, artifact, source, STRIDE, historical, and workflow signals
+  advisory and source-visible.
+- Represent action candidates as advisory only.
+
+Non-responsibilities:
+
+- Mutating Application, Artifact, Opportunity, Role, Workspace, or Automation state.
+- Creating `AutomationSuggestion` records without explicit later user action.
+- Storing hidden strategy memory.
+- Making external market claims.
+- Producing employer-facing artifacts.
+
+Layer 10 guidance:
+
+- Strategy synthesis must say when it is based on stored Careero data.
+- Cross-track comparison is internal only and does not use external market data.
+- Artifact performance wording must remain correlational.
+- Compensation heuristics must be labeled internal/local when used.
 
 ## AI Orchestration Boundaries
 

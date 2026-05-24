@@ -18,6 +18,7 @@ from app.api.roles import router as roles_router
 from app.api.search_analytics import router as search_analytics_router
 from app.api.search_health import router as search_health_router
 from app.api.source_intelligence import router as source_intelligence_router
+from app.api.strategy import router as strategy_router
 from app.api.stride_insights import router as stride_insights_router
 from app.api.stride_evaluations import router as stride_evaluations_router
 from app.api.workspaces import router as workspaces_router
@@ -53,6 +54,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(search_analytics_router, prefix="/api")
     app.include_router(search_health_router, prefix="/api")
     app.include_router(source_intelligence_router, prefix="/api")
+    app.include_router(strategy_router, prefix="/api")
     app.include_router(stride_insights_router, prefix="/api")
     app.include_router(stride_evaluations_router, prefix="/api")
     app.include_router(workspaces_router, prefix="/api")

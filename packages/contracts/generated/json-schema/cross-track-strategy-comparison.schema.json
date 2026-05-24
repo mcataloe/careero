@@ -1,0 +1,230 @@
+{
+  "$ref": "#/definitions/CrossTrackStrategyComparison",
+  "definitions": {
+    "CrossTrackStrategyComparison": {
+      "type": "object",
+      "properties": {
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "object",
+          "properties": {
+            "confidence": {
+              "type": "string",
+              "enum": [
+                "insufficient_data",
+                "weak",
+                "moderate",
+                "high"
+              ]
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sampleSize": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sourceInputs": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "knownUncertainty": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "insufficientData": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "empty_workspace",
+                  "few_opportunities",
+                  "few_applications",
+                  "few_outcomes",
+                  "missing_stride_evaluations",
+                  "missing_compensation_ranges",
+                  "missing_artifact_performance",
+                  "missing_source_history",
+                  "stale_track",
+                  "unknown"
+                ]
+              },
+              "default": []
+            },
+            "userOverrides": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/CrossTrackStrategyComparison/properties/confidence/properties/sourceInputs"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "required": [
+            "confidence",
+            "basis",
+            "sampleSize",
+            "sourceInputs"
+          ],
+          "additionalProperties": false
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "workspaceId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "workspaceName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sampleSize": {
+                "$ref": "#/definitions/CrossTrackStrategyComparison/properties/confidence/properties/sourceInputs"
+              },
+              "signalCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "warningCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "workspaceId",
+              "workspaceName",
+              "summary",
+              "sampleSize",
+              "signalCount",
+              "warningCount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "search_health",
+                  "stride",
+                  "compensation",
+                  "source",
+                  "artifact",
+                  "historical",
+                  "workspace"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "info",
+                  "caution",
+                  "positive"
+                ],
+                "default": "info"
+              },
+              "confidence": {
+                "$ref": "#/definitions/CrossTrackStrategyComparison/properties/confidence"
+              },
+              "sourceInputs": {
+                "$ref": "#/definitions/CrossTrackStrategyComparison/properties/confidence/properties/sourceInputs"
+              }
+            },
+            "required": [
+              "id",
+              "category",
+              "label",
+              "message",
+              "basis",
+              "confidence",
+              "sourceInputs"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "insufficientData": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "$ref": "#/definitions/CrossTrackStrategyComparison/properties/confidence/properties/insufficientData/items"
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sourceInputs": {
+                "$ref": "#/definitions/CrossTrackStrategyComparison/properties/confidence/properties/sourceInputs",
+                "default": {}
+              }
+            },
+            "required": [
+              "reason",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "generatedAt",
+        "basis",
+        "confidence",
+        "tracks"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

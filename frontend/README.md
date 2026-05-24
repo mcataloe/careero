@@ -72,6 +72,17 @@ Application workflow:
 - Structured interview tracking is manual-only; calendar invites, meeting generation, email, and coaching are intentionally out of scope.
 - Reminder counts can appear from backend workflow data, but the fuller reminder management UI is not merged into `main`.
 
+Career strategy:
+
+- Open `/strategy` to review a read-only workspace/search-track strategy summary.
+- The strategy surface shows confidence, sample size, source basis,
+  insufficient-data reasons, retrospective text, compensation alignment, role
+  positioning, skill gaps, narrative themes, advisory actions, warnings, and
+  internal cross-track comparison.
+- Strategy synthesis is based only on stored Careero data. It does not export
+  employer-facing content, mutate records, create automation suggestions, or use
+  external market data.
+
 Long and structured text:
 
 - Read-only resume/profile, opportunity description, and STRIDE text uses expandable preview blocks so pages stay scannable without hiding full content.

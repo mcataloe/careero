@@ -8,6 +8,7 @@ import { RoleDetailPage } from "./pages/RoleDetailPage";
 import { RoleNewPage } from "./pages/RoleNewPage";
 import { RolesPage } from "./pages/RolesPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { StrategyPage } from "./pages/StrategyPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/strategy" element={<StrategyPage />} />
         <Route path="/opportunities" element={<RolesPage />} />
         <Route path="/opportunities/new" element={<RoleNewPage />} />
         <Route path="/opportunities/:opportunityId" element={<RoleDetailPage />} />

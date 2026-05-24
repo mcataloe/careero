@@ -8,6 +8,11 @@ import {
   AutomationSuggestionSchema,
 } from "./automation.js";
 import { OpportunitySchema } from "./opportunity.js";
+import {
+  CareerStrategySummarySchema,
+  CrossTrackStrategyComparisonSchema,
+  SearchTrackStrategySummarySchema,
+} from "./strategy.js";
 import { StrideEvaluationSchema } from "./stride-evaluation.js";
 import { WorkspaceSchema } from "./workspace.js";
 
@@ -21,6 +26,9 @@ export const canonicalSchemaRegistry = {
   AutomationSuggestion: AutomationSuggestionSchema,
   AutomationApprovalLog: AutomationApprovalLogSchema,
   AutomationPreferences: AutomationPreferencesSchema,
+  SearchTrackStrategySummary: SearchTrackStrategySummarySchema,
+  CrossTrackStrategyComparison: CrossTrackStrategyComparisonSchema,
+  CareerStrategySummary: CareerStrategySummarySchema,
 } as const satisfies Record<string, z.ZodTypeAny>;
 
 export type CanonicalSchemaName = keyof typeof canonicalSchemaRegistry;

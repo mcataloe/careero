@@ -39,6 +39,7 @@ Current planning hierarchy:
 - Local reminder persistence/count/timeline support, while the fuller reminder API/UI branch still needs reconciliation into `main`.
 - Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
+- Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.
@@ -56,6 +57,7 @@ Careero does not yet include:
 - Background job execution.
 - Destructive persistence migration from current `Role` table/model/foreign-key naming.
 - Mature workspace switching and management UX.
+- Durable strategy tables, hidden strategy memory, or user-unreviewed saved retrospectives.
 - Dedicated artifact list/detail/review/edit/approve/archive UX.
 - Submitted artifact tracking.
 - Dedicated frontend artifact export workflow.

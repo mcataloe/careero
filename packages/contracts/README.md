@@ -21,6 +21,9 @@ Canonical entities:
 - `ResumeArtifact`
 - `CoverLetterArtifact`
 - `ApplicationState`
+- `SearchTrackStrategySummary`
+- `CrossTrackStrategyComparison`
+- `CareerStrategySummary`
 
 ## Commands
 

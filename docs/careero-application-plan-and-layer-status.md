@@ -46,9 +46,9 @@ Careero is no longer just a local job tracker or STRIDE evaluation prototype. Th
 - structured interview tracking
 - analytics and dashboard intelligence surfaces
 
-However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and some branch work still needs reconciliation before it should be treated as complete.
+However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and some historical branch work still needs validation before it should be treated as complete.
 
-The next strategic move is to stabilize current workflow reality and then introduce a deliberate **Layer 7 - Opportunity Model Strategy** before deeper integrations.
+The current strategic move is to stabilize existing workflow and intelligence reality while introducing Layer 10 as derived, read-only career strategy synthesis.
 
 ---
 
@@ -144,11 +144,11 @@ The current repo already includes meaningful implementation for:
 
 ### Partially built / needs reconciliation or validation
 
-The current repo also has partially completed, branch-diverged, or not-yet-fully-validated work for:
+The current repo also has partially completed, historically branch-diverged, or not-yet-fully-validated work for:
 
-- local application reminders: current `main` has reminder tables, service logic, counts, analytics inputs, and timeline events, but the fuller reminder API routes, frontend panel, and `docs/application-reminders.md` remain on an unmerged branch.
-- external-link summary/count refinements: external-link CRUD is present, but the separate summary/count refinement commit is not an ancestor of `main`.
-- branch drift from Codex-generated feature work
+- local application reminders: current `main` has reminder tables, service logic, counts, analytics inputs, and timeline events, but fuller reminder API routes, frontend panel, and `docs/application-reminders.md` were previously observed outside `main` and still need product reconciliation.
+- external-link summary/count refinements: external-link CRUD is present, but separate historical summary/count refinement work still needs validation before being treated as current.
+- historical branch drift from Codex-generated feature work; current local clone exposes no unmerged branches (`main` and `origin/main` only), while private remote PR state may still require external checking.
 - Layer 4 workflow completion, especially reminder UX and final count validation
 - Layer 5 insight stabilization
 
@@ -195,7 +195,7 @@ The repo does not yet fully include:
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
-| Layer 10 | Advanced Search Tracks / Career Strategy | Planned | Full-time vs contract strategy, compensation modeling, skill gaps, career narrative, search retrospectives, and role-market positioning. |
+| Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
 | Layer 11 | Productization / Deployment / Monetization | Future | Production deployment, auth hardening, privacy model, billing, cost controls, paid AI/artifact tiers, account lifecycle. |
 | Layer 12 | Advisor / Collaboration Mode | Future | Coach, reviewer, spouse/advisor review, scoped sharing, comments, shared opportunity packets. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
@@ -336,6 +336,7 @@ Evaluate opportunities and generate grounded application artifacts.
 - Contract validation.
 - Truthfulness checks.
 - Artifact performance recording.
+- Backend local Markdown/DOCX/PDF artifact export through the Layer 8 local export boundary.
 
 ### Remaining work
 
@@ -343,14 +344,14 @@ Evaluate opportunities and generate grounded application artifacts.
 - Artifact detail page.
 - Review/edit/approve/archive flow.
 - Submitted artifact tracking.
-- Markdown/DOCX/PDF export.
+- Dedicated frontend artifact export workflow for the existing backend export API.
 - Artifact comparison/diff.
 - Better artifact visibility from role/application pages.
 - Explicit UI separation of draft, reviewed, approved, exported, submitted, and archived artifacts.
 
 ### Guidance
 
-Do not focus next on adding more generation logic. Focus on lifecycle, reviewability, retrieval, and export.
+Do not focus next on adding more generation logic. Focus on lifecycle, reviewability, retrieval, frontend export workflow, and submitted-artifact clarity.
 
 ---
 
@@ -389,8 +390,8 @@ Manage the day-to-day job-search workflow around saved opportunities.
 
 ### Partially accomplished
 
-- Reminder API routes and frontend panel remain on an unmerged branch.
-- External-link summary/count refinements remain on an unmerged branch and need validation before being treated as current.
+- Reminder API routes and frontend panel were previously observed outside `main`; current local clone exposes no unmerged branch containing them.
+- External-link summary/count refinements were previously observed as branch drift and need validation before being treated as current. Current local clone exposes no unmerged branch for this work.
 
 ### Remaining work
 
@@ -576,7 +577,7 @@ Layer 8 begins with Layer 7 compatibility cleanup. Integration-facing APIs shoul
 
 For the first Layer 8 MVP/prototype build, OAuth and account-linked sync are intentionally deferred. Do not implement Gmail/Outlook account linking, Google Docs account import, cloud sync, background polling, or external account token storage in this build. Local/manual integration paths come first: paste, local file import/export, generated files, manual links, and reviewable captured payloads.
 
-Markdown, DOCX, and PDF artifact export belong in this Layer 8 prototype build. Export should be generated from stored, validated artifact content and should record local export metadata without requiring cloud storage.
+Markdown, DOCX, and PDF artifact export belong in the Layer 8 local export boundary. Backend export is now present; the dedicated frontend export workflow remains future work.
 
 Current `main` includes backend local Markdown, DOCX, and PDF artifact export
 through the local integration adapter boundary. A dedicated frontend artifact
@@ -625,13 +626,25 @@ Layer 9 details are tracked in [Automation guardrails](automation-guardrails.md)
 
 ### Status
 
-Planned.
+Partially built / derived strategy synthesis MVP started.
 
 ### Purpose
 
 Make Careero more strategic than tactical by helping users evaluate whether their overall search strategy is working.
 
-### Candidate capabilities
+### Already accomplished
+
+- Read-only strategy synthesis contracts.
+- Workspace-scoped career strategy backend service.
+- `GET /api/strategy/workspaces/{workspace_id}` endpoint.
+- `GET /api/strategy/workspaces?include_cross_track=true` endpoint for internal cross-track comparison.
+- Frontend career strategy surface with workspace selection.
+- Insufficient-data, confidence, sample-size, source-input, warning, retrospective, compensation, role-positioning, skill-gap, narrative, and action-candidate sections.
+- No durable strategy tables.
+- No external market data.
+- No state mutation or automation suggestion creation.
+
+### Candidate capabilities / remaining work
 
 - Full-time vs contract strategy comparison.
 - Compensation target modeling.
@@ -641,10 +654,13 @@ Make Careero more strategic than tactical by helping users evaluate whether thei
 - Search-track retrospectives.
 - Strategic category adjustments.
 - Search-track archival retrospectives.
+- Durable user-reviewed retrospectives if explicitly scoped later.
+- Optional source-grounded AI summarization after deterministic synthesis is mature.
+- Explicit user-selected strategy-to-automation handoff through Layer 9 approval logs.
 
 ### Guidance
 
-This layer becomes stronger after Layer 7 because strategic planning depends on clean historical Opportunity data.
+Layer 10 remains stronger as Layer 7, Layer 5, and artifact lifecycle data mature. Strategy synthesis must remain advisory, source-visible, and based on stored Careero evidence only.
 
 ---
 
@@ -734,14 +750,14 @@ This layer should be last. Careero should not compromise user trust by becoming 
 
 ### Goal
 
-Get `main` into a clean, truthful state before new feature work.
+Keep `main` in a clean, truthful state as new feature work lands.
 
 ### Tasks
 
-- Review diverged Codex branches.
-- Recover reminder work that belongs in `main`.
+- Review historical branch drift when external GitHub/PR access is available.
+- Recover reminder work that belongs in `main` if it is available outside this clone.
 - Confirm structured interview tracking remains clean after merge.
-- Recover external-link count refinements if still relevant.
+- Recover external-link count refinements if still relevant and externally available.
 - Reconcile migrations carefully.
 - Run backend compile/tests.
 - Run frontend tests/build.
@@ -776,7 +792,7 @@ Finish the workflow records users expect before modeling Opportunity more deeply
 - Application detail page shows notes, links, reminders, interviews, and timeline.
 - Application list/pipeline counts match backend records.
 - All workflow state transitions are tested.
-- Branches no longer contain unmerged Layer 4 work that should be part of `main`.
+- Current local clone exposes no unmerged branches; private remote PR state may still need external verification.
 
 ---
 
@@ -815,7 +831,7 @@ Turn generated artifacts into usable product objects.
 - Add artifact list/detail page.
 - Add review/edit/approve/archive lifecycle.
 - Add submitted artifact tracking.
-- Add export to Markdown first, then DOCX/PDF.
+- Add dedicated frontend export workflow for existing backend Markdown/DOCX/PDF export.
 - Add artifact retrieval from application and opportunity pages.
 - Add artifact lineage/revision display.
 - Add basic diff/compare if feasible.
@@ -868,7 +884,7 @@ Recommended order from here:
 5. Layer 7 Opportunity Model Strategy and compatibility surface.
 6. Layer 8 integrations.
 7. Layer 9 automation guardrails.
-8. Layer 10 advanced search-track strategy.
+8. Layer 10 advanced search-track strategy stabilization.
 9. Layer 11 productization/deployment/monetization.
 10. Layer 12 advisor/collaboration mode.
 11. Layer 13 marketplace/employer-side exploration.

@@ -12,12 +12,14 @@ import {
   IconBriefcase,
   IconClipboardList,
   IconGauge,
+  IconRoute,
   IconSettings,
 } from "@tabler/icons-react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: IconGauge },
+  { label: "Strategy", to: "/strategy", icon: IconRoute },
   { label: "Opportunities", to: "/opportunities", icon: IconBriefcase },
   { label: "Applications", to: "/applications", icon: IconClipboardList },
   { label: "Settings", to: "/settings", icon: IconSettings },

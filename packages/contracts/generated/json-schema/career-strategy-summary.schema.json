@@ -1,0 +1,573 @@
+{
+  "$ref": "#/definitions/CareerStrategySummary",
+  "definitions": {
+    "CareerStrategySummary": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspaceId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workspaceName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activeTrack": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "contractVersion": {
+                  "$ref": "#/definitions/CareerStrategySummary/properties/contractVersion"
+                },
+                "workspaceId": {
+                  "$ref": "#/definitions/CareerStrategySummary/properties/workspaceId/anyOf/0"
+                },
+                "workspaceName": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "generatedAt": {
+                  "$ref": "#/definitions/CareerStrategySummary/properties/generatedAt"
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "basis": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "confidence": {
+                  "type": "object",
+                  "properties": {
+                    "confidence": {
+                      "type": "string",
+                      "enum": [
+                        "insufficient_data",
+                        "weak",
+                        "moderate",
+                        "high"
+                      ]
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "sampleSize": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "sourceInputs": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "knownUncertainty": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "default": []
+                    },
+                    "insufficientData": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "empty_workspace",
+                          "few_opportunities",
+                          "few_applications",
+                          "few_outcomes",
+                          "missing_stride_evaluations",
+                          "missing_compensation_ranges",
+                          "missing_artifact_performance",
+                          "missing_source_history",
+                          "stale_track",
+                          "unknown"
+                        ]
+                      },
+                      "default": []
+                    },
+                    "userOverrides": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "confidence",
+                    "basis",
+                    "sampleSize",
+                    "sourceInputs"
+                  ],
+                  "additionalProperties": false
+                },
+                "sampleSize": {
+                  "type": "object",
+                  "properties": {
+                    "opportunities": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "applications": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "submittedApplications": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "responses": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "strideEvaluations": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "artifactPerformanceRecords": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "opportunities",
+                    "applications",
+                    "submittedApplications",
+                    "responses",
+                    "strideEvaluations",
+                    "artifactPerformanceRecords"
+                  ],
+                  "additionalProperties": false
+                },
+                "sourceInputs": {
+                  "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs"
+                },
+                "knownUncertainty": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                },
+                "insufficientData": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "reason": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/insufficientData/items"
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "sourceInputs": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs",
+                        "default": {}
+                      }
+                    },
+                    "required": [
+                      "reason",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "default": []
+                },
+                "signals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "category": {
+                        "type": "string",
+                        "enum": [
+                          "search_health",
+                          "stride",
+                          "compensation",
+                          "source",
+                          "artifact",
+                          "historical",
+                          "workspace"
+                        ]
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "message": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "basis": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "severity": {
+                        "type": "string",
+                        "enum": [
+                          "info",
+                          "caution",
+                          "positive"
+                        ],
+                        "default": "info"
+                      },
+                      "confidence": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence"
+                      },
+                      "sourceInputs": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "category",
+                      "label",
+                      "message",
+                      "basis",
+                      "confidence",
+                      "sourceInputs"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "default": []
+                },
+                "compensationAlignment": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "confidence": {
+                      "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence"
+                    },
+                    "observations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs"
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "summary",
+                    "basis",
+                    "confidence"
+                  ],
+                  "additionalProperties": false
+                },
+                "skillGapThemes": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/signals/items"
+                  },
+                  "default": []
+                },
+                "roleMarketPositioning": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "confidence": {
+                      "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence"
+                    },
+                    "themes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "summary",
+                    "basis",
+                    "confidence"
+                  ],
+                  "additionalProperties": false
+                },
+                "careerNarrativeThemes": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/signals/items"
+                  },
+                  "default": []
+                },
+                "retrospective": {
+                  "type": "object",
+                  "properties": {
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "confidence": {
+                      "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence"
+                    },
+                    "notes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "summary",
+                    "basis",
+                    "confidence"
+                  ],
+                  "additionalProperties": false
+                },
+                "actionCandidates": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "category": {
+                        "type": "string",
+                        "enum": [
+                          "review_workspace_targets",
+                          "review_compensation_target",
+                          "review_skill_gap_plan",
+                          "review_artifact_strategy",
+                          "review_source_strategy",
+                          "archive_or_pause_track_review",
+                          "create_followup_plan_preview",
+                          "review_search_focus"
+                        ]
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "rationale": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "basis": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "confidence": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence"
+                      },
+                      "sourceInputs": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs"
+                      },
+                      "advisoryOnly": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "category",
+                      "title",
+                      "rationale",
+                      "basis",
+                      "confidence",
+                      "sourceInputs",
+                      "advisoryOnly"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "default": []
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                }
+              },
+              "required": [
+                "contractVersion",
+                "workspaceId",
+                "workspaceName",
+                "generatedAt",
+                "summary",
+                "basis",
+                "confidence",
+                "sampleSize",
+                "sourceInputs",
+                "compensationAlignment",
+                "roleMarketPositioning",
+                "retrospective"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0"
+          },
+          "default": []
+        },
+        "crossTrackComparison": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "generatedAt": {
+                  "$ref": "#/definitions/CareerStrategySummary/properties/generatedAt"
+                },
+                "basis": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "confidence": {
+                  "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence"
+                },
+                "tracks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "workspaceId": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/workspaceId/anyOf/0"
+                      },
+                      "workspaceName": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "summary": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "sampleSize": {
+                        "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/confidence/properties/sourceInputs"
+                      },
+                      "signalCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "warningCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "workspaceId",
+                      "workspaceName",
+                      "summary",
+                      "sampleSize",
+                      "signalCount",
+                      "warningCount"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "signals": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/signals/items"
+                  },
+                  "default": []
+                },
+                "insufficientData": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/CareerStrategySummary/properties/activeTrack/anyOf/0/properties/insufficientData/items"
+                  },
+                  "default": []
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                }
+              },
+              "required": [
+                "generatedAt",
+                "basis",
+                "confidence",
+                "tracks"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "contractVersion",
+        "generatedAt",
+        "summary",
+        "workspaceId",
+        "workspaceName",
+        "activeTrack",
+        "crossTrackComparison"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

@@ -1,0 +1,422 @@
+{
+  "$ref": "#/definitions/SearchTrackStrategySummary",
+  "definitions": {
+    "SearchTrackStrategySummary": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "object",
+          "properties": {
+            "confidence": {
+              "type": "string",
+              "enum": [
+                "insufficient_data",
+                "weak",
+                "moderate",
+                "high"
+              ]
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sampleSize": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sourceInputs": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "knownUncertainty": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "insufficientData": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "empty_workspace",
+                  "few_opportunities",
+                  "few_applications",
+                  "few_outcomes",
+                  "missing_stride_evaluations",
+                  "missing_compensation_ranges",
+                  "missing_artifact_performance",
+                  "missing_source_history",
+                  "stale_track",
+                  "unknown"
+                ]
+              },
+              "default": []
+            },
+            "userOverrides": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/sourceInputs"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "required": [
+            "confidence",
+            "basis",
+            "sampleSize",
+            "sourceInputs"
+          ],
+          "additionalProperties": false
+        },
+        "sampleSize": {
+          "type": "object",
+          "properties": {
+            "opportunities": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "applications": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "submittedApplications": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "responses": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "strideEvaluations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "artifactPerformanceRecords": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "opportunities",
+            "applications",
+            "submittedApplications",
+            "responses",
+            "strideEvaluations",
+            "artifactPerformanceRecords"
+          ],
+          "additionalProperties": false
+        },
+        "sourceInputs": {
+          "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/sourceInputs"
+        },
+        "knownUncertainty": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "insufficientData": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/insufficientData/items"
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sourceInputs": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/sourceInputs",
+                "default": {}
+              }
+            },
+            "required": [
+              "reason",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "search_health",
+                  "stride",
+                  "compensation",
+                  "source",
+                  "artifact",
+                  "historical",
+                  "workspace"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "info",
+                  "caution",
+                  "positive"
+                ],
+                "default": "info"
+              },
+              "confidence": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence"
+              },
+              "sourceInputs": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/sourceInputs"
+              }
+            },
+            "required": [
+              "id",
+              "category",
+              "label",
+              "message",
+              "basis",
+              "confidence",
+              "sourceInputs"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "compensationAlignment": {
+          "type": "object",
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "confidence": {
+              "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence"
+            },
+            "observations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/sourceInputs"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "summary",
+            "basis",
+            "confidence"
+          ],
+          "additionalProperties": false
+        },
+        "skillGapThemes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchTrackStrategySummary/properties/signals/items"
+          },
+          "default": []
+        },
+        "roleMarketPositioning": {
+          "type": "object",
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "confidence": {
+              "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence"
+            },
+            "themes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "summary",
+            "basis",
+            "confidence"
+          ],
+          "additionalProperties": false
+        },
+        "careerNarrativeThemes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchTrackStrategySummary/properties/signals/items"
+          },
+          "default": []
+        },
+        "retrospective": {
+          "type": "object",
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "confidence": {
+              "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence"
+            },
+            "notes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "summary",
+            "basis",
+            "confidence"
+          ],
+          "additionalProperties": false
+        },
+        "actionCandidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "review_workspace_targets",
+                  "review_compensation_target",
+                  "review_skill_gap_plan",
+                  "review_artifact_strategy",
+                  "review_source_strategy",
+                  "archive_or_pause_track_review",
+                  "create_followup_plan_preview",
+                  "review_search_focus"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confidence": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence"
+              },
+              "sourceInputs": {
+                "$ref": "#/definitions/SearchTrackStrategySummary/properties/confidence/properties/sourceInputs"
+              },
+              "advisoryOnly": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "id",
+              "category",
+              "title",
+              "rationale",
+              "basis",
+              "confidence",
+              "sourceInputs",
+              "advisoryOnly"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "contractVersion",
+        "workspaceId",
+        "workspaceName",
+        "generatedAt",
+        "summary",
+        "basis",
+        "confidence",
+        "sampleSize",
+        "sourceInputs",
+        "compensationAlignment",
+        "roleMarketPositioning",
+        "retrospective"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
