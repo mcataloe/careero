@@ -16,6 +16,9 @@ const fileNames: Record<keyof typeof canonicalSchemaRegistry, string> = {
   ResumeArtifact: "resume-artifact.schema.json",
   CoverLetterArtifact: "cover-letter-artifact.schema.json",
   ApplicationState: "application-state.schema.json",
+  AutomationSuggestion: "automation-suggestion.schema.json",
+  AutomationApprovalLog: "automation-approval-log.schema.json",
+  AutomationPreferences: "automation-preferences.schema.json",
 };
 
 mkdirSync(outputDir, { recursive: true });

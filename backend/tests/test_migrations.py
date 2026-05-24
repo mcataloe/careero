@@ -20,6 +20,8 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "application_interview_stages",
         "application_external_links",
         "generated_artifacts",
+        "automation_suggestions",
+        "automation_approval_logs",
         "activity_log",
     }.issubset(set(inspector.get_table_names()))
 
@@ -212,3 +214,40 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "ix_application_external_links_deleted_at"
         in application_external_link_indexes
     )
+
+    automation_suggestion_columns = {
+        column["name"] for column in inspector.get_columns("automation_suggestions")
+    }
+    assert {
+        "id",
+        "user_id",
+        "workspace_id",
+        "target_type",
+        "target_id",
+        "role_id",
+        "application_id",
+        "artifact_id",
+        "action_type",
+        "preview_hash",
+        "status",
+        "policy_version",
+    }.issubset(automation_suggestion_columns)
+
+    automation_approval_columns = {
+        column["name"] for column in inspector.get_columns("automation_approval_logs")
+    }
+    assert {
+        "id",
+        "user_id",
+        "workspace_id",
+        "suggestion_id",
+        "actor",
+        "target_type",
+        "target_id",
+        "action_type",
+        "preview_hash",
+        "approval_status",
+        "execution_status",
+        "external_mutation",
+        "policy_version",
+    }.issubset(automation_approval_columns)

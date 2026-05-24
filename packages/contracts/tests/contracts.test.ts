@@ -5,6 +5,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   ApplicationStateSchema,
+  AutomationApprovalLogSchema,
+  AutomationPreferencesSchema,
+  AutomationSuggestionSchema,
   CONTRACT_VERSION,
   MoneySchema,
   OpportunitySchema,
@@ -87,6 +90,35 @@ describe("canonical contract validation", () => {
 
     expect(result.success).toBe(false);
   });
+
+  it("requires workspace scope for automation suggestions", () => {
+    const invalid = { ...canonicalExamples.AutomationSuggestion };
+    delete (invalid as Partial<typeof invalid>).workspaceId;
+
+    expect(AutomationSuggestionSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it("rejects automation approval logs that allow external mutation", () => {
+    const invalid = {
+      ...canonicalExamples.AutomationApprovalLog,
+      externalMutation: true,
+      preview: {
+        ...canonicalExamples.AutomationApprovalLog.preview,
+        externalMutation: true,
+      },
+    };
+
+    expect(AutomationApprovalLogSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it("keeps future external automation disabled in preferences", () => {
+    const invalid = {
+      ...canonicalExamples.AutomationPreferences,
+      futureExternalActionsEnabled: true,
+    };
+
+    expect(AutomationPreferencesSchema.safeParse(invalid).success).toBe(false);
+  });
 });
 
 describe("contract validation helpers", () => {
@@ -122,6 +154,9 @@ describe("generated JSON Schema exports", () => {
     "resume-artifact.schema.json",
     "cover-letter-artifact.schema.json",
     "application-state.schema.json",
+    "automation-suggestion.schema.json",
+    "automation-approval-log.schema.json",
+    "automation-preferences.schema.json",
     "index.json",
   ];
 

@@ -1,5 +1,6 @@
 export * from "./application-state.js";
 export * from "./artifacts.js";
+export * from "./automation.js";
 export * from "./enums.js";
 export * from "./examples.js";
 export * from "./opportunity.js";

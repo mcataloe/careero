@@ -127,6 +127,11 @@ The current repo already includes meaningful implementation for:
 - structured application interview tracking
 - application timeline aggregation
 - activity log
+- local integration adapter boundary
+- backend local Markdown/DOCX/PDF artifact export
+- automation suggestion persistence and API
+- automation approval log persistence and API
+- workspace automation preferences
 - search analytics endpoint
 - artifact performance analytics endpoint
 - STRIDE insights endpoint
@@ -163,15 +168,14 @@ The repo does not yet fully include:
 - dedicated artifact list/detail UX
 - artifact review/edit/approve/archive flow
 - submitted artifact tracking
-- DOCX/PDF/Markdown export workflow
+- dedicated frontend artifact export workflow
 - destructive persistence migration from Role table/model/foreign-key naming
 - Google Docs import
 - Gmail/Outlook integration
 - calendar interview sync
 - LinkedIn/job-board save helpers
 - browser extension or share-sheet intake
-- automation approval logs
-- review-before-send workflows
+- external review-before-send workflows
 - coach/advisor collaboration mode
 - marketplace or employer-side capabilities
 
@@ -189,8 +193,8 @@ The repo does not yet fully include:
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
 | Layer 6 | Advanced STRIDE + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, STRIDE history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
-| Layer 8 | Integrations | Planned / begins with Layer 7 compatibility cleanup | Local/manual integration adapters first, Markdown/DOCX/PDF export, and later Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync after OAuth is explicitly re-opened. |
-| Layer 9 | Automation Guardrails | Planned | Suggested follow-ups, draft-only generation, review-before-send, approval logs, no-auto-apply boundaries, workspace automation preferences. |
+| Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
+| Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Planned | Full-time vs contract strategy, compensation modeling, skill gaps, career narrative, search retrospectives, and role-market positioning. |
 | Layer 11 | Productization / Deployment / Monetization | Future | Production deployment, auth hardening, privacy model, billing, cost controls, paid AI/artifact tiers, account lifecycle. |
 | Layer 12 | Advisor / Collaboration Mode | Future | Coach, reviewer, spouse/advisor review, scoped sharing, comments, shared opportunity packets. |
@@ -549,7 +553,7 @@ Use the Layer 7A strategy artifact before further implementation prompts. Layer 
 
 ### Status
 
-Planned / begins with Layer 7 compatibility cleanup.
+Partially built / local export started.
 
 ### Purpose
 
@@ -574,6 +578,10 @@ For the first Layer 8 MVP/prototype build, OAuth and account-linked sync are int
 
 Markdown, DOCX, and PDF artifact export belong in this Layer 8 prototype build. Export should be generated from stored, validated artifact content and should record local export metadata without requiring cloud storage.
 
+Current `main` includes backend local Markdown, DOCX, and PDF artifact export
+through the local integration adapter boundary. A dedicated frontend artifact
+export workflow remains future work.
+
 All integrations must preserve review-before-save, review-before-send, no-auto-apply, and TruthGuard boundaries. Imported content should remain reviewable and source/provenance-aware before it becomes durable Opportunity/Application/Artifact data.
 
 ---
@@ -582,7 +590,7 @@ All integrations must preserve review-before-save, review-before-send, no-auto-a
 
 ### Status
 
-Planned.
+Partially built / local guardrail foundation started.
 
 ### Purpose
 
@@ -602,6 +610,14 @@ Automate repetitive actions safely while preserving user control.
 ### Guidance
 
 Automation should suggest or draft before it acts. User-visible state changes and external communication must remain reviewable and auditable.
+
+Current `main` includes durable automation suggestions, approval logs, workspace
+automation preferences, dashboard/application review surfaces, and settings for
+local guardrails. Approving a suggestion records an audit decision only; it does
+not send externally, sync externally, auto-apply, batch-approve, or silently
+mutate application state. Communication drafts remain local previews.
+
+Layer 9 details are tracked in [Automation guardrails](automation-guardrails.md).
 
 ---
 

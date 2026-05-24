@@ -10,6 +10,7 @@ import type {
   ApplicationNote,
   ApplicationTimelineEvent,
 } from "../types/applications";
+import type { AutomationSuggestionListResponse } from "../types/automation";
 
 function jsonResponse(response: unknown, status = 200) {
   return {
@@ -124,6 +125,44 @@ const links: ApplicationExternalLink[] = [
   },
 ];
 
+const automationSuggestions: AutomationSuggestionListResponse = {
+  workspace_id: "workspace-1",
+  target_type: "application",
+  target_id: "app-1",
+  external_actions_enabled: false,
+  suggestions: [
+    {
+      id: "suggestion-1",
+      workspace_id: "workspace-1",
+      target_type: "application",
+      target_id: "app-1",
+      role_id: "role-1",
+      application_id: "app-1",
+      artifact_id: null,
+      action_type: "communication_draft",
+      title: "Prepare follow-up draft",
+      summary: "A local-only follow-up draft can be reviewed.",
+      reason: "Careero can prepare review text without sending it.",
+      basis: "Generated from stored application timing only.",
+      confidence: "Draft Only",
+      source_inputs: {},
+      preview: {
+        title: "Draft follow-up note",
+        body: "Hi, I wanted to briefly follow up.",
+        content_hash: "sha256:test",
+        external_mutation: false,
+      },
+      preview_hash: "sha256:test",
+      status: "active",
+      expires_at: null,
+      policy_version: "automation_policy_v1",
+      metadata: {},
+      created_at: "2026-05-16T15:00:00Z",
+      updated_at: "2026-05-16T15:00:00Z",
+    },
+  ],
+};
+
 function renderDetailPage() {
   render(
     <MemoryRouter initialEntries={["/applications/app-1"]}>
@@ -148,7 +187,8 @@ describe("ApplicationDetailPage", () => {
         .mockResolvedValueOnce(jsonResponse(timeline))
         .mockResolvedValueOnce(jsonResponse(notes))
         .mockResolvedValueOnce(jsonResponse(links))
-        .mockResolvedValueOnce(jsonResponse(interviews)),
+        .mockResolvedValueOnce(jsonResponse(interviews))
+        .mockResolvedValueOnce(jsonResponse(automationSuggestions)),
     );
 
     renderDetailPage();
@@ -164,6 +204,8 @@ describe("ApplicationDetailPage", () => {
       "noreferrer noopener",
     );
     expect(screen.getByText(/Notes: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
+    expect(screen.getByText("Prepare follow-up draft")).toBeInTheDocument();
+    expect(screen.getByText(/Draft only. Careero will not send this message./i)).toBeInTheDocument();
   });
 
   it("renders an error state", async () => {

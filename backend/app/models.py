@@ -774,6 +774,126 @@ class ArtifactPerformanceRecord(TimestampMixin, Base):
     )
 
 
+class AutomationSuggestion(TimestampMixin, Base):
+    __tablename__ = "automation_suggestions"
+    __table_args__ = (
+        Index("ix_automation_suggestions_user_id", "user_id"),
+        Index("ix_automation_suggestions_workspace_id", "workspace_id"),
+        Index("ix_automation_suggestions_target", "target_type", "target_id"),
+        Index("ix_automation_suggestions_action_type", "action_type"),
+        Index("ix_automation_suggestions_status", "status"),
+        Index("ix_automation_suggestions_application_id", "application_id"),
+        Index("ix_automation_suggestions_role_id", "role_id"),
+        Index("ix_automation_suggestions_artifact_id", "artifact_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    target_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    role_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("roles.id"),
+    )
+    application_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+    )
+    artifact_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("generated_artifacts.id"),
+    )
+    action_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    basis: Mapped[str] = mapped_column(Text, nullable=False)
+    confidence: Mapped[str] = mapped_column(String(100), nullable=False)
+    source_inputs: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    preview: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    preview_hash: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(100), nullable=False, default="active")
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    policy_version: Mapped[str] = mapped_column(String(100), nullable=False)
+    suggestion_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+    approval_logs: Mapped[list["AutomationApprovalLog"]] = relationship(
+        back_populates="suggestion"
+    )
+
+
+class AutomationApprovalLog(Base):
+    __tablename__ = "automation_approval_logs"
+    __table_args__ = (
+        Index("ix_automation_approval_logs_user_id", "user_id"),
+        Index("ix_automation_approval_logs_workspace_id", "workspace_id"),
+        Index("ix_automation_approval_logs_suggestion_id", "suggestion_id"),
+        Index("ix_automation_approval_logs_target", "target_type", "target_id"),
+        Index("ix_automation_approval_logs_action_type", "action_type"),
+        Index("ix_automation_approval_logs_approval_status", "approval_status"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+        nullable=False,
+    )
+    suggestion_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("automation_suggestions.id"),
+        nullable=False,
+    )
+    actor: Mapped[str] = mapped_column(String(100), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    action_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    preview: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    preview_hash: Mapped[str] = mapped_column(String(100), nullable=False)
+    approval_status: Mapped[str] = mapped_column(String(100), nullable=False)
+    dismissal_or_rejection_reason: Mapped[str | None] = mapped_column(Text)
+    execution_status: Mapped[str] = mapped_column(String(100), nullable=False)
+    execution_result: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    external_mutation: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    policy_version: Mapped[str] = mapped_column(String(100), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    executed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    suggestion: Mapped[AutomationSuggestion] = relationship(back_populates="approval_logs")
+
+
 class ActivityLog(Base):
     __tablename__ = "activity_log"
     __table_args__ = (

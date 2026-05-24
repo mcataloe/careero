@@ -98,6 +98,48 @@ export const ApplicationWorkflowStateSchema = z.enum([
   "archived",
 ]);
 
+export const AutomationActionTypeSchema = z.enum([
+  "follow_up_suggestion",
+  "reminder_suggestion",
+  "artifact_readiness_check",
+  "communication_draft",
+  "workflow_state_suggestion",
+  "opportunity_review_suggestion",
+  "future_external_action_disabled",
+]);
+
+export const AutomationTargetTypeSchema = z.enum([
+  "workspace",
+  "opportunity",
+  "application",
+  "artifact",
+  "reminder",
+]);
+
+export const AutomationSuggestionStatusSchema = z.enum([
+  "active",
+  "dismissed",
+  "rejected",
+  "approved",
+  "expired",
+]);
+
+export const AutomationApprovalStatusSchema = z.enum([
+  "pending",
+  "approved",
+  "rejected",
+  "dismissed",
+  "expired",
+]);
+
+export const AutomationExecutionStatusSchema = z.enum([
+  "not_applicable",
+  "pending",
+  "succeeded",
+  "failed",
+  "canceled",
+]);
+
 export type WorkspaceStatus = z.infer<typeof WorkspaceStatusSchema>;
 export type OpportunityStatus = z.infer<typeof OpportunityStatusSchema>;
 export type ApplicationWorkflowState = z.infer<typeof ApplicationWorkflowStateSchema>;
@@ -105,3 +147,8 @@ export type RemoteType = z.infer<typeof RemoteTypeSchema>;
 export type EmploymentType = z.infer<typeof EmploymentTypeSchema>;
 export type Recommendation = z.infer<typeof RecommendationSchema>;
 export type ConfidenceLevel = z.infer<typeof ConfidenceLevelSchema>;
+export type AutomationActionType = z.infer<typeof AutomationActionTypeSchema>;
+export type AutomationTargetType = z.infer<typeof AutomationTargetTypeSchema>;
+export type AutomationSuggestionStatus = z.infer<typeof AutomationSuggestionStatusSchema>;
+export type AutomationApprovalStatus = z.infer<typeof AutomationApprovalStatusSchema>;
+export type AutomationExecutionStatus = z.infer<typeof AutomationExecutionStatusSchema>;

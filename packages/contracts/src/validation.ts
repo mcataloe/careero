@@ -2,6 +2,11 @@ import type { z } from "zod";
 
 import { ApplicationStateSchema } from "./application-state.js";
 import { CoverLetterArtifactSchema, ResumeArtifactSchema } from "./artifacts.js";
+import {
+  AutomationApprovalLogSchema,
+  AutomationPreferencesSchema,
+  AutomationSuggestionSchema,
+} from "./automation.js";
 import { OpportunitySchema } from "./opportunity.js";
 import { StrideEvaluationSchema } from "./stride-evaluation.js";
 import { WorkspaceSchema } from "./workspace.js";
@@ -36,6 +41,9 @@ export const parseStrideEvaluation = (value: unknown) => parseContract(StrideEva
 export const parseResumeArtifact = (value: unknown) => parseContract(ResumeArtifactSchema, value);
 export const parseCoverLetterArtifact = (value: unknown) => parseContract(CoverLetterArtifactSchema, value);
 export const parseApplicationState = (value: unknown) => parseContract(ApplicationStateSchema, value);
+export const parseAutomationSuggestion = (value: unknown) => parseContract(AutomationSuggestionSchema, value);
+export const parseAutomationApprovalLog = (value: unknown) => parseContract(AutomationApprovalLogSchema, value);
+export const parseAutomationPreferences = (value: unknown) => parseContract(AutomationPreferencesSchema, value);
 
 export const validateWorkspace = (value: unknown) => validateContract(WorkspaceSchema, value);
 export const validateOpportunity = (value: unknown) => validateContract(OpportunitySchema, value);
@@ -43,3 +51,6 @@ export const validateStrideEvaluation = (value: unknown) => validateContract(Str
 export const validateResumeArtifact = (value: unknown) => validateContract(ResumeArtifactSchema, value);
 export const validateCoverLetterArtifact = (value: unknown) => validateContract(CoverLetterArtifactSchema, value);
 export const validateApplicationState = (value: unknown) => validateContract(ApplicationStateSchema, value);
+export const validateAutomationSuggestion = (value: unknown) => validateContract(AutomationSuggestionSchema, value);
+export const validateAutomationApprovalLog = (value: unknown) => validateContract(AutomationApprovalLogSchema, value);
+export const validateAutomationPreferences = (value: unknown) => validateContract(AutomationPreferencesSchema, value);

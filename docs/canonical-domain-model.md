@@ -29,6 +29,7 @@ packages/contracts/
     stride-evaluation.ts
     artifacts.ts
     application-state.ts
+    automation.ts
     primitives.ts
     enums.ts
     examples.ts
@@ -226,6 +227,22 @@ Timeline guidance:
 
 - State history, notes, reminders, and interview stages can render as a unified timeline.
 - Timeline rendering must not become the persistence model; use typed structures as the source.
+
+### Automation Suggestion And Approval Log
+
+`AutomationSuggestion` is a local, reviewable proposal. It records action type,
+target, reason, basis, confidence, source inputs, preview, preview hash, status,
+and policy version. It does not own Opportunity, Application, Artifact, or
+Reminder state.
+
+`AutomationApprovalLog` is the durable decision record for approved, rejected,
+or dismissed suggestions. `ActivityLog` may mirror automation events, but it is
+not the source of truth for approvals.
+
+Automation preferences are scoped to workspaces/search tracks first. Future
+external-action settings are disabled in the Layer 9 MVP.
+
+Layer 9 guidance: [Automation guardrails](automation-guardrails.md).
 
 ## AI Orchestration Boundaries
 

@@ -1,0 +1,175 @@
+{
+  "$ref": "#/definitions/AutomationApprovalLog",
+  "definitions": {
+    "AutomationApprovalLog": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/AutomationApprovalLog/properties/id"
+        },
+        "suggestionId": {
+          "$ref": "#/definitions/AutomationApprovalLog/properties/id"
+        },
+        "actor": {
+          "type": "string",
+          "enum": [
+            "user",
+            "system",
+            "ai",
+            "automation"
+          ]
+        },
+        "targetType": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "opportunity",
+            "application",
+            "artifact",
+            "reminder"
+          ]
+        },
+        "targetId": {
+          "$ref": "#/definitions/AutomationApprovalLog/properties/id"
+        },
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "follow_up_suggestion",
+            "reminder_suggestion",
+            "artifact_readiness_check",
+            "communication_draft",
+            "workflow_state_suggestion",
+            "opportunity_review_suggestion",
+            "future_external_action_disabled"
+          ]
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "minLength": 1
+            },
+            "externalMutation": {
+              "type": "boolean",
+              "const": false
+            }
+          },
+          "required": [
+            "title",
+            "body",
+            "contentHash",
+            "externalMutation"
+          ],
+          "additionalProperties": false
+        },
+        "previewHash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvalStatus": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected",
+            "dismissed",
+            "expired"
+          ]
+        },
+        "dismissalOrRejectionReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "executionStatus": {
+          "type": "string",
+          "enum": [
+            "not_applicable",
+            "pending",
+            "succeeded",
+            "failed",
+            "canceled"
+          ]
+        },
+        "executionResult": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "externalMutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decidedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AutomationApprovalLog/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "executedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AutomationApprovalLog/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "contractVersion",
+        "id",
+        "workspaceId",
+        "suggestionId",
+        "actor",
+        "targetType",
+        "targetId",
+        "actionType",
+        "preview",
+        "previewHash",
+        "approvalStatus",
+        "dismissalOrRejectionReason",
+        "executionStatus",
+        "executionResult",
+        "externalMutation",
+        "policyVersion",
+        "createdAt",
+        "decidedAt",
+        "executedAt"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

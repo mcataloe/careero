@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
+import { listAutomationSuggestions } from "../api/automation";
 import { getCompensationIntelligence } from "../api/compensationIntelligence";
 import { getHistoricalLearning } from "../api/historicalLearning";
 import { getRecommendations } from "../api/recommendations";
@@ -21,8 +22,10 @@ import { getSearchHealth } from "../api/searchHealth";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
 import { getStrideInsights } from "../api/strideInsights";
 import { ErrorState, LoadingState } from "../components/States";
+import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
 import { InsightMeta } from "../components/InsightMeta";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
+import type { AutomationSuggestionListResponse } from "../types/automation";
 import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
 import type { HistoricalLearningResponse } from "../types/historicalLearning";
 import type { RecommendationListResponse } from "../types/recommendations";
@@ -46,6 +49,8 @@ export function DashboardPage() {
     useState<RecommendationListResponse | null>(null);
   const [historicalLearning, setHistoricalLearning] =
     useState<HistoricalLearningResponse | null>(null);
+  const [automationSuggestions, setAutomationSuggestions] =
+    useState<AutomationSuggestionListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +67,7 @@ export function DashboardPage() {
         searchHealthAnalytics,
         recommendationData,
         historicalData,
+        automationData,
       ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
@@ -71,6 +77,7 @@ export function DashboardPage() {
         getSearchHealth(),
         getRecommendations(),
         getHistoricalLearning(),
+        listAutomationSuggestions(),
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
@@ -80,6 +87,7 @@ export function DashboardPage() {
       setSearchHealth(searchHealthAnalytics);
       setRecommendations(recommendationData);
       setHistoricalLearning(historicalData);
+      setAutomationSuggestions(automationData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analytics");
     } finally {
@@ -122,6 +130,12 @@ export function DashboardPage() {
           {searchHealth ? <SearchHealthPanel health={searchHealth} /> : null}
           {recommendations ? (
             <RecommendationsPanel recommendations={recommendations} />
+          ) : null}
+          {automationSuggestions ? (
+            <AutomationSuggestionsPanel
+              suggestions={automationSuggestions.suggestions}
+              onChanged={loadAnalytics}
+            />
           ) : null}
           {historicalLearning ? (
             <HistoricalLearningPanel learning={historicalLearning} />

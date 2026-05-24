@@ -39,6 +39,48 @@ class ApplicationInterviewStatus(StrEnum):
     NO_SHOW = "no_show"
 
 
+class AutomationActionType(StrEnum):
+    FOLLOW_UP_SUGGESTION = "follow_up_suggestion"
+    REMINDER_SUGGESTION = "reminder_suggestion"
+    ARTIFACT_READINESS_CHECK = "artifact_readiness_check"
+    COMMUNICATION_DRAFT = "communication_draft"
+    WORKFLOW_STATE_SUGGESTION = "workflow_state_suggestion"
+    OPPORTUNITY_REVIEW_SUGGESTION = "opportunity_review_suggestion"
+    FUTURE_EXTERNAL_ACTION_DISABLED = "future_external_action_disabled"
+
+
+class AutomationTargetType(StrEnum):
+    WORKSPACE = "workspace"
+    OPPORTUNITY = "opportunity"
+    APPLICATION = "application"
+    ARTIFACT = "artifact"
+    REMINDER = "reminder"
+
+
+class AutomationSuggestionStatus(StrEnum):
+    ACTIVE = "active"
+    DISMISSED = "dismissed"
+    REJECTED = "rejected"
+    APPROVED = "approved"
+    EXPIRED = "expired"
+
+
+class AutomationApprovalStatus(StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    DISMISSED = "dismissed"
+    EXPIRED = "expired"
+
+
+class AutomationExecutionStatus(StrEnum):
+    NOT_APPLICABLE = "not_applicable"
+    PENDING = "pending"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    CANCELED = "canceled"
+
+
 class WorkspaceStatus(StrEnum):
     ACTIVE = "active"
     PAUSED = "paused"

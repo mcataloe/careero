@@ -38,6 +38,7 @@ Current planning hierarchy:
 - Application workflow tracking with state machine, state history, notes, external links, timeline, pipeline views, and structured interview tracking.
 - Local reminder persistence/count/timeline support, while the fuller reminder API/UI branch still needs reconciliation into `main`.
 - Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
+- Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.
@@ -65,7 +66,8 @@ Careero does not yet include:
 - Browser extension or share-sheet intake.
 - Automated source discovery or polling.
 - Automated job application submission.
-- Automation approval logs and review-before-send workflows.
+- External review-before-send workflows.
+- State-changing or externally mutating automation.
 - Coach/advisor collaboration.
 - Marketplace or employer-side capabilities.
 

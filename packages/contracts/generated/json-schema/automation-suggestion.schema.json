@@ -1,0 +1,188 @@
+{
+  "$ref": "#/definitions/AutomationSuggestion",
+  "definitions": {
+    "AutomationSuggestion": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/AutomationSuggestion/properties/createdAt"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "$ref": "#/definitions/AutomationSuggestion/properties/id"
+        },
+        "targetType": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "opportunity",
+            "application",
+            "artifact",
+            "reminder"
+          ]
+        },
+        "targetId": {
+          "$ref": "#/definitions/AutomationSuggestion/properties/id"
+        },
+        "opportunityId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AutomationSuggestion/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "applicationId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AutomationSuggestion/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifactId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AutomationSuggestion/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "follow_up_suggestion",
+            "reminder_suggestion",
+            "artifact_readiness_check",
+            "communication_draft",
+            "workflow_state_suggestion",
+            "opportunity_review_suggestion",
+            "future_external_action_disabled"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceInputs": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "preview": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "minLength": 1
+            },
+            "externalMutation": {
+              "type": "boolean",
+              "const": false
+            }
+          },
+          "required": [
+            "title",
+            "body",
+            "contentHash",
+            "externalMutation"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "dismissed",
+            "rejected",
+            "approved",
+            "expired"
+          ]
+        },
+        "expiresAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AutomationSuggestion/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "$ref": "#/definitions/AutomationSuggestion/properties/sourceInputs"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "id",
+        "workspaceId",
+        "targetType",
+        "targetId",
+        "opportunityId",
+        "applicationId",
+        "artifactId",
+        "actionType",
+        "title",
+        "summary",
+        "reason",
+        "basis",
+        "confidence",
+        "sourceInputs",
+        "preview",
+        "status",
+        "expiresAt",
+        "policyVersion",
+        "metadata"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

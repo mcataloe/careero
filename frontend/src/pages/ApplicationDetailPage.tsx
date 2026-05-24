@@ -2,6 +2,7 @@ import { Badge, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+import { listAutomationSuggestions } from "../api/automation";
 import {
   getApplication,
   getApplicationTimeline,
@@ -13,6 +14,7 @@ import { ApplicationInterviewPanel } from "../components/ApplicationInterviewPan
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
 import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
 import { ApplicationTimeline } from "../components/ApplicationTimeline";
+import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
 import { ErrorState, LoadingState } from "../components/States";
 import type {
   ApplicationDetail,
@@ -22,6 +24,7 @@ import type {
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
 } from "../types/applications";
+import type { AutomationSuggestion } from "../types/automation";
 
 const STATE_COLORS: Record<ApplicationWorkflowState, string> = {
   discovered: "gray",
@@ -41,6 +44,7 @@ export function ApplicationDetailPage() {
   const [notes, setNotes] = useState<ApplicationNote[]>([]);
   const [links, setLinks] = useState<ApplicationExternalLink[]>([]);
   const [interviews, setInterviews] = useState<ApplicationInterviewStage[]>([]);
+  const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,19 +57,31 @@ export function ApplicationDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const [nextApplication, nextTimeline, nextNotes, nextLinks, nextInterviews] =
+      const [
+        nextApplication,
+        nextTimeline,
+        nextNotes,
+        nextLinks,
+        nextInterviews,
+        nextSuggestions,
+      ] =
         await Promise.all([
           getApplication(applicationId),
           getApplicationTimeline(applicationId),
           listApplicationNotes(applicationId),
           listApplicationLinks(applicationId),
           listApplicationInterviews(applicationId),
+          listAutomationSuggestions({
+            targetType: "application",
+            targetId: applicationId,
+          }),
         ]);
       setApplication(nextApplication);
       setTimeline(nextTimeline);
       setNotes(nextNotes);
       setLinks(nextLinks);
       setInterviews(nextInterviews);
+      setSuggestions(nextSuggestions.suggestions);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load application");
     } finally {
@@ -127,6 +143,12 @@ export function ApplicationDetailPage() {
         applicationId={application.id}
         currentState={application.current_state}
         interviews={interviews}
+        onChanged={loadApplication}
+      />
+
+      <AutomationSuggestionsPanel
+        suggestions={suggestions}
+        title="Application suggestions"
         onChanged={loadApplication}
       />
 

@@ -32,6 +32,7 @@ Current planning hierarchy:
 - [Resume artifact generation](resume-artifact-generation.md)
 - [Cover letter artifact generation](cover-letter-artifact-generation.md)
 - [Workspace intelligence context](workspace-intelligence-context.md)
+- [Automation guardrails](automation-guardrails.md)
 
 ## Archive
 

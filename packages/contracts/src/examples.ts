@@ -1,5 +1,10 @@
 import type { ApplicationState } from "./application-state.js";
 import type { CoverLetterArtifact, ResumeArtifact } from "./artifacts.js";
+import type {
+  AutomationApprovalLog,
+  AutomationPreferences,
+  AutomationSuggestion,
+} from "./automation.js";
 import type { Opportunity } from "./opportunity.js";
 import { CONTRACT_VERSION } from "./primitives.js";
 import type { StrideEvaluation } from "./stride-evaluation.js";
@@ -13,6 +18,9 @@ const evaluationId = "44444444-4444-4444-8444-444444444444";
 const resumeArtifactId = "55555555-5555-4555-8555-555555555555";
 const coverLetterArtifactId = "66666666-6666-4666-8666-666666666666";
 const applicationStateId = "77777777-7777-4777-8777-777777777777";
+const automationSuggestionId = "12121212-1212-4212-8212-121212121212";
+const automationApprovalLogId = "13131313-1313-4313-8313-131313131313";
+const automationPreferencesId = "14141414-1414-4414-8414-141414141414";
 
 export const workspaceExample: Workspace = {
   contractVersion: CONTRACT_VERSION,
@@ -293,6 +301,84 @@ export const applicationStateExample: ApplicationState = {
   updatedAt: now,
 };
 
+export const automationSuggestionExample: AutomationSuggestion = {
+  contractVersion: CONTRACT_VERSION,
+  id: automationSuggestionId,
+  workspaceId,
+  targetType: "application",
+  targetId: applicationStateId,
+  opportunityId,
+  applicationId: applicationStateId,
+  artifactId: null,
+  actionType: "follow_up_suggestion",
+  title: "Review follow-up timing",
+  summary: "This application has been applied for more than seven days without a recorded response.",
+  reason: "A gentle follow-up may be useful if the user still wants to pursue the opportunity.",
+  basis: "Application applied date is older than the workspace follow-up threshold and no interview or offer is recorded.",
+  confidence: "Weak Signal",
+  sourceInputs: { appliedAt: "2026-05-01T15:00:00.000Z", thresholdDays: 7 },
+  preview: {
+    title: "Draft follow-up note",
+    body: "Consider checking whether a short, professional follow-up is appropriate.",
+    contentHash: "sha256:automation-preview",
+    externalMutation: false,
+  },
+  status: "active",
+  expiresAt: null,
+  policyVersion: "automation_policy_v1",
+  metadata: {},
+  createdAt: now,
+  updatedAt: now,
+};
+
+export const automationApprovalLogExample: AutomationApprovalLog = {
+  contractVersion: CONTRACT_VERSION,
+  id: automationApprovalLogId,
+  workspaceId,
+  suggestionId: automationSuggestionId,
+  actor: "user",
+  targetType: "application",
+  targetId: applicationStateId,
+  actionType: "follow_up_suggestion",
+  preview: automationSuggestionExample.preview,
+  previewHash: "sha256:automation-preview",
+  approvalStatus: "approved",
+  dismissalOrRejectionReason: null,
+  executionStatus: "not_applicable",
+  executionResult: {},
+  externalMutation: false,
+  policyVersion: "automation_policy_v1",
+  createdAt: now,
+  decidedAt: now,
+  executedAt: null,
+};
+
+export const automationPreferencesExample: AutomationPreferences = {
+  contractVersion: CONTRACT_VERSION,
+  id: automationPreferencesId,
+  workspaceId,
+  enabled: true,
+  suggestionCategories: [
+    "follow_up_suggestion",
+    "reminder_suggestion",
+    "artifact_readiness_check",
+    "communication_draft",
+    "workflow_state_suggestion",
+    "opportunity_review_suggestion",
+    "future_external_action_disabled",
+  ],
+  followUpSuggestionDays: 7,
+  artifactReadinessChecksEnabled: true,
+  communicationDraftsEnabled: true,
+  internalStateChangeSuggestionsEnabled: true,
+  futureExternalActionsEnabled: false,
+  quietMode: false,
+  policyVersion: "automation_policy_v1",
+  metadata: {},
+  createdAt: now,
+  updatedAt: now,
+};
+
 export const canonicalExamples = {
   Workspace: workspaceExample,
   Opportunity: opportunityExample,
@@ -300,4 +386,7 @@ export const canonicalExamples = {
   ResumeArtifact: resumeArtifactExample,
   CoverLetterArtifact: coverLetterArtifactExample,
   ApplicationState: applicationStateExample,
+  AutomationSuggestion: automationSuggestionExample,
+  AutomationApprovalLog: automationApprovalLogExample,
+  AutomationPreferences: automationPreferencesExample,
 } as const;
