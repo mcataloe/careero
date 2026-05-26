@@ -12,6 +12,7 @@ from app.api.compensation_intelligence import router as compensation_intelligenc
 from app.api.cover_letter_artifacts import router as cover_letter_artifacts_router
 from app.api.historical_learning import router as historical_learning_router
 from app.api.opportunities import router as opportunities_router
+from app.api.productization import router as productization_router
 from app.api.recommendations import router as recommendations_router
 from app.api.resume_sources import router as resume_sources_router
 from app.api.resume_artifacts import router as resume_artifacts_router
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
+    provided_settings = settings
     settings = settings or get_settings()
     configure_logging(settings)
 
@@ -39,6 +41,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description="Local-first API foundation for Careero.",
         version="0.1.0",
     )
+    if provided_settings is not None:
+        app.dependency_overrides[get_settings] = lambda: settings
     app.include_router(activity_log_router, prefix="/api")
     app.include_router(advisor_packets_router, prefix="/api")
     app.include_router(automation_router, prefix="/api")
@@ -49,6 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(cover_letter_artifacts_router, prefix="/api")
     app.include_router(historical_learning_router, prefix="/api")
     app.include_router(opportunities_router, prefix="/api")
+    app.include_router(productization_router, prefix="/api")
     app.include_router(recommendations_router, prefix="/api")
     app.include_router(resume_sources_router, prefix="/api")
     app.include_router(resume_artifacts_router, prefix="/api")

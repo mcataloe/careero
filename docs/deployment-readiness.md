@@ -13,6 +13,10 @@ PostgreSQL database, Alembic migrations, local scripts, and local health checks.
 The `infra/` directory is reserved for future infrastructure notes and does not
 contain production cloud deployment logic.
 
+Layer 11A adds a local-first readiness endpoint and Settings panel that can
+report deployment status as `local_only` or production controls missing. This is
+an inspection surface, not deployment infrastructure.
+
 Careero is not production-ready.
 
 ## Deployment Target Options
@@ -40,6 +44,7 @@ Careero is not production-ready.
 - Data export/delete.
 - Privacy and retention policy.
 - AI usage controls.
+- Productization readiness reporting that stays privacy-safe.
 
 ## Environment Model
 
@@ -80,6 +85,8 @@ Future deployments need:
 
 ## Explicit Non-Implementation Statement
 
-This prompt does not implement hosted deployment, production infrastructure,
+Layer 11A does not implement hosted deployment, production infrastructure,
 Docker/Kubernetes/Terraform/cloud resources, production auth, billing, account
-deletion/export, retention enforcement, or external integrations.
+deletion/export, retention enforcement, durable usage metering, or external
+integrations. Production-like environments should report blocked readiness until
+those controls exist.

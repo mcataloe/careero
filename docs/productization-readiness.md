@@ -14,6 +14,20 @@ Careero has meaningful local workflow value across intake, COMPASS evaluation,
 artifact generation foundations, application workflow, analytics, automation
 guardrails, and read-only career strategy synthesis.
 
+Layer 11A adds a local-first productization readiness surface:
+
+- Backend endpoint: `GET /api/productization/readiness`.
+- Frontend surface: Settings page Product readiness panel.
+- Scope: reports environment, readiness stage, local-first status, local
+  workflow indicators, coarse database health, AI feature flags, auth/tenant
+  boundary prep, billing, export/delete, retention, usage metering, deployment,
+  hosted collaboration, marketplace status, and known blockers.
+- Safety boundary: the response must not expose secrets, database URLs, OpenAI
+  API keys, private user data, resumes, notes, prompts, job descriptions,
+  artifacts, or compensation targets.
+
+Layer 11A is not production deployment. It adds reporting only.
+
 It does not yet have production authentication, production authorization,
 tenant isolation, billing, hosted deployment, account deletion/export,
 retention enforcement, or production privacy controls. Existing seeded local
@@ -30,7 +44,7 @@ implement production auth.
 | Stage | Definition | Current fit |
 | --- | --- | --- |
 | Local POC | Developer-run local app proving the core job-seeker workflow. | Current primary stage. |
-| Local beta | Local-first app stable enough for repeated personal use with clear data boundaries and recovery notes. | Near-term target after workflow and artifact lifecycle stabilization. |
+| Local beta | Local-first app stable enough for repeated personal use with clear data boundaries and recovery notes. | Blocked until workflow, artifact lifecycle, and readiness gates are clearer. |
 | Private hosted beta | Limited hosted environment for invited users with auth, privacy controls, tenant isolation, support process, and operational monitoring. | Future. |
 | Production SaaS | Public paid or free hosted product with production-grade privacy, security, operations, billing, support, and lifecycle controls. | Future. |
 | Future marketplace/employer-side mode | Optional employer, recruiter, or marketplace capabilities with explicit user-controlled sharing and strict disclosure. | Future and last. |
@@ -57,6 +71,7 @@ implement production auth.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
 - Production deployment architecture is not implemented.
+- Layer 11A readiness reporting exists, but it is only a status surface.
 - Artifact lifecycle UX remains incomplete.
 - Reminder API/UI reconciliation remains a production readiness blocker.
 - Opportunity remains Role-backed internally.
@@ -69,6 +84,8 @@ implement production auth.
   monetization boundaries.
 - Local beta runbooks and non-destructive readiness checklists.
 - User-facing clarity that Careero is local-first and not production-ready.
+- Local readiness endpoint/UI improvements that continue to avoid secrets and
+  private content.
 - Local-first current-user context and service-level boundary tests that prepare
   future auth injection without selecting an auth provider.
 - Future implementation prompts that preserve job-seeker-first trust.
@@ -129,6 +146,7 @@ ranking. No employer-side visibility exists today.
 
 ## Productization Stance
 
-Layer 11 readiness docs define gates and boundaries so future agents do not
-confuse local-first readiness with production readiness. Implementation remains
-future until the blockers above are resolved.
+Layer 11 readiness docs and the Layer 11A readiness endpoint/UI define and
+report gates so future agents do not confuse local-first readiness with
+production readiness. Production implementation remains future until the
+blockers above are resolved.

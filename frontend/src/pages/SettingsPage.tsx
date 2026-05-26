@@ -1,6 +1,7 @@
 import { List, Paper, Stack, Text, Title } from "@mantine/core";
 
 import { AutomationPreferencesPanel } from "../components/AutomationPreferencesPanel";
+import { ProductReadinessPanel } from "../components/ProductReadinessPanel";
 import { ResumeSourceSettings } from "../components/ResumeSourceSettings";
 
 export function SettingsPage() {
@@ -17,6 +18,7 @@ export function SettingsPage() {
           <List.Item>Authentication and workspace switching are intentionally absent.</List.Item>
         </List>
       </Paper>
+      <ProductReadinessPanel />
       <AutomationPreferencesPanel />
       <ResumeSourceSettings />
     </Stack>

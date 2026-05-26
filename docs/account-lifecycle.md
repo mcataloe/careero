@@ -21,6 +21,8 @@ registration, tenant isolation, data export, or account deletion.
   implemented.
 - No auth provider has been selected, and no auth provider dependency, login,
   signup, OAuth, session, JWT, or password storage has been added.
+- Layer 11A readiness reporting surfaces this status in the backend and
+  Settings page, but it does not add account controls.
 
 ## Production Account Lifecycle Target
 
@@ -98,6 +100,10 @@ Production deletion design must define:
 - Deletion timing and recovery window.
 - Local exports and files outside app control.
 - Provider-side AI/billing data implications.
+
+Layer 11A reports export/delete status as not implemented. It does not add
+export buttons, deletion controls, deletion jobs, retention enforcement, or
+account lifecycle APIs.
 
 ## Data Export
 

@@ -204,7 +204,7 @@ The repo does not yet fully include:
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future / readiness documentation started; local boundary prep added | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface started; local boundary prep added | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 | Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
@@ -678,7 +678,7 @@ Layer 10 remains stronger as Layer 7, Layer 5, and artifact lifecycle data matur
 
 ### Status
 
-Future / readiness documentation started.
+Future / readiness surface started.
 
 ### Purpose
 
@@ -700,7 +700,7 @@ Turn Careero into a sustainable product without compromising user trust.
 
 ### Readiness docs
 
-Layer 11 readiness docs now define productization, privacy, account lifecycle,
+Layer 11 readiness docs define productization, privacy, account lifecycle,
 AI usage/cost, monetization, and deployment gates:
 
 - [Productization readiness](productization-readiness.md)
@@ -712,7 +712,14 @@ AI usage/cost, monetization, and deployment gates:
 - [Cross-layer impact map](cross-layer-impact-map.md)
 - [Execution drift ledger](execution-drift-ledger.md)
 
-These documents are readiness and boundary design only. They do not implement
+Layer 11A adds `GET /api/productization/readiness` and a Settings page Product
+readiness panel. This is a local-first reporting surface only. It reports
+environment, readiness stage, local-first status, coarse database health, AI
+feature flags, auth/tenant/billing/export/delete/retention/metering/deployment
+status, hosted collaboration status, marketplace/employer-side status, and
+known blockers without exposing secrets or private user content.
+
+These documents and surfaces are readiness and boundary design only. They do not implement
 production auth, billing, tenant isolation, hosted deployment, data export/delete,
 retention enforcement, or AI usage metering.
 
