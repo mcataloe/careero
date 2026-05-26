@@ -19,6 +19,12 @@ tenant isolation, billing, hosted deployment, account deletion/export,
 retention enforcement, or production privacy controls. Existing seeded local
 user behavior is not production auth.
 
+Layer 11B adds local-first current-user boundary prep: a small injectable
+current-user context resolves the seeded local user by default, and selected
+workspace, role/opportunity, and application services now make owner-scoped
+service checks more explicit. This preserves local operation and does not
+implement production auth.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |
@@ -45,6 +51,8 @@ user behavior is not production auth.
 
 - Production authentication is not implemented.
 - Production authorization and tenant isolation are not implemented.
+- Layer 11B service-level ownership checks are local boundary prep only and do
+  not certify hosted tenant isolation.
 - Data export, account deletion, and retention enforcement are not implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
@@ -61,11 +69,14 @@ user behavior is not production auth.
   monetization boundaries.
 - Local beta runbooks and non-destructive readiness checklists.
 - User-facing clarity that Careero is local-first and not production-ready.
+- Local-first current-user context and service-level boundary tests that prepare
+  future auth injection without selecting an auth provider.
 - Future implementation prompts that preserve job-seeker-first trust.
 
 ## What Must Stay Future
 
 - Production auth and account registration.
+- Auth-provider selection and auth dependencies.
 - Production authorization and tenant isolation implementation.
 - Hosted production deployment.
 - Billing provider integration, including Stripe or equivalent providers.
@@ -96,6 +107,9 @@ Layer 12 local-only advisor packet preview/export can exist as owner-visible,
 redacted scaffolding. Hosted advisor/collaboration mode still requires
 privacy-scoped sharing, account roles, comment boundaries, revocation, account
 lifecycle, and tenant isolation design before implementation.
+
+Layer 11B does not unblock hosted collaboration, advisor accounts, employer
+access, recruiter access, or support/admin access.
 
 Layer 13 marketplace/employer-side exploration remains last. It requires strict
 user control, disclosure, auditability, and separation from core recommendation

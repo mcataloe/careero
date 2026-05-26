@@ -52,6 +52,9 @@ Current planning hierarchy:
 - Frontend component tests and production build validation.
 - Local development documentation.
 - Reserved directories for future modular growth.
+- Local-first current-user context and service-level ownership-boundary prep for
+  workspace, role/opportunity, and application workflow services. This preserves
+  seeded local-user operation and is not production authentication.
 
 ## Out of Scope
 

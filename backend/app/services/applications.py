@@ -45,12 +45,18 @@ from app.schemas.applications import (
     ApplicationMetadataUpdate,
     ApplicationStateTransitionRequest,
 )
-from app.seed import DEFAULT_LOCAL_USER_ID, DEFAULT_LOCAL_USER_DISPLAY_NAME
 from app.services.activity_log import ActivityLogService
 from app.services.application_state_machine import (
     can_transition,
     get_available_transitions,
 )
+from app.services.current_user import (
+    CurrentUserContext,
+    CurrentUserResolutionError,
+    get_current_user_context,
+    resolve_current_user,
+)
+from app.services.ownership import require_user_application, require_user_role
 from app.services.workspace_context import is_workspace_active_for_new_work
 
 
@@ -104,18 +110,23 @@ class ApplicationWorkflowTransitionError(ApplicationWorkflowError):
 
 
 class ApplicationWorkflowService:
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        current_user_context: CurrentUserContext | None = None,
+    ) -> None:
         self.db = db
+        self.current_user_context = current_user_context or get_current_user_context()
         self.activity_log = ActivityLogService(db)
         self._schema_validator = _application_state_validator()
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db, self.current_user_context)
+        except CurrentUserResolutionError as exc:
             raise ApplicationWorkflowSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def get_or_create_for_role(self, role_id: uuid.UUID) -> dict[str, Any]:
         user = self.get_default_user()
@@ -534,7 +545,7 @@ class ApplicationWorkflowService:
             application_id=application.id,
             user_id=application.user_id,
             workspace_id=application.workspace_id,
-            author=payload.author or DEFAULT_LOCAL_USER_DISPLAY_NAME,
+            author=payload.author or self.current_user_context.display_name,
             note_type=payload.note_type,
             body=payload.body,
         )
@@ -998,17 +1009,17 @@ class ApplicationWorkflowService:
         return contract
 
     def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
-        statement = (
-            select(Role)
-            .where(
-                Role.id == role_id,
-                Role.user_id == user_id,
-                Role.deleted_at.is_(None),
-                Role.status != RoleStatus.ARCHIVED.value,
+        try:
+            return require_user_role(
+                self.db,
+                role_id=role_id,
+                user_id=user_id,
+                load_options=(joinedload(Role.company), selectinload(Role.workspace)),
+                error_cls=ApplicationWorkflowNotFoundError,
+                error_message="Role not found",
             )
-            .options(joinedload(Role.company), selectinload(Role.workspace))
-        )
-        return self.db.scalar(statement)
+        except ApplicationWorkflowNotFoundError:
+            return None
 
     def _get_active_application_for_role(
         self,
@@ -1041,16 +1052,17 @@ class ApplicationWorkflowService:
 
     def _get_application(self, application_id: uuid.UUID) -> Application | None:
         user = self.get_default_user()
-        statement = (
-            select(Application)
-            .where(
-                Application.id == application_id,
-                Application.user_id == user.id,
-                Application.deleted_at.is_(None),
+        try:
+            return require_user_application(
+                self.db,
+                application_id=application_id,
+                user_id=user.id,
+                load_options=_application_load_options(),
+                error_cls=ApplicationWorkflowNotFoundError,
+                error_message="Application workflow not found",
             )
-            .options(*_application_load_options())
-        )
-        return self.db.scalar(statement)
+        except ApplicationWorkflowNotFoundError:
+            return None
 
     def _require_application(self, application_id: uuid.UUID) -> Application:
         application = self._get_application(application_id)
@@ -1063,6 +1075,8 @@ class ApplicationWorkflowService:
         if (
             child is None
             or child.application_id != application.id
+            or child.user_id != application.user_id
+            or child.workspace_id != application.workspace_id
             or getattr(child, "deleted_at", None) is not None
         ):
             raise ApplicationWorkflowNotFoundError("Application workflow child not found")

@@ -9,9 +9,15 @@ from app.constants import RoleStatus
 from app.models import Company, JobSource, Role, User
 from app.repositories.roles import RoleRepository
 from app.schemas.roles import CompanyLookup, RoleCreate, RoleUpdate, SourceLookup
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.current_user import (
+    CurrentUserContext,
+    CurrentUserResolutionError,
+    get_current_user_context,
+    resolve_current_user,
+)
 from app.services.opportunity_intelligence import OpportunityIntelligenceService
+from app.services.ownership import require_user_role
 from app.services.workspaces import (
     WorkspaceInactiveError,
     WorkspaceNotFoundError,
@@ -44,17 +50,24 @@ class RoleWorkspaceInactiveError(RoleIntakeError):
 
 
 class RoleService:
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        current_user_context: CurrentUserContext | None = None,
+    ) -> None:
         self.db = db
+        self.current_user_context = current_user_context or get_current_user_context()
         self.repository = RoleRepository(db)
         self.activity_log = ActivityLogService(db)
         self.opportunity_intelligence = OpportunityIntelligenceService(db)
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
-            raise RoleSeedMissingError("Default local user is missing; run python -m app.seed")
-        return user
+        try:
+            return resolve_current_user(self.db, self.current_user_context)
+        except CurrentUserResolutionError as exc:
+            raise RoleSeedMissingError(
+                "Default local user is missing; run python -m app.seed"
+            ) from exc
 
     def list_roles(self) -> list[Role]:
         user = self.get_default_user()
@@ -76,17 +89,17 @@ class RoleService:
 
     def get_role(self, role_id: uuid.UUID) -> Role:
         user = self.get_default_user()
-        role = self._get_active_role(role_id=role_id, user_id=user.id)
-        if role is None:
-            raise RoleNotFoundError("Role not found")
-        return role
+        return self._require_active_role(role_id=role_id, user_id=user.id)
 
     def create_role(self, payload: RoleCreate) -> Role:
         user = self.get_default_user()
         company = self._resolve_company(user_id=user.id, company=payload.company)
         source = self._resolve_source(user_id=user.id, source=payload.source)
         try:
-            workspace = WorkspaceService(self.db).resolve_active_workspace(
+            workspace = WorkspaceService(
+                self.db,
+                current_user_context=self.current_user_context,
+            ).resolve_active_workspace(
                 user_id=user.id,
                 workspace_id=payload.workspace_id,
             )
@@ -126,9 +139,7 @@ class RoleService:
 
     def update_role(self, role_id: uuid.UUID, payload: RoleUpdate) -> Role:
         user = self.get_default_user()
-        role = self._get_active_role(role_id=role_id, user_id=user.id)
-        if role is None:
-            raise RoleNotFoundError("Role not found")
+        role = self._require_active_role(role_id=role_id, user_id=user.id)
 
         updates = payload.model_dump(exclude_unset=True)
         changed_fields: list[str] = []
@@ -176,9 +187,7 @@ class RoleService:
 
     def refresh_opportunity_intelligence(self, role_id: uuid.UUID) -> Role:
         user = self.get_default_user()
-        role = self._get_active_role(role_id=role_id, user_id=user.id)
-        if role is None:
-            raise RoleNotFoundError("Role not found")
+        role = self._require_active_role(role_id=role_id, user_id=user.id)
         self.opportunity_intelligence.refresh_role(role)
         self._log_activity(
             user_id=user.id,
@@ -191,9 +200,7 @@ class RoleService:
 
     def archive_role(self, role_id: uuid.UUID) -> Role:
         user = self.get_default_user()
-        role = self._get_active_role(role_id=role_id, user_id=user.id)
-        if role is None:
-            raise RoleNotFoundError("Role not found")
+        role = self._require_active_role(role_id=role_id, user_id=user.id)
 
         role.status = RoleStatus.ARCHIVED.value
         role.deleted_at = datetime.now(timezone.utc)
@@ -208,21 +215,30 @@ class RoleService:
         return role
 
     def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
-        statement = (
-            select(Role)
-            .options(
-                joinedload(Role.company),
-                joinedload(Role.source),
-                joinedload(Role.workspace),
-            )
-            .where(
-                Role.id == role_id,
-                Role.user_id == user_id,
-                Role.deleted_at.is_(None),
-                Role.status != RoleStatus.ARCHIVED.value,
-            )
+        try:
+            return self._require_active_role(role_id=role_id, user_id=user_id)
+        except RoleNotFoundError:
+            return None
+
+    def _require_active_role(
+        self,
+        *,
+        role_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> Role:
+        load_options = (
+            joinedload(Role.company),
+            joinedload(Role.source),
+            joinedload(Role.workspace),
         )
-        return self.db.scalar(statement)
+        return require_user_role(
+            self.db,
+            role_id=role_id,
+            user_id=user_id,
+            load_options=load_options,
+            error_cls=RoleNotFoundError,
+            error_message="Role not found",
+        )
 
     def _load_role(self, role_id: uuid.UUID, user_id: uuid.UUID) -> Role:
         role = self._get_active_role(role_id=role_id, user_id=user_id)

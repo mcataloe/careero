@@ -10,8 +10,18 @@ from sqlalchemy.orm import Session
 from app.constants import WorkspaceStatus
 from app.models import User, Workspace
 from app.schemas.workspaces import WorkspaceCreate, WorkspaceUpdate
-from app.seed import DEFAULT_LOCAL_USER_ID, DEFAULT_WORKSPACE_ID
+from app.seed import DEFAULT_WORKSPACE_ID
 from app.services.activity_log import ActivityLogService
+from app.services.current_user import (
+    CurrentUserContext,
+    CurrentUserResolutionError,
+    get_current_user_context,
+    resolve_current_user,
+)
+from app.services.ownership import (
+    require_active_user_workspace_for_new_work,
+    require_user_workspace,
+)
 from app.services.workspace_context import is_workspace_active_for_new_work
 
 
@@ -32,17 +42,22 @@ class WorkspaceInactiveError(WorkspaceError):
 
 
 class WorkspaceService:
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        current_user_context: CurrentUserContext | None = None,
+    ) -> None:
         self.db = db
+        self.current_user_context = current_user_context or get_current_user_context()
         self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db, self.current_user_context)
+        except CurrentUserResolutionError as exc:
             raise WorkspaceSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def create_workspace(self, payload: WorkspaceCreate) -> Workspace:
         user = self.get_default_user()
@@ -97,14 +112,14 @@ class WorkspaceService:
         include_inactive: bool = False,
     ) -> Workspace:
         user = self.get_default_user()
-        workspace = self._get_for_user(
+        return require_user_workspace(
+            self.db,
             workspace_id=workspace_id,
             user_id=user.id,
             include_inactive=include_inactive,
+            error_cls=WorkspaceNotFoundError,
+            error_message="Workspace not found",
         )
-        if workspace is None:
-            raise WorkspaceNotFoundError("Workspace not found")
-        return workspace
 
     def update_workspace(
         self,
@@ -112,13 +127,14 @@ class WorkspaceService:
         payload: WorkspaceUpdate,
     ) -> Workspace:
         user = self.get_default_user()
-        workspace = self._get_for_user(
+        workspace = require_user_workspace(
+            self.db,
             workspace_id=workspace_id,
             user_id=user.id,
             include_inactive=True,
+            error_cls=WorkspaceNotFoundError,
+            error_message="Workspace not found",
         )
-        if workspace is None:
-            raise WorkspaceNotFoundError("Workspace not found")
 
         updates = payload.model_dump(exclude_unset=True)
         changed_fields: list[str] = []
@@ -154,13 +170,14 @@ class WorkspaceService:
 
     def archive_workspace(self, workspace_id: uuid.UUID) -> Workspace:
         user = self.get_default_user()
-        workspace = self._get_for_user(
+        workspace = require_user_workspace(
+            self.db,
             workspace_id=workspace_id,
             user_id=user.id,
             include_inactive=True,
+            error_cls=WorkspaceNotFoundError,
+            error_message="Workspace not found",
         )
-        if workspace is None:
-            raise WorkspaceNotFoundError("Workspace not found")
         workspace.status = "archived"
         workspace.archived_at = datetime.now(timezone.utc)
         self._log_activity(
@@ -174,13 +191,14 @@ class WorkspaceService:
 
     def reactivate_workspace(self, workspace_id: uuid.UUID) -> Workspace:
         user = self.get_default_user()
-        workspace = self._get_for_user(
+        workspace = require_user_workspace(
+            self.db,
             workspace_id=workspace_id,
             user_id=user.id,
             include_inactive=True,
+            error_cls=WorkspaceNotFoundError,
+            error_message="Workspace not found",
         )
-        if workspace is None:
-            raise WorkspaceNotFoundError("Workspace not found")
         workspace.status = "active"
         workspace.archived_at = None
         self._log_activity(
@@ -224,36 +242,15 @@ class WorkspaceService:
         if workspace_id is None:
             return self.get_default_active_workspace(user_id=user_id)
 
-        workspace = self._get_for_user(
+        return require_active_user_workspace_for_new_work(
+            self.db,
             workspace_id=workspace_id,
             user_id=user_id,
-            include_inactive=True,
+            not_found_error_cls=WorkspaceNotFoundError,
+            inactive_error_cls=WorkspaceInactiveError,
+            not_found_message="Workspace not found",
+            inactive_message="Workspace is not active",
         )
-        if workspace is None:
-            raise WorkspaceNotFoundError("Workspace not found")
-        if not is_workspace_active_for_new_work(workspace):
-            raise WorkspaceInactiveError("Workspace is not active")
-        return workspace
-
-    def _get_for_user(
-        self,
-        *,
-        workspace_id: uuid.UUID,
-        user_id: uuid.UUID,
-        include_inactive: bool,
-    ) -> Workspace | None:
-        filters = [
-            Workspace.id == workspace_id,
-            Workspace.user_id == user_id,
-        ]
-        if not include_inactive:
-            filters.extend(
-                [
-                    Workspace.archived_at.is_(None),
-                    Workspace.status.in_(["active", "paused"]),
-                ]
-            )
-        return self.db.scalar(select(Workspace).where(*filters))
 
     def _log_activity(
         self,

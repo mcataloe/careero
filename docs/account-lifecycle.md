@@ -10,10 +10,17 @@ registration, tenant isolation, data export, or account deletion.
 
 - Careero uses a seeded local user/workspace model for local development.
 - The current local user is not production authentication.
+- Layer 11B adds a local-first current-user context abstraction so services can
+  resolve the seeded user through one injectable boundary instead of scattering
+  direct default-user lookups.
+- Workspace, role/opportunity, and application services now have clearer
+  owner-scoped service checks for local/test execution.
 - Existing workspace behavior is local-first and does not prove tenant
   isolation.
 - Production account lifecycle, recovery, support, and deletion flows are not
   implemented.
+- No auth provider has been selected, and no auth provider dependency, login,
+  signup, OAuth, session, JWT, or password storage has been added.
 
 ## Production Account Lifecycle Target
 
@@ -62,6 +69,10 @@ Hosted modes require:
 - Isolation for Opportunity/Role-backed records, applications, artifacts,
   notes, reminders, interviews, analytics, and automation logs.
 - Operational logging that avoids leaking private content.
+
+Layer 11B prepares these boundaries locally by making current-user resolution
+injectable and by adding service-level cross-user tests. This is boundary prep
+only. It is not tenant isolation certification for hosted SaaS.
 
 ## Authorization Boundaries
 
@@ -160,3 +171,8 @@ Stop before account implementation if the work would require choosing an auth
 provider, adding auth dependencies, changing permission behavior, introducing
 tenant isolation code, changing sensitive-data handling, or enabling external
 account linking without a fresh approved scope.
+
+Layer 11B does not remove those stop conditions. Hosted collaboration, advisor
+accounts, employer/recruiter access, and support/admin access remain blocked
+until production auth, authorization, revocation, audit, privacy, and lifecycle
+work is explicitly scoped.

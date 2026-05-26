@@ -204,7 +204,7 @@ The repo does not yet fully include:
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future / readiness documentation started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness documentation started; local boundary prep added | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 | Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
@@ -716,6 +716,15 @@ These documents are readiness and boundary design only. They do not implement
 production auth, billing, tenant isolation, hosted deployment, data export/delete,
 retention enforcement, or AI usage metering.
 
+Layer 11B adds a local-first current-user context abstraction and explicit
+service-level ownership-boundary helpers for selected workspace,
+role/opportunity, and application workflow paths. The default context still
+resolves the seeded local user so local development remains unchanged. Tests
+cover basic cross-user service-level boundaries with explicit test contexts.
+This is not production authentication, login/signup, OAuth, session management,
+JWT handling, auth-provider selection, or hosted tenant isolation
+certification.
+
 Layer 14 extends the productization strategy for model choice, credits, and
 API-first intelligence, but those capabilities are not implemented in `main`.
 Layer 14A/14B should only be pulled forward when Layer 11 billing, metering,
@@ -727,6 +736,10 @@ Do not productize until the user-side workflow has proven durable value locally.
 Layer 11 implementation should not proceed until local workflow value,
 privacy/account lifecycle, AI usage/cost controls, deployment readiness, and
 production blockers are resolved through a fresh LEAP Recon.
+
+Hosted collaboration, advisor accounts, employer/recruiter access, support/admin
+access, billing, deployment, data export/delete, and usage metering remain
+blocked after Layer 11B.
 
 ---
 
