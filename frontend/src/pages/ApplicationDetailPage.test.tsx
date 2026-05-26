@@ -10,6 +10,7 @@ import type {
   ApplicationNote,
   ApplicationTimelineEvent,
 } from "../types/applications";
+import type { AdvisorPacket } from "../types/advisorPackets";
 import type { AutomationSuggestionListResponse } from "../types/automation";
 
 function jsonResponse(response: unknown, status = 200) {
@@ -163,6 +164,64 @@ const automationSuggestions: AutomationSuggestionListResponse = {
   ],
 };
 
+const advisorPacket: AdvisorPacket = {
+  packet_version: "advisor_packet.local_preview.v1",
+  mode: "local_preview",
+  generated_at: "2026-05-16T15:00:00Z",
+  local_only: true,
+  external_sharing_enabled: false,
+  advisory_notice:
+    "Local-only owner preview. Nothing is externally shared, no advisor account exists, and private strategy is redacted by default.",
+  opportunity: {
+    id: "role-1",
+    workspace_id: "workspace-1",
+    title: "Staff Platform Engineer",
+    company_name: "Example Company",
+    status: "interested",
+    location: "Remote",
+    remote_type: "remote",
+  },
+  application: {
+    id: "app-1",
+    current_state: "interested",
+    applied_at: null,
+    next_action_at: null,
+    counts: {
+      notes: 1,
+      reminders: 0,
+      interviews: 1,
+      external_links: 1,
+    },
+  },
+  artifacts: [
+    {
+      id: "artifact-1",
+      artifact_type: "cover_letter",
+      title: "Cover letter",
+      lifecycle_status: "draft",
+      revision_number: 1,
+      content_included: false,
+      updated_at: "2026-05-16T15:00:00Z",
+      warnings: [],
+    },
+  ],
+  redactions: [
+    {
+      data_class: "Private user notes",
+      default_visibility: "Private by default",
+      status: "excluded",
+      reason: "1 note(s) exist and require explicit future selection before inclusion.",
+    },
+    {
+      data_class: "STRIDE score and explanation",
+      default_visibility: "Private by default",
+      status: "excluded",
+      reason: "Internal fit analysis remains advisory, source-grounded, and private by default.",
+    },
+  ],
+  warnings: [],
+};
+
 function renderDetailPage() {
   render(
     <MemoryRouter initialEntries={["/applications/app-1"]}>
@@ -188,7 +247,8 @@ describe("ApplicationDetailPage", () => {
         .mockResolvedValueOnce(jsonResponse(notes))
         .mockResolvedValueOnce(jsonResponse(links))
         .mockResolvedValueOnce(jsonResponse(interviews))
-        .mockResolvedValueOnce(jsonResponse(automationSuggestions)),
+        .mockResolvedValueOnce(jsonResponse(automationSuggestions))
+        .mockResolvedValueOnce(jsonResponse(advisorPacket)),
     );
 
     renderDetailPage();
@@ -206,6 +266,10 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByText(/Notes: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
     expect(screen.getByText("Prepare follow-up draft")).toBeInTheDocument();
     expect(screen.getByText(/Draft only. Careero will not send this message./i)).toBeInTheDocument();
+    expect(screen.getByText("Advisor packet preview")).toBeInTheDocument();
+    expect(screen.getByText("Local only")).toBeInTheDocument();
+    expect(screen.getByText("Private user notes")).toBeInTheDocument();
+    expect(screen.getByText(/content excluded/i)).toBeInTheDocument();
   });
 
   it("renders an error state", async () => {

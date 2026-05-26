@@ -14,7 +14,7 @@ Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strat
 
 Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. These are readiness docs only; production auth, billing, tenant isolation, and hosted deployment remain future.
 
-Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). This is design guidance only; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
+Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
 
 Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
@@ -45,6 +45,7 @@ Current planning hierarchy:
 - Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
+- Local-only advisor packet preview and Markdown export with redacted defaults for private notes, STRIDE rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.
@@ -75,7 +76,7 @@ Careero does not yet include:
 - Automated job application submission.
 - External review-before-send workflows.
 - State-changing or externally mutating automation.
-- Coach/advisor collaboration.
+- Hosted coach/advisor collaboration.
 - Marketplace or employer-side capabilities.
 
 ## Repository Structure

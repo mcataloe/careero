@@ -6,10 +6,11 @@ Layer 12 defines how Careero can eventually support trusted external help while
 preserving privacy, user ownership, explicit consent, scoped visibility,
 revocation, and auditability.
 
-This document is readiness and design guidance only. It does not implement
-hosted collaboration, advisor accounts, invitations, external sharing, public
-links, comments, production auth, tenant isolation, or employer/recruiter
-visibility.
+This document is the active readiness and design source. Current code is limited
+to local-only owner-visible advisor packet preview and Markdown export
+scaffolding. Careero still does not implement hosted collaboration, advisor
+accounts, invitations, external sharing, public links, comments, production
+auth, tenant isolation, or employer/recruiter visibility.
 
 Advisor collaboration must keep Careero job-seeker-first. STRIDE remains
 advisory, source-grounded, explainable, and never deterministic truth. Private
@@ -19,7 +20,11 @@ visible by default.
 
 ## Current Status
 
-Layer 12 status: future / readiness design started.
+Layer 12 status: future / local-only packet preview started.
+
+Careero now has local-only advisor packet preview and Markdown export
+scaffolding from application detail. The packet is owner-visible, read-only,
+redacted by default, and creates no external access.
 
 Careero currently has:
 
@@ -111,8 +116,10 @@ Safe defaults:
 
 ## Advisor Packet Model
 
-A future Advisor Packet is a user-selected, read-only, source-grounded bundle
-for trusted review. It is not a shared workspace and not a public link.
+An Advisor Packet is a user-selected, read-only, source-grounded bundle for
+trusted review. In the current implementation, it exists only as a local owner
+preview/Markdown export with redacted defaults. It is not a shared workspace and
+not a public link.
 
 It may eventually include:
 
@@ -137,9 +144,9 @@ It must not include by default:
 - Automation approval logs.
 - Hidden internal metadata.
 
-The safest near-term packet behavior, if separately approved later, is local-only
-owner preview/export with no hosted access, no invitations, no external send, and
-no persistent collaborator records.
+The current safe packet behavior is local-only owner preview/export with no
+hosted access, no invitations, no external send, and no persistent collaborator
+records.
 
 ## Permission Model: Design Only
 
@@ -212,7 +219,7 @@ sync, and production auth/provider choices are outside this Build Unit.
 | 12B Collaboration data-class/redaction matrix | Design-only, may refine this document or become a dedicated design doc. |
 | 12C Permission model design | Design-only. |
 | 12D Advisor packet model design | Design-only. |
-| 12E Local-only packet preview/export scaffolding | Blocked until explicitly approved in a separate prompt. |
+| 12E Local-only packet preview/export scaffolding | Implemented locally after separate approval; owner-visible only, redacted by default, no hosted sharing. |
 | 12F Comment-only workflow design | Design-only; implementation blocked. |
 | 12G Revocation/audit design | Design-only; implementation blocked until account/auth decisions exist. |
 | 12H UI trust copy | Design-only, no implementation without approval. |
@@ -243,8 +250,7 @@ Stop before coding if a future prompt requires:
 
 Layer 12 is user-controlled trusted help, not employer visibility.
 
-The safest near-term implementation is docs/design and, only after a separate
-approval prompt, possibly local-only packet preview/export. Hosted collaboration
-requires a fresh LEAP Recon and explicit approval after production auth,
-authorization, tenant isolation, privacy controls, revocation, audit, and
-account lifecycle are implemented.
+The safest near-term implementation is docs/design plus the current local-only
+packet preview/export scaffold. Hosted collaboration requires a fresh LEAP Recon
+and explicit approval after production auth, authorization, tenant isolation,
+privacy controls, revocation, audit, and account lifecycle are implemented.
