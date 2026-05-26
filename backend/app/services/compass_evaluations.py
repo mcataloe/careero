@@ -10,8 +10,8 @@ from app.config import Settings, get_settings
 from app.constants import RoleStatus, CompassEvaluationStatus
 from app.models import ResumeSourceVersion, Role, CompassEvaluation, User
 from app.schemas.compass_evaluations import CompassEvaluationCreate
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.evaluation_hashing import (
     evaluation_input_hash,
     resume_source_hash,
@@ -69,12 +69,12 @@ class CompassEvaluationService:
         self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise CompassEvaluationSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def create_for_role(
         self,

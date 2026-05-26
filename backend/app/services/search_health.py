@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.constants import ApplicationWorkflowState
 from app.models import Application, Role, CompassEvaluation, User
-from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
 SUBMITTED_STATES = {
@@ -34,12 +34,12 @@ class SearchHealthService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise SearchHealthSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def get_search_health(
         self,

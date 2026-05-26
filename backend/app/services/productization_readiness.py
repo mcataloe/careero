@@ -75,7 +75,7 @@ def get_productization_readiness(
     production_like = _is_production_like(environment)
 
     known_blockers = [
-        "Production authentication is not implemented.",
+        "Production auth hardening, account recovery, and SSO are not implemented.",
         "Production authorization and tenant isolation are not implemented.",
         "Billing, subscriptions, invoices, checkout, and payment flows are not implemented.",
         "Data export, account deletion, and retention enforcement are not implemented.",
@@ -155,9 +155,9 @@ def get_productization_readiness(
             durable_metering_status="not_implemented",
         ),
         auth_status=_capability(
-            "not_implemented",
-            False,
-            "Auth-provider choice is deferred; no login, signup, OAuth, sessions, JWTs, or production auth exist.",
+            "local_password_enabled",
+            True,
+            "First-party local username/password auth and HttpOnly cookie sessions exist; OAuth, SSO, account recovery, and production auth hardening remain future.",
         ),
         tenant_boundary_prep_status=_capability(
             "local_boundary_prep",

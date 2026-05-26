@@ -13,6 +13,7 @@ export async function apiRequest<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const response = await fetch(path, {
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,

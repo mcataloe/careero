@@ -1,9 +1,13 @@
 import logging
 
-from fastapi import FastAPI, Response, status
+from fastapi import Depends, FastAPI, Response, status
 
 from app.api.activity_log import router as activity_log_router
 from app.api.advisor_packets import router as advisor_packets_router
+from app.api.auth import (
+    require_authenticated_current_user_context,
+    router as auth_router,
+)
 from app.api.automation import router as automation_router
 from app.api.artifact_exports import router as artifact_exports_router
 from app.api.artifact_performance import router as artifact_performance_router
@@ -43,28 +47,38 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     if provided_settings is not None:
         app.dependency_overrides[get_settings] = lambda: settings
-    app.include_router(activity_log_router, prefix="/api")
-    app.include_router(advisor_packets_router, prefix="/api")
-    app.include_router(automation_router, prefix="/api")
-    app.include_router(artifact_exports_router, prefix="/api")
-    app.include_router(artifact_performance_router, prefix="/api")
-    app.include_router(applications_router, prefix="/api")
-    app.include_router(compensation_intelligence_router, prefix="/api")
-    app.include_router(cover_letter_artifacts_router, prefix="/api")
-    app.include_router(historical_learning_router, prefix="/api")
-    app.include_router(opportunities_router, prefix="/api")
+    authenticated = [Depends(require_authenticated_current_user_context)]
+    app.include_router(auth_router, prefix="/api")
+    app.include_router(activity_log_router, prefix="/api", dependencies=authenticated)
+    app.include_router(advisor_packets_router, prefix="/api", dependencies=authenticated)
+    app.include_router(automation_router, prefix="/api", dependencies=authenticated)
+    app.include_router(artifact_exports_router, prefix="/api", dependencies=authenticated)
+    app.include_router(artifact_performance_router, prefix="/api", dependencies=authenticated)
+    app.include_router(applications_router, prefix="/api", dependencies=authenticated)
+    app.include_router(
+        compensation_intelligence_router,
+        prefix="/api",
+        dependencies=authenticated,
+    )
+    app.include_router(
+        cover_letter_artifacts_router,
+        prefix="/api",
+        dependencies=authenticated,
+    )
+    app.include_router(historical_learning_router, prefix="/api", dependencies=authenticated)
+    app.include_router(opportunities_router, prefix="/api", dependencies=authenticated)
     app.include_router(productization_router, prefix="/api")
-    app.include_router(recommendations_router, prefix="/api")
-    app.include_router(resume_sources_router, prefix="/api")
-    app.include_router(resume_artifacts_router, prefix="/api")
-    app.include_router(roles_router, prefix="/api")
-    app.include_router(search_analytics_router, prefix="/api")
-    app.include_router(search_health_router, prefix="/api")
-    app.include_router(source_intelligence_router, prefix="/api")
-    app.include_router(strategy_router, prefix="/api")
-    app.include_router(compass_insights_router, prefix="/api")
-    app.include_router(compass_evaluations_router, prefix="/api")
-    app.include_router(workspaces_router, prefix="/api")
+    app.include_router(recommendations_router, prefix="/api", dependencies=authenticated)
+    app.include_router(resume_sources_router, prefix="/api", dependencies=authenticated)
+    app.include_router(resume_artifacts_router, prefix="/api", dependencies=authenticated)
+    app.include_router(roles_router, prefix="/api", dependencies=authenticated)
+    app.include_router(search_analytics_router, prefix="/api", dependencies=authenticated)
+    app.include_router(search_health_router, prefix="/api", dependencies=authenticated)
+    app.include_router(source_intelligence_router, prefix="/api", dependencies=authenticated)
+    app.include_router(strategy_router, prefix="/api", dependencies=authenticated)
+    app.include_router(compass_insights_router, prefix="/api", dependencies=authenticated)
+    app.include_router(compass_evaluations_router, prefix="/api", dependencies=authenticated)
+    app.include_router(workspaces_router, prefix="/api", dependencies=authenticated)
 
     @app.get("/health")
     def health() -> dict[str, str]:

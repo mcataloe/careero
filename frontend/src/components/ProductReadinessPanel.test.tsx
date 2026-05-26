@@ -56,9 +56,9 @@ const readiness: ProductizationReadiness = {
     durable_metering_status: "not_implemented",
   },
   auth_status: {
-    status: "not_implemented",
-    implemented: false,
-    detail: "Production auth is not implemented.",
+    status: "local_password_enabled",
+    implemented: true,
+    detail: "Local password auth is enabled.",
   },
   tenant_boundary_prep_status: {
     status: "local_boundary_prep",
@@ -101,7 +101,7 @@ const readiness: ProductizationReadiness = {
     detail: "Marketplace is not implemented.",
   },
   known_blockers: [
-    "Production authentication is not implemented.",
+    "Production auth hardening is incomplete.",
     "Billing, subscriptions, invoices, checkout, and payment flows are not implemented.",
   ],
   production_readiness_statement:

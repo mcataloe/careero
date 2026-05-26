@@ -34,7 +34,8 @@ def test_local_readiness_response(monkeypatch) -> None:
     assert body["production_ready"] is False
     assert body["local_first_status"] == "active_local_first"
     assert body["database_health"] == "available"
-    assert body["auth_status"]["status"] == "not_implemented"
+    assert body["auth_status"]["status"] == "local_password_enabled"
+    assert body["auth_status"]["implemented"] is True
     assert body["tenant_boundary_prep_status"]["status"] == "local_boundary_prep"
     assert body["billing_status"]["status"] == "not_implemented"
 

@@ -1,6 +1,6 @@
 # Backend
 
-The backend is a local FastAPI application for Careero. It now supports the local platform foundation, workspace-scoped role intake, COMPASS evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-authenticated.
+The backend is a local FastAPI application for Careero. It now supports the local platform foundation, first-party local username/password auth, workspace-scoped role intake, COMPASS evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-auth-hardened.
 
 ## PostgreSQL
 
@@ -46,6 +46,12 @@ CAREERO_OPENAI_TIMEOUT_SECONDS=30
 CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 CAREERO_LOG_LEVEL=INFO
+CAREERO_ENABLE_PASSWORD_AUTH=true
+CAREERO_ALLOW_REGISTRATION=true
+CAREERO_AUTH_SESSION_COOKIE_NAME=careero_session
+CAREERO_AUTH_SESSION_DAYS=14
+CAREERO_AUTH_COOKIE_SECURE=false
+CAREERO_PASSWORD_MIN_LENGTH=12
 ```
 
 `CAREERO_OPENAI_API_KEY` is intentionally empty in local setup. Do not commit real secrets.
@@ -66,6 +72,32 @@ python -m app.seed
 
 The seed command is idempotent. It creates or updates `local-user@careero.local` and the canonical job sources, including `manual`, `linkedin_manual`, `recruiter_email`, `greenhouse`, `lever`, `ashby`, `workable`, and `other`.
 It also creates a default active workspace used by local workflows when no explicit workspace is supplied.
+The seeded local user is not assigned a password and is not a public login path.
+Authenticated app use should create a local account through `/api/auth/register`
+or the frontend `/register` page. Registered users receive their own workspace
+ID; the fixed seeded default workspace ID remains reserved for the seeded local
+user.
+
+## Local Authentication API
+
+Password auth is enabled locally by default. Passwords are hashed with
+Argon2id via `argon2-cffi`. Sessions are stored server-side with only a
+SHA-256 hash of the session token, and the raw token is returned only in an
+HttpOnly `SameSite=Lax` cookie. `CAREERO_AUTH_COOKIE_SECURE=false` is the local
+default; production-like environments must use HTTPS and harden cookie/session
+settings before hosted use.
+
+Routes:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+
+Google and LinkedIn SSO are not implemented. The frontend login page shows
+disabled placeholders only. Account recovery, email verification, MFA, hosted
+auth provider selection, and production tenant isolation certification remain
+future work.
 
 ## Run
 
@@ -85,11 +117,11 @@ http://127.0.0.1:8000/health/database
 ## Role Intake API
 
 Role intake is manual-only in this phase. Paste role details discovered from LinkedIn or another source into Careero; the backend does not scrape LinkedIn, poll job boards, or call OpenAI.
-Roles belong to exactly one workspace. If `workspace_id` is omitted, Careero uses the seeded default active workspace.
+Roles belong to exactly one workspace. If `workspace_id` is omitted, Careero uses the current user's first active workspace; for seeded direct-service flows, that is the seeded default workspace.
 
 ## Workspace API
 
-Workspaces scope career-search preferences, notes, tags, AI context summary, roles, evaluations, and generated artifacts. The local seed creates a default active workspace for compatibility with existing local flows.
+Workspaces scope career-search preferences, notes, tags, AI context summary, roles, evaluations, and generated artifacts. Registration creates a default active workspace for the new local account. The local seed also creates a default active workspace for compatibility with existing seed/direct-service flows.
 
 Create a workspace:
 
@@ -199,7 +231,7 @@ Archive a role:
 Invoke-RestMethod -Method Delete http://127.0.0.1:8000/api/roles/{role_id}
 ```
 
-Company intake accepts either an existing company ID or a name. When a name is supplied, Careero reuses an existing company for the default local user using case-insensitive name matching or creates a new company if one does not exist.
+Company intake accepts either an existing company ID or a name. When a name is supplied, Careero reuses an existing company for the current user using case-insensitive name matching or creates a new company if one does not exist.
 
 ### AI-Assisted Role Parsing
 
@@ -312,7 +344,7 @@ Invoke-RestMethod `
   -Body '{ "name": "Updated Master Resume", "source_type": "profile" }'
 ```
 
-Only one resume source version can be active for the default local user. COMPASS evaluation can still run without an active source, but OpenAI enrichment includes the active source when present.
+Only one resume source version can be active for the current user. COMPASS evaluation can still run without an active source, but OpenAI enrichment includes the active source when present.
 
 ## COMPASS Evaluation API
 
@@ -444,7 +476,7 @@ Invoke-RestMethod `
   "http://127.0.0.1:8000/api/activity-log?entity_type=compass_evaluation&entity_id={evaluation_id}"
 ```
 
-The activity log is scoped to the seeded default local user. It supports optional `entity_type`, `entity_id`, `action`, and `limit` query parameters. The default limit is `50`; the maximum is `200`.
+The activity log is scoped to the authenticated current user when password auth is enabled, and to the seeded default local user only in seed/direct-service/auth-disabled test paths. It supports optional `entity_type`, `entity_id`, `action`, and `limit` query parameters. The default limit is `50`; the maximum is `200`.
 
 ## Layer 2 Local Flow
 
@@ -455,7 +487,7 @@ The activity log is scoped to the seeded default local user. It supports optiona
 5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
 6. Inspect lifecycle events with `GET /api/activity-log`.
 
-The original Layer 2 local flow does not add auth, automated discovery, generated application packets, or application submission. Backend resume and cover-letter artifact generation foundations now exist separately as draft-only services; frontend rendering, review/approval lifecycle, and submission remain future work. Local Markdown/DOCX/PDF export is available for stored generated artifacts.
+The original Layer 2 local flow does not add automated discovery, generated application packets, or application submission. Local username/password auth now exists separately from those intake workflows. Backend resume and cover-letter artifact generation foundations now exist separately as draft-only services; frontend rendering, review/approval lifecycle, and submission remain future work. Local Markdown/DOCX/PDF export is available for stored generated artifacts.
 
 ## Resume Artifact Generation
 

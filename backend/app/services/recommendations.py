@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState
 from app.models import Application, ArtifactPerformanceRecord, Role, CompassEvaluation, User
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.artifact_performance import summarize_artifact_records
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.search_health import generate_search_health_signals
 
 
@@ -27,12 +27,12 @@ class RecommendationService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise RecommendationSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def list_recommendations(
         self,

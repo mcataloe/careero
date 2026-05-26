@@ -43,7 +43,7 @@ const readiness: ProductizationReadiness = {
     local_session_attempt_cap: 25,
     durable_metering_status: "not_implemented",
   },
-  auth_status: { status: "not_implemented", implemented: false, detail: "" },
+  auth_status: { status: "local_password_enabled", implemented: true, detail: "" },
   tenant_boundary_prep_status: {
     status: "local_boundary_prep",
     implemented: true,
@@ -68,7 +68,7 @@ const readiness: ProductizationReadiness = {
     implemented: false,
     detail: "",
   },
-  known_blockers: ["Production authentication is not implemented."],
+  known_blockers: ["Production auth hardening is incomplete."],
   production_readiness_statement:
     "Careero is not production-ready unless all required productization gates pass.",
 };
@@ -85,5 +85,9 @@ describe("SettingsPage", () => {
 
     expect(await screen.findByText("Product readiness")).toBeInTheDocument();
     expect(screen.getByText("Not production-ready")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Authentication and workspace switching are intentionally absent."),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("First-party username/password login is enabled locally.")).toBeInTheDocument();
   });
 });

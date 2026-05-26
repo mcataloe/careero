@@ -10,8 +10,8 @@ from app.schemas.resume_sources import (
     ResumeSourceUpdate,
     ResumeSourceVersionCreate,
 )
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
 class ResumeSourceError(Exception):
@@ -40,12 +40,12 @@ class ResumeSourceService:
         self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise ResumeSourceSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def create_source(self, payload: ResumeSourceCreate) -> dict[str, Any]:
         user = self.get_default_user()

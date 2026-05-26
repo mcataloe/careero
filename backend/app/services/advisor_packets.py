@@ -22,7 +22,7 @@ from app.models import (
     User,
 )
 from app.schemas.advisor_packets import AdvisorPacketIncludeOptions
-from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
 PACKET_VERSION = "advisor_packet.local_preview.v1"
@@ -57,12 +57,12 @@ class AdvisorPacketService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise AdvisorPacketSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def get_application_packet(
         self,

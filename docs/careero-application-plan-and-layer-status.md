@@ -159,7 +159,7 @@ These should not be treated as cleanly complete until implemented or validated i
 
 The repo does not yet fully include:
 
-- production authentication
+- production authentication hardening and account recovery
 - real multi-user tenant behavior
 - production authorization hardening
 - billing/subscriptions
@@ -194,7 +194,7 @@ The repo does not yet fully include:
 | Layer | Revised name | Revised status | Notes |
 | --- | --- | --- | --- |
 | Layer 0 | Product Foundation | Built / defined | Product mission, user-first posture, search-track concept, AI governance, UX philosophy, monetization caution, and risk boundaries are defined. |
-| Layer 1 | Local Platform Foundation | Built locally / production incomplete | Local backend, frontend, database, migrations, config, and seed model exist. Production auth, multi-user identity, tenancy, and authorization hardening remain future. |
+| Layer 1 | Local Platform Foundation | Built locally / first-party password auth foundation started; production incomplete | Local backend, frontend, database, migrations, config, seed model, username/password registration/login, and local HttpOnly session cookies exist. Production auth hardening, account recovery, SSO, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
 | Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
 | Layer 4 | Application Workflow | Substantially built / local reminder reconciliation implemented | Applications, state transitions, timeline, notes, external links, local reminders, and structured interview tracking exist. Reminder persistence/service/API/UI/count/timeline support exists for local user-triggered workflow actions. Summary counts include notes, external links, reminders, and interviews. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
@@ -204,7 +204,7 @@ The repo does not yet fully include:
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface started; local boundary prep added | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface and local auth foundation started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and ownership-boundary prep. Layer 11C adds first-party local username/password auth with HttpOnly cookie sessions and disabled Google/LinkedIn SSO placeholders. Production auth hardening, account recovery, OAuth/SSO, billing, hosted tenant isolation certification, export/delete, retention enforcement, and usage metering remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 | Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
@@ -247,7 +247,7 @@ Careero should remain job-seeker-first, AI-grounded, source-traceable, emotional
 
 ### Status
 
-Built locally / production incomplete.
+Built locally / first-party password auth foundation started; production incomplete.
 
 ### Purpose
 
@@ -262,14 +262,18 @@ Provide the local-first technical foundation for Careero.
 - Local development scripts.
 - Backend and frontend health checks.
 - Default local user seed model.
+- First-party local username/password registration and login.
+- HttpOnly local session cookies, current-user lookup, and logout.
+- Disabled Google and LinkedIn SSO placeholders on the login page.
 - Environment/config structure.
 - Workspace persistence.
 - Core repository structure.
 
 ### Remaining work
 
-- Real authentication.
-- User registration/login.
+- Production auth hardening.
+- Account recovery.
+- OAuth/SSO provider implementation.
 - Multi-user account support.
 - Production authorization model.
 - Runtime tenant isolation.
@@ -724,13 +728,15 @@ production auth, billing, tenant isolation, hosted deployment, data export/delet
 retention enforcement, or AI usage metering.
 
 Layer 11B adds a local-first current-user context abstraction and explicit
-service-level ownership-boundary helpers for selected workspace,
-role/opportunity, and application workflow paths. The default context still
-resolves the seeded local user so local development remains unchanged. Tests
-cover basic cross-user service-level boundaries with explicit test contexts.
-This is not production authentication, login/signup, OAuth, session management,
-JWT handling, auth-provider selection, or hosted tenant isolation
-certification.
+service-level ownership-boundary helpers. Layer 11C connects that boundary to
+first-party local username/password authentication with Argon2id password
+hashing, server-side session records, HttpOnly cookies, `/api/auth/*` routes,
+frontend login/register pages, app route protection, and logout. Seeded local
+user fallback remains for seed, direct service, and auth-disabled test paths
+only; authenticated app requests must resolve from a valid session. Google and
+LinkedIn SSO are disabled placeholders only. OAuth, JWT auth, hosted auth
+provider selection, account recovery, production auth hardening, billing,
+export/delete, and hosted tenant isolation certification remain future.
 
 Layer 14 extends the productization strategy for model choice, credits, and
 API-first intelligence, but those capabilities are not implemented in `main`.

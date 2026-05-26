@@ -24,12 +24,22 @@ def seed_default_local_user(db: Session) -> User:
         user = User(
             id=DEFAULT_LOCAL_USER_ID,
             email=DEFAULT_LOCAL_USER_EMAIL,
+            email_normalized=DEFAULT_LOCAL_USER_EMAIL,
+            username="local-user",
+            username_normalized="local-user",
             display_name=DEFAULT_LOCAL_USER_DISPLAY_NAME,
+            auth_method="local_seeded",
+            account_status="active",
         )
         db.add(user)
     else:
         user.email = DEFAULT_LOCAL_USER_EMAIL
+        user.email_normalized = DEFAULT_LOCAL_USER_EMAIL
+        user.username = user.username or "local-user"
+        user.username_normalized = user.username_normalized or "local-user"
         user.display_name = DEFAULT_LOCAL_USER_DISPLAY_NAME
+        user.auth_method = "local_seeded"
+        user.account_status = "active"
 
     db.commit()
     db.refresh(user)

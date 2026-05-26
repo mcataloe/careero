@@ -28,10 +28,17 @@ Layer 11A adds a local-first productization readiness surface:
 
 Layer 11A is not production deployment. It adds reporting only.
 
-It does not yet have production authentication, production authorization,
-tenant isolation, billing, hosted deployment, account deletion/export,
-retention enforcement, or production privacy controls. Existing seeded local
-user behavior is not production auth.
+It now has a local-first first-party username/password auth foundation:
+registration, login with username or email, Argon2id password hashing,
+server-side session records, HttpOnly cookie sessions, `/api/auth/me`, logout,
+and frontend app-route protection. Google and LinkedIn SSO are visible disabled
+placeholders only. OAuth is not implemented.
+
+It does not yet have production auth hardening, account recovery, production
+authorization, hosted tenant isolation certification, billing, hosted
+deployment, account deletion/export, retention enforcement, or production
+privacy controls. Existing seeded local user behavior is not a public password
+or hosted auth path.
 
 Layer 11B adds local-first current-user boundary prep: a small injectable
 current-user context resolves the seeded local user by default, and selected
@@ -54,7 +61,7 @@ implement production auth.
 | Gate | Local POC | Local beta | Private hosted beta | Production SaaS | Marketplace/employer-side |
 | --- | --- | --- | --- | --- | --- |
 | Core workflow | Manual local workflow works. | Application, reminders, artifacts, analytics, and strategy are coherent. | Hosted workflows are stable for invited users. | Public workflows are supportable and observable. | User-side workflow remains the product center. |
-| Identity | Seeded local user is acceptable. | Local user assumptions are documented. | Real auth and account recovery are implemented. | Auth is hardened and supportable. | Sharing identity model is explicit and user-controlled. |
+| Identity | Local username/password auth is available; seeded local user remains for seed/test paths. | Local user and bootstrap assumptions are documented. | Hardened auth and account recovery are implemented. | Auth is hardened and supportable. | Sharing identity model is explicit and user-controlled. |
 | Authorization | Local-only boundary. | No false tenant claims. | Workspace/account authorization is enforced. | Tenant isolation is tested and monitored. | Employer access is scoped, revocable, and audited. |
 | Privacy | Local data expectations documented. | Data classes, export, deletion, and retention designs exist. | Export/delete and retention controls are implemented. | Privacy controls are operationally supportable. | No employer visibility without explicit user sharing. |
 | AI governance | Source-grounded AI and TruthGuard checks. | Usage transparency and reviewability are clear. | Usage metering and cost controls are implemented. | Abuse, cost, and quality controls are monitored. | AI never sells attention or hides sponsored steering. |
@@ -63,7 +70,7 @@ implement production auth.
 
 ## Explicit Production Blockers
 
-- Production authentication is not implemented.
+- Production auth hardening, account recovery, email verification, MFA, and SSO are not implemented.
 - Production authorization and tenant isolation are not implemented.
 - Layer 11B service-level ownership checks are local boundary prep only and do
   not certify hosted tenant isolation.
@@ -92,8 +99,8 @@ implement production auth.
 
 ## What Must Stay Future
 
-- Production auth and account registration.
-- Auth-provider selection and auth dependencies.
+- Production auth hardening, account recovery, and SSO.
+- Hosted auth-provider selection and OAuth dependencies.
 - Production authorization and tenant isolation implementation.
 - Hosted production deployment.
 - Billing provider integration, including Stripe or equivalent providers.

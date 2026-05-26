@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import ActivityLog, User
-from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
 class ActivityLogSeedMissingError(Exception):
@@ -17,12 +17,12 @@ class ActivityLogService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise ActivityLogSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def append(
         self,

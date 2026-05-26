@@ -20,7 +20,7 @@ from app.models import (
     User,
     Workspace,
 )
-from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.insight_governance import governed_insight
 
 
@@ -60,12 +60,12 @@ class SearchAnalyticsService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise SearchAnalyticsSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def get_search_analytics(
         self,

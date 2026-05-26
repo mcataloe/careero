@@ -25,6 +25,12 @@ python -m app.seed
 uvicorn app.main:app --reload
 ```
 
+Open `/register` to create a local username/password account, or `/login` to
+sign in. The session is held in an HttpOnly backend cookie; the frontend does
+not store session tokens in local storage. Google and LinkedIn buttons on the
+login page are disabled "coming soon" placeholders only and do not trigger
+OAuth or external redirects.
+
 AI enrichment is controlled by backend configuration. The frontend works with the deterministic backend fallback when AI is disabled, missing, or unavailable.
 
 Manual opportunity intake is available at:

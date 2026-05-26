@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState, SOURCE_DISPLAY_NAMES
 from app.models import Application, ApplicationNote, Role, CompassEvaluation, User
-from app.seed import DEFAULT_LOCAL_USER_ID
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.insight_governance import governed_insight
 
 
@@ -39,12 +39,12 @@ class SourceIntelligenceService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise SourceIntelligenceSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def get_source_intelligence(
         self,

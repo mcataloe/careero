@@ -14,6 +14,16 @@ function jsonResponse(response: unknown, status = 200) {
   };
 }
 
+const authUser = {
+  id: "user-1",
+  username: "matthew",
+  email: "matthew@example.com",
+  display_name: "Matthew",
+  auth_method: "local_password",
+  account_status: "active",
+  created_at: "2026-05-26T00:00:00Z",
+};
+
 function renderAppAt(path: string) {
   render(
     <MemoryRouter initialEntries={[path]}>
@@ -28,18 +38,23 @@ describe("Opportunity routes", () => {
   });
 
   it("renders the canonical opportunity list route", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(jsonResponse(authUser)).mockResolvedValueOnce(jsonResponse([])),
+    );
 
     renderAppAt("/opportunities");
 
     expect(await screen.findByRole("heading", { name: "Opportunities" })).toBeInTheDocument();
-    expect(screen.getByText("No opportunities yet")).toBeInTheDocument();
+    expect(await screen.findByText("No opportunities yet")).toBeInTheDocument();
   });
 
   it("renders the canonical add opportunity route", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse(authUser)));
+
     renderAppAt("/opportunities/new");
 
-    expect(screen.getByRole("heading", { name: "Add opportunity" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Add opportunity" })).toBeInTheDocument();
     expect(screen.getByLabelText(/opportunity title/i)).toBeInTheDocument();
   });
 
@@ -48,6 +63,7 @@ describe("Opportunity routes", () => {
       "fetch",
       vi
         .fn()
+        .mockResolvedValueOnce(jsonResponse(authUser))
         .mockResolvedValueOnce(jsonResponse(sampleRole))
         .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404)),
     );
@@ -59,7 +75,10 @@ describe("Opportunity routes", () => {
   });
 
   it("redirects the legacy roles list route", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(jsonResponse(authUser)).mockResolvedValueOnce(jsonResponse([])),
+    );
 
     renderAppAt("/roles");
 
@@ -67,9 +86,11 @@ describe("Opportunity routes", () => {
   });
 
   it("redirects the legacy add role route", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse(authUser)));
+
     renderAppAt("/roles/new");
 
-    expect(screen.getByRole("heading", { name: "Add opportunity" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Add opportunity" })).toBeInTheDocument();
   });
 
   it("redirects the legacy role detail route", async () => {
@@ -77,6 +98,7 @@ describe("Opportunity routes", () => {
       "fetch",
       vi
         .fn()
+        .mockResolvedValueOnce(jsonResponse(authUser))
         .mockResolvedValueOnce(jsonResponse(sampleRole))
         .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404)),
     );
@@ -88,5 +110,14 @@ describe("Opportunity routes", () => {
       `/api/opportunities/${sampleRole.id}`,
       expect.any(Object),
     );
+  });
+
+  it("redirects unauthenticated app routes to login", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse({ detail: "Authentication required" }, 401)));
+
+    renderAppAt("/dashboard");
+
+    expect(await screen.findByRole("heading", { name: "Careero" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/username or email/i)).toBeInTheDocument();
   });
 });

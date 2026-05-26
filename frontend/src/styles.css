@@ -55,3 +55,18 @@ a {
   border-color: var(--mantine-color-gray-4);
   background: var(--mantine-color-body);
 }
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--mantine-spacing-xl);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(246, 248, 251, 0.96)),
+    #f6f8fb;
+}
+
+.auth-panel {
+  width: min(100%, 440px);
+  background: var(--mantine-color-white);
+}

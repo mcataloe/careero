@@ -31,7 +31,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 6. Local data is seeded with `.\scripts\seed.ps1`.
 7. Backend and frontend are running.
 8. `.\scripts\check-local.ps1` passes.
-9. Manual opportunity intake works at `http://127.0.0.1:5173/opportunities/new`.
+9. Local account registration works at `http://127.0.0.1:5173/register`.
+10. Manual opportunity intake works at `http://127.0.0.1:5173/opportunities/new` after login.
 
 If database health fails, fix PostgreSQL credentials or update `backend/.env`, then rerun migrations and seed.
 
@@ -60,7 +61,7 @@ uvicorn app.main:app --reload
 ```
 
 Edit `backend/.env` so `CAREERO_DATABASE_URL` and `CAREERO_TEST_DATABASE_URL` point at your local PostgreSQL databases.
-Run `python -m app.seed` after migrations so the default local user and canonical manual job sources are available for role intake.
+Run `python -m app.seed` after migrations so the default local user and canonical manual job sources remain available for seed/direct-service compatibility. The seeded local user is not assigned a password. For normal browser use, create a local account at `/register`; registered users receive their own workspace and job sources.
 
 OpenAI COMPASS enrichment is optional and disabled by default. Deterministic COMPASS scoring works without an API key. To enable AI enrichment locally, set these in `backend/.env`:
 
@@ -139,7 +140,7 @@ Invoke-RestMethod `
 
 You can also import local `.txt`, `.md`, `.docx`, and text-based `.pdf` files from the Settings page or with `POST /api/resume-sources/import`. Imports are limited to `5 MB`, extract text for preview only, and do not save uploaded files or create sources. The extracted text remains editable before saving. PDFs must contain embedded selectable text; OCR for scanned PDFs is not included.
 
-Only one source version is active for the default local user. COMPASS evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. Resume and cover letter artifact generation can also use the active source when enabled. This source API does not extract profile facts or import external profiles.
+Only one source version is active for the current user. COMPASS evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. Resume and cover letter artifact generation can also use the active source when enabled. This source API does not extract profile facts or import external profiles.
 
 Future Google Docs import is tracked as a backlog item and requires Google OAuth, Drive/Docs scopes, document export, token handling, permission review, and a security design.
 
@@ -156,11 +157,12 @@ Posting the same opportunity/source/context inputs reuses a cached completed eva
 
 Manual browser smoke flow:
 
-1. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
-2. Open `http://127.0.0.1:5173/settings` and create an active resume/profile source.
-3. Open the opportunity detail page and run COMPASS evaluation.
-4. Confirm the evaluation shows score, recommendation, confidence, alignments, keyword gaps, and AI fallback/enrichment status.
-5. Re-run the evaluation and confirm a forced new run succeeds.
+1. Open `http://127.0.0.1:5173/register` and create a local account.
+2. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
+3. Open `http://127.0.0.1:5173/settings` and create an active resume/profile source.
+4. Open the opportunity detail page and run COMPASS evaluation.
+5. Confirm the evaluation shows score, recommendation, confidence, alignments, keyword gaps, and AI fallback/enrichment status.
+6. Re-run the evaluation and confirm a forced new run succeeds.
 
 Run tests:
 
@@ -179,7 +181,14 @@ npm install
 npm run dev
 ```
 
-The Vite dev server proxies `/api` requests to `http://127.0.0.1:8000`, so start the backend first for opportunity intake.
+The Vite dev server proxies `/api` requests to `http://127.0.0.1:8000`, so start the backend first for login and opportunity intake.
+
+Local auth routes:
+
+```text
+http://127.0.0.1:5173/login
+http://127.0.0.1:5173/register
+```
 
 Manual opportunity intake:
 
@@ -226,7 +235,7 @@ npm run validate
 
 ## Current Boundaries
 
-Layer 2 is local-first and evaluation-focused only. Later layers add workspace-aware artifact generation, but the app still does not include authentication, tenants, frontend workspace switching, billing, cloud deployment, automated discovery, application packets, or automated application submission.
+Layer 2 is local-first and evaluation-focused only. Later layers add workspace-aware artifact generation. The app now includes local username/password authentication, but it still does not include production auth hardening, tenants, frontend workspace switching, billing, cloud deployment, automated discovery, application packets, or automated application submission.
 
 ## Layer 2 Completion
 

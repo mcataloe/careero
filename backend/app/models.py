@@ -43,6 +43,11 @@ class SoftDeleteMixin:
 
 class User(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "users"
+    __table_args__ = (
+        Index("ix_users_username_normalized", "username_normalized", unique=True),
+        Index("ix_users_email_normalized", "email_normalized", unique=True),
+        Index("ix_users_account_status", "account_status"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -50,7 +55,25 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
         default=uuid.uuid4,
     )
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
+    email_normalized: Mapped[str | None] = mapped_column(String(320))
+    username: Mapped[str | None] = mapped_column(String(100))
+    username_normalized: Mapped[str | None] = mapped_column(String(100))
     display_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    password_hash: Mapped[str | None] = mapped_column(Text)
+    password_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    auth_method: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="local_password",
+    )
+    account_status: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="active",
+    )
+    failed_login_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     companies: Mapped[list["Company"]] = relationship(back_populates="user")
     roles: Mapped[list["Role"]] = relationship(back_populates="user")
@@ -59,6 +82,42 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     )
     resume_sources: Mapped[list["ResumeSource"]] = relationship(back_populates="user")
     workspaces: Mapped[list["Workspace"]] = relationship(back_populates="user")
+    auth_sessions: Mapped[list["AuthSession"]] = relationship(back_populates="user")
+
+
+class AuthSession(TimestampMixin, Base):
+    __tablename__ = "auth_sessions"
+    __table_args__ = (
+        Index("ix_auth_sessions_user_id", "user_id"),
+        Index("ix_auth_sessions_token_hash", "session_token_hash", unique=True),
+        Index("ix_auth_sessions_expires_at", "expires_at"),
+        Index("ix_auth_sessions_revoked_at", "revoked_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    session_token_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    user_agent: Mapped[str | None] = mapped_column(String(512))
+    ip_hint: Mapped[str | None] = mapped_column(String(100))
+    session_metadata: Mapped[dict] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=False,
+        default=dict,
+    )
+
+    user: Mapped[User] = relationship(back_populates="auth_sessions")
 
 
 class Workspace(TimestampMixin, Base):

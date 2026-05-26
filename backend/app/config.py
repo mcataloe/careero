@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     openai_max_output_tokens: int = Field(default=2500)
     max_ai_evaluations_per_session: int = Field(default=25)
     log_level: str = Field(default="INFO")
+    auth_session_cookie_name: str = Field(default="careero_session")
+    auth_session_days: int = Field(default=14)
+    auth_cookie_secure: bool = Field(default=False)
+    enable_password_auth: bool = Field(default=True)
+    allow_registration: bool = Field(default=True)
+    password_min_length: int = Field(default=12)
 
     @field_validator(
         "app_name",
@@ -52,6 +58,7 @@ class Settings(BaseSettings):
         "openai_default_resume_generation_model",
         "openai_default_cover_letter_generation_model",
         "log_level",
+        "auth_session_cookie_name",
     )
     @classmethod
     def required_text_must_not_be_blank(cls, value: str) -> str:
@@ -78,6 +85,20 @@ class Settings(BaseSettings):
     def max_ai_evaluations_per_session_must_be_positive(cls, value: int) -> int:
         if value <= 0:
             raise ValueError("must be greater than zero")
+        return value
+
+    @field_validator("auth_session_days")
+    @classmethod
+    def auth_session_days_must_be_positive(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("must be greater than zero")
+        return value
+
+    @field_validator("password_min_length")
+    @classmethod
+    def password_min_length_must_be_reasonable(cls, value: int) -> int:
+        if value < 8:
+            raise ValueError("must be at least 8")
         return value
 
     @model_validator(mode="after")

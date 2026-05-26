@@ -20,6 +20,12 @@ def test_settings_have_safe_local_defaults_without_env_file(
 ) -> None:
     monkeypatch.delenv("CAREERO_DATABASE_URL", raising=False)
     monkeypatch.delenv("CAREERO_TEST_DATABASE_URL", raising=False)
+    monkeypatch.delenv("CAREERO_ENABLE_PASSWORD_AUTH", raising=False)
+    monkeypatch.delenv("CAREERO_ALLOW_REGISTRATION", raising=False)
+    monkeypatch.delenv("CAREERO_AUTH_SESSION_COOKIE_NAME", raising=False)
+    monkeypatch.delenv("CAREERO_AUTH_SESSION_DAYS", raising=False)
+    monkeypatch.delenv("CAREERO_AUTH_COOKIE_SECURE", raising=False)
+    monkeypatch.delenv("CAREERO_PASSWORD_MIN_LENGTH", raising=False)
     settings = Settings(_env_file=None)
 
     assert settings.app_name == "Careero API"
@@ -41,6 +47,12 @@ def test_settings_have_safe_local_defaults_without_env_file(
     assert settings.openai_max_output_tokens == 2500
     assert settings.max_ai_evaluations_per_session == 25
     assert settings.log_level == "INFO"
+    assert settings.enable_password_auth is True
+    assert settings.allow_registration is True
+    assert settings.auth_session_cookie_name == "careero_session"
+    assert settings.auth_session_days == 14
+    assert settings.auth_cookie_secure is False
+    assert settings.password_min_length == 12
 
 
 @pytest.mark.parametrize(
@@ -55,6 +67,7 @@ def test_settings_have_safe_local_defaults_without_env_file(
         ("openai_default_resume_generation_model", ""),
         ("openai_default_cover_letter_generation_model", ""),
         ("log_level", ""),
+        ("auth_session_cookie_name", ""),
     ],
 )
 def test_settings_reject_blank_required_values(field_name: str, value: str) -> None:
@@ -112,6 +125,9 @@ def test_settings_accept_ai_enabled_with_valid_openai_options() -> None:
         ("openai_max_output_tokens", -10),
         ("max_ai_evaluations_per_session", 0),
         ("max_ai_evaluations_per_session", -1),
+        ("auth_session_days", 0),
+        ("auth_session_days", -1),
+        ("password_min_length", 7),
     ],
 )
 def test_settings_reject_invalid_openai_numeric_options(

@@ -10,6 +10,8 @@ prompt.
 
 Careero currently runs as a local-first FastAPI backend, React + Vite frontend,
 PostgreSQL database, Alembic migrations, local scripts, and local health checks.
+It also has first-party local username/password auth with HttpOnly cookie
+sessions. This is a local foundation, not production-hardened hosted auth.
 The `infra/` directory is reserved for future infrastructure notes and does not
 contain production cloud deployment logic.
 
@@ -30,7 +32,7 @@ Careero is not production-ready.
 
 ## Required Production Capabilities
 
-- Authentication.
+- Production auth hardening, account recovery, and SSO decisioning.
 - Authorization.
 - Tenant isolation.
 - Secrets management.
@@ -63,7 +65,9 @@ Production readiness requires:
 - Compatibility windows for Role-backed Opportunity persistence.
 - Test database validation.
 
-No migration changes are included in this Layer 11 readiness prompt.
+Layer 11C adds an auth migration for user credential/session fields. Production
+deployment still needs a migration runbook, backup-before-migration process,
+and tested rollback/forward-fix expectations.
 
 ## Monitoring and Logging
 
@@ -85,8 +89,8 @@ Future deployments need:
 
 ## Explicit Non-Implementation Statement
 
-Layer 11A does not implement hosted deployment, production infrastructure,
-Docker/Kubernetes/Terraform/cloud resources, production auth, billing, account
-deletion/export, retention enforcement, durable usage metering, or external
-integrations. Production-like environments should report blocked readiness until
-those controls exist.
+Layer 11A/11C do not implement hosted deployment, production infrastructure,
+Docker/Kubernetes/Terraform/cloud resources, production auth hardening, billing,
+account deletion/export, retention enforcement, durable usage metering, or
+external integrations. Production-like environments should report blocked
+readiness until those controls exist.

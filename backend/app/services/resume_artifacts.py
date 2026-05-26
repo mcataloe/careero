@@ -22,9 +22,9 @@ from app.models import (
     User,
 )
 from app.schemas.resume_artifacts import ResumeArtifactGenerateRequest
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
 from app.services.artifact_performance import ArtifactPerformanceService
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.evaluation_hashing import resume_source_hash, role_content_hash
 from app.services.resume_artifact_ai import (
     OpenAIResumeArtifactGenerator,
@@ -104,12 +104,12 @@ class ResumeArtifactService:
         self._schema_validator = _resume_artifact_validator()
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise ResumeArtifactSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def generate_for_role(
         self,

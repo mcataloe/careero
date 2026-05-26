@@ -16,6 +16,14 @@ from app.database import sqlalchemy_url
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(autouse=True)
+def default_legacy_api_tests_to_local_user_fallback(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("CAREERO_ENABLE_PASSWORD_AUTH", "false")
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 @pytest.fixture
 def test_database_url() -> str:
     database_url = os.environ.get("CAREERO_TEST_DATABASE_URL")
@@ -46,6 +54,7 @@ def drop_known_schema(database_url: str) -> None:
                     text(
                         """
                         DROP TABLE IF EXISTS
+                            auth_sessions,
                             automation_approval_logs,
                             automation_suggestions,
                             activity_log,

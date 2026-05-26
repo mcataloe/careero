@@ -29,8 +29,8 @@ from app.models import (
     Workspace,
 )
 from app.schemas.automation import AutomationPreferencesUpdate
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
 POLICY_VERSION = "automation_policy_v1"
@@ -80,12 +80,12 @@ class AutomationService:
         self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise AutomationSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def list_suggestions(
         self,

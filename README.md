@@ -12,7 +12,7 @@ Use that document as the source of truth for Careero-specific LEAP Recon, layer 
 
 Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md).
 
-Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. These are readiness surfaces only; production auth, billing, tenant isolation, and hosted deployment remain future.
+Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. First-party local username/password login now exists, while Google/LinkedIn SSO, account recovery, production auth hardening, billing, tenant isolation, and hosted deployment remain future.
 
 Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
 
@@ -48,22 +48,24 @@ Current planning hierarchy:
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
 - Local-first productization readiness reporting through `GET /api/productization/readiness` and the Settings page. This reports current blockers and does not implement production deployment.
+- First-party local username/password account registration and login with HttpOnly cookie-backed sessions, current-user lookup, logout, and route protection.
+- Disabled Google and LinkedIn SSO placeholders on the login page. OAuth is not implemented.
 - Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, COMPASS rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.
 - Reserved directories for future modular growth.
 - Local-first current-user context and service-level ownership-boundary prep for
-  workspace, role/opportunity, and application workflow services. This preserves
-  seeded local-user operation and is not production authentication.
+  user-data services. Seeded local-user operation is preserved only for seed,
+  direct service, and test paths where password auth is disabled.
 
 ## Out of Scope
 
 Careero does not yet include:
 
-- Production authentication.
+- Production authentication hardening and account recovery.
 - Real multi-user tenant behavior.
-- Production authorization hardening.
+- Production authorization hardening and hosted tenant isolation certification.
 - Billing or subscriptions.
 - Model catalog, credit wallet, usage ledger, or credit-based billing controls.
 - Production deployment architecture.
@@ -148,9 +150,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 6. Run `.\scripts\seed.ps1`.
 7. Start backend and frontend in separate terminals.
 8. Run `.\scripts\check-local.ps1`.
-9. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
-10. Open `http://127.0.0.1:5173/settings` and add an active resume/profile source.
-11. Open the opportunity detail page and run a COMPASS evaluation.
+9. Open `http://127.0.0.1:5173/register` and create a local account.
+10. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
+11. Open `http://127.0.0.1:5173/settings` and add an active resume/profile source.
+12. Open the opportunity detail page and run a COMPASS evaluation.
 
 ## Backend Setup
 

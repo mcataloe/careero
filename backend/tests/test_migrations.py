@@ -23,6 +23,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "automation_suggestions",
         "automation_approval_logs",
         "activity_log",
+        "auth_sessions",
     }.issubset(set(inspector.get_table_names()))
 
     role_columns = {column["name"] for column in inspector.get_columns("roles")}
@@ -251,3 +252,34 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "external_mutation",
         "policy_version",
     }.issubset(automation_approval_columns)
+
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    assert {
+        "username",
+        "username_normalized",
+        "email_normalized",
+        "password_hash",
+        "password_updated_at",
+        "last_login_at",
+        "auth_method",
+        "account_status",
+        "failed_login_count",
+        "locked_until",
+    }.issubset(user_columns)
+
+    auth_session_columns = {
+        column["name"] for column in inspector.get_columns("auth_sessions")
+    }
+    assert {
+        "id",
+        "user_id",
+        "session_token_hash",
+        "expires_at",
+        "revoked_at",
+        "last_seen_at",
+        "user_agent",
+        "ip_hint",
+        "metadata",
+        "created_at",
+        "updated_at",
+    }.issubset(auth_session_columns)

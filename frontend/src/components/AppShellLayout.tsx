@@ -1,6 +1,7 @@
 import {
   AppShell as MantineAppShell,
   Burger,
+  Button,
   Group,
   NavLink,
   Stack,
@@ -12,10 +13,13 @@ import {
   IconBriefcase,
   IconClipboardList,
   IconGauge,
+  IconLogout,
   IconRoute,
   IconSettings,
 } from "@tabler/icons-react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
+
+import { useAuth } from "../auth/AuthProvider";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: IconGauge },
@@ -28,6 +32,9 @@ const navItems = [
 export function AppShellLayout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
   const location = useLocation();
+  const { currentUser, logout } = useAuth();
+  const userLabel =
+    currentUser?.display_name || currentUser?.username || currentUser?.email || "User";
 
   return (
     <MantineAppShell
@@ -45,9 +52,21 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <Title order={3}>Careero</Title>
           </Group>
-          <Text size="sm" c="dimmed">
-            Local-first career operations
-          </Text>
+          <Group gap="sm">
+            <Text size="sm" c="dimmed" visibleFrom="sm">
+              {userLabel}
+            </Text>
+            <Button
+              variant="subtle"
+              size="xs"
+              leftSection={<IconLogout size={16} />}
+              onClick={() => {
+                void logout();
+              }}
+            >
+              Log out
+            </Button>
+          </Group>
         </Group>
       </MantineAppShell.Header>
 

@@ -31,9 +31,9 @@ from app.schemas.strategy import (
     StrategySampleSize,
     StrategySignal,
 )
-from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.artifact_performance import ArtifactPerformanceService
 from app.services.compensation_intelligence import CompensationIntelligenceService
+from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.historical_learning import HistoricalLearningService
 from app.services.recommendations import RecommendationService
 from app.services.search_analytics import SearchAnalyticsService
@@ -72,12 +72,12 @@ class CareerStrategyService:
         self.db = db
 
     def get_default_user(self) -> User:
-        user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
-        if user is None or user.deleted_at is not None:
+        try:
+            return resolve_current_user(self.db)
+        except CurrentUserResolutionError as exc:
             raise CareerStrategySeedMissingError(
                 "Default local user is missing; run python -m app.seed"
-            )
-        return user
+            ) from exc
 
     def get_workspace_strategy(
         self,

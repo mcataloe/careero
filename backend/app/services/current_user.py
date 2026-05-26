@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from contextvars import ContextVar
 from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
@@ -41,8 +42,28 @@ class LocalUserContext(CurrentUserContext):
         )
 
 
+_request_current_user_context: ContextVar[CurrentUserContext | None] = ContextVar(
+    "request_current_user_context",
+    default=None,
+)
+
+
+def set_request_current_user_context(
+    current_user_context: CurrentUserContext,
+):
+    return _request_current_user_context.set(current_user_context)
+
+
+def reset_request_current_user_context(token) -> None:
+    _request_current_user_context.reset(token)
+
+
 def get_current_user_context() -> CurrentUserContext:
-    """Return the local seeded user context; this is not production auth."""
+    request_context = _request_current_user_context.get()
+    if request_context is not None:
+        return request_context
+
+    # Direct service calls keep the Layer 11B local/test ergonomics.
     return LocalUserContext()
 
 
@@ -52,7 +73,11 @@ def resolve_current_user(
 ) -> User:
     context = current_user_context or get_current_user_context()
     user = db.get(User, context.user_id)
-    if user is None or user.deleted_at is not None:
+    if (
+        user is None
+        or user.deleted_at is not None
+        or getattr(user, "account_status", "active") != "active"
+    ):
         raise CurrentUserResolutionError(
             "Current local user is missing; run python -m app.seed"
         )

@@ -29,6 +29,7 @@ sharing design.
 | Data class | Owner | Sensitivity | Retention expectation | Export behavior | Deletion behavior | Audit/logging expectation | AI use | Monetization use |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Account/profile data | User | High | Retain while account/workspace exists; production window TBD. | Export account profile fields. | Delete or anonymize on account deletion after approved retention window. | Log account lifecycle events without secrets. | Only for personalization if explicitly scoped. | May support account tier eligibility, not targeting. |
+| Password hashes and auth sessions | User/system | Critical | Retain while local account/session exists; production window TBD. | Do not export password hashes or raw session tokens. | Revoke/delete sessions with account/session lifecycle; password reset remains future. | Never log plaintext passwords, password hashes, raw tokens, or cookie values. | Not used for AI. | Not monetized. |
 | Workspace/search-track data | User | Medium | Retain while active or archived. | Export workspace/search-track records. | Delete with workspace or account deletion. | Log create/update/archive. | Yes, for workspace-scoped insights. | Aggregate plan limits only. |
 | Resume/profile sources | User | High | Retain while user keeps the source/version. | Export raw and normalized source text plus metadata. | Delete all versions and derived references when requested, subject to approved audit policy. | Log source lifecycle without raw text in logs. | Yes, only as grounding source. | Not sold, ranked, or shared. |
 | Source material versions | User | High | Retain version history until deleted or pruned by future policy. | Export version text, hashes, labels, and timestamps. | Delete versions or all source lineage when requested. | Log version lifecycle and hashes, not raw content. | Yes, as traceable grounding. | Not used for hidden monetization. |
@@ -58,6 +59,8 @@ sharing design.
 - Retention windows must be explicit before private hosted beta.
 - Logs must avoid raw resumes, prompts, private notes, API keys, and raw job
   descriptions unless an approved diagnostic mode exists.
+- Passwords and session tokens must never be logged or exported. Session records
+  store token hashes only; password hashes use Argon2id via `argon2-cffi`.
 - AI use must be opt-in where provider calls are involved.
 - Future collaboration and employer-side modes require separate sharing,
   revocation, audit, and disclosure design.
