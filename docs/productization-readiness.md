@@ -92,9 +92,10 @@ Layer 11 depends on Layers 1-10 becoming truthful, stable, and reviewable:
 
 ## Relationship to Layers 12-13
 
-Layer 12 advisor/collaboration mode requires privacy-scoped sharing, account
-roles, comment boundaries, and revocation. It should not precede account
-lifecycle and tenant isolation design.
+Layer 12 local-only advisor packet preview/export can exist as owner-visible,
+redacted scaffolding. Hosted advisor/collaboration mode still requires
+privacy-scoped sharing, account roles, comment boundaries, revocation, account
+lifecycle, and tenant isolation design before implementation.
 
 Layer 13 marketplace/employer-side exploration remains last. It requires strict
 user control, disclosure, auditability, and separation from core recommendation

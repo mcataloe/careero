@@ -2,6 +2,7 @@ import { Badge, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+import { getAdvisorPacket } from "../api/advisorPackets";
 import { listAutomationSuggestions } from "../api/automation";
 import {
   getApplication,
@@ -14,6 +15,7 @@ import { ApplicationInterviewPanel } from "../components/ApplicationInterviewPan
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
 import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
 import { ApplicationTimeline } from "../components/ApplicationTimeline";
+import { AdvisorPacketPanel } from "../components/AdvisorPacketPanel";
 import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
 import { ErrorState, LoadingState } from "../components/States";
 import type {
@@ -24,6 +26,10 @@ import type {
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
 } from "../types/applications";
+import type {
+  AdvisorPacket,
+  AdvisorPacketPreviewOptions,
+} from "../types/advisorPackets";
 import type { AutomationSuggestion } from "../types/automation";
 
 const STATE_COLORS: Record<ApplicationWorkflowState, string> = {
@@ -45,6 +51,7 @@ export function ApplicationDetailPage() {
   const [links, setLinks] = useState<ApplicationExternalLink[]>([]);
   const [interviews, setInterviews] = useState<ApplicationInterviewStage[]>([]);
   const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
+  const [advisorPacket, setAdvisorPacket] = useState<AdvisorPacket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,6 +71,7 @@ export function ApplicationDetailPage() {
         nextLinks,
         nextInterviews,
         nextSuggestions,
+        nextAdvisorPacket,
       ] =
         await Promise.all([
           getApplication(applicationId),
@@ -75,6 +83,7 @@ export function ApplicationDetailPage() {
             targetType: "application",
             targetId: applicationId,
           }),
+          getAdvisorPacket(applicationId),
         ]);
       setApplication(nextApplication);
       setTimeline(nextTimeline);
@@ -82,11 +91,20 @@ export function ApplicationDetailPage() {
       setLinks(nextLinks);
       setInterviews(nextInterviews);
       setSuggestions(nextSuggestions.suggestions);
+      setAdvisorPacket(nextAdvisorPacket);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load application");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function refreshAdvisorPacket(options: AdvisorPacketPreviewOptions) {
+    if (!applicationId) {
+      throw new Error("Application id is required");
+    }
+    const nextAdvisorPacket = await getAdvisorPacket(applicationId, options);
+    setAdvisorPacket(nextAdvisorPacket);
   }
 
   useEffect(() => {
@@ -151,6 +169,16 @@ export function ApplicationDetailPage() {
         title="Application suggestions"
         onChanged={loadApplication}
       />
+
+      {advisorPacket ? (
+        <AdvisorPacketPanel
+          applicationId={application.id}
+          packet={advisorPacket}
+          externalLinks={links}
+          interviews={interviews}
+          onRefresh={refreshAdvisorPacket}
+        />
+      ) : null}
 
       <ApplicationNotesPanel
         applicationId={application.id}
