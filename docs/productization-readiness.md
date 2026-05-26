@@ -79,6 +79,11 @@ Layer 11.7 adds a local-first entitlement boundary model:
 - Safety boundary: no Stripe, checkout, subscriptions, invoices, payment
   details, credit wallet, upgrade buttons, or paid enforcement.
 
+Layer 11.8 adds
+[`auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md).
+This is evaluation only. It does not select an auth provider, add auth
+dependencies, implement login/signup, or claim hosted readiness.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |

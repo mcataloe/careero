@@ -14,6 +14,8 @@ Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strat
 
 Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. These are readiness surfaces only; production auth, billing, tenant isolation, and hosted deployment remain future.
 
+Auth-provider and hosted-beta direction is evaluated in [`docs/auth-provider-and-hosted-beta-evaluation.md`](docs/auth-provider-and-hosted-beta-evaluation.md). It is evaluation only and does not select or implement auth.
+
 Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
 
 Layer 14 model choice, credits, and API-first intelligence strategy is captured in [`docs/careero-layer-14-strategic-plan-section.md`](docs/careero-layer-14-strategic-plan-section.md) and summarized in the canonical layer plan. This is strategic planning only; model catalogs, credit wallets, usage ledgers, API job ingestion, company research caching, and scraping are not implemented in `main`.

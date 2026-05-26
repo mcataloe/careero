@@ -19,6 +19,12 @@ an inspection surface, not deployment infrastructure.
 
 Careero is not production-ready.
 
+Layer 11.8 adds
+[`auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md)
+to compare local packaged app, single-user hosted app, private hosted beta, and
+production SaaS paths. It is evaluation only and does not add deployment
+infrastructure or hosted readiness.
+
 ## Deployment Target Options
 
 | Option | Requirements | Risks | Missing pieces | Security/privacy implications | Operational burden | Recommended timing |

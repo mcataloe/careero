@@ -29,6 +29,9 @@ registration, tenant isolation, data export, or account deletion.
   or submit hosted support work.
 - No auth provider has been selected, and no auth provider dependency, login,
   signup, OAuth, session, JWT, or password storage has been added.
+- Layer 11.8 evaluates auth-provider and hosted-beta options while keeping the
+  final provider choice deferred. It adds no login/signup, OAuth, session, JWT,
+  password, or passkey implementation.
 - Layer 11A readiness reporting surfaces this status in the backend and
   Settings page, but it does not add account controls.
 
