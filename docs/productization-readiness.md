@@ -39,6 +39,16 @@ workspace, role/opportunity, and application services now make owner-scoped
 service checks more explicit. This preserves local operation and does not
 implement production auth.
 
+Layer 11.4 adds a local-first data export foundation:
+
+- Backend endpoint: `GET /api/data-export/local`.
+- Frontend surface: Settings page Local data export panel.
+- Scope: returns a structured JSON package for records owned by the resolved
+  current local user, including user-owned private content where appropriate.
+- Safety boundary: no cloud storage, public links, hosted account export,
+  production account support, legal compliance certification, runtime secrets,
+  database URLs, API keys, provider credentials, or unrelated users' records.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |
@@ -67,7 +77,9 @@ implement production auth.
 - Production authorization and tenant isolation are not implemented.
 - Layer 11B service-level ownership checks are local boundary prep only and do
   not certify hosted tenant isolation.
-- Data export, account deletion, and retention enforcement are not implemented.
+- Local-first JSON data export exists for the current local user.
+- Hosted account export, account deletion, and retention enforcement are not
+  implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
 - Production deployment architecture is not implemented.
@@ -88,6 +100,8 @@ implement production auth.
   private content.
 - Local-first current-user context and service-level boundary tests that prepare
   future auth injection without selecting an auth provider.
+- Local-first owner export surfaces that avoid cloud storage and runtime
+  secrets.
 - Future implementation prompts that preserve job-seeker-first trust.
 
 ## What Must Stay Future

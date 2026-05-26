@@ -19,6 +19,10 @@ registration, tenant isolation, data export, or account deletion.
   isolation.
 - Production account lifecycle, recovery, support, and deletion flows are not
   implemented.
+- Layer 11.4 adds a local-first JSON data export for the resolved current local
+  user. This is a local owner export only and does not imply hosted account
+  export, production auth, cloud backup, account recovery, deletion, retention
+  enforcement, or legal compliance certification.
 - No auth provider has been selected, and no auth provider dependency, login,
   signup, OAuth, session, JWT, or password storage has been added.
 - Layer 11A readiness reporting surfaces this status in the backend and
@@ -101,8 +105,9 @@ Production deletion design must define:
 - Local exports and files outside app control.
 - Provider-side AI/billing data implications.
 
-Layer 11A reports export/delete status as not implemented. It does not add
-export buttons, deletion controls, deletion jobs, retention enforcement, or
+Layer 11.4 adds `GET /api/data-export/local` and a Settings page download
+control for local JSON export. It does not add hosted export queues, cloud
+download links, deletion controls, deletion jobs, retention enforcement, or
 account lifecycle APIs.
 
 ## Data Export
@@ -167,7 +172,7 @@ operational logs.
 - Backup/restore.
 - Incident response.
 - User-visible privacy controls.
-- Data export/delete implementation.
+- Hosted data export/delete implementation.
 - Billing only after provider and policy approval.
 - Monitoring, logging, cost controls, and support coverage.
 

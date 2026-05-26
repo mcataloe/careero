@@ -1,6 +1,7 @@
 import { List, Paper, Stack, Text, Title } from "@mantine/core";
 
 import { AutomationPreferencesPanel } from "../components/AutomationPreferencesPanel";
+import { LocalDataExportPanel } from "../components/LocalDataExportPanel";
 import { ProductReadinessPanel } from "../components/ProductReadinessPanel";
 import { ResumeSourceSettings } from "../components/ResumeSourceSettings";
 
@@ -19,6 +20,7 @@ export function SettingsPage() {
         </List>
       </Paper>
       <ProductReadinessPanel />
+      <LocalDataExportPanel />
       <AutomationPreferencesPanel />
       <ResumeSourceSettings />
     </Stack>

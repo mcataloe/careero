@@ -54,7 +54,16 @@ sharing design.
 
 ## Governance Expectations
 
-- Data export/delete must be designed before production implementation.
+- Layer 11.4 adds a local-first JSON export endpoint and Settings panel for the
+  resolved current local user. The export is user-owned local output only; it
+  does not create cloud storage, public links, hosted account export,
+  production auth, or compliance certification.
+- Local-first export may include the user's own private source material,
+  opportunity content, notes, artifacts, evaluations, and visible audit records,
+  but it must not include environment variables, API keys, database URLs,
+  provider credentials, or unrelated users' records.
+- Hosted account export, account deletion, and retention enforcement must be
+  designed before production implementation.
 - Retention windows must be explicit before private hosted beta.
 - Logs must avoid raw resumes, prompts, private notes, API keys, and raw job
   descriptions unless an approved diagnostic mode exists.

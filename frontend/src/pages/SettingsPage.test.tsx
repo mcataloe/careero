@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 
 vi.mock("../components/AutomationPreferencesPanel", () => ({
   AutomationPreferencesPanel: () => <div>Automation settings placeholder</div>,
@@ -50,7 +51,7 @@ const readiness: ProductizationReadiness = {
     detail: "",
   },
   billing_status: { status: "not_implemented", implemented: false, detail: "" },
-  export_delete_status: { status: "not_implemented", implemented: false, detail: "" },
+  export_delete_status: { status: "local_export_available", implemented: true, detail: "" },
   retention_status: { status: "not_enforced", implemented: false, detail: "" },
   durable_usage_metering_status: {
     status: "not_implemented",
@@ -76,6 +77,7 @@ const readiness: ProductizationReadiness = {
 describe("SettingsPage", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it("renders the product readiness panel", async () => {
@@ -85,5 +87,66 @@ describe("SettingsPage", () => {
 
     expect(await screen.findByText("Product readiness")).toBeInTheDocument();
     expect(screen.getByText("Not production-ready")).toBeInTheDocument();
+  });
+
+  it("downloads a local data export from settings", async () => {
+    const createObjectURL = vi.fn(() => "blob:careero-export");
+    const revokeObjectURL = vi.fn();
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    const append = vi.spyOn(document.body, "append");
+    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(readiness))
+        .mockResolvedValueOnce(
+          jsonResponse({
+            metadata: {
+              schema_version: "careero.local_data_export.v1",
+              generated_at: "2026-05-26T12:00:00Z",
+              readiness_note: "Local-first JSON export.",
+              current_user: {
+                id: "00000000-0000-4000-8000-000000000001",
+                email: "local-user@careero.local",
+                display_name: "Local User",
+                mode: "local",
+                environment: "local",
+              },
+              derived_data_notes: [],
+            },
+            opportunities: [{ id: "role-1" }],
+            workspaces: [],
+            companies: [],
+            job_sources: [],
+            resume_sources: [],
+            resume_source_versions: [],
+            compass_evaluations: [],
+            generated_artifacts: [],
+            artifact_performance_records: [],
+            applications: [],
+            application_state_history: [],
+            notes: [],
+            reminders: [],
+            external_links: [],
+            interview_stages: [],
+            activity_logs: [],
+            automation_suggestions: [],
+            automation_approval_logs: [],
+          }),
+        ),
+    );
+
+    render(<SettingsPage />);
+    await screen.findByText("Local data export");
+    await userEvent.click(screen.getByRole("button", { name: /download json/i }));
+
+    expect(await screen.findByText("Export prepared with 1 opportunities.")).toBeInTheDocument();
+    expect(createObjectURL).toHaveBeenCalled();
+    expect(append).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:careero-export");
   });
 });
