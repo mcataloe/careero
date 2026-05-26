@@ -5,6 +5,7 @@ from fastapi import FastAPI, Response, status
 from app.api.activity_log import router as activity_log_router
 from app.api.account_lifecycle import router as account_lifecycle_router
 from app.api.advisor_packets import router as advisor_packets_router
+from app.api.ai_usage import router as ai_usage_router
 from app.api.automation import router as automation_router
 from app.api.artifact_exports import router as artifact_exports_router
 from app.api.artifact_performance import router as artifact_performance_router
@@ -48,6 +49,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(activity_log_router, prefix="/api")
     app.include_router(account_lifecycle_router, prefix="/api")
     app.include_router(advisor_packets_router, prefix="/api")
+    app.include_router(ai_usage_router, prefix="/api")
     app.include_router(automation_router, prefix="/api")
     app.include_router(artifact_exports_router, prefix="/api")
     app.include_router(artifact_performance_router, prefix="/api")

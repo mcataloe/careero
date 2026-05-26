@@ -60,6 +60,16 @@ Layer 11.5 adds local-first account lifecycle request tracking:
 - Safety boundary: deletion requests are non-destructive and explicitly state
   that data has not been deleted and deletion enforcement remains future.
 
+Layer 11.6 adds local-first AI usage metering:
+
+- Backend endpoint: `GET /api/usage/ai`.
+- Frontend surface: Settings page AI usage panel.
+- Scope: records provider-agnostic local usage events for role parsing, COMPASS
+  enrichment, resume artifacts, and cover-letter artifacts.
+- Safety boundary: events contain safe metadata only and do not persist raw
+  prompts, resumes, private notes, job descriptions, provider credentials,
+  database URLs, API keys, or billing events.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |
@@ -91,6 +101,8 @@ Layer 11.5 adds local-first account lifecycle request tracking:
 - Local-first JSON data export exists for the current local user.
 - Hosted account export, destructive account deletion, anonymization, and
   retention enforcement are not implemented.
+- Credits, paid billing, quota enforcement, model marketplaces, and production
+  cost controls are not implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
 - Production deployment architecture is not implemented.
@@ -113,6 +125,8 @@ Layer 11.5 adds local-first account lifecycle request tracking:
   future auth injection without selecting an auth provider.
 - Local-first owner export surfaces that avoid cloud storage and runtime
   secrets.
+- Local-first AI usage visibility that avoids private content and billing
+  claims.
 - Future implementation prompts that preserve job-seeker-first trust.
 
 ## What Must Stay Future

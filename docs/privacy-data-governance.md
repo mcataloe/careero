@@ -47,6 +47,7 @@ sharing design.
 | Recruiter/source/contact metadata | User | Medium to high | Retain while user keeps source/contact context. | Export source/contact labels, notes, and provenance. | Delete with source/contact/opportunity/account. | Log lifecycle and references. | Yes, for source quality and provenance. | Not sold to recruiters or employers. |
 | AI prompts | User/system | High | Store only when needed for audit/debug and with redaction policy; current retention policy TBD. | Export if stored and user-specific. | Delete with related AI run/account subject to future audit policy. | Log prompt version, hashes, and model metadata; avoid raw prompt logs by default. | Sent to provider only when AI feature is enabled. | Not monetized as content. |
 | AI outputs | User | High | Retain with generated/evaluation records. | Export outputs and trace metadata. | Delete with related record/account. | Log lifecycle, model, prompt/ruleset versions, warnings. | May be reused only as traceable, reviewable context. | May count usage, not steer hidden sponsorship. |
+| AI usage events | User/system | Medium | Retention window TBD. | Export safe local usage event metadata and aggregate basis. | Delete/anonymize under future account deletion policy. | Record feature, event type, model/provider, token estimates, latency, sanitized error class, and hashes only. | Supports local transparency and future cost controls. | May support future transparent quotas; not hidden steering or billing today. |
 | Activity logs | User/system | Medium | Retain for audit window TBD. | Export user-visible activity. | Delete/anonymize under account deletion policy after approved retention window. | Source of audit summaries, not source of domain truth. | Limited use for analytics and strategy. | Aggregate operational metrics only. |
 | Account lifecycle requests | User/system | Medium | Retain until future retention policy defines audit windows. | Export request type, status, target metadata, timestamps, and user-provided reason in the owner's local export. | Request-only today; destructive deletion and anonymization remain future. | Log request/cancel events without raw reasons or private content. | No direct AI use. | Not monetized. |
 | Automation suggestions | User/system | Medium to high | Retain while useful for audit and workflow; window TBD. | Export suggestion, reason, target, status, and preview metadata. | Delete with workspace/account or future cleanup policy. | Log suggestion lifecycle. | Yes, for local suggestions only. | Not used for employer-paid steering. |
@@ -67,6 +68,9 @@ sharing design.
   designed before production implementation.
 - Layer 11.5 lifecycle request records are tracking/audit records only; they do
   not enforce deletion, anonymization, recovery, or retention policy.
+- Layer 11.6 AI usage events must remain metadata-only and must not persist raw
+  prompts, raw resumes, raw private notes, raw job descriptions, API keys,
+  provider credentials, database URLs, or full exception messages.
 - Retention windows must be explicit before private hosted beta.
 - Logs must avoid raw resumes, prompts, private notes, API keys, and raw job
   descriptions unless an approved diagnostic mode exists.

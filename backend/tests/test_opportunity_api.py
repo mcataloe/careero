@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.api.roles import get_role_parsing_service
+from app.api.roles import get_ai_usage_service, get_role_parsing_service
 from app.database import get_db
 from app.main import create_app
 from app.models import Role
@@ -129,7 +129,24 @@ def test_opportunity_parse_route_uses_role_backed_parser() -> None:
                 metadata={"parserVersion": "role_parser_v1", "model": "gpt-5-mini"},
             )
 
+    class FakeUsageService:
+        class FakeDb:
+            def commit(self):
+                return None
+
+        db = FakeDb()
+
+        def current_user(self):
+            class User:
+                id = "00000000-0000-4000-8000-000000000001"
+
+            return User()
+
+        def record_event(self, payload):
+            return None
+
     app.dependency_overrides[get_role_parsing_service] = lambda: FakeService()
+    app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
     with TestClient(app) as client:
         response = client.post(
             "/api/opportunities/parse",

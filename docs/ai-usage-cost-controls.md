@@ -3,8 +3,11 @@
 ## Purpose
 
 This document defines Layer 11 readiness for AI usage metering, transparency,
-and cost controls. It is provider-agnostic design guidance only. It does not
-implement counters, database tables, billing logic, or rate limiting.
+and cost controls.
+
+Layer 11.6 implements durable local-first provider-agnostic AI usage event
+metering. It does not implement billing logic, credit wallets, paid quota
+enforcement, model marketplaces, or production cost controls.
 
 ## Why AI Cost Controls Matter
 
@@ -24,9 +27,19 @@ bounded before any hosted beta or paid tier.
 | Integration summarization | Future only. | Requires integration privacy and token handling design first. |
 | Automation suggestions | Local suggestions and approval logs exist. | External actions remain disabled. |
 
+Layer 11.6 records local usage events for:
+
+- Role parsing.
+- COMPASS enrichment, including skipped/failed/cache-reused outcomes.
+- Resume artifact generation.
+- Cover-letter artifact generation.
+
+The read-only local endpoint is `GET /api/usage/ai`, with a Settings page AI
+usage panel for recent events and aggregate counts.
+
 ## Usage Event Taxonomy
 
-Future metering should track provider-agnostic events:
+Local metering now tracks provider-agnostic events:
 
 - `ai.parse_opportunity.requested`
 - `ai.parse_opportunity.completed`
@@ -44,10 +57,11 @@ Future metering should track provider-agnostic events:
 - `ai.skipped_disabled`
 - `ai.skipped_quota`
 
-Suggested metadata: workspace, account, feature, model/provider, prompt version,
-ruleset version, estimated input/output tokens, latency, status, cache hit,
-error class, content hashes, and safety warnings. Do not log raw resumes, raw
-notes, raw prompts, API keys, or raw private content in operational logs.
+Metadata includes workspace/account references where available, feature,
+model/provider, prompt version, ruleset version, estimated input/output tokens,
+latency, status, cache reuse, sanitized error class, content hash, and safe
+metadata. It must not persist raw resumes, raw notes, raw prompts, API keys,
+provider credentials, database URLs, or raw private content.
 
 ## Provider-Agnostic Metering Model
 
@@ -103,14 +117,15 @@ Billing provider integration is future and not part of this design.
 
 ## User-Visible Usage Transparency
 
-Future UI should show:
+Current local UI shows:
 
 - AI feature enabled/disabled state.
-- Remaining usage when quotas exist.
-- Whether a result was deterministic, cached, or AI-enriched.
+- Recent safe usage events and aggregate counts.
+- Whether a result was requested, completed, failed, skipped, or cache-reused.
 - Model/provider family if relevant.
-- Warnings and grounding sources.
-- Whether an artifact is draft, reviewed, approved, exported, or submitted.
+
+Future UI may add remaining usage when quotas exist, cost estimates, and richer
+artifact lifecycle context after credit/billing policy is approved.
 
 ## Admin/Ops Visibility Requirements
 
@@ -132,8 +147,13 @@ Careero must not use AI cost controls as a cover for hidden steering, employer
 paid prioritization, pay-to-rank listings, selling attention, or undisclosed
 sponsored recommendations.
 
-## Stop Conditions Before Metering Implementation
+## Remaining Future Work
 
-Stop before implementation if the scope requires new database tables, billing
-events, provider-specific payment logic, auth/tenant changes, raw prompt
-storage, external account linking, or a new dependency without explicit approval.
+- Credit wallet.
+- Paid billing.
+- Quota enforcement beyond existing local session caps.
+- Model marketplace or user-selected model catalog.
+- Production budget alerts and ops dashboards.
+- Provider-specific cost accounting.
+- Hosted account or tenant changes.
+- Raw prompt storage.

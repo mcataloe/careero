@@ -29,6 +29,7 @@ export interface LocalDataExport {
   interview_stages: Record<string, unknown>[];
   activity_logs: Record<string, unknown>[];
   account_lifecycle_requests: Record<string, unknown>[];
+  ai_usage_events: Record<string, unknown>[];
   automation_suggestions: Record<string, unknown>[];
   automation_approval_logs: Record<string, unknown>[];
 }

@@ -12,6 +12,7 @@ from app.config import Settings, get_settings
 from app.models import (
     ActivityLog,
     AccountLifecycleRequest,
+    AIUsageEvent,
     Application,
     ApplicationExternalLink,
     ApplicationInterviewStage,
@@ -255,6 +256,14 @@ class LocalDataExportService:
                         AccountLifecycleRequest.requested_at.asc(),
                         AccountLifecycleRequest.id.asc(),
                     )
+                )
+            ],
+            ai_usage_events=[
+                _ai_usage_event(event)
+                for event in self._list(
+                    select(AIUsageEvent)
+                    .where(user_filter(AIUsageEvent))
+                    .order_by(AIUsageEvent.created_at.asc(), AIUsageEvent.id.asc())
                 )
             ],
             automation_suggestions=[
@@ -616,6 +625,34 @@ def _account_lifecycle_request(record: AccountLifecycleRequest) -> dict[str, Any
             "request_metadata",
             "created_at",
             "updated_at",
+        ],
+    )
+
+
+def _ai_usage_event(record: AIUsageEvent) -> dict[str, Any]:
+    return _base(
+        record,
+        [
+            "id",
+            "user_id",
+            "workspace_id",
+            "role_id",
+            "application_id",
+            "artifact_id",
+            "feature",
+            "event_type",
+            "provider",
+            "model",
+            "status",
+            "prompt_version",
+            "ruleset_version",
+            "input_token_estimate",
+            "output_token_estimate",
+            "latency_ms",
+            "error_class",
+            "content_hash",
+            "event_metadata",
+            "created_at",
         ],
     )
 

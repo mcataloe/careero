@@ -104,7 +104,7 @@ def test_ai_feature_flags_are_represented(monkeypatch) -> None:
         "cover_letter_generation_enabled": True,
         "provider_key_configured": False,
         "local_session_attempt_cap": 7,
-        "durable_metering_status": "not_implemented",
+        "durable_metering_status": "local_usage_events",
     }
 
 

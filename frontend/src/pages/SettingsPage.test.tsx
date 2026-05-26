@@ -42,7 +42,7 @@ const readiness: ProductizationReadiness = {
     cover_letter_generation_enabled: false,
     provider_key_configured: false,
     local_session_attempt_cap: 25,
-    durable_metering_status: "not_implemented",
+    durable_metering_status: "local_usage_events",
   },
   auth_status: { status: "not_implemented", implemented: false, detail: "" },
   tenant_boundary_prep_status: {
@@ -58,8 +58,8 @@ const readiness: ProductizationReadiness = {
   },
   retention_status: { status: "not_enforced", implemented: false, detail: "" },
   durable_usage_metering_status: {
-    status: "not_implemented",
-    implemented: false,
+    status: "local_usage_events",
+    implemented: true,
     detail: "",
   },
   deployment_status: { status: "local_only", implemented: true, detail: "" },
@@ -120,6 +120,22 @@ function fetchByPath(overrides: Record<string, unknown> = {}) {
         ),
       );
     }
+    if (path === "/api/usage/ai?limit=25") {
+      return Promise.resolve(
+        jsonResponse(
+          overrides.aiUsage ?? {
+            events: [],
+            summary: {
+              total_events: 0,
+              by_feature: {},
+              by_event_type: {},
+            },
+            usage_note:
+              "Local AI usage metering records safe metadata only. It is not billing, credits, paid quota enforcement, or a production cost-control system.",
+          },
+        ),
+      );
+    }
     if (path === "/api/data-export/local") {
       return Promise.resolve(
         jsonResponse(
@@ -154,6 +170,7 @@ function fetchByPath(overrides: Record<string, unknown> = {}) {
             interview_stages: [],
             activity_logs: [],
             account_lifecycle_requests: [],
+            ai_usage_events: [],
             automation_suggestions: [],
             automation_approval_logs: [],
           },
@@ -230,5 +247,52 @@ describe("SettingsPage", () => {
         method: "POST",
       }),
     );
+  });
+
+  it("shows local AI usage without private content", async () => {
+    vi.stubGlobal(
+      "fetch",
+      fetchByPath({
+        aiUsage: {
+          events: [
+            {
+              id: "usage-1",
+              user_id: "00000000-0000-4000-8000-000000000001",
+              workspace_id: null,
+              role_id: null,
+              application_id: null,
+              artifact_id: null,
+              feature: "parse_opportunity",
+              event_type: "completed",
+              provider: "openai",
+              model: "gpt-5-mini",
+              status: "completed",
+              prompt_version: null,
+              ruleset_version: null,
+              input_token_estimate: 12,
+              output_token_estimate: 8,
+              latency_ms: 25,
+              error_class: null,
+              content_hash: "sha256:safe",
+              metadata: {},
+              created_at: "2026-05-26T12:00:00Z",
+            },
+          ],
+          summary: {
+            total_events: 1,
+            by_feature: { parse_opportunity: 1 },
+            by_event_type: { completed: 1 },
+          },
+          usage_note: "Local AI usage metering records safe metadata only.",
+        },
+      }),
+    );
+
+    render(<SettingsPage />);
+
+    expect(await screen.findByText("AI usage")).toBeInTheDocument();
+    expect(screen.getByText("parse opportunity")).toBeInTheDocument();
+    expect(screen.getByText("openai / gpt-5-mini")).toBeInTheDocument();
+    expect(screen.queryByText(/raw resume/i)).not.toBeInTheDocument();
   });
 });

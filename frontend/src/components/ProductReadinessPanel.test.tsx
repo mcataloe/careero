@@ -53,7 +53,7 @@ const readiness: ProductizationReadiness = {
     cover_letter_generation_enabled: false,
     provider_key_configured: false,
     local_session_attempt_cap: 25,
-    durable_metering_status: "not_implemented",
+    durable_metering_status: "local_usage_events",
   },
   auth_status: {
     status: "not_implemented",
@@ -81,9 +81,9 @@ const readiness: ProductizationReadiness = {
     detail: "Retention is not enforced.",
   },
   durable_usage_metering_status: {
-    status: "not_implemented",
-    implemented: false,
-    detail: "Durable usage metering is not implemented.",
+    status: "local_usage_events",
+    implemented: true,
+    detail: "Durable usage metering is local.",
   },
   deployment_status: {
     status: "local_only",

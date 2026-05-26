@@ -21,9 +21,11 @@ from app.models import (
     CompassEvaluation,
     User,
 )
+from app.schemas.ai_usage import AIUsageEventCreate
 from app.schemas.cover_letter_artifacts import CoverLetterArtifactGenerateRequest
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
+from app.services.ai_usage import AIUsageService
 from app.services.artifact_performance import ArtifactPerformanceService
 from app.services.cover_letter_artifact_ai import (
     CoverLetterArtifactGenerationUnavailableError,
@@ -100,6 +102,7 @@ class CoverLetterArtifactService:
         self.settings = settings or get_settings()
         self.generator = generator or OpenAICoverLetterArtifactGenerator(self.settings)
         self.activity_log = ActivityLogService(db)
+        self.ai_usage = AIUsageService(db)
         self.artifact_performance = ArtifactPerformanceService(db)
         self._schema_validator = _cover_letter_artifact_validator()
 
@@ -173,6 +176,28 @@ class CoverLetterArtifactService:
                 "tone": payload.tone,
             },
         )
+        self.ai_usage.record_event(
+            AIUsageEventCreate(
+                user_id=user.id,
+                workspace_id=workspace.id,
+                role_id=role.id,
+                artifact_id=artifact_id,
+                feature="cover_letter_artifact",
+                event_type="requested",
+                provider="openai"
+                if self.settings.enable_ai_cover_letter_generation
+                else None,
+                model=self.settings.openai_default_cover_letter_generation_model
+                if self.settings.enable_ai_cover_letter_generation
+                else None,
+                prompt_version=PROMPT_VERSION,
+                ruleset_version=evaluation.ruleset_version
+                if evaluation is not None
+                else None,
+                content_hash=role_content_hash(role),
+                metadata={"tone": payload.tone},
+            )
+        )
         self.db.commit()
 
         try:
@@ -221,6 +246,31 @@ class CoverLetterArtifactService:
                 role=role,
                 evaluation=evaluation,
             )
+            self.ai_usage.record_event(
+                AIUsageEventCreate(
+                    user_id=user.id,
+                    workspace_id=workspace.id,
+                    role_id=role.id,
+                    artifact_id=artifact_id,
+                    feature="cover_letter_artifact",
+                    event_type="completed",
+                    provider="openai",
+                    model=ai_result.get("model"),
+                    prompt_version=PROMPT_VERSION,
+                    ruleset_version=evaluation.ruleset_version
+                    if evaluation is not None
+                    else None,
+                    input_token_estimate=ai_result.get("input_token_estimate"),
+                    output_token_estimate=ai_result.get("output_token_estimate"),
+                    latency_ms=ai_result.get("latency_ms"),
+                    content_hash=artifact["generationMetadata"]["inputHash"],
+                    metadata={
+                        "generation_status": ai_result.get("status"),
+                        "revision_number": artifact["revision"]["revisionNumber"],
+                        "tone": payload.tone,
+                    },
+                )
+            )
             self._log_activity(
                 user_id=user.id,
                 entity_id=artifact_id,
@@ -243,6 +293,11 @@ class CoverLetterArtifactService:
                 entity_id=artifact_id,
                 role_id=role.id,
                 error_type=type(exc).__name__,
+                usage_event_type="skipped_disabled",
+                workspace_id=workspace.id,
+                ruleset_version=evaluation.ruleset_version
+                if evaluation is not None
+                else None,
             )
             raise CoverLetterArtifactUnavailableError(str(exc)) from exc
         except CoverLetterArtifactOutputValidationError as exc:
@@ -251,6 +306,11 @@ class CoverLetterArtifactService:
                 entity_id=artifact_id,
                 role_id=role.id,
                 error_type=type(exc).__name__,
+                usage_event_type="failed",
+                workspace_id=workspace.id,
+                ruleset_version=evaluation.ruleset_version
+                if evaluation is not None
+                else None,
             )
             raise CoverLetterArtifactValidationError(str(exc)) from exc
         except AICoverLetterArtifactProviderError as exc:
@@ -259,6 +319,11 @@ class CoverLetterArtifactService:
                 entity_id=artifact_id,
                 role_id=role.id,
                 error_type=type(exc).__name__,
+                usage_event_type="failed",
+                workspace_id=workspace.id,
+                ruleset_version=evaluation.ruleset_version
+                if evaluation is not None
+                else None,
             )
             raise CoverLetterArtifactProviderError(str(exc)) from exc
         except CoverLetterArtifactValidationError:
@@ -267,6 +332,11 @@ class CoverLetterArtifactService:
                 entity_id=artifact_id,
                 role_id=role.id,
                 error_type="CoverLetterArtifactValidationError",
+                usage_event_type="failed",
+                workspace_id=workspace.id,
+                ruleset_version=evaluation.ruleset_version
+                if evaluation is not None
+                else None,
             )
             raise
         except Exception as exc:
@@ -275,6 +345,11 @@ class CoverLetterArtifactService:
                 entity_id=artifact_id,
                 role_id=role.id,
                 error_type=type(exc).__name__,
+                usage_event_type="failed",
+                workspace_id=workspace.id,
+                ruleset_version=evaluation.ruleset_version
+                if evaluation is not None
+                else None,
             )
             raise CoverLetterArtifactProviderError(
                 "Cover letter artifact generation failed"
@@ -516,8 +591,30 @@ class CoverLetterArtifactService:
         entity_id: uuid.UUID,
         role_id: uuid.UUID,
         error_type: str,
+        usage_event_type: str,
+        workspace_id: uuid.UUID,
+        ruleset_version: str | None,
     ) -> None:
         self.db.rollback()
+        self.ai_usage.record_event(
+            AIUsageEventCreate(
+                user_id=user_id,
+                workspace_id=workspace_id,
+                role_id=role_id,
+                artifact_id=entity_id,
+                feature="cover_letter_artifact",
+                event_type=usage_event_type,
+                provider="openai"
+                if self.settings.enable_ai_cover_letter_generation
+                else None,
+                model=self.settings.openai_default_cover_letter_generation_model
+                if self.settings.enable_ai_cover_letter_generation
+                else None,
+                prompt_version=PROMPT_VERSION,
+                ruleset_version=ruleset_version,
+                error_class=error_type,
+            )
+        )
         self._log_activity(
             user_id=user_id,
             entity_id=entity_id,

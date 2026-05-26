@@ -204,7 +204,7 @@ The repo does not yet fully include:
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface started; local boundary prep, local export, and request tracking added | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Layer 11.4 adds local-first JSON data export for the current local user. Layer 11.5 adds local lifecycle request tracking without destructive enforcement. Production deployment, auth hardening, billing, tenant isolation, hosted export/delete, retention enforcement, and usage metering implementation remain future. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface started; local boundary prep, local export, request tracking, and usage metering added | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Layer 11.4 adds local-first JSON data export for the current local user. Layer 11.5 adds local lifecycle request tracking without destructive enforcement. Layer 11.6 adds provider-agnostic local AI usage events. Production deployment, auth hardening, billing, tenant isolation, hosted export/delete, retention enforcement, paid quotas, credits, and production cost controls remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 | Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
@@ -744,6 +744,12 @@ track export/deletion/retention-review intent and privacy-safe activity-log
 events only. They do not delete data, anonymize data, recover accounts, create
 hosted support workflows, or certify GDPR/CCPA/SOC2 compliance.
 
+Layer 11.6 adds local `ai_usage_events`, usage recording in role parsing,
+COMPASS enrichment, resume artifact generation, and cover-letter artifact
+generation, plus `GET /api/usage/ai` and a Settings page usage panel. Events
+store safe metadata only. They do not create billing events, credits, paid
+quota enforcement, model marketplaces, or production cost controls.
+
 Layer 14 extends the productization strategy for model choice, credits, and
 API-first intelligence, but those capabilities are not implemented in `main`.
 Layer 14A/14B should only be pulled forward when Layer 11 billing, metering,
@@ -758,7 +764,7 @@ production blockers are resolved through a fresh LEAP Recon.
 
 Hosted collaboration, advisor accounts, employer/recruiter access, support/admin
 access, billing, deployment, hosted export/delete, retention enforcement, and
-usage metering remain blocked after Layer 11.5.
+production billing/cost controls remain blocked after Layer 11.6.
 
 ---
 

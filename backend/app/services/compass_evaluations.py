@@ -11,7 +11,9 @@ from app.constants import RoleStatus, CompassEvaluationStatus
 from app.models import ResumeSourceVersion, Role, CompassEvaluation, User
 from app.schemas.compass_evaluations import CompassEvaluationCreate
 from app.seed import DEFAULT_LOCAL_USER_ID
+from app.schemas.ai_usage import AIUsageEventCreate
 from app.services.activity_log import ActivityLogService
+from app.services.ai_usage import AIUsageService, event_type_for_ai_status
 from app.services.evaluation_hashing import (
     evaluation_input_hash,
     resume_source_hash,
@@ -67,6 +69,7 @@ class CompassEvaluationService:
         self.settings = settings or get_settings()
         self.ai_evaluator = ai_evaluator or OpenAICompassEvaluator(self.settings)
         self.activity_log = ActivityLogService(db)
+        self.ai_usage = AIUsageService(db)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
@@ -128,6 +131,21 @@ class CompassEvaluationService:
                         "evaluation_input_hash": input_hash,
                     },
                 )
+                self.ai_usage.record_event(
+                    AIUsageEventCreate(
+                        user_id=user.id,
+                        workspace_id=role.workspace_id,
+                        role_id=role.id,
+                        feature="compass_enrichment",
+                        event_type="cache_reused",
+                        provider="openai" if cached.ai_enabled else None,
+                        model=cached.model_used,
+                        status=cached.ai_status or "cache_reused",
+                        prompt_version=cached.prompt_version,
+                        ruleset_version=cached.ruleset_version,
+                        content_hash=input_hash,
+                    )
+                )
                 self.db.commit()
                 logger.info(
                     "COMPASS evaluation cache reused",
@@ -154,6 +172,24 @@ class CompassEvaluationService:
                 "force": payload.force,
             },
         )
+        self.ai_usage.record_event(
+            AIUsageEventCreate(
+                user_id=user.id,
+                workspace_id=role.workspace_id,
+                role_id=role.id,
+                feature="compass_enrichment",
+                event_type="requested",
+                provider="openai" if self.settings.enable_ai_evaluations else None,
+                model=self.settings.openai_default_evaluation_model
+                if self.settings.enable_ai_evaluations
+                else None,
+                prompt_version=PROMPT_VERSION,
+                ruleset_version=RULESET_VERSION,
+                content_hash=input_hash,
+                metadata={"force": payload.force},
+            )
+        )
+        self.db.commit()
         started_at = time.perf_counter()
         try:
             baseline = evaluate_role(
@@ -183,6 +219,10 @@ class CompassEvaluationService:
                 ai_metadata.get("ai_failure_reason")
                 if ai_status == "failed"
                 else None
+            )
+            usage_event_type = event_type_for_ai_status(
+                ai_status,
+                ai_metadata.get("ai_failure_reason"),
             )
 
             raw = dict(evaluation_data["raw_evaluation_json"])
@@ -228,6 +268,29 @@ class CompassEvaluationService:
             )
             self.db.add(evaluation)
             self.db.flush()
+            self.ai_usage.record_event(
+                AIUsageEventCreate(
+                    user_id=user.id,
+                    workspace_id=role.workspace_id,
+                    role_id=role.id,
+                    feature="compass_enrichment",
+                    event_type=usage_event_type,
+                    provider="openai"
+                    if self.settings.enable_ai_evaluations or ai_metadata.get("ai_model")
+                    else None,
+                    model=ai_metadata.get("ai_model"),
+                    status=ai_status,
+                    prompt_version=PROMPT_VERSION,
+                    ruleset_version=RULESET_VERSION,
+                    input_token_estimate=ai_metadata.get("ai_input_token_estimate"),
+                    output_token_estimate=ai_metadata.get("ai_output_token_estimate"),
+                    latency_ms=latency_ms,
+                    error_class=ai_metadata.get("ai_error_type")
+                    if usage_event_type == "failed"
+                    else None,
+                    content_hash=input_hash,
+                )
+            )
             if ai_status == "failed":
                 self._add_activity(
                     user_id=user.id,
@@ -276,6 +339,23 @@ class CompassEvaluationService:
                     "workspace_id": str(role.workspace_id),
                     "error_type": type(exc).__name__,
                 },
+            )
+            self.ai_usage.record_event(
+                AIUsageEventCreate(
+                    user_id=user.id,
+                    workspace_id=role.workspace_id,
+                    role_id=role.id,
+                    feature="compass_enrichment",
+                    event_type="failed",
+                    provider="openai" if self.settings.enable_ai_evaluations else None,
+                    model=self.settings.openai_default_evaluation_model
+                    if self.settings.enable_ai_evaluations
+                    else None,
+                    prompt_version=PROMPT_VERSION,
+                    ruleset_version=RULESET_VERSION,
+                    error_class=type(exc).__name__,
+                    content_hash=input_hash,
+                )
             )
             self.db.commit()
             logger.warning(

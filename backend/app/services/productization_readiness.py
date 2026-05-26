@@ -79,7 +79,7 @@ def get_productization_readiness(
         "Production authorization and tenant isolation are not implemented.",
         "Billing, subscriptions, invoices, checkout, and payment flows are not implemented.",
         "Hosted account export, destructive account deletion, and retention enforcement are not implemented.",
-        "Durable AI usage metering and cost controls are not implemented.",
+        "Paid AI usage controls, credits, billing, quotas, and production cost controls are not implemented.",
         "Production deployment architecture, monitoring, backup, restore, and incident response are not implemented.",
         "Hosted collaboration and employer-side marketplace capabilities are not implemented.",
         "Artifact lifecycle UX remains incomplete for production or paid use.",
@@ -152,7 +152,7 @@ def get_productization_readiness(
             cover_letter_generation_enabled=settings.enable_ai_cover_letter_generation,
             provider_key_configured=bool(settings.openai_api_key),
             local_session_attempt_cap=settings.max_ai_evaluations_per_session,
-            durable_metering_status="not_implemented",
+            durable_metering_status="local_usage_events",
         ),
         auth_status=_capability(
             "not_implemented",
@@ -180,9 +180,9 @@ def get_productization_readiness(
             "Retention windows are documented as TBD and are not enforced in code.",
         ),
         durable_usage_metering_status=_capability(
-            "not_implemented",
-            False,
-            "AI feature flags and a local session cap exist, but durable usage events, quotas, and ledgers remain future.",
+            "local_usage_events",
+            True,
+            "Provider-agnostic local AI usage events are recorded; credits, paid billing, quotas, and production cost controls remain future.",
         ),
         deployment_status=deployment_status,
         hosted_collaboration_status=_capability(

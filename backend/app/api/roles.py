@@ -1,10 +1,17 @@
 import uuid
+import time
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.schemas.ai_usage import AIUsageEventCreate
 from app.schemas.role_parsing import RoleParseRequest, RoleParseResponse
+from app.services.ai_usage import (
+    AIUsageSeedMissingError,
+    AIUsageService,
+    content_hash,
+)
 from app.schemas.roles import RoleCreate, RoleResponse, RoleUpdate
 from app.services.role_parsing import (
     RoleParsingProviderError,
@@ -32,6 +39,15 @@ def get_role_parsing_service() -> RoleParsingService:
     return RoleParsingService()
 
 
+def get_ai_usage_service(db: Session = Depends(get_db)) -> AIUsageService:
+    return AIUsageService(db)
+
+
+def _role_parsing_model(service: RoleParsingService) -> str | None:
+    settings = getattr(service, "settings", None)
+    return getattr(settings, "openai_default_role_parsing_model", None)
+
+
 @router.post("", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
 def create_role(
     payload: RoleCreate,
@@ -51,20 +67,90 @@ def create_role(
 def parse_role(
     payload: RoleParseRequest,
     service: RoleParsingService = Depends(get_role_parsing_service),
+    usage_service: AIUsageService = Depends(get_ai_usage_service),
 ):
+    started_at = time.perf_counter()
     try:
-        return service.parse(payload)
+        user = usage_service.current_user()
+    except AIUsageSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    usage_service.record_event(
+        AIUsageEventCreate(
+            user_id=user.id,
+            feature="parse_opportunity",
+            event_type="requested",
+            provider="openai",
+            model=_role_parsing_model(service),
+            content_hash=content_hash(payload.raw_text),
+            metadata={"source": payload.source, "job_url_provided": bool(payload.job_url)},
+        )
+    )
+    usage_service.db.commit()
+    try:
+        result = service.parse(payload)
+        usage_service.record_event(
+            AIUsageEventCreate(
+                user_id=user.id,
+                feature="parse_opportunity",
+                event_type="completed",
+                provider="openai",
+                model=_role_parsing_model(service),
+                latency_ms=max(0, round((time.perf_counter() - started_at) * 1000)),
+                content_hash=content_hash(payload.raw_text),
+            )
+        )
+        usage_service.db.commit()
+        return result
     except RoleParsingUnavailableError as exc:
+        usage_service.record_event(
+            AIUsageEventCreate(
+                user_id=user.id,
+                feature="parse_opportunity",
+                event_type="skipped_disabled",
+                provider="openai",
+                model=_role_parsing_model(service),
+                latency_ms=max(0, round((time.perf_counter() - started_at) * 1000)),
+                error_class=type(exc).__name__,
+                content_hash=content_hash(payload.raw_text),
+            )
+        )
+        usage_service.db.commit()
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         )
     except RoleParsingValidationError as exc:
+        usage_service.record_event(
+            AIUsageEventCreate(
+                user_id=user.id,
+                feature="parse_opportunity",
+                event_type="failed",
+                provider="openai",
+                model=_role_parsing_model(service),
+                latency_ms=max(0, round((time.perf_counter() - started_at) * 1000)),
+                error_class=type(exc).__name__,
+                content_hash=content_hash(payload.raw_text),
+            )
+        )
+        usage_service.db.commit()
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),
         )
     except RoleParsingProviderError as exc:
+        usage_service.record_event(
+            AIUsageEventCreate(
+                user_id=user.id,
+                feature="parse_opportunity",
+                event_type="failed",
+                provider="openai",
+                model=_role_parsing_model(service),
+                latency_ms=max(0, round((time.perf_counter() - started_at) * 1000)),
+                error_class=type(exc).__name__,
+                content_hash=content_hash(payload.raw_text),
+            )
+        )
+        usage_service.db.commit()
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),

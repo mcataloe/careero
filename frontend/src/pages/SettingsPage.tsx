@@ -1,6 +1,7 @@
 import { List, Paper, Stack, Text, Title } from "@mantine/core";
 
 import { AccountLifecyclePanel } from "../components/AccountLifecyclePanel";
+import { AIUsagePanel } from "../components/AIUsagePanel";
 import { AutomationPreferencesPanel } from "../components/AutomationPreferencesPanel";
 import { LocalDataExportPanel } from "../components/LocalDataExportPanel";
 import { ProductReadinessPanel } from "../components/ProductReadinessPanel";
@@ -23,6 +24,7 @@ export function SettingsPage() {
       <ProductReadinessPanel />
       <LocalDataExportPanel />
       <AccountLifecyclePanel />
+      <AIUsagePanel />
       <AutomationPreferencesPanel />
       <ResumeSourceSettings />
     </Stack>
