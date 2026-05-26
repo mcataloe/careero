@@ -198,7 +198,7 @@ The repo does not yet fully include:
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
 | Layer 11 | Productization / Deployment / Monetization | Future / readiness documentation started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
-| Layer 12 | Advisor / Collaboration Mode | Future | Coach, reviewer, spouse/advisor review, scoped sharing, comments, shared opportunity packets. |
+| Layer 12 | Advisor / Collaboration Mode | Future / readiness design started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 
 ---
@@ -720,11 +720,13 @@ production blockers are resolved through a fresh LEAP Recon.
 
 ### Status
 
-Future.
+Future / readiness design started.
 
 ### Purpose
 
 Allow trusted external help while preserving privacy boundaries.
+
+Active readiness/design source: [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md).
 
 ### Candidate capabilities
 
@@ -737,7 +739,7 @@ Allow trusted external help while preserving privacy boundaries.
 
 ### Guidance
 
-This should wait until artifacts, opportunities, and application records are cleanly separated.
+This should wait until artifacts, opportunities, and application records are cleanly separated and until production auth, authorization, tenant isolation, privacy controls, revocation, audit, and account lifecycle are implemented. The current Layer 12 work is documentation and design only; it does not start hosted collaboration implementation.
 
 ---
 

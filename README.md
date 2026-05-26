@@ -14,13 +14,15 @@ Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strat
 
 Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. These are readiness docs only; production auth, billing, tenant isolation, and hosted deployment remain future.
 
+Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). This is design guidance only; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
+
 Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
 Current planning hierarchy:
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md) - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md) and [`docs/productization-readiness.md`](docs/productization-readiness.md).
+3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md), [`docs/productization-readiness.md`](docs/productization-readiness.md), and [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md).
 4. `docs/archive/*` - historical context only.
 5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
