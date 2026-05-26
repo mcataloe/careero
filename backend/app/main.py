@@ -13,6 +13,7 @@ from app.api.applications import router as applications_router
 from app.api.compensation_intelligence import router as compensation_intelligence_router
 from app.api.cover_letter_artifacts import router as cover_letter_artifacts_router
 from app.api.data_export import router as data_export_router
+from app.api.entitlements import router as entitlements_router
 from app.api.historical_learning import router as historical_learning_router
 from app.api.opportunities import router as opportunities_router
 from app.api.productization import router as productization_router
@@ -57,6 +58,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(compensation_intelligence_router, prefix="/api")
     app.include_router(cover_letter_artifacts_router, prefix="/api")
     app.include_router(data_export_router, prefix="/api")
+    app.include_router(entitlements_router, prefix="/api")
     app.include_router(historical_learning_router, prefix="/api")
     app.include_router(opportunities_router, prefix="/api")
     app.include_router(productization_router, prefix="/api")

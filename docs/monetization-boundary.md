@@ -3,8 +3,14 @@
 ## Purpose
 
 This document defines Careero's Layer 11 monetization posture. It is
-provider-agnostic design guidance only. It does not implement billing,
-subscriptions, checkout, invoices, payment links, or usage-meter billing.
+provider-agnostic design guidance with a local-first boundary implementation.
+It does not implement billing, subscriptions, checkout, invoices, payment
+links, or usage-meter billing.
+
+Layer 11.7 adds a local entitlement boundary model through
+`GET /api/entitlements/current` and a Settings page Local plan panel. The
+current plan is `local_free`, billing status is `not_configured`, and payment
+provider is `none`.
 
 ## Layer 0 Trust Principles
 
@@ -46,6 +52,17 @@ Monetization may eventually support sustainability, but it must not compromise:
 - Notes, links, and essential search organization.
 - Clear export/delete expectations before hosted modes.
 - Transparency about AI and product limitations.
+
+The local entitlement model keeps these baseline features enabled locally:
+
+- Opportunity capture.
+- Workspace/search-track organization.
+- Application workflow.
+- Notes, links, reminders, and interviews.
+- Deterministic COMPASS where available.
+- Local data export visibility.
+- Local lifecycle request tracking.
+- Local AI usage visibility.
 
 ## What May Be Paid Later
 
@@ -91,6 +108,10 @@ Future billing design should first define:
 - How billing state maps to account/workspace access.
 
 Stripe or any other provider integration is future and not in scope.
+
+Layer 11.7 intentionally adds no upgrade button, checkout link, billing
+provider, subscription, invoice, payment detail collection, credit wallet, or
+paid enforcement.
 
 ## Monetization Readiness Gates
 

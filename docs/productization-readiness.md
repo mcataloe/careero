@@ -70,6 +70,15 @@ Layer 11.6 adds local-first AI usage metering:
   prompts, resumes, private notes, job descriptions, provider credentials,
   database URLs, API keys, or billing events.
 
+Layer 11.7 adds a local-first entitlement boundary model:
+
+- Backend endpoint: `GET /api/entitlements/current`.
+- Frontend surface: Settings page Local plan panel.
+- Scope: reports the `local_free` plan, enabled local baseline features,
+  future-only paid/collaboration/cloud features, and monetization guardrails.
+- Safety boundary: no Stripe, checkout, subscriptions, invoices, payment
+  details, credit wallet, upgrade buttons, or paid enforcement.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |
@@ -103,6 +112,8 @@ Layer 11.6 adds local-first AI usage metering:
   retention enforcement are not implemented.
 - Credits, paid billing, quota enforcement, model marketplaces, and production
   cost controls are not implemented.
+- Entitlement boundaries exist locally, but live billing and paid plan
+  enforcement are not implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
 - Production deployment architecture is not implemented.

@@ -51,6 +51,7 @@ Current planning hierarchy:
 - Local-first JSON data export for the current seeded local user through `GET /api/data-export/local` and the Settings page. This creates no cloud download link, backup, hosted account export, or production account support.
 - Local-first account lifecycle request tracking through `GET/POST /api/account/lifecycle-requests` and the Settings page. This records audit requests only and does not delete or anonymize data.
 - Local-first provider-agnostic AI usage metering through `GET /api/usage/ai` and the Settings page. This records safe metadata for local visibility only and does not implement credits, billing, or paid quotas.
+- Local-first entitlement boundary reporting through `GET /api/entitlements/current` and the Settings page. This models the `local_free` plan without payments, checkout, subscriptions, or invoices.
 - Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, COMPASS rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.

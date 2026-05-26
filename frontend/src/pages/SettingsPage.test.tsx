@@ -136,6 +136,41 @@ function fetchByPath(overrides: Record<string, unknown> = {}) {
         ),
       );
     }
+    if (path === "/api/entitlements/current") {
+      return Promise.resolve(
+        jsonResponse(
+          overrides.entitlements ?? {
+            plan_id: "local_free",
+            plan_display_name: "Local Free",
+            billing_status: "not_configured",
+            payment_provider: "none",
+            entitlements: [
+              {
+                key: "opportunity_capture",
+                enabled: true,
+                category: "essential_workflow",
+                description: "Capture and organize opportunities locally.",
+              },
+              {
+                key: "local_data_export",
+                enabled: true,
+                category: "data_ownership",
+                description: "Export current local-user data as JSON.",
+              },
+            ],
+            feature_limits: [],
+            unavailable_future_features: [
+              "billing_provider_checkout",
+              "employer_sponsored_ranking",
+            ],
+            monetization_guardrails: ["No payment provider is configured."],
+            local_first_note:
+              "The local_free plan is a local-first boundary model only.",
+            metadata: { schema_version: "careero.local_entitlements.v1" },
+          },
+        ),
+      );
+    }
     if (path === "/api/data-export/local") {
       return Promise.resolve(
         jsonResponse(
@@ -294,5 +329,17 @@ describe("SettingsPage", () => {
     expect(screen.getByText("parse opportunity")).toBeInTheDocument();
     expect(screen.getByText("openai / gpt-5-mini")).toBeInTheDocument();
     expect(screen.queryByText(/raw resume/i)).not.toBeInTheDocument();
+  });
+
+  it("shows the local plan without upgrade or checkout actions", async () => {
+    vi.stubGlobal("fetch", fetchByPath());
+
+    render(<SettingsPage />);
+
+    expect(await screen.findByText("Local plan")).toBeInTheDocument();
+    expect(screen.getByText("Local Free")).toBeInTheDocument();
+    expect(screen.getByText("Billing not configured")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /upgrade/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /checkout/i })).not.toBeInTheDocument();
   });
 });

@@ -157,3 +157,7 @@ sponsored recommendations.
 - Provider-specific cost accounting.
 - Hosted account or tenant changes.
 - Raw prompt storage.
+
+Layer 11.7 references the existing local AI session attempt cap as a local
+feature limit only. It does not turn usage events into credits, paid quotas, or
+billing enforcement.
