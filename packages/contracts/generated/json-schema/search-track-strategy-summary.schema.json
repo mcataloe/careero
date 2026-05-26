@@ -68,7 +68,7 @@
                   "few_opportunities",
                   "few_applications",
                   "few_outcomes",
-                  "missing_stride_evaluations",
+                  "missing_compass_evaluations",
                   "missing_compensation_ranges",
                   "missing_artifact_performance",
                   "missing_source_history",
@@ -117,7 +117,7 @@
               "type": "integer",
               "minimum": 0
             },
-            "strideEvaluations": {
+            "compassEvaluations": {
               "type": "integer",
               "minimum": 0
             },
@@ -131,7 +131,7 @@
             "applications",
             "submittedApplications",
             "responses",
-            "strideEvaluations",
+            "compassEvaluations",
             "artifactPerformanceRecords"
           ],
           "additionalProperties": false
@@ -184,7 +184,7 @@
                 "type": "string",
                 "enum": [
                   "search_health",
-                  "stride",
+                  "compass",
                   "compensation",
                   "source",
                   "artifact",

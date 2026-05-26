@@ -204,7 +204,7 @@ export function ResumeSourceSettings() {
           <Stack gap={4}>
             <Title order={3}>Resume/profile source</Title>
             <Text c="dimmed">
-              Active local grounding source for STRIDE evaluation.
+              Active local grounding source for COMPASS evaluation.
             </Text>
           </Stack>
           {activeSource && !editingDraft ? (
@@ -344,7 +344,7 @@ function ActiveSourcePreview({
   return (
     <Stack gap="lg">
       <Alert color="green" title="Active source configured">
-        {activeSource.source.name} is active for STRIDE grounding.
+        {activeSource.source.name} is active for COMPASS grounding.
       </Alert>
 
       <Grid>

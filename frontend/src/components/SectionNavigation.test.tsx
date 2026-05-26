@@ -12,18 +12,18 @@ describe("SectionNavigation", () => {
     const user = userEvent.setup();
     const scrollIntoView = vi.fn();
     const target = document.createElement("div");
-    target.id = "stride-evaluation";
+    target.id = "compass-evaluation";
     target.scrollIntoView = scrollIntoView;
     document.body.appendChild(target);
 
     render(
       <SectionNavigation
-        items={[{ label: "STRIDE Evaluation", targetId: "stride-evaluation" }]}
+        items={[{ label: "COMPASS Evaluation", targetId: "compass-evaluation" }]}
       />,
     );
 
-    const link = screen.getByRole("link", { name: /stride evaluation/i });
-    expect(link).toHaveAttribute("href", "#stride-evaluation");
+    const link = screen.getByRole("link", { name: /compass evaluation/i });
+    expect(link).toHaveAttribute("href", "#compass-evaluation");
 
     await user.click(link);
 

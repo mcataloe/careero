@@ -27,7 +27,7 @@ from app.models import (
     ApplicationStateHistory,
     GeneratedArtifact,
     Role,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
     Workspace,
 )
@@ -462,7 +462,7 @@ class ApplicationWorkflowService:
     def summary(self, application: Application) -> dict[str, Any]:
         role = application.role
         company = role.company
-        latest_stride = self._latest_stride_summary(application)
+        latest_compass = self._latest_compass_summary(application)
         return {
             "id": application.id,
             "role_id": application.role_id,
@@ -482,7 +482,7 @@ class ApplicationWorkflowService:
                 application.current_state,
                 include_reactivation=True,
             ),
-            "stride": latest_stride,
+            "compass": latest_compass,
             "resume_artifact": self._latest_artifact_summary(
                 application,
                 artifact_type="tailored_resume",
@@ -1103,26 +1103,26 @@ class ApplicationWorkflowService:
 
     def _timeline_evaluations(self, application: Application) -> list[dict[str, Any]]:
         evaluations = self.db.scalars(
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(
-                StrideEvaluation.user_id == application.user_id,
-                StrideEvaluation.workspace_id == application.workspace_id,
-                StrideEvaluation.role_id == application.role_id,
-                StrideEvaluation.deleted_at.is_(None),
-                StrideEvaluation.evaluation_status == "completed",
+                CompassEvaluation.user_id == application.user_id,
+                CompassEvaluation.workspace_id == application.workspace_id,
+                CompassEvaluation.role_id == application.role_id,
+                CompassEvaluation.deleted_at.is_(None),
+                CompassEvaluation.evaluation_status == "completed",
             )
-            .order_by(StrideEvaluation.updated_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.updated_at.desc(), CompassEvaluation.id.desc())
         )
         return [
             _timeline_event(
                 application=application,
-                event_id=f"stride-completed-{evaluation.id}",
-                event_type="stride.completed",
-                title="STRIDE evaluation completed",
+                event_id=f"compass-completed-{evaluation.id}",
+                event_type="compass.completed",
+                title="COMPASS evaluation completed",
                 description=evaluation.summary,
                 occurred_at=evaluation.updated_at,
                 actor="ai" if evaluation.ai_enabled else "system",
-                source_type="stride_evaluation",
+                source_type="compass_evaluation",
                 source_id=str(evaluation.id),
                 metadata={
                     "recommendation": evaluation.recommendation,
@@ -1220,16 +1220,16 @@ class ApplicationWorkflowService:
             for log in logs
         ]
 
-    def _latest_stride_summary(self, application: Application) -> dict[str, Any] | None:
+    def _latest_compass_summary(self, application: Application) -> dict[str, Any] | None:
         evaluation = self.db.scalar(
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(
-                StrideEvaluation.user_id == application.user_id,
-                StrideEvaluation.workspace_id == application.workspace_id,
-                StrideEvaluation.role_id == application.role_id,
-                StrideEvaluation.deleted_at.is_(None),
+                CompassEvaluation.user_id == application.user_id,
+                CompassEvaluation.workspace_id == application.workspace_id,
+                CompassEvaluation.role_id == application.role_id,
+                CompassEvaluation.deleted_at.is_(None),
             )
-            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.created_at.desc(), CompassEvaluation.id.desc())
             .limit(1)
         )
         if evaluation is None:

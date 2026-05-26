@@ -39,7 +39,7 @@ def upgrade() -> None:
         sa.Column("interview_outcome", sa.String(length=100), nullable=True),
         sa.Column("recruiter_engagement_outcome", sa.String(length=100), nullable=True),
         sa.Column(
-            "stride_alignment",
+            "compass_alignment",
             postgresql.JSONB(astext_type=sa.Text()),
             server_default=sa.text("'{}'::jsonb"),
             nullable=False,

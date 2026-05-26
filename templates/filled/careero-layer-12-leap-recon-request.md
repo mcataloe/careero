@@ -13,7 +13,7 @@ Phase 0 / project baseline status:
 - Known open questions:
   - Should Layer 12 begin as docs-first collaboration strategy, local-only advisor packet preview, or actual scoped sharing implementation?
   - Who are the first supported advisor personas: career coach, resume reviewer, spouse/family advisor, mentor, recruiter relationship reviewer, or internal self-review persona?
-  - What data may be shared by default, and what must remain private unless explicitly selected: STRIDE analysis, compensation targets, private notes, generated artifacts, source resume/profile material, recruiter contacts, interview notes, application history, and opportunity rationale?
+  - What data may be shared by default, and what must remain private unless explicitly selected: COMPASS analysis, compensation targets, private notes, generated artifacts, source resume/profile material, recruiter contacts, interview notes, application history, and opportunity rationale?
   - Should collaboration start with shareable read-only packets only, or with comment-only review workflows?
   - Should shared packets be local/exported artifacts only until production auth and tenant isolation exist?
   - What revocation/audit model is required before any hosted collaboration is allowed?
@@ -39,7 +39,7 @@ Solution/system overview:
   - Local-first FastAPI backend, React + Vite frontend, Mantine UI, PostgreSQL persistence, Alembic migrations, local scripts, and local health checks exist.
   - Workspace/search-track persistence exists.
   - Opportunity-facing intake/list/detail/update/archive surfaces exist, while persistence remains Role-backed.
-  - Resume/profile source grounding, STRIDE evaluation, artifact generation foundations, application workflow, state history, notes, external links, structured interview tracking, analytics, dashboard intelligence, local integration adapter boundary, backend Markdown/DOCX/PDF export, automation guardrails, and read-only career strategy synthesis foundations exist.
+  - Resume/profile source grounding, COMPASS evaluation, artifact generation foundations, application workflow, state history, notes, external links, structured interview tracking, analytics, dashboard intelligence, local integration adapter boundary, backend Markdown/DOCX/PDF export, automation guardrails, and read-only career strategy synthesis foundations exist.
   - Layer 11 readiness docs now exist, including productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundary, deployment readiness, cross-layer impact map, and execution drift ledger.
   - Layer 12 is explicitly future in the canonical layer-status document.
   - Repo search found no implemented advisor/collaboration module, no Layer 12-specific doc, and no active Layer 12 branch.
@@ -49,7 +49,7 @@ Solution/system overview:
   - Layer 12 depends directly on account roles, scoped sharing, revocation, audit, artifact boundaries, privacy controls, and tenant/authorization design that are not yet implemented.
   - Layer 4 reminders remain partially reconciled; Layer 5 insights need stabilization; Layer 6 artifact lifecycle remains incomplete; Layer 7 destructive Role-to-Opportunity rename is deferred; Layer 8 integrations are only partially local/manual; Layer 9 automation must not mutate external systems; Layer 10 strategy synthesis is read-only and non-durable; Layer 11 is readiness-only.
   - AI must remain advisor-only, source-grounded, reviewable, and non-fabricating.
-  - External sharing must not expose private STRIDE analysis, compensation strategy, notes, recruiter intelligence, or internal decision rationale by default.
+  - External sharing must not expose private COMPASS analysis, compensation strategy, notes, recruiter intelligence, or internal decision rationale by default.
   - Any collaboration workflow must preserve user ownership, explicit consent, least-privilege access, revocation, auditability, and review-before-externalization.
 
 Target layer or target task:
@@ -85,7 +85,7 @@ Repo / branch context:
   - Do not build marketplace, employer-side, recruiter-side, paid placement, or pay-to-rank capabilities.
   - Do not implement production external sharing until auth, authorization, tenant isolation, privacy controls, export/delete, and revocation/audit requirements are designed and approved.
   - Do not create hidden employer/recruiter visibility.
-  - Do not expose internal STRIDE analysis, ATS risk notes, compensation strategy, company commentary, private notes, or decision rationale in employer-facing or advisor-facing materials unless explicitly selected by the user.
+  - Do not expose internal COMPASS analysis, ATS risk notes, compensation strategy, company commentary, private notes, or decision rationale in employer-facing or advisor-facing materials unless explicitly selected by the user.
   - Do not implement OAuth token storage, external account sync, email sending, auto-apply, batch approvals, or state-changing automation as part of Layer 12.
   - Do not perform destructive Role-to-Opportunity persistence rename unless separately gated under Layer 7C.
   - Do not claim production collaboration readiness unless tests, security/privacy gates, account lifecycle, permission boundaries, revocation, audit, and operational controls are actually present.
@@ -131,8 +131,8 @@ Layer 12-specific recon requirements:
   - explicit non-goals for employer/marketplace visibility.
 - Preserve user ownership and explicit consent: nothing should be shared by default.
 - Preserve separation between private strategy and shareable/employer-facing materials.
-- Confirm how shared opportunity packets relate to Opportunity, Application, Artifact, STRIDE, notes, reminders, interviews, external links, and career strategy synthesis.
-- Identify which data should be redacted by default, especially compensation targets, internal STRIDE analysis, ATS/company risk, recruiter notes, personal notes, and sensitive source material.
+- Confirm how shared opportunity packets relate to Opportunity, Application, Artifact, COMPASS, notes, reminders, interviews, external links, and career strategy synthesis.
+- Identify which data should be redacted by default, especially compensation targets, internal COMPASS analysis, ATS/company risk, recruiter notes, personal notes, and sensitive source material.
 - Require least-privilege collaboration roles such as viewer, commenter, reviewer, coach, and owner only if implementation is recommended.
 - Require revocation and audit semantics before any hosted or persistent advisor access is implemented.
 - Require compatibility with Role-backed Opportunity persistence until Layer 7C is approved.

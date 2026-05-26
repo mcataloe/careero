@@ -45,16 +45,16 @@ def test_activity_log_lists_and_filters_default_user_entries(
             ),
             ActivityLog(
                 user_id=DEFAULT_LOCAL_USER_ID,
-                entity_type="stride_evaluation",
+                entity_type="compass_evaluation",
                 entity_id=evaluation_id,
-                action="stride_evaluation.completed",
+                action="compass_evaluation.completed",
                 details={"role_id": str(role_id)},
             ),
             ActivityLog(
                 user_id=other_user.id,
-                entity_type="stride_evaluation",
+                entity_type="compass_evaluation",
                 entity_id=uuid4(),
-                action="stride_evaluation.completed",
+                action="compass_evaluation.completed",
                 details={},
             ),
         ]
@@ -64,9 +64,9 @@ def test_activity_log_lists_and_filters_default_user_entries(
     response = activity_client.get(
         "/api/activity-log",
         params={
-            "entity_type": "stride_evaluation",
+            "entity_type": "compass_evaluation",
             "entity_id": str(evaluation_id),
-            "action": "stride_evaluation.completed",
+            "action": "compass_evaluation.completed",
         },
     )
 
@@ -74,7 +74,7 @@ def test_activity_log_lists_and_filters_default_user_entries(
     entries = response.json()
     assert len(entries) == 1
     assert entries[0]["entity_id"] == str(evaluation_id)
-    assert entries[0]["action"] == "stride_evaluation.completed"
+    assert entries[0]["action"] == "compass_evaluation.completed"
     assert entries[0]["details"]["role_id"] == str(role_id)
 
 

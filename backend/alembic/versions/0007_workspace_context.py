@@ -124,7 +124,7 @@ def upgrade() -> None:
         sa.Column("workspace_id", postgresql.UUID(as_uuid=True), nullable=True),
     )
     op.add_column(
-        "stride_evaluations",
+        "compass_evaluations",
         sa.Column("workspace_id", postgresql.UUID(as_uuid=True), nullable=True),
     )
     op.add_column(
@@ -146,23 +146,23 @@ def upgrade() -> None:
     )
     op.execute(
         """
-        UPDATE stride_evaluations
+        UPDATE compass_evaluations
         SET workspace_id = roles.workspace_id
         FROM roles
-        WHERE stride_evaluations.role_id = roles.id
+        WHERE compass_evaluations.role_id = roles.id
         """
     )
     op.execute(
         """
-        UPDATE stride_evaluations
+        UPDATE compass_evaluations
         SET workspace_id = user_workspace.workspace_id
         FROM (
             SELECT DISTINCT ON (user_id) user_id, id AS workspace_id
             FROM workspaces
             ORDER BY user_id, created_at ASC, id ASC
         ) AS user_workspace
-        WHERE stride_evaluations.workspace_id IS NULL
-          AND stride_evaluations.user_id = user_workspace.user_id
+        WHERE compass_evaluations.workspace_id IS NULL
+          AND compass_evaluations.user_id = user_workspace.user_id
         """
     )
     op.execute(
@@ -200,7 +200,7 @@ def upgrade() -> None:
     )
 
     op.alter_column("roles", "workspace_id", nullable=False)
-    op.alter_column("stride_evaluations", "workspace_id", nullable=False)
+    op.alter_column("compass_evaluations", "workspace_id", nullable=False)
     op.alter_column("generated_artifacts", "workspace_id", nullable=False)
 
     op.create_foreign_key(
@@ -211,8 +211,8 @@ def upgrade() -> None:
         ["id"],
     )
     op.create_foreign_key(
-        "fk_stride_evaluations_workspace_id_workspaces",
-        "stride_evaluations",
+        "fk_compass_evaluations_workspace_id_workspaces",
+        "compass_evaluations",
         "workspaces",
         ["workspace_id"],
         ["id"],
@@ -226,8 +226,8 @@ def upgrade() -> None:
     )
     op.create_index("ix_roles_workspace_id", "roles", ["workspace_id"])
     op.create_index(
-        "ix_stride_evaluations_workspace_id",
-        "stride_evaluations",
+        "ix_compass_evaluations_workspace_id",
+        "compass_evaluations",
         ["workspace_id"],
     )
     op.create_index(
@@ -239,7 +239,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_index("ix_generated_artifacts_workspace_id", table_name="generated_artifacts")
-    op.drop_index("ix_stride_evaluations_workspace_id", table_name="stride_evaluations")
+    op.drop_index("ix_compass_evaluations_workspace_id", table_name="compass_evaluations")
     op.drop_index("ix_roles_workspace_id", table_name="roles")
     op.drop_constraint(
         "fk_generated_artifacts_workspace_id_workspaces",
@@ -247,8 +247,8 @@ def downgrade() -> None:
         type_="foreignkey",
     )
     op.drop_constraint(
-        "fk_stride_evaluations_workspace_id_workspaces",
-        "stride_evaluations",
+        "fk_compass_evaluations_workspace_id_workspaces",
+        "compass_evaluations",
         type_="foreignkey",
     )
     op.drop_constraint(
@@ -257,7 +257,7 @@ def downgrade() -> None:
         type_="foreignkey",
     )
     op.drop_column("generated_artifacts", "workspace_id")
-    op.drop_column("stride_evaluations", "workspace_id")
+    op.drop_column("compass_evaluations", "workspace_id")
     op.drop_column("roles", "workspace_id")
     op.drop_index("ix_workspaces_user_status", table_name="workspaces")
     op.drop_index("ix_workspaces_status", table_name="workspaces")

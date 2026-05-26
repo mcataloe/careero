@@ -2,7 +2,7 @@ import { Badge, Button, Paper, Stack, Table, Text, Title } from "@mantine/core";
 import { Link } from "react-router-dom";
 
 import type { Role } from "../types/roles";
-import type { EvaluationSummaryState } from "../types/strideEvaluations";
+import type { EvaluationSummaryState } from "../types/compassEvaluations";
 import { EvaluationIndicator } from "./EvaluationIndicator";
 import { EmptyState } from "./States";
 
@@ -17,7 +17,7 @@ export function RolesList({
     return (
       <EmptyState
         title="No opportunities yet"
-        message="Add an opportunity you found manually so it is ready for later STRIDE evaluation."
+        message="Add an opportunity you found manually so it is ready for later COMPASS evaluation."
         action={
           <Button component={Link} to="/opportunities/new">
             Add opportunity
@@ -37,7 +37,7 @@ export function RolesList({
               <Table.Th>Company</Table.Th>
               <Table.Th>Source</Table.Th>
               <Table.Th>Status</Table.Th>
-              <Table.Th>STRIDE</Table.Th>
+              <Table.Th>COMPASS</Table.Th>
               <Table.Th>Location</Table.Th>
               <Table.Th>Date found</Table.Th>
             </Table.Tr>

@@ -2,8 +2,8 @@ from datetime import date
 from decimal import Decimal
 from types import SimpleNamespace
 
-from app.services.stride_prompt import build_stride_evaluation_prompt
-from app.services.stride_rules import evaluate_role
+from app.services.compass_prompt import build_compass_evaluation_prompt
+from app.services.compass_rules import evaluate_role
 
 
 def role_fixture(**overrides):
@@ -36,7 +36,7 @@ def test_prompt_includes_role_baseline_rules_and_grounding_instructions() -> Non
         {"target_keywords": ["python"], "preferred_remote_type": "remote"},
     )
 
-    messages = build_stride_evaluation_prompt(
+    messages = build_compass_evaluation_prompt(
         role=role,
         baseline=baseline,
         user_notes="Focus on fit.",
@@ -71,7 +71,7 @@ def test_prompt_includes_active_resume_source_when_available() -> None:
         ),
     )
 
-    messages = build_stride_evaluation_prompt(
+    messages = build_compass_evaluation_prompt(
         role=role,
         baseline=baseline,
         user_notes=None,
@@ -96,7 +96,7 @@ def test_prompt_handles_missing_compensation_and_description() -> None:
     )
     baseline = evaluate_role(role, {})
 
-    messages = build_stride_evaluation_prompt(
+    messages = build_compass_evaluation_prompt(
         role=role,
         baseline=baseline,
         user_notes=None,

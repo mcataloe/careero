@@ -7,7 +7,7 @@ context summary.
 
 ## Workspace State
 
-Workspaces are persisted in the backend and linked to roles, STRIDE evaluations,
+Workspaces are persisted in the backend and linked to roles, COMPASS evaluations,
 resume artifacts, and cover letter artifacts.
 
 Active-by-default workspaces have:
@@ -47,7 +47,7 @@ generated or updated automatically in this layer.
 
 ## AI Workflow Consumption
 
-STRIDE evaluation loads the role's workspace and merges workspace preferences
+COMPASS evaluation loads the role's workspace and merges workspace preferences
 into the evaluation context. Explicit request `user_context` values override
 workspace defaults for that one run. The workspace context is stored in
 `raw_evaluation_json`, included in the AI prompt, and included in the evaluation
@@ -58,7 +58,7 @@ is active, and owns the target role. It includes workspace context in the prompt
 input hash, canonical artifact metadata, and persisted generated artifact row.
 
 Cover letter artifact generation follows the same workspace validation and
-prompt scoping. Missing STRIDE evaluation or resume source can still be allowed,
+prompt scoping. Missing COMPASS evaluation or resume source can still be allowed,
 but workspace ownership is required.
 
 Workspace context is input context only. It must not be treated as proof of
@@ -67,7 +67,7 @@ candidate experience, and it must not be copied between workspaces.
 ## Strategy Synthesis Consumption
 
 Layer 10 uses workspaces/search tracks as the strategy scope. The strategy
-service reads workspace preferences, saved opportunities, applications, STRIDE
+service reads workspace preferences, saved opportunities, applications, COMPASS
 evaluations, source intelligence, compensation intelligence, search health,
 recommendations, historical learning, and artifact performance to produce a
 read-only summary.

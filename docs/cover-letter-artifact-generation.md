@@ -2,7 +2,7 @@
 
 Cover letter artifact generation creates a validated canonical
 `CoverLetterArtifact` draft for one workspace and target opportunity. It can use
-a STRIDE evaluation and resume/profile source when they are available, but both
+a COMPASS evaluation and resume/profile source when they are available, but both
 are optional for this layer.
 
 ## Boundary
@@ -10,7 +10,7 @@ are optional for this layer.
 The backend generation flow is:
 
 ```text
-Workspace ID + Role/Opportunity + optional STRIDE Evaluation + optional Resume Source Version
+Workspace ID + Role/Opportunity + optional COMPASS Evaluation + optional Resume Source Version
 -> Cover Letter Prompt Builder
 -> AI Model Call
 -> Raw Structured Cover Letter Output
@@ -44,18 +44,18 @@ professional.
 ## Truthfulness Rule
 
 Cover letter generation is grounded only in the supplied role/opportunity,
-optional STRIDE evaluation, optional resume/profile source, and explicit user
+optional COMPASS evaluation, optional resume/profile source, and explicit user
 inputs. The generator must not invent employers, roles, dates, technologies,
 credentials, metrics, accomplishments, or experience.
 
 If no resume/profile source is available, the letter should avoid
 candidate-specific experience claims and stay focused on professional interest
-in the opportunity. If a STRIDE evaluation or source is missing, generation
+in the opportunity. If a COMPASS evaluation or source is missing, generation
 metadata records a warning. Unsupported claims reported by the model are
 rejected before persistence.
 
-When a resume/profile source and STRIDE evaluation are available, generation
-also rejects content that includes a STRIDE missing keyword not present in the
+When a resume/profile source and COMPASS evaluation are available, generation
+also rejects content that includes a COMPASS missing keyword not present in the
 source text.
 
 ## Artifact Lifecycle
@@ -69,7 +69,7 @@ The service persists generated cover letters through the existing
 - `metadata.contract` stores the complete validated `CoverLetterArtifact`.
 - `metadata.source_resume` stores source id, source version id, source label,
   source type, and source hash when a source is available.
-- `metadata.target_evaluation_id` stores the STRIDE evaluation id or `null`.
+- `metadata.target_evaluation_id` stores the COMPASS evaluation id or `null`.
 - `metadata.tone` stores the requested canonical tone.
 
 Lineage is revision-based. The first generated cover letter for a workspace and

@@ -31,7 +31,7 @@ Monetization may eventually support sustainability, but it must not compromise:
 
 | Candidate tier | Possible value | Readiness requirement |
 | --- | --- | --- |
-| Free useful baseline | Manual opportunities, workflow tracking, deterministic STRIDE, limited local artifacts/analytics. | Must be genuinely useful. |
+| Free useful baseline | Manual opportunities, workflow tracking, deterministic COMPASS, limited local artifacts/analytics. | Must be genuinely useful. |
 | Paid individual/power-user tier | Higher volume, richer analytics, advanced workflow, better artifact lifecycle. | Requires stable user-side workflow value. |
 | Paid AI/artifact quota tier | More AI generations, export convenience, higher monthly AI limits. | Requires usage transparency and cost controls. |
 | Future coach/advisor collaboration tier | Scoped reviewer/advisor access and comments. | Requires account lifecycle, permissions, and privacy sharing. |
@@ -41,7 +41,7 @@ Monetization may eventually support sustainability, but it must not compromise:
 
 - Basic opportunity capture and organization.
 - Review-before-save local intake.
-- Deterministic STRIDE-style guidance where feasible.
+- Deterministic COMPASS-style guidance where feasible.
 - Basic application workflow tracking.
 - Notes, links, and essential search organization.
 - Clear export/delete expectations before hosted modes.
@@ -62,7 +62,7 @@ Monetization may eventually support sustainability, but it must not compromise:
 - Pay-to-rank listings.
 - Selling user attention.
 - Employer-funded recommendation steering without disclosure.
-- Access to private STRIDE notes, compensation strategy, company commentary,
+- Access to private COMPASS notes, compensation strategy, company commentary,
   or decision rationale.
 - Essential organization locked behind expensive tiers before value is proven.
 - Auto-apply, auto-send, or unreviewed external automation.

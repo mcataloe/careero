@@ -1,7 +1,7 @@
 """resume source grounding
 
 Revision ID: 0004_resume_sources
-Revises: 0003_stride_evaluations
+Revises: 0003_compass_evaluations
 Create Date: 2026-05-13
 """
 from alembic import op
@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 revision = "0004_resume_sources"
-down_revision = "0003_stride_evaluations"
+down_revision = "0003_compass_evaluations"
 branch_labels = None
 depends_on = None
 

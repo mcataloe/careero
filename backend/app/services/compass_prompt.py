@@ -3,13 +3,13 @@ from decimal import Decimal
 from typing import Any
 
 from app.models import ResumeSourceVersion, Role
-from app.services.stride_rules import StrideRuleResult
+from app.services.compass_rules import CompassRuleResult
 
 
 PROMPT_VERSION = "phase_2c_grounded_prompt_v1"
 
-STRIDE_RULES_TEXT = """
-STRIDE evaluates role fit, risk, positioning, and application priority using:
+COMPASS_RULES_TEXT = """
+COMPASS evaluates role fit, risk, positioning, and application priority using:
 - strategic fit
 - technical alignment
 - seniority alignment
@@ -40,10 +40,10 @@ outreach messages, or application artifacts.
 """.strip()
 
 
-def build_stride_evaluation_prompt(
+def build_compass_evaluation_prompt(
     *,
     role: Role,
-    baseline: StrideRuleResult,
+    baseline: CompassRuleResult,
     user_notes: str | None,
     user_context: dict[str, Any],
     workspace_context: dict[str, Any] | None = None,
@@ -79,7 +79,7 @@ def build_stride_evaluation_prompt(
         "workspace_context": workspace_context,
         "active_resume_source": _active_resume_source_payload(active_resume_source),
         "deterministic_baseline": _baseline_payload(baseline),
-        "stride_rules": STRIDE_RULES_TEXT,
+        "compass_rules": COMPASS_RULES_TEXT,
         "grounding_instructions": GROUNDING_INSTRUCTIONS,
     }
 
@@ -87,7 +87,7 @@ def build_stride_evaluation_prompt(
         {
             "role": "system",
             "content": (
-                "You are Careero's grounded STRIDE evaluator. Return only "
+                "You are Careero's grounded COMPASS evaluator. Return only "
                 "schema-valid structured analysis."
             ),
         },
@@ -98,7 +98,7 @@ def build_stride_evaluation_prompt(
     ]
 
 
-def _baseline_payload(baseline: StrideRuleResult) -> dict[str, Any]:
+def _baseline_payload(baseline: CompassRuleResult) -> dict[str, Any]:
     return {
         "overall_score": str(baseline.overall_score),
         "recommendation": baseline.recommendation,

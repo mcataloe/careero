@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
-class StrideTrendInsight(BaseModel):
+class CompassTrendInsight(BaseModel):
     label: str
     message: str
     basis: str
@@ -13,7 +13,7 @@ class StrideTrendInsight(BaseModel):
     source_inputs: dict[str, Any] = Field(default_factory=dict)
 
 
-class StrideTrendPoint(BaseModel):
+class CompassTrendPoint(BaseModel):
     role_id: uuid.UUID
     created_at: str
     overall_score: float | None
@@ -22,9 +22,9 @@ class StrideTrendPoint(BaseModel):
     role_category: str
 
 
-class StrideInsightsResponse(BaseModel):
+class CompassInsightsResponse(BaseModel):
     workspace_id: uuid.UUID | None = None
-    average_stride_score: float | None = None
-    trend_points: list[StrideTrendPoint] = Field(default_factory=list)
-    insights: list[StrideTrendInsight] = Field(default_factory=list)
+    average_compass_score: float | None = None
+    trend_points: list[CompassTrendPoint] = Field(default_factory=list)
+    insights: list[CompassTrendInsight] = Field(default_factory=list)
     insufficient_data: list[str] = Field(default_factory=list)

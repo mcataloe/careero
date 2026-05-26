@@ -2,7 +2,7 @@ import json
 from decimal import Decimal
 from typing import Any
 
-from app.models import ResumeSourceVersion, Role, StrideEvaluation
+from app.models import ResumeSourceVersion, Role, CompassEvaluation
 
 
 PROMPT_VERSION = "cover_letter_artifact_generation_v1"
@@ -15,7 +15,7 @@ or an equivalent professional opening.
 """.strip()
 
 TRUTHFULNESS_INSTRUCTIONS = """
-Use only the supplied role/opportunity, optional STRIDE evaluation, and optional
+Use only the supplied role/opportunity, optional COMPASS evaluation, and optional
 resume/profile source. Do not invent employers, roles, dates, technologies,
 metrics, accomplishments, credentials, or experience. If no resume/profile
 source is supplied, avoid candidate-specific claims beyond generic application
@@ -28,14 +28,14 @@ def build_cover_letter_artifact_prompt(
     *,
     role: Role,
     tone: str,
-    evaluation: StrideEvaluation | None = None,
+    evaluation: CompassEvaluation | None = None,
     source_version: ResumeSourceVersion | None = None,
     workspace_context: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     payload = {
         "workspace_context": workspace_context,
         "target_role": _role_payload(role),
-        "stride_evaluation": _evaluation_payload(evaluation),
+        "compass_evaluation": _evaluation_payload(evaluation),
         "resume_source": _source_payload(source_version),
         "tone": tone,
         "tone_instructions": NEUTRAL_TONE_INSTRUCTIONS
@@ -94,7 +94,7 @@ def _role_payload(role: Role) -> dict[str, Any]:
     }
 
 
-def _evaluation_payload(evaluation: StrideEvaluation | None) -> dict[str, Any] | None:
+def _evaluation_payload(evaluation: CompassEvaluation | None) -> dict[str, Any] | None:
     if evaluation is None:
         return None
     return {

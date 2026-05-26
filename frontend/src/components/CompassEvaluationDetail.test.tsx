@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { StrideEvaluationDetail } from "./StrideEvaluationDetail";
+import { CompassEvaluationDetail } from "./CompassEvaluationDetail";
 import { sampleEvaluation } from "../test-data";
 import { render, screen, userEvent, waitFor } from "../test-utils";
 
-describe("StrideEvaluationDetail", () => {
+describe("CompassEvaluationDetail", () => {
   it("renders completed evaluation details and unsupported warnings", () => {
     render(
-      <StrideEvaluationDetail
+      <CompassEvaluationDetail
         evaluation={sampleEvaluation}
         onRun={vi.fn()}
         onViewLatest={vi.fn()}
@@ -22,20 +22,20 @@ describe("StrideEvaluationDetail", () => {
     expect(screen.getByText("kubernetes")).toBeInTheDocument();
     expect(screen.getByText("Do not claim Kubernetes experience without source evidence.")).toBeInTheDocument();
     expect(screen.getByText(/AI fallback: AI evaluations are disabled/i)).toBeInTheDocument();
-    expect(document.getElementById("stride-summary")).not.toBeNull();
-    expect(document.getElementById("stride-fit-analysis")).not.toBeNull();
-    expect(document.getElementById("stride-ats-findings")).not.toBeNull();
-    expect(document.getElementById("stride-interview-positioning")).not.toBeNull();
+    expect(document.getElementById("compass-summary")).not.toBeNull();
+    expect(document.getElementById("compass-fit-analysis")).not.toBeNull();
+    expect(document.getElementById("compass-ats-findings")).not.toBeNull();
+    expect(document.getElementById("compass-interview-positioning")).not.toBeNull();
   });
 
   it("renders not evaluated state and runs evaluation", async () => {
     const user = userEvent.setup();
     const onRun = vi.fn();
 
-    render(<StrideEvaluationDetail evaluation={null} onRun={onRun} />);
+    render(<CompassEvaluationDetail evaluation={null} onRun={onRun} />);
 
     expect(screen.getByText("Not evaluated")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /run stride evaluation/i }));
+    await user.click(screen.getByRole("button", { name: /run compass evaluation/i }));
 
     await waitFor(() => expect(onRun).toHaveBeenCalledWith(false));
   });
@@ -44,7 +44,7 @@ describe("StrideEvaluationDetail", () => {
     const user = userEvent.setup();
     const onRun = vi.fn();
 
-    render(<StrideEvaluationDetail evaluation={sampleEvaluation} onRun={onRun} />);
+    render(<CompassEvaluationDetail evaluation={sampleEvaluation} onRun={onRun} />);
 
     await user.click(screen.getByRole("button", { name: /re-run evaluation/i }));
 
@@ -53,7 +53,7 @@ describe("StrideEvaluationDetail", () => {
 
   it("renders top-level AI failure metadata safely", () => {
     render(
-      <StrideEvaluationDetail
+      <CompassEvaluationDetail
         evaluation={{
           ...sampleEvaluation,
           ai_status: "failed",
@@ -70,7 +70,7 @@ describe("StrideEvaluationDetail", () => {
 
   it("renders validation-failed state without treating it as completed", () => {
     render(
-      <StrideEvaluationDetail
+      <CompassEvaluationDetail
         evaluation={{
           ...sampleEvaluation,
           evaluation_status: "failed",
@@ -90,7 +90,7 @@ describe("StrideEvaluationDetail", () => {
     const longSummary = Array.from({ length: 24 }, (_, index) => `Line ${index + 1}`).join("\n");
 
     render(
-      <StrideEvaluationDetail
+      <CompassEvaluationDetail
         evaluation={{
           ...sampleEvaluation,
           summary: longSummary,

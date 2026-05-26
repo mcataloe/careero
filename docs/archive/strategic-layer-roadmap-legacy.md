@@ -26,11 +26,11 @@ Careero's layer model should help the project preserve a coherent product direct
 | --- | --- | --- | --- | --- |
 | Layer 0 | Product Foundation | Built / defined | Establish the product's strategic operating model. | Mission, target users, MVP boundary, product principles, workspace/search-track concept, AI governance posture, UX philosophy, monetization philosophy, and risk boundaries. |
 | Layer 1 | Core Platform | Built / mostly built | Provide the technical foundation for a real application. | User accounts, authentication/login, sessions, authorization, user profile, workspace ownership, environment/config setup, and core database structure. |
-| Layer 2 | Intake & Parsing | Built / mostly built | Turn raw opportunity and source-material input into structured data. | Pasted job description intake, AI-assisted role parsing, manual field correction, resume/profile source storage, supported local document imports, normalized long-text handling, and source-grounded STRIDE preparation. |
-| Layer 3 | Core Domain Model | Built / mostly built | Define Careero's canonical product objects and lifecycle concepts. | Workspace, Opportunity, STRIDE Evaluation, Resume Artifact, Cover Letter Artifact, Application State, canonical contracts, versioning strategy, lifecycle guidance, and migration mapping from earlier role-centered models. |
+| Layer 2 | Intake & Parsing | Built / mostly built | Turn raw opportunity and source-material input into structured data. | Pasted job description intake, AI-assisted role parsing, manual field correction, resume/profile source storage, supported local document imports, normalized long-text handling, and source-grounded COMPASS preparation. |
+| Layer 3 | Core Domain Model | Built / mostly built | Define Careero's canonical product objects and lifecycle concepts. | Workspace, Opportunity, COMPASS Evaluation, Resume Artifact, Cover Letter Artifact, Application State, canonical contracts, versioning strategy, lifecycle guidance, and migration mapping from earlier role-centered models. |
 | Layer 4 | Application Workflow | Built / mostly built | Manage the day-to-day job-search workflow. | Saved opportunities, application state machine, application history/timeline, notes, reminders, interview tracking, status pipeline, archive/reactivate workflows, and basic dashboard views per workspace/search track. |
-| Layer 5 | Workflow Intelligence / Insights | Next / partially started | Help users understand what is working, what is stuck, and where to focus next. | Workspace/search-track dashboards, pipeline analytics, stale opportunity detection, follow-up candidates, upcoming reminders/interviews, STRIDE recommendation rollups, opportunity comparison, search-track health indicators, activity trends, and "what should I focus on next?" views. |
-| Layer 6 | Advanced STRIDE + Artifact Lifecycle | Planned | Make evaluation and application materials more trustworthy, traceable, and strategically useful. | STRIDE history, cross-opportunity comparison, JD-to-resume evidence mapping, missing requirement detection, TruthGuard checks, resume and cover-letter artifact versioning, submitted artifact tracking, tailoring notes, internal-strategy separation, and source-material traceability. |
+| Layer 5 | Workflow Intelligence / Insights | Next / partially started | Help users understand what is working, what is stuck, and where to focus next. | Workspace/search-track dashboards, pipeline analytics, stale opportunity detection, follow-up candidates, upcoming reminders/interviews, COMPASS recommendation rollups, opportunity comparison, search-track health indicators, activity trends, and "what should I focus on next?" views. |
+| Layer 6 | Advanced COMPASS + Artifact Lifecycle | Planned | Make evaluation and application materials more trustworthy, traceable, and strategically useful. | COMPASS history, cross-opportunity comparison, JD-to-resume evidence mapping, missing requirement detection, TruthGuard checks, resume and cover-letter artifact versioning, submitted artifact tracking, tailoring notes, internal-strategy separation, and source-material traceability. |
 | Layer 7 | Integrations | Planned | Reduce manual entry by connecting Careero to tools users already use. | Google Docs import, Gmail/Outlook linkage, calendar interview sync, LinkedIn/job-board save helpers, browser extension or share-sheet intake, resume source sync, DOCX/PDF/Markdown export, and optional cloud storage integrations. |
 | Layer 8 | Automation Guardrails | Planned | Automate repetitive actions safely without reducing user control or trust. | Suggested follow-ups, draft-only application material generation, reminder automation, status nudges, review-before-send workflows, no auto-apply without explicit approval, TruthGuard checks before artifact generation, approval logs, and automation boundaries per workspace/search track. |
 | Layer 9 | Advanced Search Tracks / Career Strategy | Planned | Make Careero more strategic than tactical. | Multiple long-running career paths, full-time vs. contract strategy comparison, compensation target modeling, skill-gap planning, role-market positioning, career narrative refinement, search-track archival retrospectives, and strategic category adjustments. |
@@ -64,7 +64,7 @@ It includes pasted job description intake, AI-assisted parsing, manual correctio
 
 Layer 3 defines the canonical objects Careero uses to reason about the job-search workflow.
 
-The central objects include Workspace, Opportunity, STRIDE Evaluation, Resume Artifact, Cover Letter Artifact, and Application State. These contracts should provide a stable bridge between frontend rendering, backend persistence, AI orchestration, workflow tracking, and future export generation.
+The central objects include Workspace, Opportunity, COMPASS Evaluation, Resume Artifact, Cover Letter Artifact, and Application State. These contracts should provide a stable bridge between frontend rendering, backend persistence, AI orchestration, workflow tracking, and future export generation.
 
 ### Layer 4 — Application Workflow
 
@@ -76,13 +76,13 @@ It includes saved opportunities, state transitions, notes, reminders, interviews
 
 Layer 5 turns accumulated workflow activity into useful guidance.
 
-Once Careero can save opportunities and track state, the natural user question becomes: what should I focus on next? This layer should answer that through dashboards, stale-opportunity detection, follow-up recommendations, STRIDE rollups, pipeline health, activity trends, and search-track-level insight.
+Once Careero can save opportunities and track state, the natural user question becomes: what should I focus on next? This layer should answer that through dashboards, stale-opportunity detection, follow-up recommendations, COMPASS rollups, pipeline health, activity trends, and search-track-level insight.
 
-### Layer 6 — Advanced STRIDE + Artifact Lifecycle
+### Layer 6 — Advanced COMPASS + Artifact Lifecycle
 
 Layer 6 deepens evaluation quality and artifact traceability.
 
-It should make STRIDE evaluations more comparable over time, connect role requirements to resume evidence, detect missing high-priority terms, apply TruthGuard checks before artifact generation, and track resume and cover-letter artifacts through draft, reviewed, submitted, and archived states.
+It should make COMPASS evaluations more comparable over time, connect role requirements to resume evidence, detect missing high-priority terms, apply TruthGuard checks before artifact generation, and track resume and cover-letter artifacts through draft, reviewed, submitted, and archived states.
 
 This layer should preserve a strict separation between internal strategy and employer-facing materials.
 
@@ -146,7 +146,7 @@ The practical sequence is:
 
 1. Stabilize Layers 0-4 as the product and workflow foundation.
 2. Build Layer 5 so the workflow becomes informative, not merely record-keeping.
-3. Build Layer 6 so STRIDE and artifacts become more traceable, auditable, and useful.
+3. Build Layer 6 so COMPASS and artifacts become more traceable, auditable, and useful.
 4. Build Layer 7 integrations after internal data flows are stable.
 5. Build Layer 8 automation only after review, approval, and TruthGuard boundaries are clear.
 6. Build Layer 9 career strategy once enough workflow history exists to generate useful retrospectives.

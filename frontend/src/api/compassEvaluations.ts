@@ -1,14 +1,14 @@
 import { ApiError, apiRequest } from "./client";
 import type {
-  StrideEvaluation,
-  StrideEvaluationCreatePayload,
-} from "../types/strideEvaluations";
+  CompassEvaluation,
+  CompassEvaluationCreatePayload,
+} from "../types/compassEvaluations";
 
 export async function getLatestEvaluation(
   roleId: string,
-): Promise<StrideEvaluation | null> {
+): Promise<CompassEvaluation | null> {
   try {
-    return await apiRequest<StrideEvaluation>(
+    return await apiRequest<CompassEvaluation>(
       `/api/roles/${roleId}/evaluations/latest`,
     );
   } catch (error) {
@@ -21,22 +21,22 @@ export async function getLatestEvaluation(
 
 export function createEvaluation(
   roleId: string,
-  payload: StrideEvaluationCreatePayload = {},
-): Promise<StrideEvaluation> {
-  return apiRequest<StrideEvaluation>(`/api/roles/${roleId}/evaluations`, {
+  payload: CompassEvaluationCreatePayload = {},
+): Promise<CompassEvaluation> {
+  return apiRequest<CompassEvaluation>(`/api/roles/${roleId}/evaluations`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export interface CreateEvaluationResult {
-  evaluation: StrideEvaluation;
+  evaluation: CompassEvaluation;
   status: number;
 }
 
 export async function createEvaluationWithStatus(
   roleId: string,
-  payload: StrideEvaluationCreatePayload = {},
+  payload: CompassEvaluationCreatePayload = {},
 ): Promise<CreateEvaluationResult> {
   const response = await fetch(`/api/roles/${roleId}/evaluations`, {
     method: "POST",
@@ -59,7 +59,7 @@ export async function createEvaluationWithStatus(
   }
 
   return {
-    evaluation: data as StrideEvaluation,
+    evaluation: data as CompassEvaluation,
     status: response.status,
   };
 }

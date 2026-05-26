@@ -57,7 +57,7 @@ def drop_known_schema(database_url: str) -> None:
                             application_notes,
                             application_state_history,
                             applications,
-                            stride_evaluations,
+                            compass_evaluations,
                             resume_source_versions,
                             resume_sources,
                             roles,

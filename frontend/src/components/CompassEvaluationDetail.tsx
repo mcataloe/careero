@@ -17,8 +17,8 @@ import type { ReactNode } from "react";
 import type {
   EvaluationSection,
   EvidenceItem,
-  StrideEvaluation,
-} from "../types/strideEvaluations";
+  CompassEvaluation,
+} from "../types/compassEvaluations";
 import { ExpandableTextSection } from "./ExpandableTextSection";
 import { MarkdownPreviewBlock } from "./MarkdownPreviewBlock";
 import { EmptyState } from "./States";
@@ -40,7 +40,7 @@ function recommendationColor(recommendation: string | null | undefined) {
   return "yellow";
 }
 
-function aiStatusLabel(evaluation: StrideEvaluation) {
+function aiStatusLabel(evaluation: CompassEvaluation) {
   const aiStatus = evaluation.ai_status ?? evaluation.raw_evaluation_json?.ai_status;
   if (aiStatus === "skipped") return "Skipped AI fallback";
   if (aiStatus === "failed") return "AI failed";
@@ -48,19 +48,19 @@ function aiStatusLabel(evaluation: StrideEvaluation) {
   return "Deterministic";
 }
 
-function evaluationStatus(evaluation: StrideEvaluation) {
+function evaluationStatus(evaluation: CompassEvaluation) {
   return evaluation.evaluation_status ?? evaluation.status ?? "completed";
 }
 
-function overallScore(evaluation: StrideEvaluation) {
+function overallScore(evaluation: CompassEvaluation) {
   return scoreNumber(evaluation.overall_score ?? evaluation.overallScore);
 }
 
-function recommendation(evaluation: StrideEvaluation) {
+function recommendation(evaluation: CompassEvaluation) {
   return evaluation.recommendation ?? evaluation.recommendations?.decision ?? null;
 }
 
-function confidenceLevel(evaluation: StrideEvaluation) {
+function confidenceLevel(evaluation: CompassEvaluation) {
   return evaluation.confidence_level ?? evaluation.confidence?.level ?? null;
 }
 
@@ -74,8 +74,8 @@ function evidenceText(evidence: EvidenceItem["evidence"]) {
 }
 
 function sectionFromCanonical(
-  evaluation: StrideEvaluation,
-  key: keyof NonNullable<StrideEvaluation["sections"]>,
+  evaluation: CompassEvaluation,
+  key: keyof NonNullable<CompassEvaluation["sections"]>,
   fallback: EvaluationSection | null | undefined,
 ) {
   return evaluation.sections?.[key] ?? fallback;
@@ -198,7 +198,7 @@ export function EvaluationStatusBadge({
   loading = false,
   error,
 }: {
-  evaluation: StrideEvaluation | null;
+  evaluation: CompassEvaluation | null;
   loading?: boolean;
   error?: string | null;
 }) {
@@ -216,13 +216,13 @@ export function EvaluationStatusBadge({
   return <Badge color="green">Completed</Badge>;
 }
 
-export function StrideEvaluationDetail({
+export function CompassEvaluationDetail({
   evaluation,
   onRun,
   running = false,
   onViewLatest,
 }: {
-  evaluation: StrideEvaluation | null;
+  evaluation: CompassEvaluation | null;
   onRun: (force?: boolean) => Promise<void> | void;
   running?: boolean;
   onViewLatest?: () => void;
@@ -232,10 +232,10 @@ export function StrideEvaluationDetail({
       <Paper withBorder radius="md" p="lg">
         <EmptyState
           title="Not evaluated"
-          message="Run STRIDE evaluation to create a local recommendation for this opportunity."
+          message="Run COMPASS evaluation to create a local recommendation for this opportunity."
           action={
             <Button loading={running} onClick={() => onRun(false)}>
-              Run STRIDE evaluation
+              Run COMPASS evaluation
             </Button>
           }
         />
@@ -271,7 +271,7 @@ export function StrideEvaluationDetail({
       <Stack gap="lg">
         <Group justify="space-between" align="flex-start">
           <Stack gap={4}>
-            <Title order={3}>STRIDE evaluation</Title>
+            <Title order={3}>COMPASS evaluation</Title>
             <Group gap="xs">
               <EvaluationStatusBadge evaluation={evaluation} />
               <Badge variant="light">{aiStatusLabel(evaluation)}</Badge>
@@ -333,13 +333,13 @@ export function StrideEvaluationDetail({
           </Grid.Col>
         </Grid>
 
-        <EvaluationSectionBlock id="stride-summary" title="Summary">
+        <EvaluationSectionBlock id="compass-summary" title="Summary">
           <ExpandableTextSection maxHeight={220}>
             <MarkdownPreviewBlock value={evaluation.summary ?? "No summary available."} />
           </ExpandableTextSection>
         </EvaluationSectionBlock>
 
-        <EvaluationSectionBlock id="stride-fit-analysis" title="Fit analysis">
+        <EvaluationSectionBlock id="compass-fit-analysis" title="Fit analysis">
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <AlignmentSection
@@ -370,17 +370,17 @@ export function StrideEvaluationDetail({
 
         <Grid>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <EvaluationSectionBlock id="stride-strengths" title="Strengths">
+            <EvaluationSectionBlock id="compass-strengths" title="Strengths">
               <EvidenceList items={evaluation.strengths} empty="No strengths recorded." />
             </EvaluationSectionBlock>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <EvaluationSectionBlock id="stride-gaps" title="Gaps">
+            <EvaluationSectionBlock id="compass-gaps" title="Gaps">
               <EvidenceList items={gaps} empty="No gaps recorded." />
             </EvaluationSectionBlock>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <EvaluationSectionBlock id="stride-risks" title="Risks">
+            <EvaluationSectionBlock id="compass-risks" title="Risks">
               <EvidenceList items={risks} empty="No risks recorded." />
             </EvaluationSectionBlock>
           </Grid.Col>
@@ -390,7 +390,7 @@ export function StrideEvaluationDetail({
 
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <EvaluationSectionBlock id="stride-ats-findings" title="ATS findings">
+            <EvaluationSectionBlock id="compass-ats-findings" title="ATS findings">
               <Stack gap="sm">
                 <Text size="sm" c="dimmed">
                   Matched keywords
@@ -424,7 +424,7 @@ export function StrideEvaluationDetail({
             </EvaluationSectionBlock>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <EvaluationSectionBlock id="stride-compensation" title="Compensation">
+            <EvaluationSectionBlock id="compass-compensation" title="Compensation">
               <AlignmentSection title="Compensation alignment" section={compensationSection} />
             </EvaluationSectionBlock>
           </Grid.Col>
@@ -432,12 +432,12 @@ export function StrideEvaluationDetail({
 
         <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <EvaluationSectionBlock id="stride-remote-fit" title="Remote fit">
+            <EvaluationSectionBlock id="compass-remote-fit" title="Remote fit">
               <AlignmentSection title="Remote/location alignment" section={remoteSection} />
             </EvaluationSectionBlock>
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6 }}>
-            <EvaluationSectionBlock id="stride-interview-positioning" title="Interview positioning">
+            <EvaluationSectionBlock id="compass-interview-positioning" title="Interview positioning">
               <EvidenceList
                 items={[
                   ...positioningOpportunities,
@@ -452,7 +452,7 @@ export function StrideEvaluationDetail({
           </Grid.Col>
         </Grid>
 
-        <EvaluationSectionBlock id="stride-recommendations" title="Recommendations">
+        <EvaluationSectionBlock id="compass-recommendations" title="Recommendations">
           <Stack gap="sm">
             <Badge size="lg" color={recommendationColor(decision)}>
               {titleize(decision)}
@@ -468,7 +468,7 @@ export function StrideEvaluationDetail({
           </Stack>
         </EvaluationSectionBlock>
 
-        <EvaluationSectionBlock id="stride-assumptions-confidence" title="Assumptions / confidence">
+        <EvaluationSectionBlock id="compass-assumptions-confidence" title="Assumptions / confidence">
           <Grid>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Paper withBorder radius="md" p="md">
@@ -508,7 +508,7 @@ export function StrideEvaluationDetail({
           </Grid>
         </EvaluationSectionBlock>
 
-        <EvaluationSectionBlock id="stride-unsupported-warnings" title="Unsupported claim warnings">
+        <EvaluationSectionBlock id="compass-unsupported-warnings" title="Unsupported claim warnings">
           <EvidenceList
             items={unsupportedWarnings}
             empty="No unsupported claim warnings recorded."
@@ -516,7 +516,7 @@ export function StrideEvaluationDetail({
         </EvaluationSectionBlock>
 
         {validationIssues.length > 0 ? (
-          <EvaluationSectionBlock id="stride-validation-issues" title="Validation issues">
+          <EvaluationSectionBlock id="compass-validation-issues" title="Validation issues">
             <EvidenceList
               items={validationIssues.map((issue, index) => ({
                 code: `validation_issue_${index}`,

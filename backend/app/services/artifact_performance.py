@@ -14,7 +14,7 @@ from app.models import (
     ArtifactPerformanceRecord,
     GeneratedArtifact,
     Role,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
 )
 from app.seed import DEFAULT_LOCAL_USER_ID
@@ -56,7 +56,7 @@ class ArtifactPerformanceService:
         *,
         artifact: GeneratedArtifact,
         role: Role,
-        evaluation: StrideEvaluation | None,
+        evaluation: CompassEvaluation | None,
     ) -> ArtifactPerformanceRecord:
         application = self._application_for_role(role)
         contract = artifact.artifact_metadata.get("contract", {})
@@ -77,7 +77,7 @@ class ArtifactPerformanceService:
             response_outcome=_response_outcome(application),
             interview_outcome=_interview_outcome(application),
             recruiter_engagement_outcome=_recruiter_outcome(self.db, application),
-            stride_alignment=_stride_alignment(evaluation),
+            compass_alignment=_compass_alignment(evaluation),
             generated_at=artifact.created_at,
             submitted_at=application.applied_at if application is not None else None,
             record_metadata={
@@ -312,7 +312,7 @@ def _recruiter_outcome(db: Session, application: Application | None) -> str | No
     return "recruiter_engaged" if note_id is not None else "none_recorded"
 
 
-def _stride_alignment(evaluation: StrideEvaluation | None) -> dict[str, Any]:
+def _compass_alignment(evaluation: CompassEvaluation | None) -> dict[str, Any]:
     if evaluation is None:
         return {}
     return {

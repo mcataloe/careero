@@ -4,17 +4,17 @@ import type { Opportunity } from "./opportunity.js";
 import { CONTRACT_VERSION, type ModelMetadata } from "./primitives.js";
 import {
   type EvaluationSection,
-  type StrideEvaluation,
-  StrideEvaluationSchema,
-} from "./stride-evaluation.js";
+  type CompassEvaluation,
+  CompassEvaluationSchema,
+} from "./compass-evaluation.js";
 import type { Workspace } from "./workspace.js";
 
-export const STRIDE_ENGINE_VERSION = "stride_engine_v1" as const;
-export const STRIDE_PROMPT_VERSION = "stride_prompt_v1" as const;
-export const STRIDE_RULESET_VERSION = "stride_rules_v1" as const;
-export const STRIDE_EVALUATION_VERSION = "stride_evaluation_v1" as const;
+export const COMPASS_ENGINE_VERSION = "compass_engine_v1" as const;
+export const COMPASS_PROMPT_VERSION = "compass_prompt_v1" as const;
+export const COMPASS_RULESET_VERSION = "compass_rules_v1" as const;
+export const COMPASS_EVALUATION_VERSION = "compass_evaluation_v1" as const;
 
-export interface StrideEvaluationEngineInput {
+export interface CompassEvaluationEngineInput {
   workspace: Workspace;
   opportunity: Opportunity;
   resumeProfileContent?: string | null;
@@ -29,30 +29,30 @@ export interface StrideEvaluationEngineInput {
   evaluationVersion?: string;
 }
 
-export interface StrideModelProviderResult {
+export interface CompassModelProviderResult {
   rawText: string;
   modelMetadata?: Partial<ModelMetadata>;
 }
 
-export interface StrideModelProvider {
-  evaluate(prompt: string): Promise<StrideModelProviderResult>;
+export interface CompassModelProvider {
+  evaluate(prompt: string): Promise<CompassModelProviderResult>;
 }
 
-export interface StrideEvaluationEngineResult {
+export interface CompassEvaluationEngineResult {
   status: "completed" | "failed";
-  evaluation: StrideEvaluation;
+  evaluation: CompassEvaluation;
   rawModelOutput: string | null;
   validationIssues: z.ZodIssue[];
   failureReason: string | null;
   usedFallback: boolean;
 }
 
-export interface StrideEvaluationPromptOptions {
+export interface CompassEvaluationPromptOptions {
   promptVersion?: string;
   rulesetVersion?: string;
 }
 
-export interface StrideEvaluationNormalizationMetadata {
+export interface CompassEvaluationNormalizationMetadata {
   modelMetadata?: Partial<ModelMetadata>;
   rawModelOutput?: string | null;
   createdAt?: string;
@@ -63,24 +63,24 @@ export interface StrideEvaluationNormalizationMetadata {
   evaluationId?: string;
 }
 
-export interface StrideEvaluationFailure {
+export interface CompassEvaluationFailure {
   reason: string;
   errorType?: string;
   validationIssues?: z.ZodIssue[];
   rawModelOutput?: string | null;
 }
 
-export async function evaluateStrideOpportunity(
-  input: StrideEvaluationEngineInput,
-  provider: StrideModelProvider,
-  options: StrideEvaluationPromptOptions = {},
-): Promise<StrideEvaluationEngineResult> {
-  const prompt = buildStrideEvaluationPrompt(input, options);
+export async function evaluateCompassOpportunity(
+  input: CompassEvaluationEngineInput,
+  provider: CompassModelProvider,
+  options: CompassEvaluationPromptOptions = {},
+): Promise<CompassEvaluationEngineResult> {
+  const prompt = buildCompassEvaluationPrompt(input, options);
 
   try {
     const providerResult = await provider.evaluate(prompt);
-    const parsed = parseStrideModelOutput(providerResult.rawText);
-    const normalized = normalizeStrideEvaluation(parsed, input, {
+    const parsed = parseCompassModelOutput(providerResult.rawText);
+    const normalized = normalizeCompassEvaluation(parsed, input, {
       modelMetadata: providerResult.modelMetadata,
       rawModelOutput: providerResult.rawText,
       promptVersion: options.promptVersion,
@@ -116,16 +116,16 @@ export async function evaluateStrideOpportunity(
   }
 }
 
-export function buildStrideEvaluationPrompt(
-  input: StrideEvaluationEngineInput,
-  options: StrideEvaluationPromptOptions = {},
+export function buildCompassEvaluationPrompt(
+  input: CompassEvaluationEngineInput,
+  options: CompassEvaluationPromptOptions = {},
 ): string {
-  const promptVersion = options.promptVersion ?? input.promptVersion ?? STRIDE_PROMPT_VERSION;
-  const rulesetVersion = options.rulesetVersion ?? input.rulesetVersion ?? STRIDE_RULESET_VERSION;
+  const promptVersion = options.promptVersion ?? input.promptVersion ?? COMPASS_PROMPT_VERSION;
+  const rulesetVersion = options.rulesetVersion ?? input.rulesetVersion ?? COMPASS_RULESET_VERSION;
   const resumeContent = input.resumeProfileContent?.trim() || null;
 
   return [
-    "You are CareerO's STRIDE evaluation engine.",
+    "You are CareerO's COMPASS evaluation engine.",
     `Prompt version: ${promptVersion}`,
     `Ruleset version: ${rulesetVersion}`,
     "",
@@ -135,7 +135,7 @@ export function buildStrideEvaluationPrompt(
     "Use only the supplied workspace, opportunity, user context, and resume/profile content.",
     "If resume/profile content is missing, mark affected sections as insufficient_data, lower confidence, and add an explicit assumption.",
     "",
-    "Required output must validate against the canonical StrideEvaluation contract.",
+    "Required output must validate against the canonical CompassEvaluation contract.",
     "Include: summary, role fit analysis through sections, strengths, gaps, risks, atsFindings, compensationFindings, remote compatibility, interview positioning in recommendations.nextActions, confidence, assumptions, modelMetadata, and version.",
     "",
     `Workspace JSON:\n${JSON.stringify(input.workspace, null, 2)}`,
@@ -148,32 +148,32 @@ export function buildStrideEvaluationPrompt(
   ].join("\n");
 }
 
-export function parseStrideModelOutput(rawText: string): unknown {
+export function parseCompassModelOutput(rawText: string): unknown {
   const jsonText = _extractJsonText(rawText);
   if (!jsonText) {
-    throw new StrideModelOutputParseError("Model output did not contain a JSON object", rawText);
+    throw new CompassModelOutputParseError("Model output did not contain a JSON object", rawText);
   }
 
   try {
     return JSON.parse(jsonText);
   } catch (error) {
-    throw new StrideModelOutputParseError(
+    throw new CompassModelOutputParseError(
       error instanceof Error ? error.message : "Model output JSON parse failed",
       rawText,
     );
   }
 }
 
-export function normalizeStrideEvaluation(
+export function normalizeCompassEvaluation(
   parsedOutput: unknown,
-  input: StrideEvaluationEngineInput,
-  metadata: StrideEvaluationNormalizationMetadata = {},
-): StrideEvaluation {
+  input: CompassEvaluationEngineInput,
+  metadata: CompassEvaluationNormalizationMetadata = {},
+): CompassEvaluation {
   const now = _timestamp(metadata.createdAt ?? input.createdAt);
   const promptVersion =
-    metadata.promptVersion ?? input.promptVersion ?? STRIDE_PROMPT_VERSION;
+    metadata.promptVersion ?? input.promptVersion ?? COMPASS_PROMPT_VERSION;
   const rulesetVersion =
-    metadata.rulesetVersion ?? input.rulesetVersion ?? STRIDE_RULESET_VERSION;
+    metadata.rulesetVersion ?? input.rulesetVersion ?? COMPASS_RULESET_VERSION;
 
   const candidate = {
     ...(typeof parsedOutput === "object" && parsedOutput !== null ? parsedOutput : {}),
@@ -186,11 +186,11 @@ export function normalizeStrideEvaluation(
         _readString(parsedOutput, ["version", "version"]) ??
         metadata.evaluationVersion ??
         input.evaluationVersion ??
-        STRIDE_EVALUATION_VERSION,
+        COMPASS_EVALUATION_VERSION,
       previousVersion: _readString(parsedOutput, ["version", "previousVersion"]),
       changeReason:
         _readString(parsedOutput, ["version", "changeReason"]) ??
-        "Generated by the canonical STRIDE evaluation engine.",
+        "Generated by the canonical COMPASS evaluation engine.",
     },
     status: "completed",
     modelMetadata: _modelMetadata(input, metadata.modelMetadata, promptVersion, rulesetVersion),
@@ -216,44 +216,44 @@ export function normalizeStrideEvaluation(
     updatedAt: _timestamp(metadata.updatedAt ?? input.updatedAt ?? now),
     metadata: {
       ..._readRecord(parsedOutput, ["metadata"]),
-      engineVersion: STRIDE_ENGINE_VERSION,
+      engineVersion: COMPASS_ENGINE_VERSION,
       rawModelOutputStoredSeparately: Boolean(metadata.rawModelOutput),
     },
   };
 
-  const result = StrideEvaluationSchema.safeParse(candidate);
+  const result = CompassEvaluationSchema.safeParse(candidate);
   if (!result.success) {
-    throw new StrideEvaluationValidationError(result.error.issues, metadata.rawModelOutput ?? null);
+    throw new CompassEvaluationValidationError(result.error.issues, metadata.rawModelOutput ?? null);
   }
 
   return result.data;
 }
 
 export function buildDeterministicFallbackEvaluation(
-  input: StrideEvaluationEngineInput,
-  failure: StrideEvaluationFailure,
-): StrideEvaluation {
+  input: CompassEvaluationEngineInput,
+  failure: CompassEvaluationFailure,
+): CompassEvaluation {
   const now = _timestamp(input.createdAt);
-  const promptVersion = input.promptVersion ?? STRIDE_PROMPT_VERSION;
-  const rulesetVersion = input.rulesetVersion ?? STRIDE_RULESET_VERSION;
+  const promptVersion = input.promptVersion ?? COMPASS_PROMPT_VERSION;
+  const rulesetVersion = input.rulesetVersion ?? COMPASS_RULESET_VERSION;
   const hasResume = Boolean(input.resumeProfileContent?.trim());
   const noResumeAssumption =
     "No resume/profile content was supplied; candidate-specific fit is marked as insufficient_data.";
 
-  return StrideEvaluationSchema.parse({
+  return CompassEvaluationSchema.parse({
     contractVersion: CONTRACT_VERSION,
     id: input.evaluationId ?? _randomUuid(),
     workspaceId: input.workspace.id,
     opportunityId: input.opportunity.id,
     version: {
-      version: input.evaluationVersion ?? STRIDE_EVALUATION_VERSION,
+      version: input.evaluationVersion ?? COMPASS_EVALUATION_VERSION,
       previousVersion: null,
-      changeReason: "Deterministic fallback after STRIDE engine failure.",
+      changeReason: "Deterministic fallback after COMPASS engine failure.",
     },
     status: "failed",
     modelMetadata: _modelMetadata(input, null, promptVersion, rulesetVersion),
     summary:
-      "STRIDE evaluation could not be completed with a validated model response. A conservative fallback record was produced for auditability.",
+      "COMPASS evaluation could not be completed with a validated model response. A conservative fallback record was produced for auditability.",
     overallScore: null,
     strengths: [],
     gaps: [
@@ -269,7 +269,7 @@ export function buildDeterministicFallbackEvaluation(
         label: "Evaluation requires review",
         score: null,
         evidence: [],
-        notes: "Do not treat this failed fallback as a completed STRIDE recommendation.",
+        notes: "Do not treat this failed fallback as a completed COMPASS recommendation.",
       },
     ],
     atsFindings: {
@@ -293,7 +293,7 @@ export function buildDeterministicFallbackEvaluation(
       rationale: "The model output was unavailable or invalid, so a human review is required.",
       nextActions: [
         "Review opportunity details manually.",
-        "Re-run STRIDE evaluation when model output can be validated.",
+        "Re-run COMPASS evaluation when model output can be validated.",
       ],
     },
     confidence: {
@@ -336,12 +336,12 @@ export function buildDeterministicFallbackEvaluation(
         ? { resumeProfileContent: _stableHash(input.resumeProfileContent) }
         : {},
       deterministicBaseline: {
-        engineVersion: STRIDE_ENGINE_VERSION,
+        engineVersion: COMPASS_ENGINE_VERSION,
         fallback: true,
       },
     },
     metadata: {
-      engineVersion: STRIDE_ENGINE_VERSION,
+      engineVersion: COMPASS_ENGINE_VERSION,
       failureReason: failure.reason,
       errorType: failure.errorType ?? null,
       validationIssues: failure.validationIssues?.map((issue) => ({
@@ -355,23 +355,23 @@ export function buildDeterministicFallbackEvaluation(
   });
 }
 
-export class StrideModelOutputParseError extends Error {
+export class CompassModelOutputParseError extends Error {
   constructor(
     message: string,
     public readonly rawModelOutput: string,
   ) {
     super(message);
-    this.name = "StrideModelOutputParseError";
+    this.name = "CompassModelOutputParseError";
   }
 }
 
-export class StrideEvaluationValidationError extends Error {
+export class CompassEvaluationValidationError extends Error {
   constructor(
     public readonly issues: z.ZodIssue[],
     public readonly rawModelOutput: string | null,
   ) {
-    super("Model output did not validate against StrideEvaluationSchema");
-    this.name = "StrideEvaluationValidationError";
+    super("Model output did not validate against CompassEvaluationSchema");
+    this.name = "CompassEvaluationValidationError";
   }
 }
 
@@ -387,7 +387,7 @@ function _fallbackSection(summary: string): EvaluationSection {
 }
 
 function _modelMetadata(
-  input: StrideEvaluationEngineInput,
+  input: CompassEvaluationEngineInput,
   override: Partial<ModelMetadata> | null | undefined,
   promptVersion: string,
   rulesetVersion: string,
@@ -424,17 +424,17 @@ function _extractJsonText(rawText: string): string | null {
 }
 
 function _extractValidationIssues(error: unknown): z.ZodIssue[] {
-  if (error instanceof StrideEvaluationValidationError) {
+  if (error instanceof CompassEvaluationValidationError) {
     return error.issues;
   }
   return [];
 }
 
 function _extractRawModelOutput(error: unknown): string | null {
-  if (error instanceof StrideEvaluationValidationError) {
+  if (error instanceof CompassEvaluationValidationError) {
     return error.rawModelOutput;
   }
-  if (error instanceof StrideModelOutputParseError) {
+  if (error instanceof CompassModelOutputParseError) {
     return error.rawModelOutput;
   }
   return null;
@@ -444,7 +444,7 @@ function _safeFailureReason(error: unknown): string {
   if (error instanceof Error) {
     return error.message.slice(0, 240);
   }
-  return "STRIDE evaluation failed".slice(0, 240);
+  return "COMPASS evaluation failed".slice(0, 240);
 }
 
 function _timestamp(value?: string | null): string {

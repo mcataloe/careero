@@ -9,14 +9,14 @@ from sqlalchemy.orm import Session
 from app.config import Settings, get_settings
 from app.database import get_db
 from app.main import create_app
-from app.models import ActivityLog, Company, Role, StrideEvaluation, User, Workspace
+from app.models import ActivityLog, Company, Role, CompassEvaluation, User, Workspace
 from app.seed import DEFAULT_LOCAL_USER_ID, seed_local_data
-from app.schemas.stride_evaluations import StrideEvaluationCreate
-from app.services.stride_evaluations import StrideEvaluationService
+from app.schemas.compass_evaluations import CompassEvaluationCreate
+from app.services.compass_evaluations import CompassEvaluationService
 
 
 @pytest.fixture
-def stride_api_client(
+def compass_api_client(
     db_session: Session,
     monkeypatch: pytest.MonkeyPatch,
 ) -> Generator[TestClient, None, None]:
@@ -36,7 +36,7 @@ def stride_api_client(
     get_settings.cache_clear()
 
 
-def role_payload(company_name: str = "Stride Example") -> dict:
+def role_payload(company_name: str = "Compass Example") -> dict:
     return {
         "title": "Platform Engineer",
         "company": {
@@ -65,7 +65,7 @@ def create_evaluation(client: TestClient, role_id: str) -> dict:
     response = client.post(
         f"/api/roles/{role_id}/evaluations",
         json={
-            "user_notes": "Evaluate this later with the real STRIDE engine.",
+            "user_notes": "Evaluate this later with the real COMPASS engine.",
             "user_context": {
                 "preferred_remote_type": "hybrid",
                 "target_compensation_min": "110000",
@@ -113,11 +113,11 @@ def add_other_user_role(db_session: Session) -> Role:
 
 
 def test_create_evaluation_for_active_role_logs_activity(
-    stride_api_client: TestClient,
+    compass_api_client: TestClient,
     db_session: Session,
 ) -> None:
-    role = create_role(stride_api_client)
-    evaluation = create_evaluation(stride_api_client, role["id"])
+    role = create_role(compass_api_client)
+    evaluation = create_evaluation(compass_api_client, role["id"])
 
     assert evaluation["role_id"] == role["id"]
     assert evaluation["user_id"] == str(DEFAULT_LOCAL_USER_ID)
@@ -156,27 +156,27 @@ def test_create_evaluation_for_active_role_logs_activity(
         db_session.scalars(
             select(ActivityLog.action).where(
                 ActivityLog.entity_id == UUID(evaluation["id"]),
-                ActivityLog.entity_type == "stride_evaluation",
+                ActivityLog.entity_type == "compass_evaluation",
             )
         )
     )
     assert actions == [
-        "stride_evaluation.started",
-        "stride_evaluation.completed",
+        "compass_evaluation.started",
+        "compass_evaluation.completed",
     ]
 
 
 def test_create_evaluation_reuses_cache_for_same_inputs(
-    stride_api_client: TestClient,
+    compass_api_client: TestClient,
     db_session: Session,
 ) -> None:
-    role = create_role(stride_api_client)
-    first = create_evaluation(stride_api_client, role["id"])
+    role = create_role(compass_api_client)
+    first = create_evaluation(compass_api_client, role["id"])
 
-    second_response = stride_api_client.post(
+    second_response = compass_api_client.post(
         f"/api/roles/{role['id']}/evaluations",
         json={
-            "user_notes": "Evaluate this later with the real STRIDE engine.",
+            "user_notes": "Evaluate this later with the real COMPASS engine.",
             "user_context": {
                 "preferred_remote_type": "hybrid",
                 "target_compensation_min": "110000",
@@ -190,30 +190,30 @@ def test_create_evaluation_reuses_cache_for_same_inputs(
     second = second_response.json()
     assert second["id"] == first["id"]
     assert second["evaluation_input_hash"] == first["evaluation_input_hash"]
-    assert db_session.query(StrideEvaluation).count() == 1
+    assert db_session.query(CompassEvaluation).count() == 1
 
     actions = list(
         db_session.scalars(
             select(ActivityLog.action)
             .where(
                 ActivityLog.entity_id == UUID(first["id"]),
-                ActivityLog.entity_type == "stride_evaluation",
+                ActivityLog.entity_type == "compass_evaluation",
             )
             .order_by(ActivityLog.created_at, ActivityLog.action)
         )
     )
-    assert "stride_evaluation.cached_result_reused" in actions
+    assert "compass_evaluation.cached_result_reused" in actions
 
 
-def test_force_rerun_creates_new_evaluation(stride_api_client: TestClient) -> None:
-    role = create_role(stride_api_client)
-    first = create_evaluation(stride_api_client, role["id"])
+def test_force_rerun_creates_new_evaluation(compass_api_client: TestClient) -> None:
+    role = create_role(compass_api_client)
+    first = create_evaluation(compass_api_client, role["id"])
 
-    second_response = stride_api_client.post(
+    second_response = compass_api_client.post(
         f"/api/roles/{role['id']}/evaluations",
         json={
             "force": True,
-            "user_notes": "Evaluate this later with the real STRIDE engine.",
+            "user_notes": "Evaluate this later with the real COMPASS engine.",
             "user_context": {
                 "preferred_remote_type": "hybrid",
                 "target_compensation_min": "110000",
@@ -229,16 +229,16 @@ def test_force_rerun_creates_new_evaluation(stride_api_client: TestClient) -> No
     assert second["evaluation_input_hash"] == first["evaluation_input_hash"]
 
 
-def test_role_content_change_bypasses_cache(stride_api_client: TestClient) -> None:
-    role = create_role(stride_api_client)
-    first = create_evaluation(stride_api_client, role["id"])
+def test_role_content_change_bypasses_cache(compass_api_client: TestClient) -> None:
+    role = create_role(compass_api_client)
+    first = create_evaluation(compass_api_client, role["id"])
 
-    update_response = stride_api_client.patch(
+    update_response = compass_api_client.patch(
         f"/api/roles/{role['id']}",
         json={"normalized_description": "Updated role text with Python and FastAPI."},
     )
     assert update_response.status_code == 200
-    second = create_evaluation(stride_api_client, role["id"])
+    second = create_evaluation(compass_api_client, role["id"])
 
     assert second["id"] != first["id"]
     assert second["role_content_hash"] != first["role_content_hash"]
@@ -246,10 +246,10 @@ def test_role_content_change_bypasses_cache(stride_api_client: TestClient) -> No
 
 
 def test_active_resume_source_change_bypasses_cache(
-    stride_api_client: TestClient,
+    compass_api_client: TestClient,
 ) -> None:
-    role = create_role(stride_api_client)
-    source_response = stride_api_client.post(
+    role = create_role(compass_api_client)
+    source_response = compass_api_client.post(
         "/api/resume-sources",
         json={
             "name": "Master Resume",
@@ -262,9 +262,9 @@ def test_active_resume_source_change_bypasses_cache(
     )
     assert source_response.status_code == 201
     source = source_response.json()
-    first = create_evaluation(stride_api_client, role["id"])
+    first = create_evaluation(compass_api_client, role["id"])
 
-    version_response = stride_api_client.post(
+    version_response = compass_api_client.post(
         f"/api/resume-sources/{source['id']}/versions",
         json={
             "version_label": "v2",
@@ -274,7 +274,7 @@ def test_active_resume_source_change_bypasses_cache(
         },
     )
     assert version_response.status_code == 201
-    second = create_evaluation(stride_api_client, role["id"])
+    second = create_evaluation(compass_api_client, role["id"])
 
     assert second["id"] != first["id"]
     assert second["source_hash"] != first["source_hash"]
@@ -296,11 +296,11 @@ class FailedEvaluator:
 
 
 def test_failed_ai_metadata_is_persisted_and_logged(
-    stride_api_client: TestClient,
+    compass_api_client: TestClient,
     db_session: Session,
 ) -> None:
-    role = create_role(stride_api_client)
-    service = StrideEvaluationService(
+    role = create_role(compass_api_client)
+    service = CompassEvaluationService(
         db_session,
         settings=Settings(
             _env_file=None,
@@ -312,7 +312,7 @@ def test_failed_ai_metadata_is_persisted_and_logged(
 
     result = service.create_for_role(
         role_id=UUID(role["id"]),
-        payload=StrideEvaluationCreate(),
+        payload=CompassEvaluationCreate(),
     )
     evaluation = result.evaluation
 
@@ -328,88 +328,88 @@ def test_failed_ai_metadata_is_persisted_and_logged(
             .order_by(ActivityLog.created_at, ActivityLog.action)
         )
     )
-    assert "stride_evaluation.failed" in actions
-    assert "stride_evaluation.completed" in actions
+    assert "compass_evaluation.failed" in actions
+    assert "compass_evaluation.completed" in actions
 
 
-def test_latest_list_and_get_evaluations(stride_api_client: TestClient) -> None:
-    role = create_role(stride_api_client)
-    evaluation = create_evaluation(stride_api_client, role["id"])
+def test_latest_list_and_get_evaluations(compass_api_client: TestClient) -> None:
+    role = create_role(compass_api_client)
+    evaluation = create_evaluation(compass_api_client, role["id"])
 
-    latest_response = stride_api_client.get(
+    latest_response = compass_api_client.get(
         f"/api/roles/{role['id']}/evaluations/latest"
     )
     assert latest_response.status_code == 200
     assert latest_response.json()["id"] == evaluation["id"]
 
-    list_response = stride_api_client.get("/api/stride-evaluations")
+    list_response = compass_api_client.get("/api/compass-evaluations")
     assert list_response.status_code == 200
     assert [item["id"] for item in list_response.json()] == [evaluation["id"]]
 
-    filtered_response = stride_api_client.get(
-        "/api/stride-evaluations",
+    filtered_response = compass_api_client.get(
+        "/api/compass-evaluations",
         params={"role_id": role["id"], "evaluation_status": "completed"},
     )
     assert filtered_response.status_code == 200
     assert [item["id"] for item in filtered_response.json()] == [evaluation["id"]]
 
-    detail_response = stride_api_client.get(
-        f"/api/stride-evaluations/{evaluation['id']}"
+    detail_response = compass_api_client.get(
+        f"/api/compass-evaluations/{evaluation['id']}"
     )
     assert detail_response.status_code == 200
     assert detail_response.json()["id"] == evaluation["id"]
 
 
 def test_create_evaluation_rejects_archived_missing_or_wrong_scope_roles(
-    stride_api_client: TestClient,
+    compass_api_client: TestClient,
     db_session: Session,
 ) -> None:
-    role = create_role(stride_api_client)
+    role = create_role(compass_api_client)
 
-    archive_response = stride_api_client.delete(f"/api/roles/{role['id']}")
+    archive_response = compass_api_client.delete(f"/api/roles/{role['id']}")
     assert archive_response.status_code == 204
 
-    archived_response = stride_api_client.post(
+    archived_response = compass_api_client.post(
         f"/api/roles/{role['id']}/evaluations",
         json={},
     )
     assert archived_response.status_code == 404
 
-    missing_response = stride_api_client.post(
+    missing_response = compass_api_client.post(
         f"/api/roles/{uuid4()}/evaluations",
         json={},
     )
     assert missing_response.status_code == 404
 
     other_role = add_other_user_role(db_session)
-    wrong_scope_response = stride_api_client.post(
+    wrong_scope_response = compass_api_client.post(
         f"/api/roles/{other_role.id}/evaluations",
         json={},
     )
     assert wrong_scope_response.status_code == 404
 
 
-def test_evaluation_validation_errors(stride_api_client: TestClient) -> None:
-    role = create_role(stride_api_client)
+def test_evaluation_validation_errors(compass_api_client: TestClient) -> None:
+    role = create_role(compass_api_client)
 
-    invalid_body_response = stride_api_client.post(
+    invalid_body_response = compass_api_client.post(
         f"/api/roles/{role['id']}/evaluations",
         json={"user_context": "not-an-object"},
     )
     assert invalid_body_response.status_code == 422
 
-    invalid_query_response = stride_api_client.get(
-        "/api/stride-evaluations",
+    invalid_query_response = compass_api_client.get(
+        "/api/compass-evaluations",
         params={"evaluation_status": "unknown"},
     )
     assert invalid_query_response.status_code == 422
 
 
 def test_latest_evaluation_returns_404_when_none_exist(
-    stride_api_client: TestClient,
+    compass_api_client: TestClient,
 ) -> None:
-    role = create_role(stride_api_client)
+    role = create_role(compass_api_client)
 
-    response = stride_api_client.get(f"/api/roles/{role['id']}/evaluations/latest")
+    response = compass_api_client.get(f"/api/roles/{role['id']}/evaluations/latest")
 
     assert response.status_code == 404

@@ -49,7 +49,7 @@ def test_recommendations_include_reason_basis_and_confidence() -> None:
         health_signals=[
             {
                 "signal_type": "heavy_low_fit_focus",
-                "basis": "Low STRIDE fit among submitted applications.",
+                "basis": "Low COMPASS fit among submitted applications.",
                 "confidence": "Weak Signal",
                 "source_inputs": {"submitted": 4},
             }

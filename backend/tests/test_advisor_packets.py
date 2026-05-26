@@ -17,7 +17,7 @@ from app.models import (
     ApplicationNote,
     ApplicationReminder,
     GeneratedArtifact,
-    StrideEvaluation,
+    CompassEvaluation,
 )
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
 from app.seed import seed_local_data
@@ -99,7 +99,7 @@ def create_application_with_private_inputs(db_session: Session) -> Application:
                 notes="Reminder note with private timing.",
                 due_at=datetime.now(timezone.utc),
             ),
-            StrideEvaluation(
+            CompassEvaluation(
                 user_id=application.user_id,
                 workspace_id=application.workspace_id,
                 role_id=application.role_id,
@@ -107,7 +107,7 @@ def create_application_with_private_inputs(db_session: Session) -> Application:
                 overall_score=Decimal("88.50"),
                 recommendation="apply",
                 confidence_level="high",
-                summary="Private STRIDE summary with ATS risk notes.",
+                summary="Private COMPASS summary with ATS risk notes.",
             ),
             GeneratedArtifact(
                 id=uuid4(),
@@ -160,14 +160,14 @@ def test_advisor_packet_preview_is_local_only_and_redacted_by_default(
     body = response.text
     assert "Private negotiation note" not in body
     assert "Private raw job description" not in body
-    assert "Private STRIDE summary" not in body
+    assert "Private COMPASS summary" not in body
     assert "Private generated artifact content" not in body
     assert "https://example.com/recruiter/private" not in body
     assert "Private interview notes" not in body
     assert "Reminder note with private timing" not in body
     assert "https://meet.example.com/private" not in body
     assert "Compensation targets and strategy" in body
-    assert "STRIDE score and explanation" in body
+    assert "COMPASS score and explanation" in body
 
 
 def test_advisor_packet_preview_includes_only_explicit_local_selections(
@@ -217,7 +217,7 @@ def test_advisor_packet_preview_includes_only_explicit_local_selections(
     }
     assert "Private negotiation note" not in response.text
     assert "Private raw job description" not in response.text
-    assert "Private STRIDE summary" not in response.text
+    assert "Private COMPASS summary" not in response.text
     assert "https://meet.example.com/private" not in response.text
 
 

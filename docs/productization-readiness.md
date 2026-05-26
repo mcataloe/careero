@@ -10,7 +10,7 @@ production-ready.
 
 ## Current Status
 
-Careero has meaningful local workflow value across intake, STRIDE evaluation,
+Careero has meaningful local workflow value across intake, COMPASS evaluation,
 artifact generation foundations, application workflow, analytics, automation
 guardrails, and read-only career strategy synthesis.
 

@@ -1,4 +1,4 @@
-export interface StrideTrendInsight {
+export interface CompassTrendInsight {
   label: string;
   message: string;
   basis: string;
@@ -7,9 +7,9 @@ export interface StrideTrendInsight {
   source_inputs: Record<string, unknown>;
 }
 
-export interface StrideInsightsResponse {
+export interface CompassInsightsResponse {
   workspace_id: string | null;
-  average_stride_score: number | null;
-  insights: StrideTrendInsight[];
+  average_compass_score: number | null;
+  insights: CompassTrendInsight[];
   insufficient_data: string[];
 }

@@ -7,18 +7,18 @@ from decimal import Decimal
 from typing import Any, Protocol
 
 from app.constants import (
-    StrideConfidenceLevel,
-    StrideDimension,
-    StrideEvaluationStatus,
-    StrideRecommendation,
+    CompassConfidenceLevel,
+    CompassDimension,
+    CompassEvaluationStatus,
+    CompassRecommendation,
 )
 
 RULESET_VERSION = "phase_2b_deterministic_v1"
 
 RECOMMENDATION_THRESHOLDS = {
-    StrideRecommendation.APPLY.value: 75,
-    StrideRecommendation.MONITOR.value: 55,
-    StrideRecommendation.NEEDS_REVIEW.value: 40,
+    CompassRecommendation.APPLY.value: 75,
+    CompassRecommendation.MONITOR.value: 55,
+    CompassRecommendation.NEEDS_REVIEW.value: 40,
 }
 
 TECH_KEYWORDS = {
@@ -114,7 +114,7 @@ class RuleConcern:
 
 
 @dataclass(frozen=True)
-class StrideRuleResult:
+class CompassRuleResult:
     evaluation_status: str
     overall_score: Decimal
     recommendation: str
@@ -157,7 +157,7 @@ def evaluate_role(
     role: ScorableRole,
     user_context: dict[str, Any] | None = None,
     user_notes: str | None = None,
-) -> StrideRuleResult:
+) -> CompassRuleResult:
     context = user_context or {}
     text = _role_text(role)
     tokens = set(_tokens(text))
@@ -169,27 +169,27 @@ def evaluate_role(
     missing_keywords = sorted(keyword for keyword in target_keywords if keyword not in text.lower())
 
     dimension_scores = {
-        StrideDimension.STRATEGIC_FIT.value: _score_strategic_fit(role, context, text),
-        StrideDimension.TECHNICAL_ALIGNMENT.value: _score_technical_alignment(
+        CompassDimension.STRATEGIC_FIT.value: _score_strategic_fit(role, context, text),
+        CompassDimension.TECHNICAL_ALIGNMENT.value: _score_technical_alignment(
             tokens,
             target_keywords,
             avoid_keywords,
         ),
-        StrideDimension.SENIORITY_ALIGNMENT.value: _score_seniority(role, context, text),
-        StrideDimension.COMPENSATION_ALIGNMENT.value: _score_compensation(role, context),
-        StrideDimension.REMOTE_LOCATION_ALIGNMENT.value: _score_remote_location(
+        CompassDimension.SENIORITY_ALIGNMENT.value: _score_seniority(role, context, text),
+        CompassDimension.COMPENSATION_ALIGNMENT.value: _score_compensation(role, context),
+        CompassDimension.REMOTE_LOCATION_ALIGNMENT.value: _score_remote_location(
             role,
             context,
         ),
-        StrideDimension.COMPANY_SIGNAL.value: _score_company_signal(role),
-        StrideDimension.ROLE_CLARITY.value: _score_role_clarity(text, concerns),
-        StrideDimension.APPLICATION_EFFORT.value: _score_application_effort(role, text),
-        StrideDimension.ATS_RESUME_ALIGNMENT.value: _score_ats_alignment(
+        CompassDimension.COMPANY_SIGNAL.value: _score_company_signal(role),
+        CompassDimension.ROLE_CLARITY.value: _score_role_clarity(text, concerns),
+        CompassDimension.APPLICATION_EFFORT.value: _score_application_effort(role, text),
+        CompassDimension.ATS_RESUME_ALIGNMENT.value: _score_ats_alignment(
             ats_keywords,
             missing_keywords,
             target_keywords,
         ),
-        StrideDimension.RISK_FLAGS.value: _score_risk_flags(concerns),
+        CompassDimension.RISK_FLAGS.value: _score_risk_flags(concerns),
     }
     overall_score = round(sum(dimension_scores.values()) / len(dimension_scores))
     confidence_level = select_confidence(role, context, text, dimension_scores)
@@ -197,8 +197,8 @@ def evaluate_role(
     strengths = _build_strengths(role, dimension_scores, ats_keywords)
     summary = _build_summary(role, overall_score, recommendation, confidence_level)
 
-    return StrideRuleResult(
-        evaluation_status=StrideEvaluationStatus.COMPLETED.value,
+    return CompassRuleResult(
+        evaluation_status=CompassEvaluationStatus.COMPLETED.value,
         overall_score=Decimal(overall_score),
         recommendation=recommendation,
         confidence_level=confidence_level,
@@ -206,34 +206,34 @@ def evaluate_role(
         strengths=strengths,
         concerns=[concern.as_dict() for concern in concerns],
         resume_alignment=_section(
-            score=dimension_scores[StrideDimension.ATS_RESUME_ALIGNMENT.value],
+            score=dimension_scores[CompassDimension.ATS_RESUME_ALIGNMENT.value],
             status="baseline",
             notes="Uses request-scoped target keywords only; no resume data is stored.",
             matched_keywords=ats_keywords,
             missing_keywords=missing_keywords,
         ),
         compensation_alignment=_section(
-            score=dimension_scores[StrideDimension.COMPENSATION_ALIGNMENT.value],
+            score=dimension_scores[CompassDimension.COMPENSATION_ALIGNMENT.value],
             status="baseline",
             notes="Uses role compensation fields and optional target_compensation_min.",
         ),
         seniority_alignment=_section(
-            score=dimension_scores[StrideDimension.SENIORITY_ALIGNMENT.value],
+            score=dimension_scores[CompassDimension.SENIORITY_ALIGNMENT.value],
             status="baseline",
             notes="Uses seniority language from title and description.",
         ),
         remote_alignment=_section(
-            score=dimension_scores[StrideDimension.REMOTE_LOCATION_ALIGNMENT.value],
+            score=dimension_scores[CompassDimension.REMOTE_LOCATION_ALIGNMENT.value],
             status="baseline",
             notes="Uses role remote/location fields and optional preferred_remote_type/preferred_locations.",
         ),
         technical_alignment=_section(
-            score=dimension_scores[StrideDimension.TECHNICAL_ALIGNMENT.value],
+            score=dimension_scores[CompassDimension.TECHNICAL_ALIGNMENT.value],
             status="baseline",
             notes="Uses explicit target and avoid keywords when supplied.",
         ),
         company_risk=_section(
-            score=dimension_scores[StrideDimension.COMPANY_SIGNAL.value],
+            score=dimension_scores[CompassDimension.COMPANY_SIGNAL.value],
             status="baseline",
             notes="Uses only company fields already stored in Careero.",
         ),
@@ -270,7 +270,7 @@ def detect_concerns(role: ScorableRole, user_context: dict[str, Any] | None = No
                 code="missing_compensation",
                 severity="medium",
                 message="The role does not include compensation details.",
-                dimension=StrideDimension.COMPENSATION_ALIGNMENT.value,
+                dimension=CompassDimension.COMPENSATION_ALIGNMENT.value,
             )
         )
 
@@ -280,7 +280,7 @@ def detect_concerns(role: ScorableRole, user_context: dict[str, Any] | None = No
                 code="unclear_seniority",
                 severity="medium",
                 message="The title and description do not clearly indicate seniority.",
-                dimension=StrideDimension.SENIORITY_ALIGNMENT.value,
+                dimension=CompassDimension.SENIORITY_ALIGNMENT.value,
             )
         )
 
@@ -292,7 +292,7 @@ def detect_concerns(role: ScorableRole, user_context: dict[str, Any] | None = No
                 code="remote_mismatch",
                 severity="high" if role_remote in {"onsite", "on-site", "office"} else "medium",
                 message="The role remote type conflicts with the requested remote preference.",
-                dimension=StrideDimension.REMOTE_LOCATION_ALIGNMENT.value,
+                dimension=CompassDimension.REMOTE_LOCATION_ALIGNMENT.value,
             )
         )
 
@@ -303,7 +303,7 @@ def detect_concerns(role: ScorableRole, user_context: dict[str, Any] | None = No
                 code="vague_responsibilities",
                 severity="medium",
                 message="The description has limited concrete responsibility language.",
-                dimension=StrideDimension.ROLE_CLARITY.value,
+                dimension=CompassDimension.ROLE_CLARITY.value,
             )
         )
 
@@ -314,7 +314,7 @@ def detect_concerns(role: ScorableRole, user_context: dict[str, Any] | None = No
                 code="technology_sprawl",
                 severity="medium",
                 message="The description lists many technologies, which may indicate broad or unfocused scope.",
-                dimension=StrideDimension.TECHNICAL_ALIGNMENT.value,
+                dimension=CompassDimension.TECHNICAL_ALIGNMENT.value,
             )
         )
 
@@ -325,7 +325,7 @@ def detect_concerns(role: ScorableRole, user_context: dict[str, Any] | None = No
                 code="generic_description",
                 severity="high" if len(generic_phrase_hits) >= 2 else "medium",
                 message="The description appears unusually generic or sparse.",
-                dimension=StrideDimension.RISK_FLAGS.value,
+                dimension=CompassDimension.RISK_FLAGS.value,
             )
         )
 
@@ -339,14 +339,14 @@ def select_recommendation(
 ) -> str:
     severe_risk_flags = severe_risk_flags or []
     if severe_risk_flags or overall_score < 40:
-        return StrideRecommendation.SKIP.value
-    if confidence_level == StrideConfidenceLevel.LOW.value:
-        return StrideRecommendation.NEEDS_REVIEW.value
-    if overall_score >= RECOMMENDATION_THRESHOLDS[StrideRecommendation.APPLY.value]:
-        return StrideRecommendation.APPLY.value
-    if overall_score >= RECOMMENDATION_THRESHOLDS[StrideRecommendation.MONITOR.value]:
-        return StrideRecommendation.MONITOR.value
-    return StrideRecommendation.NEEDS_REVIEW.value
+        return CompassRecommendation.SKIP.value
+    if confidence_level == CompassConfidenceLevel.LOW.value:
+        return CompassRecommendation.NEEDS_REVIEW.value
+    if overall_score >= RECOMMENDATION_THRESHOLDS[CompassRecommendation.APPLY.value]:
+        return CompassRecommendation.APPLY.value
+    if overall_score >= RECOMMENDATION_THRESHOLDS[CompassRecommendation.MONITOR.value]:
+        return CompassRecommendation.MONITOR.value
+    return CompassRecommendation.NEEDS_REVIEW.value
 
 
 def select_confidence(
@@ -358,7 +358,7 @@ def select_confidence(
     completeness = input_completeness(role, user_context, text)
     unknown_dimensions = sum(1 for score in dimension_scores.values() if score == 50)
     if _word_count(text) < 25 or unknown_dimensions >= 5:
-        return StrideConfidenceLevel.LOW.value
+        return CompassConfidenceLevel.LOW.value
     if (
         completeness["has_title"]
         and completeness["has_company"]
@@ -368,8 +368,8 @@ def select_confidence(
         and completeness["has_user_context"]
         and _word_count(text) >= 40
     ):
-        return StrideConfidenceLevel.HIGH.value
-    return StrideConfidenceLevel.MEDIUM.value
+        return CompassConfidenceLevel.HIGH.value
+    return CompassConfidenceLevel.MEDIUM.value
 
 
 def input_completeness(
@@ -534,7 +534,7 @@ def _build_strengths(
         strengths.append(
             {
                 "code": "target_keywords_matched",
-                "dimension": StrideDimension.ATS_RESUME_ALIGNMENT.value,
+                "dimension": CompassDimension.ATS_RESUME_ALIGNMENT.value,
                 "message": "The role description includes requested target keywords.",
                 "keywords": ats_keywords,
             }
@@ -543,7 +543,7 @@ def _build_strengths(
         strengths.append(
             {
                 "code": "compensation_present",
-                "dimension": StrideDimension.COMPENSATION_ALIGNMENT.value,
+                "dimension": CompassDimension.COMPENSATION_ALIGNMENT.value,
                 "message": "The role includes compensation information.",
             }
         )
@@ -557,7 +557,7 @@ def _build_summary(
     confidence_level: str,
 ) -> str:
     return (
-        f"Deterministic STRIDE baseline for {role.title} at {role.company.name}: "
+        f"Deterministic COMPASS baseline for {role.title} at {role.company.name}: "
         f"{overall_score}/100, recommendation {recommendation}, "
         f"{confidence_level} confidence."
     )

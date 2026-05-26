@@ -47,7 +47,7 @@ Layer 9 must not implement:
 - external sync
 - batch approvals
 - automatic submitted-artifact marking
-- employer-facing content containing internal STRIDE, ATS, compensation, or
+- employer-facing content containing internal COMPASS, ATS, compensation, or
   strategy analysis
 - destructive Role-to-Opportunity persistence rename
 

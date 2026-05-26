@@ -26,7 +26,7 @@ packages/contracts/
   src/
     workspace.ts
     opportunity.ts
-    stride-evaluation.ts
+    compass-evaluation.ts
     artifacts.ts
     application-state.ts
     automation.ts
@@ -81,7 +81,7 @@ Responsibilities:
 
 - Preserve raw ingestion content and normalized structured content.
 - Track source/provenance, parse confidence, warnings, and AI notes.
-- Link to STRIDE evaluations, application state, and artifacts.
+- Link to COMPASS evaluations, application state, and artifacts.
 - Support opportunity status tracking without coupling it to application workflow state.
 
 Ingestion guidance:
@@ -100,9 +100,9 @@ AI parsing guidance:
 - AI parsing should return validated contract-compatible data.
 - Invalid or low-confidence extraction should be surfaced as warnings, not silently persisted as fact.
 
-### STRIDE Evaluation
+### COMPASS Evaluation
 
-`StrideEvaluation` is the intelligence core. It must be reproducible, explainable, structured, and versionable.
+`CompassEvaluation` is the intelligence core. It must be reproducible, explainable, structured, and versionable.
 
 Responsibilities:
 
@@ -117,7 +117,7 @@ AI contract guidance:
 - AI output cannot invent resume facts, company facts, compensation, or external research.
 - AI enrichment should clearly distinguish evidence, assumptions, gaps, and insufficient data.
 
-Layer 3B STRIDE pipeline:
+Layer 3B COMPASS pipeline:
 
 ```text
 Workspace + Opportunity + optional resume/profile content
@@ -125,15 +125,15 @@ Workspace + Opportunity + optional resume/profile content
 -> injected model provider
 -> raw model output
 -> JSON parse
--> StrideEvaluationSchema validation
--> normalized STRIDE evaluation
+-> CompassEvaluationSchema validation
+-> normalized COMPASS evaluation
 -> caller persistence or return
 ```
 
 Validation and error behavior:
 
 - Raw model output is kept separate from normalized output.
-- Only `StrideEvaluationSchema`-validated output may be treated as a completed evaluation.
+- Only `CompassEvaluationSchema`-validated output may be treated as a completed evaluation.
 - Malformed JSON, schema-invalid output, and provider failures produce a valid failed fallback evaluation with low confidence and explicit assumptions.
 - Failed fallback evaluations are audit records, not completed recommendations.
 - Model configuration lives in the caller/provider adapter. The contracts package defines the provider interface but does not include an OpenAI SDK dependency.
@@ -256,7 +256,7 @@ Responsibilities:
 - Summarize workspace/search-track strategy from stored local evidence.
 - Expose basis, confidence, sample size, source inputs, known uncertainty, and
   insufficient-data reasons.
-- Keep compensation, artifact, source, STRIDE, historical, and workflow signals
+- Keep compensation, artifact, source, COMPASS, historical, and workflow signals
   advisory and source-visible.
 - Represent action candidates as advisory only.
 
@@ -294,7 +294,7 @@ AI services should consume validated inputs and return structured outputs. Raw p
 Current models remain operational. Future migration guidance:
 
 - Current `Role` maps toward `Opportunity`.
-- Current `StrideEvaluation` maps toward canonical `StrideEvaluation`.
+- Current `CompassEvaluation` maps toward canonical `CompassEvaluation`.
 - Current `Application` maps toward `ApplicationState`.
 - Current `GeneratedArtifact` maps toward `ResumeArtifact` and `CoverLetterArtifact`.
 - Current `ResumeSource` and resume source versions map toward source inputs and lineage for `ResumeArtifact`.

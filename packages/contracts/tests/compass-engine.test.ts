@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   type Opportunity,
-  type StrideEvaluation,
+  type CompassEvaluation,
   buildDeterministicFallbackEvaluation,
-  buildStrideEvaluationPrompt,
+  buildCompassEvaluationPrompt,
   canonicalExamples,
-  evaluateStrideOpportunity,
-  normalizeStrideEvaluation,
-  parseStrideModelOutput,
+  evaluateCompassOpportunity,
+  normalizeCompassEvaluation,
+  parseCompassModelOutput,
 } from "../src/index.js";
 
 const engineInput = {
@@ -16,27 +16,27 @@ const engineInput = {
   opportunity: canonicalExamples.Opportunity,
   resumeProfileContent: "Built Python platform services, led engineering teams, and managed PostgreSQL systems.",
   userContext: { targetKeywords: ["Python", "PostgreSQL", "platform"] },
-  evaluationId: canonicalExamples.StrideEvaluation.id,
-  createdAt: canonicalExamples.StrideEvaluation.createdAt,
-  updatedAt: canonicalExamples.StrideEvaluation.updatedAt,
+  evaluationId: canonicalExamples.CompassEvaluation.id,
+  createdAt: canonicalExamples.CompassEvaluation.createdAt,
+  updatedAt: canonicalExamples.CompassEvaluation.updatedAt,
   modelProviderName: "fake",
   modelName: "fake-model",
 };
 
-function completedEvaluation(overrides: Partial<StrideEvaluation> = {}): StrideEvaluation {
+function completedEvaluation(overrides: Partial<CompassEvaluation> = {}): CompassEvaluation {
   return {
-    ...canonicalExamples.StrideEvaluation,
+    ...canonicalExamples.CompassEvaluation,
     ...overrides,
     status: "completed",
-    id: canonicalExamples.StrideEvaluation.id,
+    id: canonicalExamples.CompassEvaluation.id,
     workspaceId: canonicalExamples.Workspace.id,
     opportunityId: canonicalExamples.Opportunity.id,
   };
 }
 
-describe("STRIDE prompt builder", () => {
+describe("COMPASS prompt builder", () => {
   it("includes workspace, opportunity, resume profile content, and grounding rules", () => {
-    const prompt = buildStrideEvaluationPrompt(engineInput);
+    const prompt = buildCompassEvaluationPrompt(engineInput);
 
     expect(prompt).toContain(canonicalExamples.Workspace.title);
     expect(prompt).toContain(canonicalExamples.Opportunity.title);
@@ -47,7 +47,7 @@ describe("STRIDE prompt builder", () => {
   });
 
   it("handles missing resume context and records confidence impact instructions", () => {
-    const prompt = buildStrideEvaluationPrompt({
+    const prompt = buildCompassEvaluationPrompt({
       ...engineInput,
       resumeProfileContent: null,
     });
@@ -58,14 +58,14 @@ describe("STRIDE prompt builder", () => {
   });
 });
 
-describe("STRIDE model output parsing and validation", () => {
+describe("COMPASS model output parsing and validation", () => {
   it("parses JSON from plain or fenced model output", () => {
-    expect(parseStrideModelOutput(JSON.stringify({ summary: "ok" }))).toEqual({ summary: "ok" });
-    expect(parseStrideModelOutput("```json\n{\"summary\":\"ok\"}\n```")).toEqual({ summary: "ok" });
+    expect(parseCompassModelOutput(JSON.stringify({ summary: "ok" }))).toEqual({ summary: "ok" });
+    expect(parseCompassModelOutput("```json\n{\"summary\":\"ok\"}\n```")).toEqual({ summary: "ok" });
   });
 
   it("normalizes valid model output into a completed canonical evaluation", () => {
-    const evaluation = normalizeStrideEvaluation(completedEvaluation(), engineInput, {
+    const evaluation = normalizeCompassEvaluation(completedEvaluation(), engineInput, {
       modelMetadata: {
         provider: "fake",
         model: "fake-model",
@@ -84,10 +84,10 @@ describe("STRIDE model output parsing and validation", () => {
   });
 });
 
-describe("STRIDE engine execution", () => {
+describe("COMPASS engine execution", () => {
   it("returns a completed evaluation for valid fake provider output", async () => {
     const rawText = JSON.stringify(completedEvaluation());
-    const result = await evaluateStrideOpportunity(engineInput, {
+    const result = await evaluateCompassOpportunity(engineInput, {
       evaluate: async () => ({
         rawText,
         modelMetadata: {
@@ -108,7 +108,7 @@ describe("STRIDE engine execution", () => {
   });
 
   it("returns a failed fallback for malformed model JSON", async () => {
-    const result = await evaluateStrideOpportunity(engineInput, {
+    const result = await evaluateCompassOpportunity(engineInput, {
       evaluate: async () => ({ rawText: "not json" }),
     });
 
@@ -121,7 +121,7 @@ describe("STRIDE engine execution", () => {
 
   it("returns a failed fallback with validation issues for schema-invalid output", async () => {
     const invalid = { ...completedEvaluation(), confidence: { level: "certain" } };
-    const result = await evaluateStrideOpportunity(engineInput, {
+    const result = await evaluateCompassOpportunity(engineInput, {
       evaluate: async () => ({ rawText: JSON.stringify(invalid) }),
     });
 
@@ -133,7 +133,7 @@ describe("STRIDE engine execution", () => {
   });
 
   it("returns a failed fallback when provider throws", async () => {
-    const result = await evaluateStrideOpportunity(engineInput, {
+    const result = await evaluateCompassOpportunity(engineInput, {
       evaluate: async () => {
         throw new Error("provider unavailable");
       },
@@ -157,7 +157,7 @@ describe("STRIDE engine execution", () => {
   });
 });
 
-describe("STRIDE representative fixtures", () => {
+describe("COMPASS representative fixtures", () => {
   it("builds a valid fallback for an ambiguous sparse opportunity", () => {
     const sparseOpportunity: Opportunity = {
       ...canonicalExamples.Opportunity,

@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.constants import ApplicationWorkflowState, StrideEvaluationStatus
+from app.constants import ApplicationWorkflowState, CompassEvaluationStatus
 from app.database import get_db
 from app.main import create_app
 from app.models import (
@@ -19,7 +19,7 @@ from app.models import (
     ApplicationNote,
     ApplicationReminder,
     GeneratedArtifact,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
 )
 from app.schemas.applications import (
@@ -116,11 +116,11 @@ def add_workflow_children(db_session: Session, application: Application) -> None
 
 def add_summary_sources(db_session: Session, application: Application) -> None:
     db_session.add(
-        StrideEvaluation(
+        CompassEvaluation(
             user_id=application.user_id,
             workspace_id=application.workspace_id,
             role_id=application.role_id,
-            evaluation_status=StrideEvaluationStatus.COMPLETED.value,
+            evaluation_status=CompassEvaluationStatus.COMPLETED.value,
             overall_score=Decimal("82.50"),
             recommendation="apply",
             confidence_level="high",
@@ -212,7 +212,7 @@ def test_service_lists_by_workspace_and_aggregates_summaries(
     item = default_items[0]
     assert item["title"] == "Senior Platform Engineer"
     assert item["company"]["name"] == "Default Co"
-    assert item["stride"]["summary"] == "Strong platform fit."
+    assert item["compass"]["summary"] == "Strong platform fit."
     assert item["resume_artifact"]["revision_number"] == 2
     assert item["cover_letter_artifact"]["revision_number"] == 1
     assert item["counts"] == {"notes": 1, "reminders": 1, "interviews": 1}
@@ -489,7 +489,7 @@ def test_service_timeline_includes_typed_children_evaluations_and_artifacts(
     assert "reminder.completed" in by_type
     assert "interview.created" in by_type
     assert "interview.completed" in by_type
-    assert "stride.completed" in by_type
+    assert "compass.completed" in by_type
     assert "artifact.resume.created" in by_type
     assert "artifact.cover_letter.created" in by_type
     assert "content" not in by_type["artifact.resume.created"]["metadata"]

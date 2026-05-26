@@ -146,7 +146,7 @@ def test_archived_workspace_is_rejected_for_new_roles(
     assert role_response.status_code == 409
 
 
-def test_workspace_preferences_affect_stride_input_hash_and_context(
+def test_workspace_preferences_affect_compass_input_hash_and_context(
     workspace_client: TestClient,
 ) -> None:
     python_workspace = workspace_client.post(

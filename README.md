@@ -1,8 +1,8 @@
 # Careero
 
-Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a STRIDE-powered workflow for evaluating role fit, risk, positioning, and application priority.
+Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a COMPASS-powered workflow for evaluating role fit, risk, positioning, and application priority.
 
-The current repository is beyond the original Layer 2 prototype: it includes local platform, intake, STRIDE, artifact-generation foundations, application workflow, and early intelligence surfaces. It is still a local-first application and should not be treated as production-ready.
+The current repository is beyond the original Layer 2 prototype: it includes local platform, intake, COMPASS, artifact-generation foundations, application workflow, and early intelligence surfaces. It is still a local-first application and should not be treated as production-ready.
 
 ## Strategic Plan and Layer Status
 
@@ -16,13 +16,15 @@ Layer 11 productization readiness is captured in [`docs/productization-readiness
 
 Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
 
+Layer 14 model choice, credits, and API-first intelligence strategy is captured in [`docs/careero-layer-14-strategic-plan-section.md`](docs/careero-layer-14-strategic-plan-section.md) and summarized in the canonical layer plan. This is strategic planning only; model catalogs, credit wallets, usage ledgers, API job ingestion, company research caching, and scraping are not implemented in `main`.
+
 Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
 Current planning hierarchy:
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md) - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md), [`docs/productization-readiness.md`](docs/productization-readiness.md), and [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md).
+3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md), [`docs/productization-readiness.md`](docs/productization-readiness.md), [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md), and [`docs/careero-layer-14-strategic-plan-section.md`](docs/careero-layer-14-strategic-plan-section.md).
 4. `docs/archive/*` - historical context only.
 5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
@@ -34,18 +36,18 @@ Current planning hierarchy:
 - Workspace/search-track persistence and seeded default local workspace.
 - Opportunity-facing intake, list, detail, update, and archive workflow backed by current `Role` persistence.
 - Optional AI-assisted role parsing for pasted job posts, with user review before save.
-- Local resume/profile source storage for STRIDE grounding, with paste or local file import.
-- Deterministic STRIDE scoring for stored opportunities.
-- Optional OpenAI STRIDE enrichment grounded in stored role and active resume/profile source data.
+- Local resume/profile source storage for COMPASS grounding, with paste or local file import.
+- Deterministic COMPASS scoring for stored opportunities.
+- Optional OpenAI COMPASS enrichment grounded in stored role and active resume/profile source data.
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
 - Backend artifact-generation foundations for resume and cover-letter drafts, with truthfulness checks and generated-artifact persistence.
 - Backend local Markdown/DOCX/PDF export for stored generated artifacts.
 - Application workflow tracking with state machine, state history, notes, external links, timeline, pipeline views, and structured interview tracking.
-- Local reminder persistence/count/timeline support, while the fuller reminder API/UI branch still needs reconciliation into `main`.
-- Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
+- Local reminder persistence/count/timeline support; reminder API routes and frontend reminder UX are not implemented in `main`.
+- Analytics and dashboard surfaces for search analytics, COMPASS insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
-- Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, STRIDE rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
+- Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, COMPASS rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.
@@ -59,6 +61,7 @@ Careero does not yet include:
 - Real multi-user tenant behavior.
 - Production authorization hardening.
 - Billing or subscriptions.
+- Model catalog, credit wallet, usage ledger, or credit-based billing controls.
 - Production deployment architecture.
 - Background job execution.
 - Destructive persistence migration from current `Role` table/model/foreign-key naming.
@@ -73,6 +76,8 @@ Careero does not yet include:
 - LinkedIn/job-board helpers.
 - Browser extension or share-sheet intake.
 - Automated source discovery or polling.
+- API-only ATS/job-posting ingestion and company research caching.
+- Scraping, restricted-source extraction, or browser-driven external collection.
 - Automated job application submission.
 - External review-before-send workflows.
 - State-changing or externally mutating automation.
@@ -141,7 +146,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-local.ps1
 8. Run `.\scripts\check-local.ps1`.
 9. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
 10. Open `http://127.0.0.1:5173/settings` and add an active resume/profile source.
-11. Open the opportunity detail page and run a STRIDE evaluation.
+11. Open the opportunity detail page and run a COMPASS evaluation.
 
 ## Backend Setup
 

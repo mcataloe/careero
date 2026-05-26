@@ -2,16 +2,16 @@ from decimal import Decimal
 from types import SimpleNamespace
 
 from app.config import Settings
-from app.schemas.stride_evaluations import StrideEvaluationCreate
-from app.services.stride_ai import (
-    AIStrideEvaluationOutput,
-    AIStrideSection,
-    AIStrideItem,
-    OpenAIStrideEvaluator,
+from app.schemas.compass_evaluations import CompassEvaluationCreate
+from app.services.compass_ai import (
+    AICompassEvaluationOutput,
+    AICompassSection,
+    AICompassItem,
+    OpenAICompassEvaluator,
     merge_ai_analysis,
     reset_ai_evaluation_session_counter,
 )
-from app.services.stride_rules import evaluate_role
+from app.services.compass_rules import evaluate_role
 
 
 def role_fixture():
@@ -35,17 +35,17 @@ def role_fixture():
     )
 
 
-def ai_output() -> AIStrideEvaluationOutput:
-    grounded = AIStrideSection(
+def ai_output() -> AICompassEvaluationOutput:
+    grounded = AICompassSection(
         status="grounded",
         score=82,
         notes="Grounded in the supplied job description.",
         evidence=["Python and PostgreSQL platforms"],
     )
-    return AIStrideEvaluationOutput(
-        summary="AI-enriched grounded STRIDE analysis.",
+    return AICompassEvaluationOutput(
+        summary="AI-enriched grounded COMPASS analysis.",
         strengths=[
-            AIStrideItem(
+            AICompassItem(
                 code="technical_match",
                 message="Python and PostgreSQL are explicit role signals.",
                 evidence="Python and PostgreSQL platforms",
@@ -61,7 +61,7 @@ def ai_output() -> AIStrideEvaluationOutput:
         ats_keywords=["postgresql", "python"],
         missing_keywords=[],
         evidence_matches=[
-            AIStrideItem(
+            AICompassItem(
                 code="python_platforms",
                 message="Python platform experience is supported.",
                 evidence="Python and PostgreSQL platforms",
@@ -69,7 +69,7 @@ def ai_output() -> AIStrideEvaluationOutput:
             )
         ],
         evidence_gaps=[
-            AIStrideItem(
+            AICompassItem(
                 code="leadership_scope",
                 message="Leadership scope is only partially supported.",
                 evidence=None,
@@ -77,7 +77,7 @@ def ai_output() -> AIStrideEvaluationOutput:
             )
         ],
         positioning_opportunities=[
-            AIStrideItem(
+            AICompassItem(
                 code="platform_positioning",
                 message="Position around platform ownership.",
                 evidence="Platform role signals",
@@ -85,7 +85,7 @@ def ai_output() -> AIStrideEvaluationOutput:
             )
         ],
         unsupported_claim_warnings=[
-            AIStrideItem(
+            AICompassItem(
                 code="no_kubernetes_evidence",
                 message="Do not claim Kubernetes experience without source evidence.",
                 evidence=None,
@@ -131,10 +131,10 @@ def enabled_settings(**overrides) -> Settings:
 def test_openai_success_is_validated_and_merged() -> None:
     reset_ai_evaluation_session_counter()
     role = role_fixture()
-    payload = StrideEvaluationCreate(user_context={"target_keywords": ["python"]})
+    payload = CompassEvaluationCreate(user_context={"target_keywords": ["python"]})
     baseline = evaluate_role(role, payload.user_context, payload.user_notes)
     responses = FakeResponses(parsed=ai_output())
-    evaluator = OpenAIStrideEvaluator(
+    evaluator = OpenAICompassEvaluator(
         enabled_settings(),
         client=FakeClient(responses),
     )
@@ -148,7 +148,7 @@ def test_openai_success_is_validated_and_merged() -> None:
     assert ai_metadata["ai_input_token_estimate"] is not None
     assert ai_metadata["ai_output_token_estimate"] is not None
     assert ai_metadata["ai_latency_ms"] >= 0
-    assert merged["summary"] == "AI-enriched grounded STRIDE analysis."
+    assert merged["summary"] == "AI-enriched grounded COMPASS analysis."
     assert merged["recommendation"] == baseline.recommendation
     assert merged["confidence_level"] == baseline.confidence_level
     assert merged["raw_evaluation_json"]["ai_status"] == "completed"
@@ -165,9 +165,9 @@ def test_openai_success_is_validated_and_merged() -> None:
 
 def test_ai_disabled_stores_skipped_status() -> None:
     role = role_fixture()
-    payload = StrideEvaluationCreate()
+    payload = CompassEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
-    evaluator = OpenAIStrideEvaluator(Settings(_env_file=None))
+    evaluator = OpenAICompassEvaluator(Settings(_env_file=None))
 
     metadata = evaluator.enrich(role=role, payload=payload, baseline=baseline)
     merged = merge_ai_analysis(baseline, metadata)
@@ -179,9 +179,9 @@ def test_ai_disabled_stores_skipped_status() -> None:
 
 def test_ai_enabled_without_api_key_falls_back() -> None:
     role = role_fixture()
-    payload = StrideEvaluationCreate()
+    payload = CompassEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
-    evaluator = OpenAIStrideEvaluator(
+    evaluator = OpenAICompassEvaluator(
         enabled_settings(openai_api_key=""),
     )
 
@@ -194,9 +194,9 @@ def test_ai_enabled_without_api_key_falls_back() -> None:
 def test_openai_error_falls_back_without_secret_leak() -> None:
     reset_ai_evaluation_session_counter()
     role = role_fixture()
-    payload = StrideEvaluationCreate()
+    payload = CompassEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
-    evaluator = OpenAIStrideEvaluator(
+    evaluator = OpenAICompassEvaluator(
         enabled_settings(),
         client=FakeClient(
             FakeResponses(error=TimeoutError("timeout for sk-secret123"))
@@ -216,9 +216,9 @@ def test_openai_error_falls_back_without_secret_leak() -> None:
 def test_invalid_structured_output_falls_back() -> None:
     reset_ai_evaluation_session_counter()
     role = role_fixture()
-    payload = StrideEvaluationCreate()
+    payload = CompassEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
-    evaluator = OpenAIStrideEvaluator(
+    evaluator = OpenAICompassEvaluator(
         enabled_settings(),
         client=FakeClient(FakeResponses(parsed={"summary": "missing fields"})),
     )
@@ -232,15 +232,15 @@ def test_invalid_structured_output_falls_back() -> None:
 def test_ai_session_limit_skips_without_calling_openai() -> None:
     reset_ai_evaluation_session_counter()
     role = role_fixture()
-    payload = StrideEvaluationCreate()
+    payload = CompassEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
     first_responses = FakeResponses(parsed=ai_output())
-    first = OpenAIStrideEvaluator(
+    first = OpenAICompassEvaluator(
         enabled_settings(max_ai_evaluations_per_session=1),
         client=FakeClient(first_responses),
     )
     second_responses = FakeResponses(parsed=ai_output())
-    second = OpenAIStrideEvaluator(
+    second = OpenAICompassEvaluator(
         enabled_settings(max_ai_evaluations_per_session=1),
         client=FakeClient(second_responses),
     )
@@ -257,9 +257,9 @@ def test_ai_session_limit_skips_without_calling_openai() -> None:
 def test_openai_error_log_does_not_include_secret(caplog) -> None:
     reset_ai_evaluation_session_counter()
     role = role_fixture()
-    payload = StrideEvaluationCreate()
+    payload = CompassEvaluationCreate()
     baseline = evaluate_role(role, {}, None)
-    evaluator = OpenAIStrideEvaluator(
+    evaluator = OpenAICompassEvaluator(
         enabled_settings(),
         client=FakeClient(FakeResponses(error=RuntimeError("boom sk-secret123"))),
     )

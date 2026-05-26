@@ -60,7 +60,7 @@ export const EvaluationReproducibilitySchema = z.object({
   deterministicBaseline: z.record(z.unknown()).nullable(),
 });
 
-export const StrideEvaluationSchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
+export const CompassEvaluationSchema = ContractEnvelopeSchema.merge(TimestampFieldsSchema).extend({
   id: IdSchema,
   workspaceId: IdSchema,
   opportunityId: IdSchema,
@@ -92,4 +92,4 @@ export const StrideEvaluationSchema = ContractEnvelopeSchema.merge(TimestampFiel
 });
 
 export type EvaluationSection = z.infer<typeof EvaluationSectionSchema>;
-export type StrideEvaluation = z.infer<typeof StrideEvaluationSchema>;
+export type CompassEvaluation = z.infer<typeof CompassEvaluationSchema>;

@@ -16,7 +16,7 @@ from app.models import (
     ApplicationReminder,
     ApplicationStateHistory,
     Role,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
     Workspace,
 )
@@ -86,7 +86,7 @@ class SearchAnalyticsService:
 
         roles = self._roles(user_id=user.id, workspace_id=workspace_id)
         applications = self._applications(user_id=user.id, workspace_id=workspace_id)
-        latest_stride = self._latest_stride_by_role(
+        latest_compass = self._latest_compass_by_role(
             user_id=user.id,
             workspace_id=workspace_id,
         )
@@ -153,13 +153,13 @@ class SearchAnalyticsService:
         conversion_rates = _stage_conversions(applications)
         average_stage_durations = _stage_durations(applications)
         segment_response_rates = [
-            *_stride_response_rates(applications, latest_stride),
-            *_compensation_response_rates(applications, latest_stride),
+            *_compass_response_rates(applications, latest_compass),
+            *_compensation_response_rates(applications, latest_compass),
         ]
         insufficient_data = _insufficient_data(
             applications=applications,
             submitted=submitted,
-            latest_stride=latest_stride,
+            latest_compass=latest_compass,
             durations=average_stage_durations,
         )
 
@@ -174,7 +174,7 @@ class SearchAnalyticsService:
                 applications=applications,
                 submitted=submitted,
                 responded=responded,
-                latest_stride=latest_stride,
+                latest_compass=latest_compass,
             ),
             "insufficient_data": insufficient_data,
         }
@@ -209,25 +209,25 @@ class SearchAnalyticsService:
         )
         return list(self.db.scalars(statement))
 
-    def _latest_stride_by_role(
+    def _latest_compass_by_role(
         self,
         *,
         user_id: uuid.UUID,
         workspace_id: uuid.UUID | None,
-    ) -> dict[uuid.UUID, StrideEvaluation]:
+    ) -> dict[uuid.UUID, CompassEvaluation]:
         filters = [
-            StrideEvaluation.user_id == user_id,
-            StrideEvaluation.deleted_at.is_(None),
-            StrideEvaluation.evaluation_status == "completed",
+            CompassEvaluation.user_id == user_id,
+            CompassEvaluation.deleted_at.is_(None),
+            CompassEvaluation.evaluation_status == "completed",
         ]
         if workspace_id is not None:
-            filters.append(StrideEvaluation.workspace_id == workspace_id)
+            filters.append(CompassEvaluation.workspace_id == workspace_id)
         evaluations = self.db.scalars(
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(*filters)
-            .order_by(StrideEvaluation.role_id, StrideEvaluation.created_at.desc())
+            .order_by(CompassEvaluation.role_id, CompassEvaluation.created_at.desc())
         )
-        latest: dict[uuid.UUID, StrideEvaluation] = {}
+        latest: dict[uuid.UUID, CompassEvaluation] = {}
         for evaluation in evaluations:
             latest.setdefault(evaluation.role_id, evaluation)
         return latest
@@ -369,30 +369,30 @@ def _stage_durations(applications: list[Application]) -> list[dict[str, Any]]:
     return metrics
 
 
-def _stride_response_rates(
+def _compass_response_rates(
     applications: list[Application],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
 ) -> list[dict[str, Any]]:
     buckets: dict[str, list[Application]] = defaultdict(list)
     for application in applications:
-        evaluation = latest_stride.get(application.role_id)
+        evaluation = latest_compass.get(application.role_id)
         if evaluation is None or evaluation.overall_score is None:
             continue
         score = float(evaluation.overall_score)
         if score >= 75:
-            buckets["high_stride_fit"].append(application)
+            buckets["high_compass_fit"].append(application)
         elif score < 60:
-            buckets["low_stride_fit"].append(application)
-    return [_segment_metric(name, values, "Latest STRIDE overall score bucket.") for name, values in buckets.items()]
+            buckets["low_compass_fit"].append(application)
+    return [_segment_metric(name, values, "Latest COMPASS overall score bucket.") for name, values in buckets.items()]
 
 
 def _compensation_response_rates(
     applications: list[Application],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
 ) -> list[dict[str, Any]]:
     buckets: dict[str, list[Application]] = defaultdict(list)
     for application in applications:
-        evaluation = latest_stride.get(application.role_id)
+        evaluation = latest_compass.get(application.role_id)
         if evaluation is None:
             continue
         alignment = evaluation.compensation_alignment or {}
@@ -406,7 +406,7 @@ def _compensation_response_rates(
             buckets["compensation_aligned"].append(application)
         elif status in {"below_target", "under_target", "misaligned", "weak"}:
             buckets["compensation_risk"].append(application)
-    return [_segment_metric(name, values, "Latest STRIDE compensation alignment bucket.") for name, values in buckets.items()]
+    return [_segment_metric(name, values, "Latest COMPASS compensation alignment bucket.") for name, values in buckets.items()]
 
 
 def _segment_metric(
@@ -430,7 +430,7 @@ def _focus_signals(
     applications: list[Application],
     submitted: list[Application],
     responded: list[Application],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
 ) -> list[dict[str, Any]]:
     signals: list[dict[str, Any]] = []
     if len(submitted) >= 3:
@@ -448,15 +448,15 @@ def _focus_signals(
     high_fit_apps = [
         application
         for application in applications
-        if _score(latest_stride.get(application.role_id)) is not None
-        and _score(latest_stride.get(application.role_id)) >= 75
+        if _score(latest_compass.get(application.role_id)) is not None
+        and _score(latest_compass.get(application.role_id)) >= 75
     ]
     if high_fit_apps and sum(1 for app in high_fit_apps if _has_response(app)) > 0:
         signals.append(
             governed_insight(
                 label="High-fit opportunities are producing traction",
-                message="Prioritize opportunities with similar STRIDE fit signals before expanding the search.",
-                basis="At least one high-STRIDE-fit opportunity has reached an interview or offer signal.",
+                message="Prioritize opportunities with similar COMPASS fit signals before expanding the search.",
+                basis="At least one high-COMPASS-fit opportunity has reached an interview or offer signal.",
                 confidence="weak" if len(high_fit_apps) < 5 else "moderate",
                 source_inputs={"high_fit_opportunities": len(high_fit_apps)},
             )
@@ -464,7 +464,7 @@ def _focus_signals(
     return signals
 
 
-def _score(evaluation: StrideEvaluation | None) -> float | None:
+def _score(evaluation: CompassEvaluation | None) -> float | None:
     if evaluation is None or evaluation.overall_score is None:
         return None
     value: Decimal = evaluation.overall_score
@@ -475,7 +475,7 @@ def _insufficient_data(
     *,
     applications: list[Application],
     submitted: list[Application],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
     durations: list[dict[str, Any]],
 ) -> list[str]:
     messages: list[str] = []
@@ -483,8 +483,8 @@ def _insufficient_data(
         messages.append("At least three tracked opportunities are recommended for meaningful search analytics.")
     if len(submitted) < 3:
         messages.append("Submission conversion is based on a thin sample.")
-    if not latest_stride:
-        messages.append("STRIDE response comparisons need completed STRIDE evaluations.")
+    if not latest_compass:
+        messages.append("COMPASS response comparisons need completed COMPASS evaluations.")
     if all(metric["sample_size"] == 0 for metric in durations):
         messages.append("Average days between stages need timestamped stage transitions.")
     return messages

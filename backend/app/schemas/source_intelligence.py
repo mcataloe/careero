@@ -13,7 +13,7 @@ class SourceSummaryMetric(BaseModel):
     interviews: int
     response_rate: float | None
     interview_rate: float | None
-    average_stride_score: float | None
+    average_compass_score: float | None
     recruiter_contacts: int
     compensation_aligned: int
     basis: str

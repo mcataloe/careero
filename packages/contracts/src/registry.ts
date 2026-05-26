@@ -13,13 +13,13 @@ import {
   CrossTrackStrategyComparisonSchema,
   SearchTrackStrategySummarySchema,
 } from "./strategy.js";
-import { StrideEvaluationSchema } from "./stride-evaluation.js";
+import { CompassEvaluationSchema } from "./compass-evaluation.js";
 import { WorkspaceSchema } from "./workspace.js";
 
 export const canonicalSchemaRegistry = {
   Workspace: WorkspaceSchema,
   Opportunity: OpportunitySchema,
-  StrideEvaluation: StrideEvaluationSchema,
+  CompassEvaluation: CompassEvaluationSchema,
   ResumeArtifact: ResumeArtifactSchema,
   CoverLetterArtifact: CoverLetterArtifactSchema,
   ApplicationState: ApplicationStateSchema,

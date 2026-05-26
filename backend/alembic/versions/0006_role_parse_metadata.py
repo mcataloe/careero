@@ -1,7 +1,7 @@
 """role parse metadata
 
 Revision ID: 0006_role_parse_metadata
-Revises: 0005_stride_evaluation_metadata
+Revises: 0005_compass_evaluation_metadata
 Create Date: 2026-05-13
 """
 
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 
 revision = "0006_role_parse_metadata"
-down_revision = "0005_stride_evaluation_metadata"
+down_revision = "0005_compass_evaluation_metadata"
 branch_labels = None
 depends_on = None
 

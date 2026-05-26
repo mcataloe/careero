@@ -7,9 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.config import Settings, get_settings
-from app.constants import RoleStatus, StrideEvaluationStatus
-from app.models import ResumeSourceVersion, Role, StrideEvaluation, User
-from app.schemas.stride_evaluations import StrideEvaluationCreate
+from app.constants import RoleStatus, CompassEvaluationStatus
+from app.models import ResumeSourceVersion, Role, CompassEvaluation, User
+from app.schemas.compass_evaluations import CompassEvaluationCreate
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.activity_log import ActivityLogService
 from app.services.evaluation_hashing import (
@@ -17,9 +17,9 @@ from app.services.evaluation_hashing import (
     resume_source_hash,
     role_content_hash,
 )
-from app.services.stride_ai import OpenAIStrideEvaluator, merge_ai_analysis
-from app.services.stride_prompt import PROMPT_VERSION
-from app.services.stride_rules import RULESET_VERSION, evaluate_role
+from app.services.compass_ai import OpenAICompassEvaluator, merge_ai_analysis
+from app.services.compass_prompt import PROMPT_VERSION
+from app.services.compass_rules import RULESET_VERSION, evaluate_role
 from app.services.workspace_context import (
     is_workspace_active_for_new_work,
     merge_workspace_context,
@@ -30,48 +30,48 @@ from app.services.workspace_context import (
 logger = logging.getLogger(__name__)
 
 
-class StrideEvaluationError(Exception):
+class CompassEvaluationError(Exception):
     pass
 
 
-class StrideEvaluationSeedMissingError(StrideEvaluationError):
+class CompassEvaluationSeedMissingError(CompassEvaluationError):
     pass
 
 
-class StrideEvaluationRoleNotFoundError(StrideEvaluationError):
+class CompassEvaluationRoleNotFoundError(CompassEvaluationError):
     pass
 
 
-class StrideEvaluationWorkspaceInactiveError(StrideEvaluationError):
+class CompassEvaluationWorkspaceInactiveError(CompassEvaluationError):
     pass
 
 
-class StrideEvaluationNotFoundError(StrideEvaluationError):
+class CompassEvaluationNotFoundError(CompassEvaluationError):
     pass
 
 
 @dataclass(frozen=True)
-class StrideEvaluationCreateResult:
-    evaluation: StrideEvaluation
+class CompassEvaluationCreateResult:
+    evaluation: CompassEvaluation
     reused_cache: bool
 
 
-class StrideEvaluationService:
+class CompassEvaluationService:
     def __init__(
         self,
         db: Session,
         settings: Settings | None = None,
-        ai_evaluator: OpenAIStrideEvaluator | None = None,
+        ai_evaluator: OpenAICompassEvaluator | None = None,
     ) -> None:
         self.db = db
         self.settings = settings or get_settings()
-        self.ai_evaluator = ai_evaluator or OpenAIStrideEvaluator(self.settings)
+        self.ai_evaluator = ai_evaluator or OpenAICompassEvaluator(self.settings)
         self.activity_log = ActivityLogService(db)
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
         if user is None or user.deleted_at is not None:
-            raise StrideEvaluationSeedMissingError(
+            raise CompassEvaluationSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
             )
         return user
@@ -80,14 +80,14 @@ class StrideEvaluationService:
         self,
         *,
         role_id: uuid.UUID,
-        payload: StrideEvaluationCreate,
-    ) -> StrideEvaluationCreateResult:
+        payload: CompassEvaluationCreate,
+    ) -> CompassEvaluationCreateResult:
         user = self.get_default_user()
         role = self._get_active_role(role_id=role_id, user_id=user.id)
         if role is None:
-            raise StrideEvaluationRoleNotFoundError("Role not found")
+            raise CompassEvaluationRoleNotFoundError("Role not found")
         if not is_workspace_active_for_new_work(role.workspace):
-            raise StrideEvaluationWorkspaceInactiveError("Workspace is not active")
+            raise CompassEvaluationWorkspaceInactiveError("Workspace is not active")
 
         workspace_context = workspace_prompt_context(role.workspace)
         effective_user_context = merge_workspace_context(
@@ -121,7 +121,7 @@ class StrideEvaluationService:
                 self._add_activity(
                     user_id=user.id,
                     entity_id=cached.id,
-                    action="stride_evaluation.cached_result_reused",
+                    action="compass_evaluation.cached_result_reused",
                     details={
                         "role_id": str(role.id),
                         "workspace_id": str(role.workspace_id),
@@ -130,14 +130,14 @@ class StrideEvaluationService:
                 )
                 self.db.commit()
                 logger.info(
-                    "STRIDE evaluation cache reused",
+                    "COMPASS evaluation cache reused",
                     extra={
                         "role_id": str(role.id),
                         "evaluation_id": str(cached.id),
                         "ai_status": cached.ai_status,
                     },
                 )
-                return StrideEvaluationCreateResult(
+                return CompassEvaluationCreateResult(
                     evaluation=cached,
                     reused_cache=True,
                 )
@@ -146,7 +146,7 @@ class StrideEvaluationService:
         self._add_activity(
             user_id=user.id,
             entity_id=evaluation_id,
-            action="stride_evaluation.started",
+            action="compass_evaluation.started",
             details={
                 "role_id": str(role.id),
                 "workspace_id": str(role.workspace_id),
@@ -163,7 +163,7 @@ class StrideEvaluationService:
             )
             ai_metadata = self.ai_evaluator.enrich(
                 role=role,
-                payload=StrideEvaluationCreate(
+                payload=CompassEvaluationCreate(
                     user_notes=payload.user_notes,
                     user_context=effective_user_context,
                     force=payload.force,
@@ -207,7 +207,7 @@ class StrideEvaluationService:
             }
             evaluation_data["raw_evaluation_json"] = raw
 
-            evaluation = StrideEvaluation(
+            evaluation = CompassEvaluation(
                 id=evaluation_id,
                 user_id=user.id,
                 workspace_id=role.workspace_id,
@@ -232,7 +232,7 @@ class StrideEvaluationService:
                 self._add_activity(
                     user_id=user.id,
                     entity_id=evaluation.id,
-                    action="stride_evaluation.failed",
+                    action="compass_evaluation.failed",
                     details={
                         "role_id": str(role.id),
                         "workspace_id": str(role.workspace_id),
@@ -242,7 +242,7 @@ class StrideEvaluationService:
             self._add_activity(
                 user_id=user.id,
                 entity_id=evaluation.id,
-                action="stride_evaluation.completed",
+                action="compass_evaluation.completed",
                 details={
                     "role_id": str(role.id),
                     "workspace_id": str(role.workspace_id),
@@ -253,7 +253,7 @@ class StrideEvaluationService:
             )
             self.db.commit()
             logger.info(
-                "STRIDE evaluation completed",
+                "COMPASS evaluation completed",
                 extra={
                     "role_id": str(role.id),
                     "evaluation_id": str(evaluation.id),
@@ -261,7 +261,7 @@ class StrideEvaluationService:
                     "latency_ms": latency_ms,
                 },
             )
-            return StrideEvaluationCreateResult(
+            return CompassEvaluationCreateResult(
                 evaluation=self.get_by_id(evaluation.id),
                 reused_cache=False,
             )
@@ -270,7 +270,7 @@ class StrideEvaluationService:
             self._add_activity(
                 user_id=user.id,
                 entity_id=evaluation_id,
-                action="stride_evaluation.failed",
+                action="compass_evaluation.failed",
                 details={
                     "role_id": str(role.id),
                     "workspace_id": str(role.workspace_id),
@@ -279,69 +279,69 @@ class StrideEvaluationService:
             )
             self.db.commit()
             logger.warning(
-                "STRIDE evaluation failed before persistence: %s",
+                "COMPASS evaluation failed before persistence: %s",
                 type(exc).__name__,
                 extra={"role_id": str(role.id), "evaluation_id": str(evaluation_id)},
             )
             raise
 
-    def get_latest_for_role(self, *, role_id: uuid.UUID) -> StrideEvaluation:
+    def get_latest_for_role(self, *, role_id: uuid.UUID) -> CompassEvaluation:
         user = self.get_default_user()
         role = self._get_active_role(role_id=role_id, user_id=user.id)
         if role is None:
-            raise StrideEvaluationRoleNotFoundError("Role not found")
+            raise CompassEvaluationRoleNotFoundError("Role not found")
 
         statement = (
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(
-                StrideEvaluation.user_id == user.id,
-                StrideEvaluation.role_id == role.id,
-                StrideEvaluation.deleted_at.is_(None),
+                CompassEvaluation.user_id == user.id,
+                CompassEvaluation.role_id == role.id,
+                CompassEvaluation.deleted_at.is_(None),
             )
-            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.created_at.desc(), CompassEvaluation.id.desc())
             .limit(1)
         )
         evaluation = self.db.scalar(statement)
         if evaluation is None:
-            raise StrideEvaluationNotFoundError("STRIDE evaluation not found")
+            raise CompassEvaluationNotFoundError("COMPASS evaluation not found")
         return evaluation
 
     def list_evaluations(
         self,
         *,
         role_id: uuid.UUID | None = None,
-        evaluation_status: StrideEvaluationStatus | None = None,
-    ) -> list[StrideEvaluation]:
+        evaluation_status: CompassEvaluationStatus | None = None,
+    ) -> list[CompassEvaluation]:
         user = self.get_default_user()
         filters = [
-            StrideEvaluation.user_id == user.id,
-            StrideEvaluation.deleted_at.is_(None),
+            CompassEvaluation.user_id == user.id,
+            CompassEvaluation.deleted_at.is_(None),
         ]
         if role_id is not None:
             role = self._get_active_role(role_id=role_id, user_id=user.id)
             if role is None:
-                raise StrideEvaluationRoleNotFoundError("Role not found")
-            filters.append(StrideEvaluation.role_id == role.id)
+                raise CompassEvaluationRoleNotFoundError("Role not found")
+            filters.append(CompassEvaluation.role_id == role.id)
         if evaluation_status is not None:
-            filters.append(StrideEvaluation.evaluation_status == evaluation_status.value)
+            filters.append(CompassEvaluation.evaluation_status == evaluation_status.value)
 
         statement = (
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(*filters)
-            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.created_at.desc(), CompassEvaluation.id.desc())
         )
         return list(self.db.scalars(statement))
 
-    def get_by_id(self, evaluation_id: uuid.UUID) -> StrideEvaluation:
+    def get_by_id(self, evaluation_id: uuid.UUID) -> CompassEvaluation:
         user = self.get_default_user()
-        statement = select(StrideEvaluation).where(
-            StrideEvaluation.id == evaluation_id,
-            StrideEvaluation.user_id == user.id,
-            StrideEvaluation.deleted_at.is_(None),
+        statement = select(CompassEvaluation).where(
+            CompassEvaluation.id == evaluation_id,
+            CompassEvaluation.user_id == user.id,
+            CompassEvaluation.deleted_at.is_(None),
         )
         evaluation = self.db.scalar(statement)
         if evaluation is None:
-            raise StrideEvaluationNotFoundError("STRIDE evaluation not found")
+            raise CompassEvaluationNotFoundError("COMPASS evaluation not found")
         return evaluation
 
     def _get_active_role(self, *, role_id: uuid.UUID, user_id: uuid.UUID) -> Role | None:
@@ -384,19 +384,19 @@ class StrideEvaluationService:
         workspace_id: uuid.UUID,
         role_id: uuid.UUID,
         input_hash: str,
-    ) -> StrideEvaluation | None:
+    ) -> CompassEvaluation | None:
         statement = (
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(
-                StrideEvaluation.user_id == user_id,
-                StrideEvaluation.workspace_id == workspace_id,
-                StrideEvaluation.role_id == role_id,
-                StrideEvaluation.deleted_at.is_(None),
-                StrideEvaluation.evaluation_status
-                == StrideEvaluationStatus.COMPLETED.value,
-                StrideEvaluation.evaluation_input_hash == input_hash,
+                CompassEvaluation.user_id == user_id,
+                CompassEvaluation.workspace_id == workspace_id,
+                CompassEvaluation.role_id == role_id,
+                CompassEvaluation.deleted_at.is_(None),
+                CompassEvaluation.evaluation_status
+                == CompassEvaluationStatus.COMPLETED.value,
+                CompassEvaluation.evaluation_input_hash == input_hash,
             )
-            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.created_at.desc(), CompassEvaluation.id.desc())
             .limit(1)
         )
         return self.db.scalar(statement)
@@ -411,7 +411,7 @@ class StrideEvaluationService:
     ) -> None:
         self.activity_log.append(
             user_id=user_id,
-            entity_type="stride_evaluation",
+            entity_type="compass_evaluation",
             entity_id=entity_id,
             action=action,
             details=details,

@@ -9,7 +9,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.config import Settings, get_settings
-from app.models import ResumeSourceVersion, Role, StrideEvaluation
+from app.models import ResumeSourceVersion, Role, CompassEvaluation
 from app.services.openai_client import (
     OpenAIClientUnavailableError,
     create_openai_client,
@@ -55,7 +55,7 @@ class OpenAIResumeArtifactGenerator:
         self,
         *,
         role: Role,
-        evaluation: StrideEvaluation,
+        evaluation: CompassEvaluation,
         source_version: ResumeSourceVersion,
         workspace_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:

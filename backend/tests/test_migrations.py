@@ -10,7 +10,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "companies",
         "roles",
         "job_sources",
-        "stride_evaluations",
+        "compass_evaluations",
         "resume_sources",
         "resume_source_versions",
         "applications",
@@ -42,8 +42,8 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "date_posted",
     }.issubset(role_columns)
 
-    stride_columns = {
-        column["name"] for column in inspector.get_columns("stride_evaluations")
+    compass_columns = {
+        column["name"] for column in inspector.get_columns("compass_evaluations")
     }
     assert {
         "workspace_id",
@@ -78,20 +78,20 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "created_at",
         "updated_at",
         "deleted_at",
-    }.issubset(stride_columns)
+    }.issubset(compass_columns)
 
-    stride_indexes = {
-        index["name"] for index in inspector.get_indexes("stride_evaluations")
+    compass_indexes = {
+        index["name"] for index in inspector.get_indexes("compass_evaluations")
     }
     assert {
-        "ix_stride_evaluations_user_id",
-        "ix_stride_evaluations_role_id",
-        "ix_stride_evaluations_status",
-        "ix_stride_evaluations_role_created_at",
-        "ix_stride_evaluations_role_input_hash",
-        "ix_stride_evaluations_ai_status",
-        "ix_stride_evaluations_ruleset_version",
-    }.issubset(stride_indexes)
+        "ix_compass_evaluations_user_id",
+        "ix_compass_evaluations_role_id",
+        "ix_compass_evaluations_status",
+        "ix_compass_evaluations_role_created_at",
+        "ix_compass_evaluations_role_input_hash",
+        "ix_compass_evaluations_ai_status",
+        "ix_compass_evaluations_ruleset_version",
+    }.issubset(compass_indexes)
 
     resume_source_columns = {
         column["name"] for column in inspector.get_columns("resume_sources")
@@ -202,7 +202,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         for index in inspector.get_indexes("application_external_links")
     }
     assert "ix_roles_workspace_id" in role_indexes
-    assert "ix_stride_evaluations_workspace_id" in stride_indexes
+    assert "ix_compass_evaluations_workspace_id" in compass_indexes
     assert "ix_generated_artifacts_workspace_id" in generated_artifact_indexes
     assert {"note_type", "deleted_at"}.issubset(application_note_columns)
     assert "deleted_at" in application_external_link_columns

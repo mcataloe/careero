@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.constants import ApplicationWorkflowState
-from app.models import Application, Role, StrideEvaluation, User
+from app.models import Application, Role, CompassEvaluation, User
 from app.seed import DEFAULT_LOCAL_USER_ID
 
 
@@ -49,14 +49,14 @@ class SearchHealthService:
         user = self.get_default_user()
         applications = self._applications(user_id=user.id, workspace_id=workspace_id)
         roles = self._roles(user_id=user.id, workspace_id=workspace_id)
-        latest_stride = self._latest_stride_by_role(
+        latest_compass = self._latest_compass_by_role(
             user_id=user.id,
             workspace_id=workspace_id,
         )
         signals = generate_search_health_signals(
             applications=applications,
             roles=roles,
-            latest_stride=latest_stride,
+            latest_compass=latest_compass,
             now=datetime.now(timezone.utc),
         )
         insufficient_data = []
@@ -98,24 +98,24 @@ class SearchHealthService:
             filters.append(Role.workspace_id == workspace_id)
         return list(self.db.scalars(select(Role).where(*filters)))
 
-    def _latest_stride_by_role(
+    def _latest_compass_by_role(
         self,
         *,
         user_id: uuid.UUID,
         workspace_id: uuid.UUID | None,
-    ) -> dict[uuid.UUID, StrideEvaluation]:
+    ) -> dict[uuid.UUID, CompassEvaluation]:
         filters = [
-            StrideEvaluation.user_id == user_id,
-            StrideEvaluation.deleted_at.is_(None),
-            StrideEvaluation.evaluation_status == "completed",
+            CompassEvaluation.user_id == user_id,
+            CompassEvaluation.deleted_at.is_(None),
+            CompassEvaluation.evaluation_status == "completed",
         ]
         if workspace_id is not None:
-            filters.append(StrideEvaluation.workspace_id == workspace_id)
-        latest: dict[uuid.UUID, StrideEvaluation] = {}
+            filters.append(CompassEvaluation.workspace_id == workspace_id)
+        latest: dict[uuid.UUID, CompassEvaluation] = {}
         for evaluation in self.db.scalars(
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(*filters)
-            .order_by(StrideEvaluation.role_id, StrideEvaluation.created_at.desc())
+            .order_by(CompassEvaluation.role_id, CompassEvaluation.created_at.desc())
         ):
             latest.setdefault(evaluation.role_id, evaluation)
         return latest
@@ -125,7 +125,7 @@ def generate_search_health_signals(
     *,
     applications: list[Application],
     roles: list[Role],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
     now: datetime,
 ) -> list[dict[str, Any]]:
     signals: list[dict[str, Any]] = []
@@ -152,8 +152,8 @@ def generate_search_health_signals(
     low_fit_submitted = [
         application
         for application in submitted
-        if _score(latest_stride.get(application.role_id)) is not None
-        and _score(latest_stride.get(application.role_id)) < 60
+        if _score(latest_compass.get(application.role_id)) is not None
+        and _score(latest_compass.get(application.role_id)) < 60
     ]
     if len(submitted) >= 3 and len(low_fit_submitted) / len(submitted) >= 0.5:
         signals.append(
@@ -162,7 +162,7 @@ def generate_search_health_signals(
                 "Heavy focus on low-fit roles",
                 "You have focused heavily on low-fit roles recently.",
                 "Review whether these roles are intentional stretches or energy drains before submitting more similar applications.",
-                "Compares submitted applications with STRIDE scores below 60.",
+                "Compares submitted applications with COMPASS scores below 60.",
                 "Weak Signal",
                 severity="caution",
                 source_inputs={"low_fit_submissions": len(low_fit_submitted), "submitted": len(submitted)},
@@ -251,7 +251,7 @@ def _submitted_at(application: Application) -> datetime | None:
     return application.applied_at or application.updated_at
 
 
-def _score(evaluation: StrideEvaluation | None) -> float | None:
+def _score(evaluation: CompassEvaluation | None) -> float | None:
     if evaluation is None or evaluation.overall_score is None:
         return None
     return float(evaluation.overall_score)

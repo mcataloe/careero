@@ -46,7 +46,7 @@ promoted into the layer plan or a LEAP prompt.
 - Cross-workspace comparison scenario.
 - Empty workspace scenario.
 - Workspace with opportunities but no application outcomes.
-- Workspace with applications but no STRIDE evaluations.
+- Workspace with applications but no COMPASS evaluations.
 
 ## Deferred Product Questions
 

@@ -8,35 +8,35 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.constants import ApplicationWorkflowState
-from app.models import Application, Role, StrideEvaluation, User, Workspace
+from app.models import Application, Role, CompassEvaluation, User, Workspace
 from app.seed import DEFAULT_LOCAL_USER_ID
 
 
-class StrideInsightsError(Exception):
+class CompassInsightsError(Exception):
     pass
 
 
-class StrideInsightsSeedMissingError(StrideInsightsError):
+class CompassInsightsSeedMissingError(CompassInsightsError):
     pass
 
 
-class StrideInsightsWorkspaceNotFoundError(StrideInsightsError):
+class CompassInsightsWorkspaceNotFoundError(CompassInsightsError):
     pass
 
 
-class StrideInsightsService:
+class CompassInsightsService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_default_user(self) -> User:
         user = self.db.get(User, DEFAULT_LOCAL_USER_ID)
         if user is None or user.deleted_at is not None:
-            raise StrideInsightsSeedMissingError(
+            raise CompassInsightsSeedMissingError(
                 "Default local user is missing; run python -m app.seed"
             )
         return user
 
-    def get_stride_insights(
+    def get_compass_insights(
         self,
         *,
         workspace_id: uuid.UUID | None = None,
@@ -46,7 +46,7 @@ class StrideInsightsService:
         evaluations = self._evaluations(user_id=user.id, workspace_id=workspace_id)
         applications = self._applications(user_id=user.id, workspace_id=workspace_id)
         points = [_trend_point(evaluation) for evaluation in evaluations]
-        insights = build_stride_trend_insights(
+        insights = build_compass_trend_insights(
             points=points,
             applications=applications,
             workspace=workspace,
@@ -59,13 +59,13 @@ class StrideInsightsService:
         insufficient_data = []
         if len(points) < 3:
             insufficient_data.append(
-                "At least three STRIDE evaluations are recommended for search-level trend insight."
+                "At least three COMPASS evaluations are recommended for search-level trend insight."
             )
         if not scores:
-            insufficient_data.append("Completed STRIDE evaluations need overall scores.")
+            insufficient_data.append("Completed COMPASS evaluations need overall scores.")
         return {
             "workspace_id": workspace_id,
-            "average_stride_score": round(sum(scores) / len(scores), 1)
+            "average_compass_score": round(sum(scores) / len(scores), 1)
             if scores
             else None,
             "trend_points": points,
@@ -87,7 +87,7 @@ class StrideInsightsService:
             )
         )
         if workspace is None:
-            raise StrideInsightsWorkspaceNotFoundError("Workspace not found")
+            raise CompassInsightsWorkspaceNotFoundError("Workspace not found")
         return workspace
 
     def _evaluations(
@@ -95,20 +95,20 @@ class StrideInsightsService:
         *,
         user_id: uuid.UUID,
         workspace_id: uuid.UUID | None,
-    ) -> list[StrideEvaluation]:
+    ) -> list[CompassEvaluation]:
         filters = [
-            StrideEvaluation.user_id == user_id,
-            StrideEvaluation.deleted_at.is_(None),
-            StrideEvaluation.evaluation_status == "completed",
+            CompassEvaluation.user_id == user_id,
+            CompassEvaluation.deleted_at.is_(None),
+            CompassEvaluation.evaluation_status == "completed",
         ]
         if workspace_id is not None:
-            filters.append(StrideEvaluation.workspace_id == workspace_id)
+            filters.append(CompassEvaluation.workspace_id == workspace_id)
         return list(
             self.db.scalars(
-                select(StrideEvaluation)
+                select(CompassEvaluation)
                 .where(*filters)
-                .options(joinedload(StrideEvaluation.role))
-                .order_by(StrideEvaluation.created_at.asc())
+                .options(joinedload(CompassEvaluation.role))
+                .order_by(CompassEvaluation.created_at.asc())
             )
         )
 
@@ -124,7 +124,7 @@ class StrideInsightsService:
         return list(self.db.scalars(select(Application).where(*filters)))
 
 
-def build_stride_trend_insights(
+def build_compass_trend_insights(
     *,
     points: list[dict[str, Any]],
     applications: list[Application],
@@ -140,7 +140,7 @@ def build_stride_trend_insights(
     return insights
 
 
-def _trend_point(evaluation: StrideEvaluation) -> dict[str, Any]:
+def _trend_point(evaluation: CompassEvaluation) -> dict[str, Any]:
     role = evaluation.role
     return {
         "role_id": evaluation.role_id,
@@ -159,9 +159,9 @@ def _score_trend_insights(points: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if len(scores) < 3:
         return [
             _insight(
-                "STRIDE sample is thin",
-                "Search-level STRIDE direction is still a weak signal.",
-                "Fewer than three completed STRIDE scores are available.",
+                "COMPASS sample is thin",
+                "Search-level COMPASS direction is still a weak signal.",
+                "Fewer than three completed COMPASS scores are available.",
                 "Insufficient Data",
                 source_inputs={"score_count": len(scores)},
             )
@@ -175,9 +175,9 @@ def _score_trend_insights(points: list[dict[str, Any]]) -> list[dict[str, Any]]:
         message = "Evaluated role fit is trending downward; review whether search scope has drifted."
     return [
         _insight(
-            "Average STRIDE fit over time",
+            "Average COMPASS fit over time",
             message,
-            "Compares the first and latest STRIDE overall scores in evaluation order.",
+            "Compares the first and latest COMPASS overall scores in evaluation order.",
             "Moderate Confidence" if len(scores) >= 6 else "Weak Signal",
             source_inputs={"first_score": scores[0], "latest_score": scores[-1], "count": len(scores)},
         )
@@ -302,8 +302,8 @@ def _low_fit_submission_insights(
         return [
             _insight(
                 "Excessive low-fit submissions",
-                "A large share of submitted applications are attached to low STRIDE-fit roles.",
-                "Counts submitted applications whose latest available STRIDE score is below 60.",
+                "A large share of submitted applications are attached to low COMPASS-fit roles.",
+                "Counts submitted applications whose latest available COMPASS score is below 60.",
                 "Weak Signal",
                 severity="caution",
                 source_inputs={"low_fit_submissions": len(low_fit), "submitted": len(submitted)},

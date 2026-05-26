@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from app.constants import StrideConfidenceLevel, StrideRecommendation
-from app.services.stride_rules import (
+from app.constants import CompassConfidenceLevel, CompassRecommendation
+from app.services.compass_rules import (
     RuleConcern,
     detect_concerns,
     evaluate_role,
@@ -87,8 +87,8 @@ def test_strong_fit_scores_apply_with_high_confidence() -> None:
     )
 
     assert result.overall_score >= Decimal("75")
-    assert result.recommendation == StrideRecommendation.APPLY.value
-    assert result.confidence_level == StrideConfidenceLevel.HIGH.value
+    assert result.recommendation == CompassRecommendation.APPLY.value
+    assert result.confidence_level == CompassConfidenceLevel.HIGH.value
     assert result.ats_keywords == ["fastapi", "postgresql", "python", "typescript"]
     assert result.missing_keywords == []
     assert result.raw_evaluation_json["ruleset_version"] == "phase_2b_deterministic_v1"
@@ -105,8 +105,8 @@ def test_weak_fit_scores_skip_with_risk_flags() -> None:
         },
     )
 
-    assert result.recommendation == StrideRecommendation.SKIP.value
-    assert result.confidence_level == StrideConfidenceLevel.LOW.value
+    assert result.recommendation == CompassRecommendation.SKIP.value
+    assert result.confidence_level == CompassConfidenceLevel.LOW.value
     assert any(concern["code"] == "remote_mismatch" for concern in result.concerns)
     assert result.raw_evaluation_json["risk_flags"]
 
@@ -114,36 +114,36 @@ def test_weak_fit_scores_skip_with_risk_flags() -> None:
 def test_ambiguous_role_needs_review_with_low_confidence() -> None:
     result = evaluate_role(ambiguous_role(), {})
 
-    assert result.recommendation == StrideRecommendation.NEEDS_REVIEW.value
-    assert result.confidence_level == StrideConfidenceLevel.LOW.value
+    assert result.recommendation == CompassRecommendation.NEEDS_REVIEW.value
+    assert result.confidence_level == CompassConfidenceLevel.LOW.value
     assert any(concern["code"] == "generic_description" for concern in result.concerns)
 
 
 def test_recommendation_thresholds_are_conservative() -> None:
     assert (
-        select_recommendation(80, StrideConfidenceLevel.HIGH.value)
-        == StrideRecommendation.APPLY.value
+        select_recommendation(80, CompassConfidenceLevel.HIGH.value)
+        == CompassRecommendation.APPLY.value
     )
     assert (
-        select_recommendation(60, StrideConfidenceLevel.MEDIUM.value)
-        == StrideRecommendation.MONITOR.value
+        select_recommendation(60, CompassConfidenceLevel.MEDIUM.value)
+        == CompassRecommendation.MONITOR.value
     )
     assert (
-        select_recommendation(45, StrideConfidenceLevel.MEDIUM.value)
-        == StrideRecommendation.NEEDS_REVIEW.value
+        select_recommendation(45, CompassConfidenceLevel.MEDIUM.value)
+        == CompassRecommendation.NEEDS_REVIEW.value
     )
     assert (
-        select_recommendation(39, StrideConfidenceLevel.HIGH.value)
-        == StrideRecommendation.SKIP.value
+        select_recommendation(39, CompassConfidenceLevel.HIGH.value)
+        == CompassRecommendation.SKIP.value
     )
     assert (
-        select_recommendation(90, StrideConfidenceLevel.LOW.value)
-        == StrideRecommendation.NEEDS_REVIEW.value
+        select_recommendation(90, CompassConfidenceLevel.LOW.value)
+        == CompassRecommendation.NEEDS_REVIEW.value
     )
     assert (
         select_recommendation(
             90,
-            StrideConfidenceLevel.HIGH.value,
+            CompassConfidenceLevel.HIGH.value,
             [
                 RuleConcern(
                     code="remote_mismatch",
@@ -153,7 +153,7 @@ def test_recommendation_thresholds_are_conservative() -> None:
                 )
             ],
         )
-        == StrideRecommendation.SKIP.value
+        == CompassRecommendation.SKIP.value
     )
 
 

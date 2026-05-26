@@ -52,7 +52,7 @@
                   "few_opportunities",
                   "few_applications",
                   "few_outcomes",
-                  "missing_stride_evaluations",
+                  "missing_compass_evaluations",
                   "missing_compensation_ranges",
                   "missing_artifact_performance",
                   "missing_source_history",
@@ -135,7 +135,7 @@
                 "type": "string",
                 "enum": [
                   "search_health",
-                  "stride",
+                  "compass",
                   "compensation",
                   "source",
                   "artifact",

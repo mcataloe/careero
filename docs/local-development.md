@@ -62,7 +62,7 @@ uvicorn app.main:app --reload
 Edit `backend/.env` so `CAREERO_DATABASE_URL` and `CAREERO_TEST_DATABASE_URL` point at your local PostgreSQL databases.
 Run `python -m app.seed` after migrations so the default local user and canonical manual job sources are available for role intake.
 
-OpenAI STRIDE enrichment is optional and disabled by default. Deterministic STRIDE scoring works without an API key. To enable AI enrichment locally, set these in `backend/.env`:
+OpenAI COMPASS enrichment is optional and disabled by default. Deterministic COMPASS scoring works without an API key. To enable AI enrichment locally, set these in `backend/.env`:
 
 ```dotenv
 CAREERO_ENABLE_AI_EVALUATIONS=true
@@ -82,7 +82,7 @@ CAREERO_OPENAI_DEFAULT_ROLE_PARSING_MODEL=gpt-5-mini
 
 Do not commit real API keys. If AI is disabled, missing, times out, or returns invalid structured output, role evaluation falls back to the deterministic baseline and records `ai_status` in `raw_evaluation_json`.
 
-STRIDE evaluations are cached by an input hash built from role content, active resume/profile source content, request notes/context, prompt version, ruleset version, AI enabled state, and model name. Reposting the same inputs returns the cached completed evaluation with HTTP `200`; send `"force": true` to create a new evaluation. The backend stores model, prompt/ruleset versions, token estimates when available, latency, AI status, sanitized errors, and content hashes for auditability.
+COMPASS evaluations are cached by an input hash built from role content, active resume/profile source content, request notes/context, prompt version, ruleset version, AI enabled state, and model name. Reposting the same inputs returns the cached completed evaluation with HTTP `200`; send `"force": true` to create a new evaluation. The backend stores model, prompt/ruleset versions, token estimates when available, latency, AI status, sanitized errors, and content hashes for auditability.
 
 `CAREERO_MAX_AI_EVALUATIONS_PER_SESSION` limits OpenAI-backed attempts per backend process and resets on backend restart. Cached evaluations and AI-disabled or missing-key skipped runs do not consume the counter. Logs should include IDs/status/latency only, not prompts, API keys, raw role descriptions, or resume/profile source text.
 
@@ -139,26 +139,26 @@ Invoke-RestMethod `
 
 You can also import local `.txt`, `.md`, `.docx`, and text-based `.pdf` files from the Settings page or with `POST /api/resume-sources/import`. Imports are limited to `5 MB`, extract text for preview only, and do not save uploaded files or create sources. The extracted text remains editable before saving. PDFs must contain embedded selectable text; OCR for scanned PDFs is not included.
 
-Only one source version is active for the default local user. STRIDE evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. Resume and cover letter artifact generation can also use the active source when enabled. This source API does not extract profile facts or import external profiles.
+Only one source version is active for the default local user. COMPASS evaluations run without an active source, but OpenAI enrichment includes the active source when present and must identify gaps rather than inventing experience. Resume and cover letter artifact generation can also use the active source when enabled. This source API does not extract profile facts or import external profiles.
 
 Future Google Docs import is tracked as a backlog item and requires Google OAuth, Drive/Docs scopes, document export, token handling, permission review, and a security design.
 
-STRIDE evaluation flow:
+COMPASS evaluation flow:
 
 ```text
 POST http://127.0.0.1:8000/api/roles/{role_id}/evaluations
 GET  http://127.0.0.1:8000/api/roles/{role_id}/evaluations/latest
-GET  http://127.0.0.1:8000/api/stride-evaluations
-GET  http://127.0.0.1:8000/api/activity-log?entity_type=stride_evaluation&entity_id={evaluation_id}
+GET  http://127.0.0.1:8000/api/compass-evaluations
+GET  http://127.0.0.1:8000/api/activity-log?entity_type=compass_evaluation&entity_id={evaluation_id}
 ```
 
-Posting the same opportunity/source/context inputs reuses a cached completed evaluation. Send `"force": true` to create a new run. Evaluation activity entries include `stride_evaluation.started`, `stride_evaluation.completed`, `stride_evaluation.failed`, and `stride_evaluation.cached_result_reused`.
+Posting the same opportunity/source/context inputs reuses a cached completed evaluation. Send `"force": true` to create a new run. Evaluation activity entries include `compass_evaluation.started`, `compass_evaluation.completed`, `compass_evaluation.failed`, and `compass_evaluation.cached_result_reused`.
 
 Manual browser smoke flow:
 
 1. Open `http://127.0.0.1:5173/opportunities/new` and create an opportunity.
 2. Open `http://127.0.0.1:5173/settings` and create an active resume/profile source.
-3. Open the opportunity detail page and run STRIDE evaluation.
+3. Open the opportunity detail page and run COMPASS evaluation.
 4. Confirm the evaluation shows score, recommendation, confidence, alignments, keyword gaps, and AI fallback/enrichment status.
 5. Re-run the evaluation and confirm a forced new run succeeds.
 
@@ -230,4 +230,4 @@ Layer 2 is local-first and evaluation-focused only. Later layers add workspace-a
 
 ## Layer 2 Completion
 
-Layer 2 is considered locally stable when the backend, frontend, and PostgreSQL all pass readiness checks and the role-to-resume-to-STRIDE workflow can create, display, cache, force re-run, and audit evaluations.
+Layer 2 is considered locally stable when the backend, frontend, and PostgreSQL all pass readiness checks and the role-to-resume-to-COMPASS workflow can create, display, cache, force re-run, and audit evaluations.

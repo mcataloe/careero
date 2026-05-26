@@ -17,8 +17,8 @@ bounded before any hosted beta or paid tier.
 | Surface | Current posture | Readiness note |
 | --- | --- | --- |
 | Job parsing | Optional AI-assisted parsing, review-before-save. | Track attempts, fallback, confidence, and user acceptance later. |
-| STRIDE enrichment | Optional OpenAI enrichment grounded in role and active resume/profile source. | Current process-level attempt cap exists locally; durable metering is future. |
-| Resume generation | Draft generation grounded in source, opportunity, and STRIDE evaluation. | Must stay TruthGuard checked and user reviewed. |
+| COMPASS enrichment | Optional OpenAI enrichment grounded in role and active resume/profile source. | Current process-level attempt cap exists locally; durable metering is future. |
+| Resume generation | Draft generation grounded in source, opportunity, and COMPASS evaluation. | Must stay TruthGuard checked and user reviewed. |
 | Cover-letter generation | Draft generation grounded in opportunity and optional source/evaluation. | Must stay draft-only until lifecycle is mature. |
 | Career strategy synthesis | Current MVP is read-only and based on stored Careero evidence. | Optional AI summarization remains future. |
 | Integration summarization | Future only. | Requires integration privacy and token handling design first. |
@@ -30,8 +30,8 @@ Future metering should track provider-agnostic events:
 
 - `ai.parse_opportunity.requested`
 - `ai.parse_opportunity.completed`
-- `ai.stride_enrichment.requested`
-- `ai.stride_enrichment.completed`
+- `ai.compass_enrichment.requested`
+- `ai.compass_enrichment.completed`
 - `ai.resume_artifact.requested`
 - `ai.resume_artifact.completed`
 - `ai.cover_letter_artifact.requested`
@@ -84,7 +84,7 @@ Billing provider integration is future and not part of this design.
 
 | Tier candidate | Possible boundary | Notes |
 | --- | --- | --- |
-| Free useful baseline | Manual workflow, local records, deterministic STRIDE, limited AI attempts. | Must remain useful before paid conversion. |
+| Free useful baseline | Manual workflow, local records, deterministic COMPASS, limited AI attempts. | Must remain useful before paid conversion. |
 | Paid individual/power-user | Higher saved record volume, richer analytics, artifact lifecycle depth. | Should not lock essential organization behind an expensive tier before value is proven. |
 | Paid AI/artifact quota | More AI generations, higher monthly caps, export convenience. | Transparent usage limits required. |
 | Future collaboration tier | Advisor/reviewer access and comments. | Requires account lifecycle and sharing design first. |

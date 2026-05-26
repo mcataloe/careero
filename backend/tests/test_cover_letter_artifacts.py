@@ -15,7 +15,7 @@ from app.models import ActivityLog, GeneratedArtifact
 from app.schemas.cover_letter_artifacts import CoverLetterArtifactGenerateRequest
 from app.schemas.resume_sources import ResumeSourceCreate
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
-from app.schemas.stride_evaluations import StrideEvaluationCreate
+from app.schemas.compass_evaluations import CompassEvaluationCreate
 from app.schemas.workspaces import WorkspaceCreate
 from app.seed import DEFAULT_WORKSPACE_ID, seed_local_data
 from app.services.cover_letter_artifact_ai import (
@@ -30,7 +30,7 @@ from app.services.cover_letter_artifacts import (
 )
 from app.services.resume_sources import ResumeSourceService
 from app.services.roles import RoleService
-from app.services.stride_evaluations import StrideEvaluationService
+from app.services.compass_evaluations import CompassEvaluationService
 from app.services.workspaces import WorkspaceService
 
 
@@ -163,12 +163,12 @@ def create_source(db_session: Session, *, is_active: bool = True) -> dict[str, A
 
 
 def create_evaluation(db_session: Session, role_id: UUID):
-    result = StrideEvaluationService(
+    result = CompassEvaluationService(
         db_session,
         settings=Settings(_env_file=None),
     ).create_for_role(
         role_id=role_id,
-        payload=StrideEvaluationCreate(
+        payload=CompassEvaluationCreate(
             user_context={"target_keywords": ["python", "postgresql", "kubernetes"]},
             force=True,
         ),
@@ -295,7 +295,7 @@ def test_api_opportunity_cover_letter_alias_preserves_role_compatibility(
     assert role_response.json()["opportunityId"] == str(role.id)
 
 
-def test_missing_stride_evaluation_succeeds_with_warning(
+def test_missing_compass_evaluation_succeeds_with_warning(
     seeded_session: Session,
 ) -> None:
     role = create_role(seeded_session)
@@ -304,7 +304,7 @@ def test_missing_stride_evaluation_succeeds_with_warning(
     artifact = generate_artifact(seeded_session, role_id=role.id)
 
     assert artifact["metadata"]["targetEvaluationId"] is None
-    assert "Generated without a STRIDE evaluation." in artifact[
+    assert "Generated without a COMPASS evaluation." in artifact[
         "generationMetadata"
     ]["warnings"]
 

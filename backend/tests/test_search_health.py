@@ -37,7 +37,7 @@ def test_search_health_generates_gentle_low_fit_and_volume_signals() -> None:
         _application(role.id, days_ago=1)
         for role in roles
     ]
-    latest_stride = {
+    latest_compass = {
         role.id: _evaluation(50 if index < 10 else 75)
         for index, role in enumerate(roles)
     }
@@ -45,7 +45,7 @@ def test_search_health_generates_gentle_low_fit_and_volume_signals() -> None:
     signals = generate_search_health_signals(
         applications=applications,
         roles=roles,
-        latest_stride=latest_stride,
+        latest_compass=latest_compass,
         now=now,
     )
 
@@ -69,7 +69,7 @@ def test_search_health_detects_stale_and_burnout_risk_without_diagnosis() -> Non
     signals = generate_search_health_signals(
         applications=[],
         roles=roles,
-        latest_stride={},
+        latest_compass={},
         now=now,
     )
 

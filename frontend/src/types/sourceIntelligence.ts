@@ -7,7 +7,7 @@ export interface SourceSummaryMetric {
   interviews: number;
   response_rate: number | null;
   interview_rate: number | null;
-  average_stride_score: number | null;
+  average_compass_score: number | null;
   recruiter_contacts: number;
   compensation_aligned: number;
   basis: string;

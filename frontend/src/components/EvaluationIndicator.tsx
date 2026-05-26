@@ -1,6 +1,6 @@
 import { Badge, Group, Loader, Text } from "@mantine/core";
 
-import type { EvaluationSummaryState } from "../types/strideEvaluations";
+import type { EvaluationSummaryState } from "../types/compassEvaluations";
 
 function titleize(value: string | null | undefined) {
   return value ? value.replaceAll("_", " ") : "-";

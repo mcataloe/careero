@@ -11,15 +11,15 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.config import Settings
-from app.constants import StrideConfidenceLevel, StrideRecommendation
+from app.constants import CompassConfidenceLevel, CompassRecommendation
 from app.models import ResumeSourceVersion, Role
-from app.schemas.stride_evaluations import StrideEvaluationCreate
+from app.schemas.compass_evaluations import CompassEvaluationCreate
 from app.services.openai_client import (
     OpenAIClientUnavailableError,
     create_openai_client,
 )
-from app.services.stride_prompt import build_stride_evaluation_prompt
-from app.services.stride_rules import StrideRuleResult
+from app.services.compass_prompt import build_compass_evaluation_prompt
+from app.services.compass_rules import CompassRuleResult
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ _session_counter_lock = threading.Lock()
 _ai_evaluations_this_session = 0
 
 
-class AIStrideItem(BaseModel):
+class AICompassItem(BaseModel):
     code: str = Field(min_length=1, max_length=100)
     message: str = Field(min_length=1, max_length=1000)
     evidence: str | None = Field(default=None, max_length=2000)
@@ -40,44 +40,44 @@ class AIStrideItem(BaseModel):
     ] = "grounded"
 
 
-class AIStrideSection(BaseModel):
+class AICompassSection(BaseModel):
     status: Literal["strong_match", "partial_match", "no_evidence", "insufficient_data", "grounded"]
     score: int | None = Field(default=None, ge=0, le=100)
     notes: str = Field(min_length=1, max_length=2000)
     evidence: list[str] = Field(default_factory=list, max_length=8)
 
 
-class AIStrideEvaluationOutput(BaseModel):
+class AICompassEvaluationOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     summary: str = Field(min_length=1, max_length=3000)
-    strengths: list[AIStrideItem] = Field(default_factory=list, max_length=12)
-    concerns: list[AIStrideItem] = Field(default_factory=list, max_length=12)
-    resume_alignment: AIStrideSection
-    compensation_alignment: AIStrideSection
-    seniority_alignment: AIStrideSection
-    remote_alignment: AIStrideSection
-    technical_alignment: AIStrideSection
-    company_risk: AIStrideSection
+    strengths: list[AICompassItem] = Field(default_factory=list, max_length=12)
+    concerns: list[AICompassItem] = Field(default_factory=list, max_length=12)
+    resume_alignment: AICompassSection
+    compensation_alignment: AICompassSection
+    seniority_alignment: AICompassSection
+    remote_alignment: AICompassSection
+    technical_alignment: AICompassSection
+    company_risk: AICompassSection
     ats_keywords: list[str] = Field(default_factory=list, max_length=40)
     missing_keywords: list[str] = Field(default_factory=list, max_length=40)
-    evidence_matches: list[AIStrideItem] = Field(default_factory=list, max_length=20)
-    evidence_gaps: list[AIStrideItem] = Field(default_factory=list, max_length=20)
-    positioning_opportunities: list[AIStrideItem] = Field(
+    evidence_matches: list[AICompassItem] = Field(default_factory=list, max_length=20)
+    evidence_gaps: list[AICompassItem] = Field(default_factory=list, max_length=20)
+    positioning_opportunities: list[AICompassItem] = Field(
         default_factory=list,
         max_length=20,
     )
-    unsupported_claim_warnings: list[AIStrideItem] = Field(
+    unsupported_claim_warnings: list[AICompassItem] = Field(
         default_factory=list,
         max_length=20,
     )
     ai_overall_score: int | None = Field(default=None, ge=0, le=100)
-    ai_recommendation: StrideRecommendation | None = None
-    ai_confidence_level: StrideConfidenceLevel | None = None
+    ai_recommendation: CompassRecommendation | None = None
+    ai_confidence_level: CompassConfidenceLevel | None = None
     grounding_notes: list[str] = Field(default_factory=list, max_length=12)
 
 
-class OpenAIStrideEvaluator:
+class OpenAICompassEvaluator:
     def __init__(self, settings: Settings, client: Any | None = None) -> None:
         self.settings = settings
         self.client = client
@@ -86,8 +86,8 @@ class OpenAIStrideEvaluator:
         self,
         *,
         role: Role,
-        payload: StrideEvaluationCreate,
-        baseline: StrideRuleResult,
+        payload: CompassEvaluationCreate,
+        baseline: CompassRuleResult,
         active_resume_source: ResumeSourceVersion | None = None,
         workspace_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
@@ -105,7 +105,7 @@ class OpenAIStrideEvaluator:
         started_at = time.perf_counter()
         try:
             client = self.client or create_openai_client(self.settings)
-            prompt = build_stride_evaluation_prompt(
+            prompt = build_compass_evaluation_prompt(
                 role=role,
                 baseline=baseline,
                 user_notes=payload.user_notes,
@@ -116,19 +116,19 @@ class OpenAIStrideEvaluator:
             response = client.responses.parse(
                 model=self.settings.openai_default_evaluation_model,
                 input=prompt,
-                text_format=AIStrideEvaluationOutput,
+                text_format=AICompassEvaluationOutput,
                 max_output_tokens=self.settings.openai_max_output_tokens,
             )
             usage = getattr(response, "usage", None)
             parsed = getattr(response, "output_parsed", None)
             if parsed is None:
                 raise ValueError("OpenAI response did not include parsed output")
-            if not isinstance(parsed, AIStrideEvaluationOutput):
-                parsed = AIStrideEvaluationOutput.model_validate(parsed)
+            if not isinstance(parsed, AICompassEvaluationOutput):
+                parsed = AICompassEvaluationOutput.model_validate(parsed)
         except (OpenAIClientUnavailableError, ValidationError, ValueError) as exc:
             return self._failed(exc, prompt=prompt, started_at=started_at)
         except Exception as exc:
-            logger.warning("OpenAI STRIDE evaluation failed: %s", type(exc).__name__)
+            logger.warning("OpenAI COMPASS evaluation failed: %s", type(exc).__name__)
             return self._failed(exc, prompt=prompt, started_at=started_at)
 
         output_payload = parsed.model_dump(mode="json")
@@ -178,7 +178,7 @@ class OpenAIStrideEvaluator:
 
 
 def merge_ai_analysis(
-    baseline: StrideRuleResult,
+    baseline: CompassRuleResult,
     ai_metadata: dict[str, Any],
     active_resume_source: ResumeSourceVersion | None = None,
 ) -> dict[str, Any]:

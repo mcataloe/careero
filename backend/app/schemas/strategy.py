@@ -24,7 +24,7 @@ StrategyInsufficientDataReason = Literal[
     "few_opportunities",
     "few_applications",
     "few_outcomes",
-    "missing_stride_evaluations",
+    "missing_compass_evaluations",
     "missing_compensation_ranges",
     "missing_artifact_performance",
     "missing_source_history",
@@ -55,7 +55,7 @@ class StrategySignal(StrategyModel):
     id: str
     category: Literal[
         "search_health",
-        "stride",
+        "compass",
         "compensation",
         "source",
         "artifact",
@@ -95,7 +95,7 @@ class StrategySampleSize(StrategyModel):
     applications: int = 0
     submitted_applications: int = 0
     responses: int = 0
-    stride_evaluations: int = 0
+    compass_evaluations: int = 0
     artifact_performance_records: int = 0
 
 

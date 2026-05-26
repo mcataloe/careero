@@ -28,7 +28,7 @@ export interface EvidenceItem {
   keywords?: string[];
 }
 
-export interface StrideEvaluation {
+export interface CompassEvaluation {
   id: string;
   user_id?: string;
   role_id?: string;
@@ -121,7 +121,7 @@ export interface StrideEvaluation {
   updated_at: string;
 }
 
-export interface StrideEvaluationCreatePayload {
+export interface CompassEvaluationCreatePayload {
   user_notes?: string | null;
   user_context?: Record<string, unknown>;
   force?: boolean;
@@ -131,4 +131,4 @@ export type EvaluationSummaryState =
   | { status: "loading" }
   | { status: "not_evaluated" }
   | { status: "error"; message: string }
-  | { status: "completed"; evaluation: StrideEvaluation };
+  | { status: "completed"; evaluation: CompassEvaluation };

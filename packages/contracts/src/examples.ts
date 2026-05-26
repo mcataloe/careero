@@ -13,7 +13,7 @@ import type {
   StrategyConfidence,
   SearchTrackStrategySummary,
 } from "./strategy.js";
-import type { StrideEvaluation } from "./stride-evaluation.js";
+import type { CompassEvaluation } from "./compass-evaluation.js";
 import type { Workspace } from "./workspace.js";
 
 const now = "2026-05-13T18:00:00.000Z";
@@ -30,9 +30,9 @@ const automationPreferencesId = "14141414-1414-4414-8414-141414141414";
 
 const strategyConfidence: StrategyConfidence = {
   confidence: "weak",
-  basis: "Based on stored opportunities, applications, STRIDE evaluations, and artifact performance records.",
+  basis: "Based on stored opportunities, applications, COMPASS evaluations, and artifact performance records.",
   sampleSize: 3,
-  sourceInputs: { opportunities: 3, applications: 2, strideEvaluations: 2 },
+  sourceInputs: { opportunities: 3, applications: 2, compassEvaluations: 2 },
   knownUncertainty: ["Outcome history is still thin."],
   insufficientData: [],
   userOverrides: null,
@@ -116,13 +116,13 @@ export const opportunityExample: Opportunity = {
   updatedAt: now,
 };
 
-export const strideEvaluationExample: StrideEvaluation = {
+export const compassEvaluationExample: CompassEvaluation = {
   contractVersion: CONTRACT_VERSION,
   id: evaluationId,
   workspaceId,
   opportunityId,
   version: {
-    version: "stride_evaluation_v1",
+    version: "compass_evaluation_v1",
     previousVersion: null,
     changeReason: "Initial canonical evaluation contract.",
   },
@@ -130,8 +130,8 @@ export const strideEvaluationExample: StrideEvaluation = {
   modelMetadata: {
     provider: "openai",
     model: "gpt-5-mini",
-    promptVersion: "stride_prompt_v1",
-    rulesetVersion: "stride_rules_v1",
+    promptVersion: "compass_prompt_v1",
+    rulesetVersion: "compass_rules_v1",
     inputTokenEstimate: 1800,
     outputTokenEstimate: 900,
     latencyMs: 1200,
@@ -178,8 +178,8 @@ export const strideEvaluationExample: StrideEvaluation = {
     inputHash: "sha256:evaluation-input",
     roleContentHash: "sha256:role-content",
     sourceHash: "sha256:resume-source",
-    promptVersion: "stride_prompt_v1",
-    rulesetVersion: "stride_rules_v1",
+    promptVersion: "compass_prompt_v1",
+    rulesetVersion: "compass_rules_v1",
     sourceHashes: { resume: "sha256:resume-source" },
     deterministicBaseline: { score: 78 },
   },
@@ -204,7 +204,7 @@ export const resumeArtifactExample: ResumeArtifact = {
   },
   generationMetadata: {
     generatedBy: "ai",
-    modelMetadata: strideEvaluationExample.modelMetadata,
+    modelMetadata: compassEvaluationExample.modelMetadata,
     promptVersion: "resume_artifact_prompt_v1",
     inputHash: "sha256:resume-input",
     groundingSourceIds: [],
@@ -236,7 +236,7 @@ export const coverLetterArtifactExample: CoverLetterArtifact = {
   tone: "direct",
   generationMetadata: {
     generatedBy: "ai",
-    modelMetadata: strideEvaluationExample.modelMetadata,
+    modelMetadata: compassEvaluationExample.modelMetadata,
     promptVersion: "cover_letter_prompt_v1",
     inputHash: "sha256:cover-letter-input",
     groundingSourceIds: [],
@@ -274,7 +274,7 @@ export const applicationStateExample: ApplicationState = {
       state: "interested",
       changedAt: now,
       changedBy: "user",
-      reason: "STRIDE baseline recommended applying.",
+      reason: "COMPASS baseline recommended applying.",
       metadata: {},
     },
   ],
@@ -403,31 +403,31 @@ export const searchTrackStrategySummaryExample: SearchTrackStrategySummary = {
   summary:
     "Based on your stored Careero data, this search track has early fit signals but limited outcome evidence.",
   basis:
-    "Derived from local workspace opportunities, application workflow states, latest STRIDE evaluations, compensation observations, source intelligence, historical learning, and artifact performance records.",
+    "Derived from local workspace opportunities, application workflow states, latest COMPASS evaluations, compensation observations, source intelligence, historical learning, and artifact performance records.",
   confidence: strategyConfidence,
   sampleSize: {
     opportunities: 3,
     applications: 2,
     submittedApplications: 1,
     responses: 1,
-    strideEvaluations: 2,
+    compassEvaluations: 2,
     artifactPerformanceRecords: 1,
   },
   sourceInputs: {
     analytics: "/api/analytics/search",
-    stride: "/api/analytics/stride",
+    compass: "/api/analytics/compass",
     compensation: "/api/analytics/compensation",
   },
   knownUncertainty: ["This is not external market data."],
   insufficientData: [],
   signals: [
     {
-      id: "stride-fit",
-      category: "stride",
+      id: "compass-fit",
+      category: "compass",
       label: "High-fit opportunities are producing traction",
       message:
         "At least one higher-fit opportunity has a stored interview or offer signal.",
-      basis: "Latest STRIDE scores and application workflow outcomes.",
+      basis: "Latest COMPASS scores and application workflow outcomes.",
       severity: "positive",
       confidence: strategyConfidence,
       sourceInputs: { highFitOpportunities: 1 },
@@ -446,7 +446,7 @@ export const searchTrackStrategySummaryExample: SearchTrackStrategySummary = {
     summary:
       "Saved roles appear concentrated around leadership and platform themes in this workspace.",
     basis:
-      "Uses title-derived categories and repeated STRIDE alignment patterns from stored opportunities.",
+      "Uses title-derived categories and repeated COMPASS alignment patterns from stored opportunities.",
     confidence: strategyConfidence,
     themes: ["leadership", "platform"],
   },
@@ -454,7 +454,7 @@ export const searchTrackStrategySummaryExample: SearchTrackStrategySummary = {
   retrospective: {
     summary:
       "The track has enough stored evidence for directional review, but not enough for strong conclusions.",
-    basis: "Combines stored opportunities, applications, STRIDE results, and outcomes.",
+    basis: "Combines stored opportunities, applications, COMPASS results, and outcomes.",
     confidence: strategyConfidence,
     notes: ["No external market data was used."],
   },
@@ -508,7 +508,7 @@ export const careerStrategySummaryExample: CareerStrategySummary = {
 export const canonicalExamples = {
   Workspace: workspaceExample,
   Opportunity: opportunityExample,
-  StrideEvaluation: strideEvaluationExample,
+  CompassEvaluation: compassEvaluationExample,
   ResumeArtifact: resumeArtifactExample,
   CoverLetterArtifact: coverLetterArtifactExample,
   ApplicationState: applicationStateExample,

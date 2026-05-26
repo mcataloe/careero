@@ -11,7 +11,7 @@ import {
   CONTRACT_VERSION,
   MoneySchema,
   OpportunitySchema,
-  StrideEvaluationSchema,
+  CompassEvaluationSchema,
   WorkspaceSchema,
   canonicalExamples,
   canonicalSchemaRegistry,
@@ -54,11 +54,11 @@ describe("canonical contract validation", () => {
     expect(OpportunitySchema.safeParse(invalid).success).toBe(false);
   });
 
-  it("requires version fields for STRIDE evaluations", () => {
-    const invalid = { ...canonicalExamples.StrideEvaluation };
+  it("requires version fields for COMPASS evaluations", () => {
+    const invalid = { ...canonicalExamples.CompassEvaluation };
     delete (invalid as Partial<typeof invalid>).version;
 
-    expect(StrideEvaluationSchema.safeParse(invalid).success).toBe(false);
+    expect(CompassEvaluationSchema.safeParse(invalid).success).toBe(false);
   });
 
   it("requires state history for application state", () => {
@@ -150,7 +150,7 @@ describe("generated JSON Schema exports", () => {
   const expectedFiles = [
     "workspace.schema.json",
     "opportunity.schema.json",
-    "stride-evaluation.schema.json",
+    "compass-evaluation.schema.json",
     "resume-artifact.schema.json",
     "cover-letter-artifact.schema.json",
     "application-state.schema.json",

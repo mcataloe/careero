@@ -21,7 +21,7 @@ Careero-specific product strategy, implementation status, domain model decisions
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including `docs/opportunity-model-strategy.md` and `docs/productization-readiness.md`.
+3. Active layer-specific docs, including `docs/opportunity-model-strategy.md`, `docs/productization-readiness.md`, `docs/advisor-collaboration-mode.md`, and `docs/careero-layer-14-strategic-plan-section.md`.
 4. `docs/archive/*` - historical context only.
 5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
@@ -31,14 +31,14 @@ Archived roadmap material must not be used for current LEAP Recon or Codex imple
 
 ## Strategic Context
 
-Careero is no longer just a local job tracker or STRIDE evaluation prototype. The repo now contains meaningful parts of a career operations platform:
+Careero is no longer just a local job tracker or COMPASS evaluation prototype. The repo now contains meaningful parts of a career operations platform:
 
 - local-first backend and frontend foundation
 - PostgreSQL persistence
 - workspace/search-track persistence
 - Opportunity-facing intake backed by current Role persistence
 - resume/profile source grounding
-- STRIDE evaluation
+- COMPASS evaluation
 - artifact generation foundations
 - application workflow tracking
 - state history
@@ -47,9 +47,9 @@ Careero is no longer just a local job tracker or STRIDE evaluation prototype. Th
 - structured interview tracking
 - analytics and dashboard intelligence surfaces
 
-However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and some historical branch work still needs validation before it should be treated as complete.
+However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and any private remote branch or PR work still needs validation before it should be treated as complete.
 
-The current strategic move is to stabilize existing workflow and intelligence reality while introducing Layer 10 as derived, read-only career strategy synthesis.
+The current strategic move is to stabilize existing workflow and intelligence reality while keeping Layer 10 as derived, read-only career strategy synthesis. A later strategic expansion now belongs after Layer 13: user-selected model routing, credit economics, API-only job-posting ingestion, and source-governed company research memory. Layer 14 is planning-only in `main`; none of its model catalog, credit wallet, job-posting ingestion, or company research cache has been implemented.
 
 ---
 
@@ -106,9 +106,9 @@ The current repo already includes meaningful implementation for:
 - resume/profile source storage
 - resume/profile source versions
 - active resume/profile source grounding
-- STRIDE evaluation generation
-- deterministic STRIDE scoring
-- optional OpenAI STRIDE enrichment
+- COMPASS evaluation generation
+- deterministic COMPASS scoring
+- optional OpenAI COMPASS enrichment
 - evaluation caching/reuse
 - evaluation metadata and input hashing
 - canonical TypeScript/Zod contracts package
@@ -135,7 +135,7 @@ The current repo already includes meaningful implementation for:
 - workspace automation preferences
 - search analytics endpoint
 - artifact performance analytics endpoint
-- STRIDE insights endpoint
+- COMPASS insights endpoint
 - source intelligence endpoint
 - compensation intelligence endpoint
 - search health endpoint
@@ -145,15 +145,15 @@ The current repo already includes meaningful implementation for:
 
 ### Partially built / needs reconciliation or validation
 
-The current repo also has partially completed, historically branch-diverged, or not-yet-fully-validated work for:
+The current repo also has partially completed or not-yet-fully-validated work for:
 
-- local application reminders: current `main` has reminder tables, service logic, counts, analytics inputs, and timeline events, but fuller reminder API routes, frontend panel, and `docs/application-reminders.md` were previously observed outside `main` and still need product reconciliation.
-- external-link summary/count refinements: external-link CRUD is present, but separate historical summary/count refinement work still needs validation before being treated as current.
-- historical branch drift from Codex-generated feature work; current local clone exposes no unmerged branches (`main` and `origin/main` only), while private remote PR state may still require external checking.
-- Layer 4 workflow completion, especially reminder UX and final count validation
-- Layer 5 insight stabilization
+- local application reminders: current `main` has reminder tables, service methods, counts, next-action synchronization, activity-log events, analytics inputs, and timeline events, but no FastAPI reminder routes, frontend reminder API wrapper, or frontend reminder panel.
+- external-link workflow summaries: external-link CRUD API routes, frontend panel, activity-log events, timeline update/delete events, and tests exist in `main`; application list/detail summary counts still include notes, reminders, and interviews only, not links.
+- private remote branch or PR drift, if any, is outside the current local clone; this clone currently exposes only `main` and `origin/main`.
+- Layer 4 workflow completion, especially reminder API/UI completion and final summary-count decisions.
+- Layer 5 insight stabilization.
 
-These should not be treated as cleanly complete until reconciled into `main`, validated, and reflected in documentation. During this documentation refresh, repo history and file presence were inspected; full DB-backed test validation was not completed.
+These should not be treated as cleanly complete until implemented or validated in `main` and reflected in documentation. During this documentation refresh, repo files and local git state were inspected; full DB-backed test validation was not completed.
 
 ### Not yet built / still future
 
@@ -179,6 +179,13 @@ The repo does not yet fully include:
 - external review-before-send workflows
 - hosted coach/advisor collaboration mode
 - marketplace or employer-side capabilities
+- user-selected model routing and a provider/model catalog
+- modular prompt compiler architecture beyond the current artifact-generation prompt foundations
+- credit wallet, durable credit ledger, usage metering, credit reservation/debit/refund, rollover, top-ups, or billing-linked credits
+- API-only job posting ingestion from official ATS/job-data providers
+- API-only company research ingestion, source record caching, fact extraction, summary regeneration, and freshness tracking
+- external source licensing/compliance governance for company research and review/salary/culture data
+- scraping or restricted-source extraction; this is explicitly deferred for later legal/product/technical review
 
 ---
 
@@ -189,17 +196,18 @@ The repo does not yet fully include:
 | Layer 0 | Product Foundation | Built / defined | Product mission, user-first posture, search-track concept, AI governance, UX philosophy, monetization caution, and risk boundaries are defined. |
 | Layer 1 | Local Platform Foundation | Built locally / production incomplete | Local backend, frontend, database, migrations, config, and seed model exist. Production auth, multi-user identity, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
-| Layer 3 | STRIDE + Artifact Foundation | Mostly built / lifecycle incomplete | STRIDE and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
-| Layer 4 | Application Workflow | Substantially built / reminders still partial | Applications, state transitions, timeline, notes, external links, and structured interview tracking exist. Reminder persistence/count/timeline support exists, but the fuller reminder API/UI branch still needs reconciliation. External-link summary/count refinements also need validation before being called complete. |
+| Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
+| Layer 4 | Application Workflow | Substantially built / reminders still partial | Applications, state transitions, timeline, notes, external links, and structured interview tracking exist. Reminder persistence/service/count/timeline support exists, but reminder API routes and frontend reminder UX are not in `main`. External-link CRUD/UI exists; summary counts still omit links. |
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
-| Layer 6 | Advanced STRIDE + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, STRIDE history, evidence mapping, submitted artifacts, and export flow. |
+| Layer 6 | Advanced COMPASS + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, COMPASS history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
 | Layer 11 | Productization / Deployment / Monetization | Future / readiness documentation started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Production deployment, auth hardening, billing, tenant isolation, export/delete, retention enforcement, and usage metering implementation remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
-| Layer 13 | Marketplace / Employer-Side Exploration | Future / last | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
+| Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
+| Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
 
 ---
 
@@ -294,7 +302,7 @@ Turn raw job/opportunity and source-material input into structured, reviewable, 
 - Resume/profile source versions.
 - Active source grounding.
 - Supported local document imports.
-- STRIDE grounding flow.
+- COMPASS grounding flow.
 
 ### Remaining work
 
@@ -310,7 +318,7 @@ Treat Layer 2 as stable enough to build on. Improve opportunistically, but do no
 
 ---
 
-## Layer 3 — STRIDE + Artifact Foundation
+## Layer 3 — COMPASS + Artifact Foundation
 
 ### Status
 
@@ -322,7 +330,7 @@ Evaluate opportunities and generate grounded application artifacts.
 
 ### Already accomplished
 
-- STRIDE evaluation persistence.
+- COMPASS evaluation persistence.
 - Deterministic scoring.
 - Optional AI enrichment.
 - Evaluation metadata.
@@ -391,17 +399,18 @@ Manage the day-to-day job-search workflow around saved opportunities.
 
 ### Partially accomplished
 
-- Reminder API routes and frontend panel were previously observed outside `main`; current local clone exposes no unmerged branch containing them.
-- External-link summary/count refinements were previously observed as branch drift and need validation before being treated as current. Current local clone exposes no unmerged branch for this work.
+- Reminder persistence, service methods, next-action synchronization, counts, activity logs, analytics inputs, and timeline events exist in `main`.
+- External-link CRUD API routes, frontend panel, activity logs, timeline update/delete events, and tests exist in `main`.
 
 ### Remaining work
 
-- Reconcile local reminders branch/work into `main`.
-- Add or restore frontend reminder panel.
+- Add reminder FastAPI routes.
+- Add frontend reminder API wrapper and reminder panel.
 - Ensure application detail page surfaces all first-class workflow records.
-- Confirm timeline includes notes, links, reminders, interviews, STRIDE, artifacts, and state changes.
-- Confirm pipeline/dashboard counts align with backend records after reminder and external-link count reconciliation.
-- Validate migrations after reminder branch reconciliation.
+- Confirm timeline includes notes, links, reminders, interviews, COMPASS, artifacts, and state changes.
+- Decide whether application summary counts should include external links, then update backend/frontend/tests if needed.
+- Confirm pipeline/dashboard counts align with backend records after reminder API/UI completion and external-link count decisions.
+- Validate migrations after reminder API/UI completion.
 - Confirm backend, frontend, and contracts tests pass.
 
 ### Guidance
@@ -424,7 +433,7 @@ Turn accumulated workflow activity into useful guidance.
 
 - Search analytics endpoint.
 - Artifact performance endpoint.
-- STRIDE insights endpoint.
+- COMPASS insights endpoint.
 - Source intelligence endpoint.
 - Compensation intelligence endpoint.
 - Search health endpoint.
@@ -448,7 +457,7 @@ Layer 5 is no longer merely “next.” It exists. The work now is stabilization
 
 ---
 
-## Layer 6 — Advanced STRIDE + Artifact Lifecycle
+## Layer 6 — Advanced COMPASS + Artifact Lifecycle
 
 ### Status
 
@@ -456,12 +465,12 @@ Partially built / next lifecycle layer.
 
 ### Purpose
 
-Make STRIDE evaluations and generated artifacts more trustworthy, traceable, comparable, and useful.
+Make COMPASS evaluations and generated artifacts more trustworthy, traceable, comparable, and useful.
 
 ### Already accomplished
 
-- STRIDE evaluation records.
-- STRIDE metadata/versioning.
+- COMPASS evaluation records.
+- COMPASS metadata/versioning.
 - Artifact generation services.
 - TruthGuard-style checks.
 - Artifact performance data foundation.
@@ -471,8 +480,8 @@ Make STRIDE evaluations and generated artifacts more trustworthy, traceable, com
 
 - JD-to-resume evidence mapping.
 - Missing requirement explanations.
-- STRIDE history and comparison.
-- Cross-opportunity STRIDE comparison.
+- COMPASS history and comparison.
+- Cross-opportunity COMPASS comparison.
 - Artifact lifecycle states.
 - Submitted version tracking.
 - Resume/cover-letter variant comparison.
@@ -519,7 +528,7 @@ Current backend naming still uses `Role`, but Careero needs `Opportunity` as the
 - Define Opportunity as the canonical successor to Role.
 - Separate opportunity status from application workflow state.
 - Preserve raw/source/parsed/normalized/provenance data.
-- Link Opportunity to workspace, company, recruiter/source, STRIDE, artifacts, applications, notes, reminders, interviews, outcomes, and analytics.
+- Link Opportunity to workspace, company, recruiter/source, COMPASS, artifacts, applications, notes, reminders, interviews, outcomes, and analytics.
 - Support deduplication and similarity detection.
 - Support opportunity lineage/history.
 - Support historical analytics such as response rate by source, compensation fit, role category, artifact variant, and search-track strategy.
@@ -707,6 +716,11 @@ These documents are readiness and boundary design only. They do not implement
 production auth, billing, tenant isolation, hosted deployment, data export/delete,
 retention enforcement, or AI usage metering.
 
+Layer 14 extends the productization strategy for model choice, credits, and
+API-first intelligence, but those capabilities are not implemented in `main`.
+Layer 14A/14B should only be pulled forward when Layer 11 billing, metering,
+and model-usage controls are actively scoped.
+
 ### Guidance
 
 Do not productize until the user-side workflow has proven durable value locally.
@@ -753,7 +767,7 @@ Hosted collaboration should wait until artifacts, opportunities, and application
 
 ### Status
 
-Future / last.
+Future / last employer-facing layer.
 
 ### Purpose
 
@@ -770,7 +784,65 @@ Explore employer-side or marketplace capabilities only after user-side value is 
 
 ### Guidance
 
-This layer should be last. Careero should not compromise user trust by becoming employer-first too early.
+This layer should remain the last employer-facing/marketplace expansion. Careero should not compromise user trust by becoming employer-first too early.
+
+---
+
+## Layer 14 - Model Choice, Credits & API-First Intelligence
+
+### Status
+
+Future / appended strategic layer.
+
+Active planning source: [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md).
+
+Layer 14 is appended after the existing layer list to preserve roadmap continuity. It does not mean every Layer 14 capability must wait until after Marketplace/Employer-Side Exploration.
+
+Execution split:
+
+- Layer 14A Prompt Compiler & Model Gateway and Layer 14B Credit Wallet, Usage Metering & Cost Controls can be pulled forward with Layer 11 productization when billing, metering, and model usage controls are actively implemented.
+- Layer 14C API-Only Job Posting Ingestion and Layer 14D Company Research Memory should wait until Opportunity semantics, integration boundaries, source governance, and productization controls are stable.
+- Layer 13 remains the last employer-facing/trust-sensitive expansion.
+
+### Purpose
+
+Give Careero a flexible but controlled system for user-selected AI models, credit-based usage, API-only job-posting ingestion, and reusable company research intelligence.
+
+The strategic goal:
+
+> Careero owns the workflow, prompt compiler, source grounding, quality checks, credit ledger, and research memory. Users can choose model, budget, and research depth inside those guardrails.
+
+### Current `main` reality
+
+Layer 14 is not implemented in the codebase. Current `main` has optional OpenAI-backed parsing/COMPASS/artifact-generation foundations and readiness docs for AI cost controls, but it does not have:
+
+- model catalog tables or provider price snapshots
+- user-selectable model defaults
+- a general prompt compiler/gateway
+- prompt-only export mode
+- credit wallet, credit transactions, usage events, or artifact-linked usage records
+- billing-linked credit grants, rollover, top-ups, reservations, debits, or refunds
+- API job posting ingestion records or ATS/job-data provider integrations
+- company research source records, facts, summaries, refresh runs, TTLs, or freshness UI
+- scraping, restricted-source extraction, browser-driven collection, or background polling
+
+### Hard boundary
+
+Layer 14 is API-only for external data acquisition.
+
+Do not implement scraping, restricted-source extraction, browser-driven collection, or terms-sensitive data collection in this layer. Scraping can be revisited later only through an explicit legal/product/technical review.
+
+### Candidate sublayers
+
+- Layer 14A: Prompt Compiler & Model Gateway.
+- Layer 14B: Credit Wallet, Usage Metering & Cost Controls.
+- Layer 14C: API-Only Job Posting Ingestion.
+- Layer 14D: Company Research Memory & Source-Governed Caching.
+- Layer 14E: Future Scraping Review Backlog Item.
+
+### Guidance
+
+Layer 14 should make Careero flexible without making it chaotic. The user may choose the model and budget; Careero should control prompt structure, source grounding, no-fabrication policy, quality checks, cost estimates, credit ledger, source provenance, research freshness, and API/licensing boundaries.
 
 ---
 
@@ -784,10 +856,10 @@ Keep `main` in a clean, truthful state as new feature work lands.
 
 ### Tasks
 
-- Review historical branch drift when external GitHub/PR access is available.
-- Recover reminder work that belongs in `main` if it is available outside this clone.
-- Confirm structured interview tracking remains clean after merge.
-- Recover external-link count refinements if still relevant and externally available.
+- Review private remote branch/PR drift when external GitHub/PR access is available.
+- Confirm reminder implementation gaps against `main`: service/model/timeline exist; API routes and frontend UX do not.
+- Confirm structured interview tracking remains clean in `main`.
+- Confirm whether external links should be included in application summary counts.
 - Reconcile migrations carefully.
 - Run backend compile/tests.
 - Run frontend tests/build.
@@ -797,7 +869,7 @@ Keep `main` in a clean, truthful state as new feature work lands.
 ### Suggested commit theme
 
 ```text
-Reconcile workflow branch drift and roadmap status
+Update roadmap to current main reality
 ```
 
 ---
@@ -810,11 +882,12 @@ Finish the workflow records users expect before modeling Opportunity more deeply
 
 ### Tasks
 
-- Fully integrate reminders.
+- Add reminder API routes.
+- Add frontend reminder API wrapper and application detail reminder panel.
 - Validate structured interview tracking across backend, frontend, timeline, and tests.
 - Confirm notes, links, reminders, interviews, and timeline work consistently.
 - Ensure application detail page surfaces all first-class workflow records.
-- Confirm pipeline and dashboard counts are accurate.
+- Confirm pipeline, dashboard, and workflow summary counts are accurate, including the explicit decision on whether links should be counted.
 - Ensure all workflow events appear in timeline/activity where appropriate.
 
 ### Exit criteria
@@ -903,6 +976,36 @@ Design the durable Opportunity model before integrations.
 
 ---
 
+## Step 6 - Layer 14 Strategic Recon
+
+### Goal
+
+Plan model choice, credits, API-only job ingestion, and company research caching without destabilizing the existing workflow roadmap.
+
+### Tasks
+
+- Define the Prompt Compiler module model.
+- Define the model provider/catalog/price snapshot architecture.
+- Define default model selection UX by artifact type.
+- Define prompt-only export behavior.
+- Define credit wallet, reservation, debit, refund, rollover, and top-up rules.
+- Define provider/tool/API cost tracking.
+- Validate official API access for target job posting sources.
+- Define normalized `job_posting` ingestion records.
+- Define company research source categories, source records, facts, summaries, and TTLs.
+- Define source licensing/compliance review workflow.
+- Add a backlog item to revisit scraping later; do not implement scraping in this pass.
+
+### Exit criteria
+
+- Layer 14 implementation slices are ready.
+- API-only boundary is clear.
+- Scraping revisit is tracked as a future TODO only.
+- Credit economics are transparent and ledger-backed.
+- Source freshness and source governance rules are explicit.
+
+---
+
 # Revised Build Order
 
 Recommended order from here:
@@ -918,6 +1021,7 @@ Recommended order from here:
 9. Layer 11 productization implementation only after readiness gates are satisfied.
 10. Layer 12 advisor/collaboration mode.
 11. Layer 13 marketplace/employer-side exploration.
+12. Layer 14 model choice, credits, and API-first intelligence. Pull 14A/14B forward during Layer 11 if billing/model usage requires it; keep 14C/14D API-only and after Opportunity/integration boundaries are stable; keep Layer 13 as the last employer-side expansion.
 
 ---
 
@@ -939,21 +1043,26 @@ Preserve:
 - Career strategy layer.
 - Monetization caution.
 - Advisor/collaboration mode.
-- Marketplace last.
+- Marketplace/employer-side work last among employer-facing capabilities.
+- User-selected model flexibility under a Careero-owned prompt framework.
+- Credit transparency, usage metering, capped rollover, and top-up economics.
+- API-first job and company intelligence with source freshness and no scraping in current scope.
 
 Revise:
 
 - Do not call Layer 1 fully complete until production auth/identity exists.
-- Do not call Layer 4 complete until reminders are fully reconciled into `main` and workflow counts/timeline behavior are validated.
+- Do not call Layer 4 complete until reminder API/UI work is implemented in `main` and workflow counts/timeline behavior are validated.
 - Do not call Layer 5 merely next; it is already partially implemented.
 - Move Integrations from Layer 7 to Layer 8.
 - Introduce Opportunity Model Strategy as Layer 7.
+- Add Layer 14 as an appended model-choice, credit-economy, API-first intelligence layer. Parts of 14A/14B may execute with Layer 11 productization even though the layer is documented after Layer 13.
 
 Delay:
 
 - External integration work before Opportunity semantics are stable.
 - Automation that mutates state without user-visible approval/audit.
 - Marketplace/employer-side work until user-side trust is strong.
+- Any scraping strategy until official APIs, licensed providers, source terms, privacy risks, and retention rules have been reviewed.
 
 ---
 
@@ -967,7 +1076,7 @@ The next architectural center should be:
 
 Everything else should orbit that:
 
-- STRIDE evaluates the opportunity.
+- COMPASS evaluates the opportunity.
 - Artifacts target the opportunity.
 - Applications track pursuit of the opportunity.
 - Notes, reminders, and interviews describe activity around the opportunity.
@@ -975,4 +1084,10 @@ Everything else should orbit that:
 - Integrations import/export opportunity-related data.
 - Automation suggests actions around opportunity lifecycle.
 
-This document should be updated whenever implementation reality changes, especially after branch reconciliation, Layer 4 completion, and Layer 7 LEAP Recon output.
+Layer 14 adds a second strategic center for productization-scale intelligence:
+
+> Careero should let users choose the model and budget while Careero controls prompts, source grounding, quality, cost exposure, and API-only research memory.
+
+The long-term strategic system is not merely an AI resume generator. It is a career application intelligence platform where users can generate, compare, and improve job-search materials using the model, research depth, and budget they choose while Careero protects source truth, freshness, and user control.
+
+This document should be updated whenever implementation reality changes, especially after private PR reconciliation, Layer 4 completion, Layer 7 LEAP Recon output, and Layer 14 source/provider validation.

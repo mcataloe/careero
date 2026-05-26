@@ -13,7 +13,7 @@ Careero still does not implement hosted collaboration, advisor accounts,
 invitations, external sharing, public links, comments, production auth, tenant
 isolation, or employer/recruiter visibility.
 
-Advisor collaboration must keep Careero job-seeker-first. STRIDE remains
+Advisor collaboration must keep Careero job-seeker-first. COMPASS remains
 advisory, source-grounded, explainable, and never deterministic truth. Private
 strategy, internal fit evaluation, private notes, compensation reasoning,
 recruiter intelligence, and hidden decision rationale must not become externally
@@ -50,7 +50,7 @@ approval for the relevant implementation surface.
 - The user must explicitly select what leaves the private workspace.
 - Private strategy is separate from shareable material.
 - Advisor-facing packets must be redacted by default.
-- Employer-facing artifacts must never include internal STRIDE analysis, ATS
+- Employer-facing artifacts must never include internal COMPASS analysis, ATS
   risk notes, compensation strategy, company commentary, private notes, or
   private decision rationale.
 - Advisor-facing materials may include sensitive analysis only if the user
@@ -66,7 +66,7 @@ approval for the relevant implementation surface.
 | Persona | Purpose | Boundaries |
 | --- | --- | --- |
 | Career coach | Help the user reflect on positioning, opportunity fit, search behavior, and next actions. | Must not receive private strategy, compensation reasoning, or source material unless explicitly selected by the user in a future approved flow. |
-| Resume reviewer | Review generated resume drafts and user-selected context. | Must see artifact lifecycle and truthfulness warnings; should not receive STRIDE rationale or raw source material by default. |
+| Resume reviewer | Review generated resume drafts and user-selected context. | Must see artifact lifecycle and truthfulness warnings; should not receive COMPASS rationale or raw source material by default. |
 | Spouse/family advisor | Provide trusted personal feedback on tradeoffs, timing, commute, stress, and life fit. | Default packet should be narrow, plain-language, and redacted. |
 | Mentor | Advise on role scope, career trajectory, negotiation posture, or interview preparation. | Should receive only user-selected context and questions. |
 | Internal self-review persona | Let the user preview what an advisor packet would contain before anything leaves the workspace. | Safe near-term direction because it can stay local-only and owner-visible. |
@@ -90,8 +90,8 @@ would include unless the user explicitly changes it in an approved flow.
 | Generated resume artifact | Packet-eligible if user selects it | Yes | Must carry lifecycle, source-grounding, and truthfulness warnings until lifecycle is mature. | Drafts must not be treated as approved or submitted. |
 | Generated cover-letter artifact | Packet-eligible if user selects it | Yes | Must carry lifecycle, source-grounding, and truthfulness warnings until lifecycle is mature. | Drafts must not be treated as approved or submitted. |
 | Artifact lifecycle status | Packet-eligible summary | Yes | Warn when artifact is draft, unreviewed, unapproved, or not submitted. | Lifecycle status should travel with any selected artifact. |
-| STRIDE score | Private by default | Yes, future approved flow only | Explain STRIDE is advisory, not deterministic truth. | A score without explanation can be misleading. |
-| STRIDE explanation | Private by default | Yes, future approved flow only | Redact internal rationale, ATS notes, compensation strategy, and company commentary unless explicitly selected. | Must remain source-grounded and explainable. |
+| COMPASS score | Private by default | Yes, future approved flow only | Explain COMPASS is advisory, not deterministic truth. | A score without explanation can be misleading. |
+| COMPASS explanation | Private by default | Yes, future approved flow only | Redact internal rationale, ATS notes, compensation strategy, and company commentary unless explicitly selected. | Must remain source-grounded and explainable. |
 | ATS risk notes | Private by default | Yes, future approved flow only | Strong warning that ATS notes are internal strategy and not employer-facing. | Must never be included in employer-facing artifacts. |
 | Compensation targets | Private by default | Yes, future approved flow only | Strong warning for negotiation sensitivity. | Excluded by default even for trusted advisors. |
 | Compensation strategy | Private by default | Yes, future approved flow only | Strong warning; require explicit selection and preview. | Must never be employer-facing by default. |
@@ -111,7 +111,7 @@ Safe defaults:
 - Basic opportunity, application, and artifact summaries may be packet-eligible.
 - Private notes are excluded by default.
 - Compensation targets and compensation strategy are excluded by default.
-- Internal STRIDE explanation and ATS risk notes are excluded by default.
+- Internal COMPASS explanation and ATS risk notes are excluded by default.
 - Raw source materials are excluded by default.
 - Recruiter/contact details are excluded by default.
 - Career strategy synthesis is excluded by default.
@@ -140,7 +140,7 @@ It must not include by default:
 
 - Full private notes.
 - Compensation strategy.
-- STRIDE internal rationale.
+- COMPASS internal rationale.
 - ATS risk notes.
 - Recruiter intelligence.
 - Source resume/profile material.
@@ -174,7 +174,7 @@ permissions.
 ## Comment-Only Review Model: Design Only
 
 Advisor comments must be separate from private user notes. They must not merge
-into the user's private notes, internal rationale, STRIDE explanations, or
+into the user's private notes, internal rationale, COMPASS explanations, or
 artifact content without explicit user action.
 
 Comments require identity, permission, visibility rules, revocation behavior,
@@ -206,10 +206,10 @@ sync, and production auth/provider choices are outside this Build Unit.
 | Layer 0 Product Foundation | Collaboration must preserve job-seeker-first control, AI as advisor, source grounding, review-before-send, no-auto-apply, humane UX, and marketplace-last posture. |
 | Layer 1 Local Platform Foundation | Hosted collaboration depends on real auth, tenant isolation, server-side authorization, and account ownership. Seeded local users are not production identity. |
 | Layer 2 Intake, Parsing & Grounding | Resume/profile sources, raw job descriptions, and source versions are private grounding material by default. Packets should prefer reviewed summaries over raw sources. |
-| Layer 3 STRIDE + Artifact Foundation | STRIDE and artifacts must remain source-grounded, explainable, reviewable, and separated from private strategy. TruthGuard cannot be bypassed. |
+| Layer 3 COMPASS + Artifact Foundation | COMPASS and artifacts must remain source-grounded, explainable, reviewable, and separated from private strategy. TruthGuard cannot be bypassed. |
 | Layer 4 Application Workflow | Application state, selected timeline facts, links, reminders, interviews, and user-authored context are packet candidates only after review and redaction. |
 | Layer 5 Workflow Intelligence / Insights | Analytics and confidence signals must not overclaim. Insights should disclose basis and uncertainty before any advisor-visible use. |
-| Layer 6 Advanced STRIDE + Artifact Lifecycle | Artifact lifecycle maturity is required before shared artifact workflows can be trusted. Draft/unreviewed warnings must travel with artifacts. |
+| Layer 6 Advanced COMPASS + Artifact Lifecycle | Artifact lifecycle maturity is required before shared artifact workflows can be trusted. Draft/unreviewed warnings must travel with artifacts. |
 | Layer 7 Opportunity Model Strategy | Layer 12 must stay compatible with Opportunity-facing language while persistence remains Role-backed. No destructive Role-to-Opportunity migration belongs in Layer 12. |
 | Layer 8 Integrations | Layer 12 cannot introduce cloud sync, OAuth, external send, Gmail/Outlook, calendar, browser/share, or public-link behavior without separate approval. |
 | Layer 9 Automation Guardrails | Collaboration cannot weaken suggestion-first, review-first, audit-first automation. No auto-send, auto-apply, batch approvals, or external mutation. |
@@ -245,7 +245,7 @@ Stop before coding if a future prompt requires:
 - OAuth or external account integration.
 - Comments API.
 - Artifact lifecycle changes.
-- Exposing private STRIDE or compensation data.
+- Exposing private COMPASS or compensation data.
 - Employer/recruiter visibility.
 - Destructive Role-to-Opportunity migration.
 - New dependencies or migrations.

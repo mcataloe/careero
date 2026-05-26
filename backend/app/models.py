@@ -54,7 +54,7 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
 
     companies: Mapped[list["Company"]] = relationship(back_populates="user")
     roles: Mapped[list["Role"]] = relationship(back_populates="user")
-    stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
+    compass_evaluations: Mapped[list["CompassEvaluation"]] = relationship(
         back_populates="user"
     )
     resume_sources: Mapped[list["ResumeSource"]] = relationship(back_populates="user")
@@ -96,7 +96,7 @@ class Workspace(TimestampMixin, Base):
 
     user: Mapped[User] = relationship(back_populates="workspaces")
     roles: Mapped[list["Role"]] = relationship(back_populates="workspace")
-    stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
+    compass_evaluations: Mapped[list["CompassEvaluation"]] = relationship(
         back_populates="workspace"
     )
     applications: Mapped[list["Application"]] = relationship(back_populates="workspace")
@@ -181,7 +181,7 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     workspace: Mapped[Workspace] = relationship(back_populates="roles")
     company: Mapped[Company] = relationship(back_populates="roles")
     source: Mapped["JobSource | None"] = relationship(back_populates="roles")
-    stride_evaluations: Mapped[list["StrideEvaluation"]] = relationship(
+    compass_evaluations: Mapped[list["CompassEvaluation"]] = relationship(
         back_populates="role"
     )
     applications: Mapped[list["Application"]] = relationship(back_populates="role")
@@ -274,21 +274,21 @@ class ResumeSourceVersion(TimestampMixin, Base):
     source: Mapped[ResumeSource] = relationship(back_populates="versions")
 
 
-class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
-    __tablename__ = "stride_evaluations"
+class CompassEvaluation(TimestampMixin, SoftDeleteMixin, Base):
+    __tablename__ = "compass_evaluations"
     __table_args__ = (
-        Index("ix_stride_evaluations_user_id", "user_id"),
-        Index("ix_stride_evaluations_workspace_id", "workspace_id"),
-        Index("ix_stride_evaluations_role_id", "role_id"),
-        Index("ix_stride_evaluations_status", "evaluation_status"),
-        Index("ix_stride_evaluations_role_created_at", "role_id", "created_at"),
+        Index("ix_compass_evaluations_user_id", "user_id"),
+        Index("ix_compass_evaluations_workspace_id", "workspace_id"),
+        Index("ix_compass_evaluations_role_id", "role_id"),
+        Index("ix_compass_evaluations_status", "evaluation_status"),
+        Index("ix_compass_evaluations_role_created_at", "role_id", "created_at"),
         Index(
-            "ix_stride_evaluations_role_input_hash",
+            "ix_compass_evaluations_role_input_hash",
             "role_id",
             "evaluation_input_hash",
         ),
-        Index("ix_stride_evaluations_ai_status", "ai_status"),
-        Index("ix_stride_evaluations_ruleset_version", "ruleset_version"),
+        Index("ix_compass_evaluations_ai_status", "ai_status"),
+        Index("ix_compass_evaluations_ruleset_version", "ruleset_version"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -372,9 +372,9 @@ class StrideEvaluation(TimestampMixin, SoftDeleteMixin, Base):
         default=dict,
     )
 
-    user: Mapped[User] = relationship(back_populates="stride_evaluations")
-    workspace: Mapped[Workspace] = relationship(back_populates="stride_evaluations")
-    role: Mapped[Role] = relationship(back_populates="stride_evaluations")
+    user: Mapped[User] = relationship(back_populates="compass_evaluations")
+    workspace: Mapped[Workspace] = relationship(back_populates="compass_evaluations")
+    role: Mapped[Role] = relationship(back_populates="compass_evaluations")
 
 
 class Application(TimestampMixin, SoftDeleteMixin, Base):
@@ -763,7 +763,7 @@ class ArtifactPerformanceRecord(TimestampMixin, Base):
     response_outcome: Mapped[str | None] = mapped_column(String(100))
     interview_outcome: Mapped[str | None] = mapped_column(String(100))
     recruiter_engagement_outcome: Mapped[str | None] = mapped_column(String(100))
-    stride_alignment: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    compass_alignment: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     record_metadata: Mapped[dict] = mapped_column(

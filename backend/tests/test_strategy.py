@@ -7,10 +7,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.constants import ApplicationWorkflowState, StrideEvaluationStatus, WorkspaceType
+from app.constants import ApplicationWorkflowState, CompassEvaluationStatus, WorkspaceType
 from app.database import get_db
 from app.main import create_app
-from app.models import Application, AutomationSuggestion, StrideEvaluation
+from app.models import Application, AutomationSuggestion, CompassEvaluation
 from app.schemas.applications import (
     ApplicationInterviewStageCreate,
     ApplicationStateTransitionRequest,
@@ -56,7 +56,7 @@ def _create_application(db_session: Session, role_id) -> Application:
     return application
 
 
-def _add_stride(
+def _add_compass(
     db_session: Session,
     application: Application,
     *,
@@ -64,15 +64,15 @@ def _add_stride(
     missing_keywords: list[str],
 ):
     db_session.add(
-        StrideEvaluation(
+        CompassEvaluation(
             user_id=application.user_id,
             workspace_id=application.workspace_id,
             role_id=application.role_id,
-            evaluation_status=StrideEvaluationStatus.COMPLETED.value,
+            evaluation_status=CompassEvaluationStatus.COMPLETED.value,
             overall_score=score,
             recommendation="apply" if score >= 75 else "monitor",
             confidence_level="medium",
-            summary="Stored deterministic STRIDE evidence.",
+            summary="Stored deterministic COMPASS evidence.",
             strengths=[
                 {"label": "Platform leadership", "message": "Platform work is explicit."}
             ],
@@ -104,7 +104,7 @@ def test_strategy_service_returns_insufficient_data_without_mutation(
     assert {item.reason for item in summary.insufficient_data} >= {
         "empty_workspace",
         "few_applications",
-        "missing_stride_evaluations",
+        "missing_compass_evaluations",
     }
     assert "stored Careero data" in summary.summary
     assert summary.action_candidates == []
@@ -154,9 +154,9 @@ def test_strategy_service_synthesizes_workspace_signals(db_session: Session) -> 
             title="Recruiter screen",
         ),
     )
-    _add_stride(db_session, first, score=Decimal("86"), missing_keywords=["kubernetes"])
-    _add_stride(db_session, second, score=Decimal("58"), missing_keywords=["kubernetes"])
-    _add_stride(db_session, third, score=Decimal("62"), missing_keywords=["kubernetes"])
+    _add_compass(db_session, first, score=Decimal("86"), missing_keywords=["kubernetes"])
+    _add_compass(db_session, second, score=Decimal("58"), missing_keywords=["kubernetes"])
+    _add_compass(db_session, third, score=Decimal("62"), missing_keywords=["kubernetes"])
     db_session.commit()
 
     summary = CareerStrategyService(db_session).get_workspace_strategy(

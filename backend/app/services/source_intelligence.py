@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.constants import ApplicationWorkflowState, SOURCE_DISPLAY_NAMES
-from app.models import Application, ApplicationNote, Role, StrideEvaluation, User
+from app.models import Application, ApplicationNote, Role, CompassEvaluation, User
 from app.seed import DEFAULT_LOCAL_USER_ID
 from app.services.insight_governance import governed_insight
 
@@ -54,14 +54,14 @@ class SourceIntelligenceService:
         user = self.get_default_user()
         roles = self._roles(user_id=user.id, workspace_id=workspace_id)
         applications = self._applications(user_id=user.id, workspace_id=workspace_id)
-        latest_stride = self._latest_stride_by_role(
+        latest_compass = self._latest_compass_by_role(
             user_id=user.id,
             workspace_id=workspace_id,
         )
         summaries = summarize_source_performance(
             roles=roles,
             applications=applications,
-            latest_stride=latest_stride,
+            latest_compass=latest_compass,
         )
         return {
             "workspace_id": workspace_id,
@@ -106,24 +106,24 @@ class SourceIntelligenceService:
             )
         )
 
-    def _latest_stride_by_role(
+    def _latest_compass_by_role(
         self,
         *,
         user_id: uuid.UUID,
         workspace_id: uuid.UUID | None,
-    ) -> dict[uuid.UUID, StrideEvaluation]:
+    ) -> dict[uuid.UUID, CompassEvaluation]:
         filters = [
-            StrideEvaluation.user_id == user_id,
-            StrideEvaluation.deleted_at.is_(None),
-            StrideEvaluation.evaluation_status == "completed",
+            CompassEvaluation.user_id == user_id,
+            CompassEvaluation.deleted_at.is_(None),
+            CompassEvaluation.evaluation_status == "completed",
         ]
         if workspace_id is not None:
-            filters.append(StrideEvaluation.workspace_id == workspace_id)
-        latest: dict[uuid.UUID, StrideEvaluation] = {}
+            filters.append(CompassEvaluation.workspace_id == workspace_id)
+        latest: dict[uuid.UUID, CompassEvaluation] = {}
         for evaluation in self.db.scalars(
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(*filters)
-            .order_by(StrideEvaluation.role_id, StrideEvaluation.created_at.desc())
+            .order_by(CompassEvaluation.role_id, CompassEvaluation.created_at.desc())
         ):
             latest.setdefault(evaluation.role_id, evaluation)
         return latest
@@ -133,7 +133,7 @@ def summarize_source_performance(
     *,
     roles: Iterable[Role],
     applications: Iterable[Application],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
 ) -> list[dict[str, Any]]:
     roles_by_source: dict[str, list[Role]] = defaultdict(list)
     for role in roles:
@@ -149,7 +149,7 @@ def summarize_source_performance(
             source_type,
             roles_by_source[source_type],
             applications_by_source[source_type],
-            latest_stride,
+            latest_compass,
         )
         for source_type in source_types
     ]
@@ -159,7 +159,7 @@ def _source_metric(
     source_type: str,
     roles: list[Role],
     applications: list[Application],
-    latest_stride: dict[uuid.UUID, StrideEvaluation],
+    latest_compass: dict[uuid.UUID, CompassEvaluation],
 ) -> dict[str, Any]:
     submitted = [application for application in applications if _is_submitted(application)]
     responses = [application for application in submitted if _has_response(application)]
@@ -167,13 +167,13 @@ def _source_metric(
     scores = [
         float(evaluation.overall_score)
         for role in roles
-        if (evaluation := latest_stride.get(role.id)) is not None
+        if (evaluation := latest_compass.get(role.id)) is not None
         and evaluation.overall_score is not None
     ]
     comp_aligned = sum(
         1
         for role in roles
-        if _compensation_aligned(latest_stride.get(role.id))
+        if _compensation_aligned(latest_compass.get(role.id))
     )
     recruiter_contacts = sum(_recruiter_contacts(application) for application in applications)
     return {
@@ -189,12 +189,12 @@ def _source_metric(
         "interview_rate": round(len(interviews) / len(submitted), 4)
         if submitted
         else None,
-        "average_stride_score": round(sum(scores) / len(scores), 1)
+        "average_compass_score": round(sum(scores) / len(scores), 1)
         if scores
         else None,
         "recruiter_contacts": recruiter_contacts,
         "compensation_aligned": comp_aligned,
-        "basis": "Private source summary derived from saved roles, application states, recruiter notes, and completed STRIDE evaluations.",
+        "basis": "Private source summary derived from saved roles, application states, recruiter notes, and completed COMPASS evaluations.",
     }
 
 
@@ -258,7 +258,7 @@ def _recruiter_contacts(application: Application) -> int:
     )
 
 
-def _compensation_aligned(evaluation: StrideEvaluation | None) -> bool:
+def _compensation_aligned(evaluation: CompassEvaluation | None) -> bool:
     if evaluation is None:
         return False
     alignment = evaluation.compensation_alignment or {}

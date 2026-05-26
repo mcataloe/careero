@@ -2,13 +2,13 @@ import json
 from decimal import Decimal
 from typing import Any
 
-from app.models import ResumeSourceVersion, Role, StrideEvaluation
+from app.models import ResumeSourceVersion, Role, CompassEvaluation
 
 
 PROMPT_VERSION = "resume_artifact_generation_v1"
 
 TRUTHFULNESS_INSTRUCTIONS = """
-Use only the supplied resume/profile source, target role, and STRIDE evaluation.
+Use only the supplied resume/profile source, target role, and COMPASS evaluation.
 Do not invent employers, roles, dates, technologies, metrics, accomplishments,
 credentials, or experience. Do not convert missing target keywords into candidate
 claims unless the resume/profile source explicitly supports them. If source
@@ -21,14 +21,14 @@ not render or export files.
 def build_resume_artifact_prompt(
     *,
     role: Role,
-    evaluation: StrideEvaluation,
+    evaluation: CompassEvaluation,
     source_version: ResumeSourceVersion,
     workspace_context: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     payload = {
         "workspace_context": workspace_context,
         "target_role": _role_payload(role),
-        "stride_evaluation": _evaluation_payload(evaluation),
+        "compass_evaluation": _evaluation_payload(evaluation),
         "resume_source": _source_payload(source_version),
         "truthfulness_instructions": TRUTHFULNESS_INSTRUCTIONS,
         "output_contract": {
@@ -84,7 +84,7 @@ def _role_payload(role: Role) -> dict[str, Any]:
     }
 
 
-def _evaluation_payload(evaluation: StrideEvaluation) -> dict[str, Any]:
+def _evaluation_payload(evaluation: CompassEvaluation) -> dict[str, Any]:
     return {
         "id": str(evaluation.id),
         "summary": evaluation.summary,

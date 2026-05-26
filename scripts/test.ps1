@@ -13,7 +13,7 @@ if (-not (Test-Path $python)) {
 Write-Host "Running backend unit tests..."
 Push-Location $backendDir
 try {
-    & $python -m pytest tests/test_config.py tests/test_health.py tests/test_stride_rules.py tests/test_stride_prompt.py tests/test_stride_ai.py
+    & $python -m pytest tests/test_config.py tests/test_health.py tests/test_compass_rules.py tests/test_compass_prompt.py tests/test_compass_ai.py
 
     Write-Host "Checking whether database-backed backend tests can run..."
     if (-not $env:CAREERO_TEST_DATABASE_URL) {
@@ -27,7 +27,7 @@ try {
         $ErrorActionPreference = $previousErrorActionPreference
         if ($dbCheckExitCode -eq 0 -and $dbCheck -match "ok") {
             Write-Host "Test database is reachable. Running database-backed backend tests..."
-            & $python -m pytest tests/test_migrations.py tests/test_roles.py tests/test_role_api.py tests/test_resume_sources_api.py tests/test_stride_evaluations.py tests/test_database_health_integration.py
+            & $python -m pytest tests/test_migrations.py tests/test_roles.py tests/test_role_api.py tests/test_resume_sources_api.py tests/test_compass_evaluations.py tests/test_database_health_integration.py
         }
         else {
             Write-Warning "Skipping database-backed backend tests because CAREERO_TEST_DATABASE_URL is not reachable. Fix PostgreSQL credentials, then rerun this script."

@@ -46,7 +46,7 @@ describe("RoleDetailPage", () => {
       `/api/opportunities/${sampleRole.id}`,
       expect.any(Object),
     );
-    await user.click(screen.getByRole("button", { name: /run stride evaluation/i }));
+    await user.click(screen.getByRole("button", { name: /run compass evaluation/i }));
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
@@ -57,7 +57,7 @@ describe("RoleDetailPage", () => {
     expect(JSON.parse(fetchMock.mock.calls[2][1].body as string)).toEqual({
       user_context: {},
     });
-    expect(await screen.findByText("STRIDE evaluation completed")).toBeInTheDocument();
+    expect(await screen.findByText("COMPASS evaluation completed")).toBeInTheDocument();
     expect(screen.getByText("Strong baseline fit for backend platform work.")).toBeInTheDocument();
   });
 
@@ -86,24 +86,24 @@ describe("RoleDetailPage", () => {
       "#role-edit",
     );
     expect(
-      screen.getByRole("link", { name: /stride evaluation/i }),
-    ).toHaveAttribute("href", "#stride-evaluation");
+      screen.getByRole("link", { name: /compass evaluation/i }),
+    ).toHaveAttribute("href", "#compass-evaluation");
     expect(screen.getByRole("link", { name: /^summary$/i })).toHaveAttribute(
       "href",
-      "#stride-summary",
+      "#compass-summary",
     );
     expect(screen.getByRole("link", { name: /ats findings/i })).toHaveAttribute(
       "href",
-      "#stride-ats-findings",
+      "#compass-ats-findings",
     );
 
     expect(document.getElementById("role-overview")).not.toBeNull();
     expect(document.getElementById("role-description")).not.toBeNull();
     expect(document.getElementById("role-normalized-description")).not.toBeNull();
     expect(document.getElementById("role-edit")).not.toBeNull();
-    expect(document.getElementById("stride-evaluation")).not.toBeNull();
-    expect(document.getElementById("stride-summary")).not.toBeNull();
-    expect(document.getElementById("stride-ats-findings")).not.toBeNull();
+    expect(document.getElementById("compass-evaluation")).not.toBeNull();
+    expect(document.getElementById("compass-summary")).not.toBeNull();
+    expect(document.getElementById("compass-ats-findings")).not.toBeNull();
   });
 
   it("re-runs evaluation with force enabled", async () => {
@@ -148,8 +148,8 @@ describe("RoleDetailPage", () => {
     renderPage();
 
     expect(await screen.findByText("Not evaluated")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /run stride evaluation/i }));
+    await user.click(screen.getByRole("button", { name: /run compass evaluation/i }));
 
-    expect(await screen.findByText("Cached STRIDE evaluation reused")).toBeInTheDocument();
+    expect(await screen.findByText("Cached COMPASS evaluation reused")).toBeInTheDocument();
   });
 });

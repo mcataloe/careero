@@ -9,7 +9,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.config import Settings, get_settings
-from app.models import ResumeSourceVersion, Role, StrideEvaluation
+from app.models import ResumeSourceVersion, Role, CompassEvaluation
 from app.services.cover_letter_artifact_prompt import (
     build_cover_letter_artifact_prompt,
 )
@@ -61,7 +61,7 @@ class OpenAICoverLetterArtifactGenerator:
         *,
         role: Role,
         tone: str,
-        evaluation: StrideEvaluation | None = None,
+        evaluation: CompassEvaluation | None = None,
         source_version: ResumeSourceVersion | None = None,
         workspace_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:

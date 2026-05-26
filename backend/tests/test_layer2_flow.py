@@ -108,19 +108,19 @@ def test_layer2_role_resume_evaluation_cache_force_and_activity_flow(
 
     activity_response = layer2_client.get(
         "/api/activity-log",
-        params={"entity_type": "stride_evaluation", "entity_id": first["id"]},
+        params={"entity_type": "compass_evaluation", "entity_id": first["id"]},
     )
     assert activity_response.status_code == 200
     first_actions = {entry["action"] for entry in activity_response.json()}
     assert {
-        "stride_evaluation.started",
-        "stride_evaluation.completed",
-        "stride_evaluation.cached_result_reused",
+        "compass_evaluation.started",
+        "compass_evaluation.completed",
+        "compass_evaluation.cached_result_reused",
     }.issubset(first_actions)
 
     completed_response = layer2_client.get(
         "/api/activity-log",
-        params={"action": "stride_evaluation.completed", "limit": 10},
+        params={"action": "compass_evaluation.completed", "limit": 10},
     )
     assert completed_response.status_code == 200
     assert len(completed_response.json()) >= 2

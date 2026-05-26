@@ -21,7 +21,7 @@ Opportunity should become Careero's central durable intelligence object.
 - `/api/opportunities` now provides Opportunity-facing aliases for intake, parse, list, detail, update, opportunity intelligence refresh, and archive behavior.
 - `/api/roles` remains available as a compatibility surface for existing local workflows and tests.
 - Frontend `/opportunities`, `/opportunities/new`, and `/opportunities/:opportunityId` routes are canonical; legacy `/roles` routes redirect to the Opportunity routes.
-- `role_id` is currently used by STRIDE evaluations, Applications, GeneratedArtifacts, artifact performance records, analytics, source intelligence, and historical learning services.
+- `role_id` is currently used by COMPASS evaluations, Applications, GeneratedArtifacts, artifact performance records, analytics, source intelligence, and historical learning services.
 - `OpportunitySchema` already exists in `packages/contracts/src/opportunity.ts`.
 - `OpportunityStatusSchema`, `ApplicationWorkflowStateSchema`, and `ArtifactLifecycleStatusSchema` already exist in `packages/contracts/src/enums.ts`.
 - `OpportunityIntelligenceService` already exists in the backend, but it is currently Role-backed and stores intelligence under `Role.parse_metadata["opportunityIntelligence"]`.
@@ -46,7 +46,7 @@ Opportunity owns:
 - Parse confidence and parse warnings.
 - Deduplication and similarity signals.
 - Opportunity/listing status.
-- Links to STRIDE evaluations.
+- Links to COMPASS evaluations.
 - Links to application workflows.
 - Links to generated artifacts.
 - Historical intelligence metadata used for analytics and retrospectives.
@@ -73,8 +73,8 @@ Those responsibilities belong to Application, Artifact, Automation Approval, int
 | --- | --- | --- | --- | --- |
 | Workspace/Search Track | Career objective context, preferences, AI memory summary, search-track lifecycle, scoped analytics context | Individual opportunity parsing details, application state transitions, artifact lifecycle | `workspaces` table and workspace contracts | Keep as parent context for opportunities; do not move opportunity facts into workspace memory. |
 | Opportunity | Saved professional possibility, raw and normalized content, company/source/provenance, listing status, parse warnings, dedupe signals, links outward | Application state history, interview/reminder lifecycle, artifact approval/export lifecycle, sending actions | `Role` model and `roles` table; `OpportunitySchema` contract exists | Canonical product language should become Opportunity; current physical storage can remain `roles` during staged migration. |
-| Application | Pursuit workflow, current state, state history, notes, reminders, interview stages, application-specific external links and timeline | Raw posting truth, dedupe identity, artifact lifecycle, STRIDE scoring internals | `Application` model with `role_id` | Keep one active workflow per opportunity unless a future requirement justifies multiple workflows. Rename FK later only after API/UX transition is stable. |
-| STRIDE Evaluation | Fit/risk evaluation output, ruleset and prompt metadata, input hashes, recommendation, explainability | Source parsing, application workflow state, artifact approval state | `StrideEvaluation` model with `role_id` | It should link to Opportunity, but evaluation semantics do not change during naming migration. |
+| Application | Pursuit workflow, current state, state history, notes, reminders, interview stages, application-specific external links and timeline | Raw posting truth, dedupe identity, artifact lifecycle, COMPASS scoring internals | `Application` model with `role_id` | Keep one active workflow per opportunity unless a future requirement justifies multiple workflows. Rename FK later only after API/UX transition is stable. |
+| COMPASS Evaluation | Fit/risk evaluation output, ruleset and prompt metadata, input hashes, recommendation, explainability | Source parsing, application workflow state, artifact approval state | `CompassEvaluation` model with `role_id` | It should link to Opportunity, but evaluation semantics do not change during naming migration. |
 | Resume/Cover Letter Artifact | Generated draft content, source grounding, truthfulness checks, contract metadata, lifecycle status | Opportunity source truth, application state, export/submission records | `GeneratedArtifact` model with `role_id`; artifact contracts use `opportunityId` | Keep artifacts linked to target opportunity. Export/submitted records remain separate future work. |
 | Source/Provenance | Source type, label, URL, external reference, content hash, imported timestamp, parser version, parse warnings | Application decisions, opportunity status, recruiter relationship lifecycle | `JobSource`, `Role.source_id`, `Role.job_url`, `parse_metadata` | Preserve existing `job_sources`; consider normalizing richer provenance later instead of hiding it only in metadata. |
 | Recruiter/Contact | Human/source identity, relationship context, referral or recruiter signals, notes relevant to sourcing | Opportunity identity, application state, automated communications | No dedicated recruiter/contact model; notes and source labels are partial substitutes | Future Layer 8 may need contact/source entities, but Layer 7B should avoid overbuilding before integrations. |
@@ -104,7 +104,7 @@ Those responsibilities belong to Application, Artifact, Automation Approval, int
 | `roles.date_posted` | `opportunities.date_posted` or source posting date | Should remain optional and source-qualified. |
 | `companies` | Employer/company context for Opportunity | Keep normalized company records. |
 | `job_sources` | Source/provenance catalog for Opportunity | Keep source labels/types; expand only when Layer 8 needs it. |
-| `stride_evaluations.role_id` | `stride_evaluations.opportunity_id` | Rename later only after API and tests are stable. Semantics remain link to target opportunity. |
+| `compass_evaluations.role_id` | `compass_evaluations.opportunity_id` | Rename later only after API and tests are stable. Semantics remain link to target opportunity. |
 | `applications.role_id` | `applications.opportunity_id` | Application workflow attaches to an Opportunity, but owns its own state/history. |
 | `generated_artifacts.role_id` | `generated_artifacts.opportunity_id` | Artifacts target an Opportunity and may also link to application/submission records later. |
 
@@ -160,7 +160,7 @@ Benefits:
 
 Costs:
 
-- High blast radius across backend APIs, frontend routes, tests, analytics, STRIDE, applications, artifacts, and activity logs.
+- High blast radius across backend APIs, frontend routes, tests, analytics, COMPASS, applications, artifacts, and activity logs.
 - Easy to mix behavior changes into a naming migration.
 - Existing `/roles` clients and local workflows break unless compatibility aliases are added.
 
@@ -184,7 +184,7 @@ Costs:
 
 Layer 7B should use the hybrid approach.
 
-Do not start Layer 7B with a physical table rename. The current system has many `role_id` consumers: STRIDE evaluations, application workflow, generated artifacts, artifact performance, analytics, source intelligence, historical learning, frontend routes, and tests. The first implementation slice should make Opportunity the outward product/API/UX concept while preserving `/roles` behavior as a compatibility alias.
+Do not start Layer 7B with a physical table rename. The current system has many `role_id` consumers: COMPASS evaluations, application workflow, generated artifacts, artifact performance, analytics, source intelligence, historical learning, frontend routes, and tests. The first implementation slice should make Opportunity the outward product/API/UX concept while preserving `/roles` behavior as a compatibility alias.
 
 After `/opportunities` aliases, UI naming, tests, and docs are stable, a later Layer 7C destructive migration can rename `roles` to `opportunities`, rename the SQLAlchemy model, and rename `role_id` foreign keys if the repo still benefits from that physical cleanup.
 
@@ -264,7 +264,7 @@ Opportunity should support future analytics such as:
 - Duplicate and near-duplicate trends.
 - Opportunity outcomes over time.
 
-The current analytics services already aggregate over Role-backed records, Application state, STRIDE evaluations, generated artifacts, artifact performance, source intelligence, and historical learning. Layer 7B should preserve those behaviors while gradually renaming outward metrics from Role to Opportunity. Do not change analytics semantics as part of a naming-only transition.
+The current analytics services already aggregate over Role-backed records, Application state, COMPASS evaluations, generated artifacts, artifact performance, source intelligence, and historical learning. Layer 7B should preserve those behaviors while gradually renaming outward metrics from Role to Opportunity. Do not change analytics semantics as part of a naming-only transition.
 
 ## 14. UX Naming Transition Plan
 

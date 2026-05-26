@@ -132,7 +132,7 @@ function StrategyOverview({ strategy }: { strategy: SearchTrackStrategySummary }
           value={strategy.sampleSize.submittedApplications}
         />
         <Metric label="Responses" value={strategy.sampleSize.responses} />
-        <Metric label="STRIDE" value={strategy.sampleSize.strideEvaluations} />
+        <Metric label="COMPASS" value={strategy.sampleSize.compassEvaluations} />
         <Metric
           label="Artifacts"
           value={strategy.sampleSize.artifactPerformanceRecords}

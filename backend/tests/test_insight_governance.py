@@ -55,7 +55,7 @@ def test_major_layer5_outputs_expose_confidence_and_basis() -> None:
             for _ in range(15)
         ],
         roles=[],
-        latest_stride={role_id: SimpleNamespace(overall_score=Decimal("55"))},
+        latest_compass={role_id: SimpleNamespace(overall_score=Decimal("55"))},
         now=now,
     )
     recommendations = generate_recommendations(

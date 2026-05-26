@@ -136,26 +136,26 @@ SOURCE_DISPLAY_NAMES: dict[SourceType, str] = {
 }
 
 
-class StrideEvaluationStatus(StrEnum):
+class CompassEvaluationStatus(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
 
 
-class StrideRecommendation(StrEnum):
+class CompassRecommendation(StrEnum):
     APPLY = "apply"
     MONITOR = "monitor"
     SKIP = "skip"
     NEEDS_REVIEW = "needs_review"
 
 
-class StrideConfidenceLevel(StrEnum):
+class CompassConfidenceLevel(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
 
 
-class StrideDimension(StrEnum):
+class CompassDimension(StrEnum):
     STRATEGIC_FIT = "strategic_fit"
     TECHNICAL_ALIGNMENT = "technical_alignment"
     SENIORITY_ALIGNMENT = "seniority_alignment"

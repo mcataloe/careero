@@ -8,7 +8,7 @@ import {
   AutomationSuggestionSchema,
 } from "./automation.js";
 import { OpportunitySchema } from "./opportunity.js";
-import { StrideEvaluationSchema } from "./stride-evaluation.js";
+import { CompassEvaluationSchema } from "./compass-evaluation.js";
 import { WorkspaceSchema } from "./workspace.js";
 
 export type ContractValidationResult<T> =
@@ -37,7 +37,7 @@ export function parseContract<TSchema extends z.ZodTypeAny>(
 
 export const parseWorkspace = (value: unknown) => parseContract(WorkspaceSchema, value);
 export const parseOpportunity = (value: unknown) => parseContract(OpportunitySchema, value);
-export const parseStrideEvaluation = (value: unknown) => parseContract(StrideEvaluationSchema, value);
+export const parseCompassEvaluation = (value: unknown) => parseContract(CompassEvaluationSchema, value);
 export const parseResumeArtifact = (value: unknown) => parseContract(ResumeArtifactSchema, value);
 export const parseCoverLetterArtifact = (value: unknown) => parseContract(CoverLetterArtifactSchema, value);
 export const parseApplicationState = (value: unknown) => parseContract(ApplicationStateSchema, value);
@@ -47,7 +47,7 @@ export const parseAutomationPreferences = (value: unknown) => parseContract(Auto
 
 export const validateWorkspace = (value: unknown) => validateContract(WorkspaceSchema, value);
 export const validateOpportunity = (value: unknown) => validateContract(OpportunitySchema, value);
-export const validateStrideEvaluation = (value: unknown) => validateContract(StrideEvaluationSchema, value);
+export const validateCompassEvaluation = (value: unknown) => validateContract(CompassEvaluationSchema, value);
 export const validateResumeArtifact = (value: unknown) => validateContract(ResumeArtifactSchema, value);
 export const validateCoverLetterArtifact = (value: unknown) => validateContract(CoverLetterArtifactSchema, value);
 export const validateApplicationState = (value: unknown) => validateContract(ApplicationStateSchema, value);

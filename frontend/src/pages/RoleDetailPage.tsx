@@ -10,13 +10,13 @@ import {
 import {
   createEvaluationWithStatus,
   getLatestEvaluation,
-} from "../api/strideEvaluations";
+} from "../api/compassEvaluations";
 import { RoleDetail } from "../components/RoleDetail";
 import { SectionNavigation } from "../components/SectionNavigation";
-import { StrideEvaluationDetail } from "../components/StrideEvaluationDetail";
+import { CompassEvaluationDetail } from "../components/CompassEvaluationDetail";
 import { ErrorState, LoadingState } from "../components/States";
 import type { Role, RoleUpdatePayload } from "../types/roles";
-import type { StrideEvaluation } from "../types/strideEvaluations";
+import type { CompassEvaluation } from "../types/compassEvaluations";
 
 export function RoleDetailPage() {
   const { opportunityId, roleId } = useParams();
@@ -26,7 +26,7 @@ export function RoleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [archiving, setArchiving] = useState(false);
-  const [evaluation, setEvaluation] = useState<StrideEvaluation | null>(null);
+  const [evaluation, setEvaluation] = useState<CompassEvaluation | null>(null);
   const [evaluationLoading, setEvaluationLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
@@ -35,17 +35,17 @@ export function RoleDetailPage() {
   const evaluationRef = useRef<HTMLDivElement | null>(null);
   const evaluationSectionNavItems = evaluation
     ? [
-        { label: "Summary", targetId: "stride-summary" },
-        { label: "Fit Analysis", targetId: "stride-fit-analysis" },
-        { label: "Strengths", targetId: "stride-strengths" },
-        { label: "Gaps", targetId: "stride-gaps" },
-        { label: "Risks", targetId: "stride-risks" },
-        { label: "ATS Findings", targetId: "stride-ats-findings" },
-        { label: "Compensation", targetId: "stride-compensation" },
-        { label: "Remote Fit", targetId: "stride-remote-fit" },
-        { label: "Interview Positioning", targetId: "stride-interview-positioning" },
-        { label: "Recommendations", targetId: "stride-recommendations" },
-        { label: "Assumptions / Confidence", targetId: "stride-assumptions-confidence" },
+        { label: "Summary", targetId: "compass-summary" },
+        { label: "Fit Analysis", targetId: "compass-fit-analysis" },
+        { label: "Strengths", targetId: "compass-strengths" },
+        { label: "Gaps", targetId: "compass-gaps" },
+        { label: "Risks", targetId: "compass-risks" },
+        { label: "ATS Findings", targetId: "compass-ats-findings" },
+        { label: "Compensation", targetId: "compass-compensation" },
+        { label: "Remote Fit", targetId: "compass-remote-fit" },
+        { label: "Interview Positioning", targetId: "compass-interview-positioning" },
+        { label: "Recommendations", targetId: "compass-recommendations" },
+        { label: "Assumptions / Confidence", targetId: "compass-assumptions-confidence" },
       ]
     : [];
   const sectionNavItems = [
@@ -54,7 +54,7 @@ export function RoleDetailPage() {
     { label: "Description", targetId: "role-description" },
     { label: "Normalized Description", targetId: "role-normalized-description" },
     { label: "Edit Opportunity", targetId: "role-edit" },
-    { label: "STRIDE Evaluation", targetId: "stride-evaluation" },
+    { label: "COMPASS Evaluation", targetId: "compass-evaluation" },
     ...evaluationSectionNavItems,
   ];
 
@@ -128,8 +128,8 @@ export function RoleDetailPage() {
       setEvaluation(nextEvaluation);
       setNotice(
         result.status === 200
-          ? "Cached STRIDE evaluation reused"
-          : "STRIDE evaluation completed",
+          ? "Cached COMPASS evaluation reused"
+          : "COMPASS evaluation completed",
       );
       evaluationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
@@ -171,13 +171,13 @@ export function RoleDetailPage() {
             archiving={archiving}
             sectionNav={<SectionNavigation items={sectionNavItems} />}
           />
-          <div id="stride-evaluation" ref={evaluationRef}>
+          <div id="compass-evaluation" ref={evaluationRef}>
             {evaluationLoading ? <LoadingState label="Loading evaluation" /> : null}
             {!evaluationLoading && evaluationError ? (
               <ErrorState message={evaluationError} onRetry={loadEvaluation} />
             ) : null}
             {!evaluationLoading && !evaluationError ? (
-              <StrideEvaluationDetail
+              <CompassEvaluationDetail
                 evaluation={evaluation}
                 onRun={handleRunEvaluation}
                 running={evaluating}

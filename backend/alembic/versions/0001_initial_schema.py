@@ -114,7 +114,7 @@ def upgrade() -> None:
     op.create_index("ix_roles_user_id", "roles", ["user_id"])
 
     op.create_table(
-        "stride_evaluations",
+        "compass_evaluations",
         uuid_pk_column(),
         user_fk_column(),
         sa.Column("role_id", postgresql.UUID(as_uuid=True), nullable=False),
@@ -132,8 +132,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_stride_evaluations_role_id", "stride_evaluations", ["role_id"])
-    op.create_index("ix_stride_evaluations_user_id", "stride_evaluations", ["user_id"])
+    op.create_index("ix_compass_evaluations_role_id", "compass_evaluations", ["role_id"])
+    op.create_index("ix_compass_evaluations_user_id", "compass_evaluations", ["user_id"])
 
     op.create_table(
         "applications",
@@ -230,9 +230,9 @@ def downgrade() -> None:
     op.drop_index("ix_applications_job_source_id", table_name="applications")
     op.drop_table("applications")
 
-    op.drop_index("ix_stride_evaluations_user_id", table_name="stride_evaluations")
-    op.drop_index("ix_stride_evaluations_role_id", table_name="stride_evaluations")
-    op.drop_table("stride_evaluations")
+    op.drop_index("ix_compass_evaluations_user_id", table_name="compass_evaluations")
+    op.drop_index("ix_compass_evaluations_role_id", table_name="compass_evaluations")
+    op.drop_table("compass_evaluations")
 
     op.drop_index("ix_roles_user_id", table_name="roles")
     op.drop_index("ix_roles_company_id", table_name="roles")

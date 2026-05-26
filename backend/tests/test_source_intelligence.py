@@ -46,7 +46,7 @@ def test_source_intelligence_summarizes_private_source_roi() -> None:
     summaries = summarize_source_performance(
         roles=roles,
         applications=applications,
-        latest_stride={
+        latest_compass={
             linkedin_role.id: _evaluation(82),
             recruiter_role.id: _evaluation(65, "below_target"),
         },
@@ -56,7 +56,7 @@ def test_source_intelligence_summarizes_private_source_roi() -> None:
     assert by_source["linkedin"]["applications"] == 2
     assert by_source["linkedin"]["responses"] == 1
     assert by_source["linkedin"]["response_rate"] == 0.5
-    assert by_source["linkedin"]["average_stride_score"] == 82
+    assert by_source["linkedin"]["average_compass_score"] == 82
     assert by_source["linkedin"]["compensation_aligned"] == 1
     assert by_source["recruiter"]["recruiter_contacts"] == 2
     assert "public recruiter" not in by_source["recruiter"]["basis"].lower()
@@ -68,7 +68,7 @@ def test_source_intelligence_normalizes_ats_sources_to_company_site() -> None:
     summaries = summarize_source_performance(
         roles=[role],
         applications=[_application(role, state="offer")],
-        latest_stride={},
+        latest_compass={},
     )
 
     assert summaries[0]["source_type"] == "company_site"

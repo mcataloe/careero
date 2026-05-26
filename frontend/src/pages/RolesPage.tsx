@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { listOpportunities } from "../api/opportunities";
-import { getLatestEvaluation } from "../api/strideEvaluations";
+import { getLatestEvaluation } from "../api/compassEvaluations";
 import { RolesList } from "../components/RolesList";
 import { ErrorState, LoadingState } from "../components/States";
 import type { Role } from "../types/roles";
-import type { EvaluationSummaryState } from "../types/strideEvaluations";
+import type { EvaluationSummaryState } from "../types/compassEvaluations";
 
 export function RolesPage() {
   const [roles, setRoles] = useState<Role[]>([]);

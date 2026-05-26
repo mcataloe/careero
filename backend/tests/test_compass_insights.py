@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 from uuid import uuid4
 
-from app.services.stride_insights import build_stride_trend_insights
+from app.services.compass_insights import build_compass_trend_insights
 
 
 def _point(score, comp, seniority, category="infrastructure"):
@@ -15,7 +15,7 @@ def _point(score, comp, seniority, category="infrastructure"):
     }
 
 
-def test_stride_insights_surface_trends_as_weak_or_moderate_guidance() -> None:
+def test_compass_insights_surface_trends_as_weak_or_moderate_guidance() -> None:
     points = [
         _point(82, 190000, 4),
         _point(70, 170000, 3),
@@ -34,14 +34,14 @@ def test_stride_insights_surface_trends_as_weak_or_moderate_guidance() -> None:
         SimpleNamespace(role_id=points[0]["role_id"], current_state="applied"),
     ]
 
-    insights = build_stride_trend_insights(
+    insights = build_compass_trend_insights(
         points=points,
         applications=applications,
         workspace=workspace,
     )
 
     labels = {insight["label"] for insight in insights}
-    assert "Average STRIDE fit over time" in labels
+    assert "Average COMPASS fit over time" in labels
     assert "Compensation drift" in labels
     assert "Compensation collapse risk" in labels
     assert "Role-seniority drift" in labels
@@ -50,8 +50,8 @@ def test_stride_insights_surface_trends_as_weak_or_moderate_guidance() -> None:
     assert all("basis" in insight and insight["basis"] for insight in insights)
 
 
-def test_stride_insights_avoid_false_precision_with_thin_data() -> None:
-    insights = build_stride_trend_insights(
+def test_compass_insights_avoid_false_precision_with_thin_data() -> None:
+    insights = build_compass_trend_insights(
         points=[_point(75, None, 3)],
         applications=[],
         workspace=None,
@@ -59,9 +59,9 @@ def test_stride_insights_avoid_false_precision_with_thin_data() -> None:
 
     assert insights == [
         {
-            "label": "STRIDE sample is thin",
-            "message": "Search-level STRIDE direction is still a weak signal.",
-            "basis": "Fewer than three completed STRIDE scores are available.",
+            "label": "COMPASS sample is thin",
+            "message": "Search-level COMPASS direction is still a weak signal.",
+            "basis": "Fewer than three completed COMPASS scores are available.",
             "confidence": "Insufficient Data",
             "severity": "info",
             "source_inputs": {"score_count": 1},

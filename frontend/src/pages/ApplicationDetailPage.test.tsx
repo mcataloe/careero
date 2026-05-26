@@ -250,13 +250,13 @@ const advisorPacket: AdvisorPacket = {
       warning: "Private notes are not advisor comments and remain separate.",
     },
     {
-      data_class: "STRIDE score and explanation",
-      field: "stride_evaluation",
+      data_class: "COMPASS score and explanation",
+      field: "compass_evaluation",
       default_visibility: "Private by default",
       status: "excluded",
       included: false,
       reason: "Internal fit analysis remains advisory, source-grounded, and private by default.",
-      warning: "STRIDE is advisory, not deterministic truth.",
+      warning: "COMPASS is advisory, not deterministic truth.",
     },
   ],
   warnings: [

@@ -1,7 +1,7 @@
 {
-  "$ref": "#/definitions/StrideEvaluation",
+  "$ref": "#/definitions/CompassEvaluation",
   "definitions": {
-    "StrideEvaluation": {
+    "CompassEvaluation": {
       "type": "object",
       "properties": {
         "contractVersion": {
@@ -13,17 +13,17 @@
           "format": "date-time"
         },
         "updatedAt": {
-          "$ref": "#/definitions/StrideEvaluation/properties/createdAt"
+          "$ref": "#/definitions/CompassEvaluation/properties/createdAt"
         },
         "id": {
           "type": "string",
           "format": "uuid"
         },
         "workspaceId": {
-          "$ref": "#/definitions/StrideEvaluation/properties/id"
+          "$ref": "#/definitions/CompassEvaluation/properties/id"
         },
         "opportunityId": {
-          "$ref": "#/definitions/StrideEvaluation/properties/id"
+          "$ref": "#/definitions/CompassEvaluation/properties/id"
         },
         "version": {
           "type": "object",
@@ -209,14 +209,14 @@
         "gaps": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/StrideEvaluation/properties/strengths/items"
+            "$ref": "#/definitions/CompassEvaluation/properties/strengths/items"
           },
           "default": []
         },
         "risks": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/StrideEvaluation/properties/strengths/items"
+            "$ref": "#/definitions/CompassEvaluation/properties/strengths/items"
           },
           "default": []
         },
@@ -446,25 +446,25 @@
               "additionalProperties": false
             },
             "technicalAlignment": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             },
             "seniorityAlignment": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             },
             "compensationAlignment": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             },
             "remoteAlignment": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             },
             "companyRisk": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             },
             "applicationEffort": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             },
             "atsResumeAlignment": {
-              "$ref": "#/definitions/StrideEvaluation/properties/sections/properties/strategicFit"
+              "$ref": "#/definitions/CompassEvaluation/properties/sections/properties/strategicFit"
             }
           },
           "required": [

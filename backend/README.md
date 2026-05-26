@@ -1,6 +1,6 @@
 # Backend
 
-The backend is a local FastAPI application for Careero. It now supports the local platform foundation, workspace-scoped role intake, STRIDE evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-authenticated.
+The backend is a local FastAPI application for Careero. It now supports the local platform foundation, workspace-scoped role intake, COMPASS evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-authenticated.
 
 ## PostgreSQL
 
@@ -233,7 +233,7 @@ When a user saves a parsed role, the frontend sends `parse_metadata` with parser
 
 ## Resume/Profile Source API
 
-Careero can store a local master resume or profile source for grounded STRIDE evaluation and artifact generation. Source text can be pasted manually or imported from a local file for preview. File import extracts text only; it does not persist uploaded files or create a source until the user explicitly saves one. This API does not import external profiles, extract profile facts, generate resumes, or generate cover letters.
+Careero can store a local master resume or profile source for grounded COMPASS evaluation and artifact generation. Source text can be pasted manually or imported from a local file for preview. File import extracts text only; it does not persist uploaded files or create a source until the user explicitly saves one. This API does not import external profiles, extract profile facts, generate resumes, or generate cover letters.
 
 Import a local resume/profile file:
 
@@ -312,13 +312,13 @@ Invoke-RestMethod `
   -Body '{ "name": "Updated Master Resume", "source_type": "profile" }'
 ```
 
-Only one resume source version can be active for the default local user. STRIDE evaluation can still run without an active source, but OpenAI enrichment includes the active source when present.
+Only one resume source version can be active for the default local user. COMPASS evaluation can still run without an active source, but OpenAI enrichment includes the active source when present.
 
-## STRIDE Evaluation API
+## COMPASS Evaluation API
 
-STRIDE evaluation support always starts with deterministic local rules. The deterministic score remains the canonical baseline. Optional OpenAI enrichment can add grounded structured analysis, but it does not replace the baseline score, infer resume facts, generate resumes or cover letters, scrape jobs, poll sources, or perform external research.
+COMPASS evaluation support always starts with deterministic local rules. The deterministic score remains the canonical baseline. Optional OpenAI enrichment can add grounded structured analysis, but it does not replace the baseline score, infer resume facts, generate resumes or cover letters, scrape jobs, poll sources, or perform external research.
 
-STRIDE uses the target role's workspace context. Workspace preferences are merged into evaluation context, and explicit request `user_context` values override workspace defaults for that run. Workspace context is included in prompt metadata and the evaluation input hash so cache results do not bleed across searches.
+COMPASS uses the target role's workspace context. Workspace preferences are merged into evaluation context, and explicit request `user_context` values override workspace defaults for that run. Workspace context is included in prompt metadata and the evaluation input hash so cache results do not bleed across searches.
 
 The first-pass dimensions are equally weighted:
 
@@ -370,7 +370,7 @@ CAREERO_OPENAI_MAX_OUTPUT_TOKENS=2500
 CAREERO_MAX_AI_EVALUATIONS_PER_SESSION=25
 ```
 
-When enabled, Careero uses the OpenAI Responses API with structured output validation. The prompt includes only stored role fields, the deterministic baseline, STRIDE rules, request `user_context`, and the active resume/profile source version when one exists. If OpenAI is unavailable, times out, or returns invalid structured output, the evaluation still succeeds with deterministic results and stores `ai_status` as `failed` or `skipped` in `raw_evaluation_json`.
+When enabled, Careero uses the OpenAI Responses API with structured output validation. The prompt includes only stored role fields, the deterministic baseline, COMPASS rules, request `user_context`, and the active resume/profile source version when one exists. If OpenAI is unavailable, times out, or returns invalid structured output, the evaluation still succeeds with deterministic results and stores `ai_status` as `failed` or `skipped` in `raw_evaluation_json`.
 
 `CAREERO_MAX_AI_EVALUATIONS_PER_SESSION` is a simple local cost control. It limits OpenAI-backed evaluation attempts per backend process and resets when the backend restarts. Cached evaluations, AI-disabled runs, and missing-key skipped runs do not consume the counter.
 
@@ -378,7 +378,7 @@ AI output stores grounding details in `raw_evaluation_json.ai_result`, including
 
 ### Evaluation Audit Metadata and Caching
 
-Each STRIDE evaluation stores audit metadata:
+Each COMPASS evaluation stores audit metadata:
 
 - `model_used`, `prompt_version`, and `ruleset_version`
 - input/output token estimates when usage is available or can be approximated
@@ -387,7 +387,7 @@ Each STRIDE evaluation stores audit metadata:
 
 The cache key uses stable role content, active resume/profile source content, request notes/context, prompt version, ruleset version, AI enabled state, and model name. If those inputs have not changed, `POST /api/roles/{role_id}/evaluations` returns the cached latest completed evaluation with HTTP `200`. To explicitly re-run and create a new row, send `"force": true`.
 
-Careero logs evaluation lifecycle activity for `stride_evaluation.started`, `stride_evaluation.completed`, `stride_evaluation.failed`, and `stride_evaluation.cached_result_reused`. Logs and stored errors must not include API keys, full prompts, raw job descriptions, or full resume/profile text.
+Careero logs evaluation lifecycle activity for `compass_evaluation.started`, `compass_evaluation.completed`, `compass_evaluation.failed`, and `compass_evaluation.cached_result_reused`. Logs and stored errors must not include API keys, full prompts, raw job descriptions, or full resume/profile text.
 
 Create a baseline evaluation for a role. If AI enrichment is enabled and configured, the same endpoint also stores grounded AI analysis:
 
@@ -427,21 +427,21 @@ Invoke-RestMethod http://127.0.0.1:8000/api/roles/{role_id}/evaluations/latest
 List evaluations:
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/stride-evaluations
-Invoke-RestMethod "http://127.0.0.1:8000/api/stride-evaluations?evaluation_status=completed"
+Invoke-RestMethod http://127.0.0.1:8000/api/compass-evaluations
+Invoke-RestMethod "http://127.0.0.1:8000/api/compass-evaluations?evaluation_status=completed"
 ```
 
 Get one evaluation by ID:
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/stride-evaluations/{evaluation_id}
+Invoke-RestMethod http://127.0.0.1:8000/api/compass-evaluations/{evaluation_id}
 ```
 
 Inspect activity log entries for an evaluation:
 
 ```powershell
 Invoke-RestMethod `
-  "http://127.0.0.1:8000/api/activity-log?entity_type=stride_evaluation&entity_id={evaluation_id}"
+  "http://127.0.0.1:8000/api/activity-log?entity_type=compass_evaluation&entity_id={evaluation_id}"
 ```
 
 The activity log is scoped to the seeded default local user. It supports optional `entity_type`, `entity_id`, `action`, and `limit` query parameters. The default limit is `50`; the maximum is `200`.
@@ -450,7 +450,7 @@ The activity log is scoped to the seeded default local user. It supports optiona
 
 1. Create a role manually with `POST /api/roles`.
 2. Create and activate a resume/profile source with `POST /api/resume-sources`.
-3. Run STRIDE evaluation with `POST /api/roles/{role_id}/evaluations`.
+3. Run COMPASS evaluation with `POST /api/roles/{role_id}/evaluations`.
 4. Open `http://127.0.0.1:5173/roles/{role_id}` to view the evaluation.
 5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
 6. Inspect lifecycle events with `GET /api/activity-log`.
@@ -459,7 +459,7 @@ The original Layer 2 local flow does not add auth, automated discovery, generate
 
 ## Resume Artifact Generation
 
-Resume artifact generation is optional and disabled by default. It creates a validated canonical `ResumeArtifact` draft for a supplied `workspace_id`, target role/opportunity, STRIDE evaluation, and active or requested resume source version. The supplied workspace must exist, be active or paused, and own the target role/opportunity. It does not render resumes in the frontend.
+Resume artifact generation is optional and disabled by default. It creates a validated canonical `ResumeArtifact` draft for a supplied `workspace_id`, target role/opportunity, COMPASS evaluation, and active or requested resume source version. The supplied workspace must exist, be active or paused, and own the target role/opportunity. It does not render resumes in the frontend.
 
 Enable locally with:
 
@@ -478,12 +478,12 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body '{
     "workspace_id": "22222222-2222-4222-8222-222222222222",
-    "evaluation_id": "optional-stride-evaluation-uuid",
+    "evaluation_id": "optional-compass-evaluation-uuid",
     "source_version_id": "optional-resume-source-version-uuid"
   }'
 ```
 
-If `evaluation_id` is omitted, Careero uses the latest STRIDE evaluation for the role. If `source_version_id` is omitted, it uses the active resume source version. Missing role/evaluation/source references return `404`. Disabled or unconfigured AI resume generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, and truthfulness violations return `502` and persist no artifact.
+If `evaluation_id` is omitted, Careero uses the latest COMPASS evaluation for the role. If `source_version_id` is omitted, it uses the active resume source version. Missing role/evaluation/source references return `404`. Disabled or unconfigured AI resume generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, and truthfulness violations return `502` and persist no artifact.
 
 The legacy `/api/roles/{role_id}/resume-artifacts` route remains available as a compatibility alias while persistence is Role-backed.
 
@@ -491,7 +491,7 @@ The generated resume is stored in `generated_artifacts`, with the complete canon
 
 ## Cover Letter Artifact Generation
 
-Cover letter artifact generation is optional and disabled by default. It creates a validated canonical `CoverLetterArtifact` draft for a supplied `workspace_id` and target role/opportunity. The supplied workspace must exist, be active or paused, and own the target role/opportunity. STRIDE evaluation and resume/profile source inputs are used when available, but missing evaluation or missing source does not block generation; the artifact records warnings in generation metadata.
+Cover letter artifact generation is optional and disabled by default. It creates a validated canonical `CoverLetterArtifact` draft for a supplied `workspace_id` and target role/opportunity. The supplied workspace must exist, be active or paused, and own the target role/opportunity. COMPASS evaluation and resume/profile source inputs are used when available, but missing evaluation or missing source does not block generation; the artifact records warnings in generation metadata.
 
 The default tone is `direct`, which maps to Careero's neutral, forward-looking professional standard for cold applications. Generated openings must avoid overly enthusiastic phrasing such as "I'm excited to apply."
 
@@ -512,13 +512,13 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body '{
     "workspace_id": "22222222-2222-4222-8222-222222222222",
-    "evaluation_id": "optional-stride-evaluation-uuid",
+    "evaluation_id": "optional-compass-evaluation-uuid",
     "source_version_id": "optional-resume-source-version-uuid",
     "tone": "direct"
   }'
 ```
 
-If `evaluation_id` is omitted, Careero uses the latest STRIDE evaluation when one exists. If `source_version_id` is omitted, it uses the active resume source version when one exists. Explicit missing role/evaluation/source references return `404`. Disabled or unconfigured AI cover letter generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, tone violations, and truthfulness violations return `502` and persist no artifact.
+If `evaluation_id` is omitted, Careero uses the latest COMPASS evaluation when one exists. If `source_version_id` is omitted, it uses the active resume source version when one exists. Explicit missing role/evaluation/source references return `404`. Disabled or unconfigured AI cover letter generation returns `503` and persists no artifact. Provider failures, invalid structured output, canonical schema failures, tone violations, and truthfulness violations return `502` and persist no artifact.
 
 The legacy `/api/roles/{role_id}/cover-letter-artifacts` route remains available as a compatibility alias while persistence is Role-backed.
 
@@ -565,7 +565,7 @@ Invoke-WebRequest `
 ```
 
 Default packet output includes basic opportunity/application summaries and
-artifact lifecycle summaries only. Private notes, raw job descriptions, STRIDE
+artifact lifecycle summaries only. Private notes, raw job descriptions, COMPASS
 rationale, ATS risk notes, compensation strategy, recruiter/contact details,
 source resume/profile material, career strategy synthesis, activity logs,
 automation approval logs, and generated artifact content are excluded by
@@ -640,7 +640,7 @@ Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}/timeli
 
 The timeline is a read-only view over typed workflow persistence. It includes
 application creation, state history, notes, reminders, interview stages,
-completed STRIDE evaluations, generated resume and cover-letter artifacts, and
+completed COMPASS evaluations, generated resume and cover-letter artifacts, and
 selected ActivityLog update/delete events. It does not store duplicate timeline
 rows and does not expose raw prompts, source resume text, generated document
 content, or raw model payloads.
@@ -707,9 +707,9 @@ row: active lists and counts exclude the record, while safe create/update/delete
 events remain available in the timeline.
 
 List endpoints return compact summaries for the Applications page: role title,
-company, current state, application dates, latest STRIDE status, latest resume
+company, current state, application dates, latest COMPASS status, latest resume
 and cover letter artifact summaries, and note/reminder/interview counts. They do
-not return full STRIDE or artifact payloads and do not trigger generation.
+not return full COMPASS or artifact payloads and do not trigger generation.
 
 Update workflow metadata or dates without changing state:
 

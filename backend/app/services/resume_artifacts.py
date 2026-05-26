@@ -18,7 +18,7 @@ from app.models import (
     GeneratedArtifact,
     ResumeSourceVersion,
     Role,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
 )
 from app.schemas.resume_artifacts import ResumeArtifactGenerateRequest
@@ -142,7 +142,7 @@ class ResumeArtifactService:
             evaluation_id=payload.evaluation_id,
         )
         if evaluation is None:
-            raise ResumeArtifactEvaluationNotFoundError("STRIDE evaluation not found")
+            raise ResumeArtifactEvaluationNotFoundError("COMPASS evaluation not found")
         source_version = self._get_source_version(
             user_id=user.id,
             source_version_id=payload.source_version_id,
@@ -267,7 +267,7 @@ class ResumeArtifactService:
         artifact_id: uuid.UUID,
         workspace_id: uuid.UUID,
         role: Role,
-        evaluation: StrideEvaluation,
+        evaluation: CompassEvaluation,
         source_version: ResumeSourceVersion,
         workspace_context: dict[str, Any],
         ai_result: dict[str, Any],
@@ -372,7 +372,7 @@ class ResumeArtifactService:
         *,
         output: dict[str, Any],
         source_text: str,
-        evaluation: StrideEvaluation,
+        evaluation: CompassEvaluation,
     ) -> None:
         unsupported_claims = [
             claim.strip()
@@ -424,19 +424,19 @@ class ResumeArtifactService:
         workspace_id: uuid.UUID,
         role_id: uuid.UUID,
         evaluation_id: uuid.UUID | None,
-    ) -> StrideEvaluation | None:
+    ) -> CompassEvaluation | None:
         filters = [
-            StrideEvaluation.user_id == user_id,
-            StrideEvaluation.workspace_id == workspace_id,
-            StrideEvaluation.role_id == role_id,
-            StrideEvaluation.deleted_at.is_(None),
+            CompassEvaluation.user_id == user_id,
+            CompassEvaluation.workspace_id == workspace_id,
+            CompassEvaluation.role_id == role_id,
+            CompassEvaluation.deleted_at.is_(None),
         ]
         if evaluation_id is not None:
-            filters.append(StrideEvaluation.id == evaluation_id)
+            filters.append(CompassEvaluation.id == evaluation_id)
         statement = (
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(*filters)
-            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.created_at.desc(), CompassEvaluation.id.desc())
             .limit(1)
         )
         return self.db.scalar(statement)

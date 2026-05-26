@@ -14,9 +14,9 @@ Phase 0 / project baseline status:
   - Has the user-side workflow proven enough durable local value to justify any productionization work now, or should Layer 11 remain mostly a readiness/recon/design layer?
   - Which deployment target should be assumed for the first production path: local-only packaged app, single-user hosted app, private beta SaaS, or future multi-tenant SaaS?
   - What authentication model is preferred for first productization: email/password, Google OAuth, GitHub OAuth, passkeys, or a staged local-to-cloud account model?
-  - What data classes require explicit privacy and retention rules before hosted deployment: resumes, source materials, STRIDE evaluations, artifacts, notes, recruiter contacts, compensation targets, application history, and AI prompts/outputs?
+  - What data classes require explicit privacy and retention rules before hosted deployment: resumes, source materials, COMPASS evaluations, artifacts, notes, recruiter contacts, compensation targets, application history, and AI prompts/outputs?
   - Should billing be deferred entirely until workflow/artifact/integration value is validated, or should Layer 11 only define pricing meters and cost-control boundaries?
-  - What AI usage should count against future paid tiers: parsing, STRIDE enrichment, artifact generation, career strategy synthesis, integration summarization, or automation suggestions?
+  - What AI usage should count against future paid tiers: parsing, COMPASS enrichment, artifact generation, career strategy synthesis, integration summarization, or automation suggestions?
   - What account deletion/export requirements should exist before any hosted beta?
 
 Source-of-truth manifest:
@@ -38,7 +38,7 @@ Solution/system overview:
   - Local-first FastAPI backend, React + Vite frontend, Mantine UI, PostgreSQL persistence, Alembic migrations, local scripts, and local health checks exist.
   - Workspace/search-track persistence exists.
   - Opportunity-facing intake/list/detail/update/archive surfaces exist, while persistence remains Role-backed.
-  - Resume/profile source grounding, STRIDE evaluation, artifact generation foundations, application workflow, state history, notes, external links, structured interview tracking, analytics, dashboard intelligence, local integration adapter boundary, backend Markdown/DOCX/PDF export, automation guardrails, and read-only career strategy synthesis foundations exist.
+  - Resume/profile source grounding, COMPASS evaluation, artifact generation foundations, application workflow, state history, notes, external links, structured interview tracking, analytics, dashboard intelligence, local integration adapter boundary, backend Markdown/DOCX/PDF export, automation guardrails, and read-only career strategy synthesis foundations exist.
   - Layer 11 is explicitly future in the canonical layer-status document.
 - Known constraints:
   - Careero is local-first and not production-ready.

@@ -15,7 +15,7 @@ The frontend expects the backend at:
 http://127.0.0.1:8000
 ```
 
-Before using opportunity intake, STRIDE evaluations, or resume/profile source settings, run the backend database setup:
+Before using opportunity intake, COMPASS evaluations, or resume/profile source settings, run the backend database setup:
 
 ```powershell
 cd ..\backend
@@ -43,17 +43,17 @@ The Add opportunity page includes optional AI-assisted parsing:
 
 Parsing fills empty fields only, does not auto-save, and keeps manual edits intact. The backend must have `CAREERO_ENABLE_AI_ROLE_PARSING=true` and an OpenAI API key configured for parsing to run.
 
-STRIDE evaluation workflow:
+COMPASS evaluation workflow:
 
 - Open an opportunity at `/opportunities/:opportunityId`.
-- Use the compact section navigation near the top of the opportunity detail page to jump between overview, descriptions, edit controls, STRIDE evaluation, and major STRIDE sections.
-- Use `Run STRIDE evaluation` for an opportunity with no evaluation.
+- Use the compact section navigation near the top of the opportunity detail page to jump between overview, descriptions, edit controls, COMPASS evaluation, and major COMPASS sections.
+- Use `Run COMPASS evaluation` for an opportunity with no evaluation.
 - Use `Re-run evaluation` to force a new latest evaluation.
 - Use `View latest evaluation` to jump to the evaluation section.
 - The opportunity list shows a non-blocking evaluation indicator for each opportunity.
 - A normal run may reuse the backend cache when opportunity/source/context inputs have not changed.
 - Completed evaluations render through section blocks for summary, fit analysis, strengths, gaps, risks, ATS findings, compensation, remote fit, interview positioning, recommendations, and assumptions/confidence.
-- Long STRIDE text uses the shared `ExpandableTextSection` pattern so the opportunity detail page stays scannable without hiding full content.
+- Long COMPASS text uses the shared `ExpandableTextSection` pattern so the opportunity detail page stays scannable without hiding full content.
 
 Resume/profile grounding source:
 
@@ -63,7 +63,7 @@ Resume/profile grounding source:
 - Imported text is copied into the draft raw text field and is not saved until you submit the form.
 - When an active source exists, the settings page is read-only by default. Use `Create new version` or `Import file` to enter draft editing.
 - Canceling a draft restores the currently active source values. Saving an active-source draft creates and activates a new version; it does not mutate the existing version in place.
-- The backend uses the active source to ground STRIDE evaluations when available.
+- The backend uses the active source to ground COMPASS evaluations when available.
 
 Application workflow:
 
@@ -86,7 +86,7 @@ Career strategy:
 
 Long and structured text:
 
-- Read-only resume/profile, opportunity description, and STRIDE text uses expandable preview blocks so pages stay scannable without hiding full content.
+- Read-only resume/profile, opportunity description, and COMPASS text uses expandable preview blocks so pages stay scannable without hiding full content.
 - Markdown-like text is rendered safely as React text nodes. Basic headings, bullets, numbered lists, paragraphs, and fenced code blocks are displayed with lightweight structure.
 - Editable long text fields use bounded autosizing instead of expanding without limit.
 

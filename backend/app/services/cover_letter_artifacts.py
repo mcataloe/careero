@@ -18,7 +18,7 @@ from app.models import (
     GeneratedArtifact,
     ResumeSourceVersion,
     Role,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
 )
 from app.schemas.cover_letter_artifacts import CoverLetterArtifactGenerateRequest
@@ -146,7 +146,7 @@ class CoverLetterArtifactService:
         )
         if payload.evaluation_id is not None and evaluation is None:
             raise CoverLetterArtifactEvaluationNotFoundError(
-                "STRIDE evaluation not found"
+                "COMPASS evaluation not found"
             )
 
         source_version = self._get_source_version(
@@ -286,7 +286,7 @@ class CoverLetterArtifactService:
         artifact_id: uuid.UUID,
         workspace_id: uuid.UUID,
         role: Role,
-        evaluation: StrideEvaluation | None,
+        evaluation: CompassEvaluation | None,
         source_version: ResumeSourceVersion | None,
         tone: str,
         workspace_context: dict[str, Any],
@@ -331,7 +331,7 @@ class CoverLetterArtifactService:
         warnings = list(output.get("warnings", []))
         warnings.extend(output.get("limitations", []))
         if evaluation is None:
-            warnings.append("Generated without a STRIDE evaluation.")
+            warnings.append("Generated without a COMPASS evaluation.")
         if source_version is None:
             warnings.append("Generated without a resume/profile source.")
 
@@ -389,7 +389,7 @@ class CoverLetterArtifactService:
         *,
         output: dict[str, Any],
         source_text: str | None,
-        evaluation: StrideEvaluation | None,
+        evaluation: CompassEvaluation | None,
     ) -> None:
         unsupported_claims = [
             claim.strip()
@@ -450,19 +450,19 @@ class CoverLetterArtifactService:
         workspace_id: uuid.UUID,
         role_id: uuid.UUID,
         evaluation_id: uuid.UUID | None,
-    ) -> StrideEvaluation | None:
+    ) -> CompassEvaluation | None:
         filters = [
-            StrideEvaluation.user_id == user_id,
-            StrideEvaluation.workspace_id == workspace_id,
-            StrideEvaluation.role_id == role_id,
-            StrideEvaluation.deleted_at.is_(None),
+            CompassEvaluation.user_id == user_id,
+            CompassEvaluation.workspace_id == workspace_id,
+            CompassEvaluation.role_id == role_id,
+            CompassEvaluation.deleted_at.is_(None),
         ]
         if evaluation_id is not None:
-            filters.append(StrideEvaluation.id == evaluation_id)
+            filters.append(CompassEvaluation.id == evaluation_id)
         statement = (
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(*filters)
-            .order_by(StrideEvaluation.created_at.desc(), StrideEvaluation.id.desc())
+            .order_by(CompassEvaluation.created_at.desc(), CompassEvaluation.id.desc())
             .limit(1)
         )
         return self.db.scalar(statement)

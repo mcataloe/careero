@@ -3,7 +3,7 @@
 Layer 4 makes the existing `Application` row the workflow aggregate for a saved
 role/opportunity and exposes workspace-aware service/API operations for list,
 detail, ensure, state transition, and metadata update. It does not duplicate
-role parsing, STRIDE evaluation, resume artifact generation, cover letter
+role parsing, COMPASS evaluation, resume artifact generation, cover letter
 generation, document export, automation, calendar, or email behavior.
 
 ## Role And Application
@@ -68,8 +68,8 @@ duplicating records.
 
 `GET /api/applications` and workspace-scoped list endpoints return compact
 summaries for the Applications page: role title, company, state, dates, latest
-STRIDE summary/status, latest resume and cover letter artifact summaries, and
-note/reminder/interview counts. They do not return full STRIDE or artifact
+COMPASS summary/status, latest resume and cover letter artifact summaries, and
+note/reminder/interview counts. They do not return full COMPASS or artifact
 payloads and do not trigger generation.
 
 `GET /api/applications/pipeline` and
@@ -82,7 +82,7 @@ canonical `ApplicationState` contract under `application_state`.
 
 `GET /api/applications/{application_id}/timeline` returns a reverse
 chronological timeline view. It aggregates existing typed workflow rows,
-completed STRIDE evaluations, generated resume/cover-letter artifacts, and
+completed COMPASS evaluations, generated resume/cover-letter artifacts, and
 selected ActivityLog entries. The timeline stores no rows of its own and must
 not become the workflow source of truth.
 
@@ -153,7 +153,7 @@ Timeline event types are stable labels for rendering and filtering. Core events
 include `application.created`, `application.state_changed`,
 `application.archived`, `application.reactivated`, `note.created`,
 `external_link.created`, `reminder.created`, `reminder.completed`,
-`interview.created`, `interview.completed`, `stride.completed`,
+`interview.created`, `interview.completed`, `compass.completed`,
 `artifact.resume.created`, and `artifact.cover_letter.created`. ActivityLog may
 enrich update/delete events such as `note.updated`, `note.deleted`,
 `external_link.updated`, and `external_link.deleted`, but it does not replace

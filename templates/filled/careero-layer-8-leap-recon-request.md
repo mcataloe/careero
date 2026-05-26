@@ -36,7 +36,7 @@ Solution/system overview:
   - Local-first FastAPI backend, React + Vite frontend, PostgreSQL persistence, Alembic migrations, Mantine UI, and local scripts exist.
   - Workspace/search-track persistence exists.
   - Opportunity-facing intake/list/detail/update/archive surfaces exist, but persistence remains Role-backed.
-  - Resume/profile source grounding, STRIDE evaluation, artifact generation foundations, application workflow, state history, notes, external links, structured interview tracking, analytics, and dashboard intelligence surfaces exist.
+  - Resume/profile source grounding, COMPASS evaluation, artifact generation foundations, application workflow, state history, notes, external links, structured interview tracking, analytics, and dashboard intelligence surfaces exist.
   - Layer 7 Opportunity model strategy exists and Layer 7B compatibility surface has started.
   - Layer 8 integrations are planned, not implemented as current product capability.
 - Known constraints:

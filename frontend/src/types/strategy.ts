@@ -47,7 +47,7 @@ export interface StrategySampleSize {
   applications: number;
   submittedApplications: number;
   responses: number;
-  strideEvaluations: number;
+  compassEvaluations: number;
   artifactPerformanceRecords: number;
 }
 

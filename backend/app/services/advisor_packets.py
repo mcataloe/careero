@@ -477,7 +477,7 @@ def _warnings(
         {
             "code": "redacted_by_default",
             "message": (
-                "Private notes, compensation strategy, STRIDE rationale, ATS "
+                "Private notes, compensation strategy, COMPASS rationale, ATS "
                 "risk notes, recruiter intelligence, raw sources, and automation "
                 "logs are excluded by default."
             ),
@@ -557,17 +557,17 @@ def _redactions(
             "warning": "Raw opportunity source text can leak proprietary posting details.",
         },
         {
-            "data_class": "STRIDE score and explanation",
-            "field": "stride_evaluation",
+            "data_class": "COMPASS score and explanation",
+            "field": "compass_evaluation",
             "default_visibility": "Private by default",
             "status": "excluded",
             "included": False,
             "reason": "Internal fit analysis remains advisory, source-grounded, and private by default.",
-            "warning": "STRIDE is advisory, not deterministic truth.",
+            "warning": "COMPASS is advisory, not deterministic truth.",
         },
         {
             "data_class": "ATS risk notes",
-            "field": "stride_evaluation.ats",
+            "field": "compass_evaluation.ats",
             "default_visibility": "Private by default",
             "status": "excluded",
             "included": False,

@@ -15,7 +15,7 @@ from app.models import ActivityLog, GeneratedArtifact
 from app.schemas.resume_artifacts import ResumeArtifactGenerateRequest
 from app.schemas.resume_sources import ResumeSourceCreate
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
-from app.schemas.stride_evaluations import StrideEvaluationCreate
+from app.schemas.compass_evaluations import CompassEvaluationCreate
 from app.schemas.workspaces import WorkspaceCreate
 from app.seed import DEFAULT_WORKSPACE_ID, seed_local_data
 from app.services.resume_artifact_ai import ResumeArtifactGenerationUnavailableError
@@ -28,7 +28,7 @@ from app.services.resume_artifacts import (
 )
 from app.services.resume_sources import ResumeSourceService
 from app.services.roles import RoleService
-from app.services.stride_evaluations import StrideEvaluationService
+from app.services.compass_evaluations import CompassEvaluationService
 from app.services.workspaces import WorkspaceService
 
 
@@ -164,12 +164,12 @@ def create_source(db_session: Session, *, is_active: bool = True) -> dict[str, A
 
 
 def create_evaluation(db_session: Session, role_id: UUID):
-    result = StrideEvaluationService(
+    result = CompassEvaluationService(
         db_session,
         settings=Settings(_env_file=None),
     ).create_for_role(
         role_id=role_id,
-        payload=StrideEvaluationCreate(
+        payload=CompassEvaluationCreate(
             user_context={"target_keywords": ["python", "postgresql", "kubernetes"]},
             force=True,
         ),

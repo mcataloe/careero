@@ -96,7 +96,7 @@ Future export must include:
 - Workspaces/search tracks.
 - Resume/profile sources and versions.
 - Opportunities and Role-backed compatibility identifiers where relevant.
-- STRIDE evaluations.
+- COMPASS evaluations.
 - Generated artifacts and export metadata.
 - Applications, state history, notes, reminders, interviews, and links.
 - Automation suggestions and approval logs.

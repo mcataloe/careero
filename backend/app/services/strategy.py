@@ -13,7 +13,7 @@ from app.models import (
     Application,
     ArtifactPerformanceRecord,
     Role,
-    StrideEvaluation,
+    CompassEvaluation,
     User,
     Workspace,
 )
@@ -39,7 +39,7 @@ from app.services.recommendations import RecommendationService
 from app.services.search_analytics import SearchAnalyticsService
 from app.services.search_health import SearchHealthService
 from app.services.source_intelligence import SourceIntelligenceService
-from app.services.stride_insights import StrideInsightsService
+from app.services.compass_insights import CompassInsightsService
 
 
 SUBMITTED_STATES = {
@@ -133,7 +133,7 @@ class CareerStrategyService:
     ) -> SearchTrackStrategySummary:
         roles = self._roles(user_id=user.id, workspace_id=workspace.id)
         applications = self._applications(user_id=user.id, workspace_id=workspace.id)
-        latest_stride = self._latest_stride_by_role(
+        latest_compass = self._latest_compass_by_role(
             user_id=user.id,
             workspace_id=workspace.id,
         )
@@ -145,7 +145,7 @@ class CareerStrategyService:
         analytics = SearchAnalyticsService(self.db).get_search_analytics(
             workspace_id=workspace.id
         )
-        stride = StrideInsightsService(self.db).get_stride_insights(
+        compass = CompassInsightsService(self.db).get_compass_insights(
             workspace_id=workspace.id
         )
         compensation = CompensationIntelligenceService(
@@ -174,7 +174,7 @@ class CareerStrategyService:
             applications=len(applications),
             submitted_applications=len(submitted),
             responses=len(responses),
-            stride_evaluations=len(latest_stride),
+            compass_evaluations=len(latest_compass),
             artifact_performance_records=len(artifact_records),
         )
         confidence = _confidence(sample_size)
@@ -183,18 +183,18 @@ class CareerStrategyService:
         signals = [
             *_signals_from_search_health(health.get("signals", []), sample_size),
             *_signals_from_analytics(analytics.get("signals", []), sample_size),
-            *_signals_from_stride(stride.get("insights", []), sample_size),
+            *_signals_from_compass(compass.get("insights", []), sample_size),
             *_signals_from_compensation(compensation.get("insights", []), sample_size),
             *_signals_from_source(source.get("insights", []), sample_size),
             *_signals_from_artifacts(artifacts.get("insights", []), sample_size),
         ]
-        skill_gap_themes = _skill_gap_themes(latest_stride.values(), sample_size)
-        narrative_themes = _career_narrative_themes(latest_stride.values(), sample_size)
+        skill_gap_themes = _skill_gap_themes(latest_compass.values(), sample_size)
+        narrative_themes = _career_narrative_themes(latest_compass.values(), sample_size)
         compensation_alignment = _compensation_alignment(compensation, sample_size)
         positioning = _role_market_positioning(
             workspace=workspace,
             roles=roles,
-            evaluations=latest_stride.values(),
+            evaluations=latest_compass.values(),
             sample_size=sample_size,
         )
         retrospective = _retrospective(
@@ -227,7 +227,7 @@ class CareerStrategyService:
         source_inputs = {
             "workspace": str(workspace.id),
             "analytics": "/api/analytics/search",
-            "stride": "/api/analytics/stride",
+            "compass": "/api/analytics/compass",
             "source": "/api/analytics/sources",
             "compensation": "/api/analytics/compensation",
             "searchHealth": "/api/analytics/search-health",
@@ -241,7 +241,7 @@ class CareerStrategyService:
             generated_at=_now(),
             summary=_summary_for(sample_size, signals),
             basis=(
-                "Derived from workspace-scoped opportunities, applications, latest STRIDE evaluations, "
+                "Derived from workspace-scoped opportunities, applications, latest COMPASS evaluations, "
                 "search analytics, source intelligence, compensation intelligence, search health, "
                 "recommendations, historical learning, and artifact performance."
             ),
@@ -392,22 +392,22 @@ class CareerStrategyService:
             )
         )
 
-    def _latest_stride_by_role(
+    def _latest_compass_by_role(
         self,
         *,
         user_id: uuid.UUID,
         workspace_id: uuid.UUID,
-    ) -> dict[uuid.UUID, StrideEvaluation]:
-        latest: dict[uuid.UUID, StrideEvaluation] = {}
+    ) -> dict[uuid.UUID, CompassEvaluation]:
+        latest: dict[uuid.UUID, CompassEvaluation] = {}
         for evaluation in self.db.scalars(
-            select(StrideEvaluation)
+            select(CompassEvaluation)
             .where(
-                StrideEvaluation.user_id == user_id,
-                StrideEvaluation.workspace_id == workspace_id,
-                StrideEvaluation.deleted_at.is_(None),
-                StrideEvaluation.evaluation_status == "completed",
+                CompassEvaluation.user_id == user_id,
+                CompassEvaluation.workspace_id == workspace_id,
+                CompassEvaluation.deleted_at.is_(None),
+                CompassEvaluation.evaluation_status == "completed",
             )
-            .order_by(StrideEvaluation.role_id, StrideEvaluation.created_at.desc())
+            .order_by(CompassEvaluation.role_id, CompassEvaluation.created_at.desc())
         ):
             latest.setdefault(evaluation.role_id, evaluation)
         return latest
@@ -437,12 +437,12 @@ def _confidence(sample_size: StrategySampleSize) -> StrategyConfidence:
     if sample_size.opportunities == 0:
         level = "insufficient_data"
         reasons.append("empty_workspace")
-    elif sample_size.applications < 3 or sample_size.stride_evaluations < 3:
+    elif sample_size.applications < 3 or sample_size.compass_evaluations < 3:
         level = "weak"
         if sample_size.applications < 3:
             reasons.append("few_applications")
-        if sample_size.stride_evaluations < 3:
-            reasons.append("missing_stride_evaluations")
+        if sample_size.compass_evaluations < 3:
+            reasons.append("missing_compass_evaluations")
     elif sample_size.responses < 1:
         level = "weak"
         reasons.append("few_outcomes")
@@ -452,7 +452,7 @@ def _confidence(sample_size: StrategySampleSize) -> StrategyConfidence:
         level = "moderate"
     return StrategyConfidence(
         confidence=level,
-        basis="Confidence is derived from local sample size, completed STRIDE coverage, and observed workflow outcomes.",
+        basis="Confidence is derived from local sample size, completed COMPASS coverage, and observed workflow outcomes.",
         sample_size=sample_size.applications,
         source_inputs=sample_size.model_dump(mode="json", by_alias=True),
         known_uncertainty=_known_uncertainty(sample_size),
@@ -507,12 +507,12 @@ def _insufficient_data(
                 source_inputs={"responses": 0},
             )
         )
-    if sample_size.stride_evaluations == 0:
+    if sample_size.compass_evaluations == 0:
         items.append(
             StrategyInsufficientDataItem(
-                reason="missing_stride_evaluations",
-                message="Completed STRIDE evaluations are needed for fit and gap themes.",
-                source_inputs={"strideEvaluations": 0},
+                reason="missing_compass_evaluations",
+                message="Completed COMPASS evaluations are needed for fit and gap themes.",
+                source_inputs={"compassEvaluations": 0},
             )
         )
     if sample_size.artifact_performance_records == 0:
@@ -592,14 +592,14 @@ def _signals_from_analytics(
     ]
 
 
-def _signals_from_stride(
+def _signals_from_compass(
     raw: Iterable[dict[str, Any]],
     sample_size: StrategySampleSize,
 ) -> list[StrategySignal]:
     return [
         _signal(
-            id_prefix="stride",
-            category="stride",
+            id_prefix="compass",
+            category="compass",
             item=item,
             sample_size=sample_size,
         )
@@ -677,7 +677,7 @@ def _signal(
 
 
 def _skill_gap_themes(
-    evaluations: Iterable[StrideEvaluation],
+    evaluations: Iterable[CompassEvaluation],
     sample_size: StrategySampleSize,
 ) -> list[StrategySignal]:
     counts: Counter[str] = Counter()
@@ -691,10 +691,10 @@ def _skill_gap_themes(
     return [
         StrategySignal(
             id=f"skill-gap:{_slug(label)}",
-            category="stride",
+            category="compass",
             label=label,
-            message=f"{label} appears repeatedly in stored STRIDE gaps or ATS findings.",
-            basis="Counts repeated missing keywords, concerns, and gap language from completed STRIDE evaluations.",
+            message=f"{label} appears repeatedly in stored COMPASS gaps or ATS findings.",
+            basis="Counts repeated missing keywords, concerns, and gap language from completed COMPASS evaluations.",
             severity="caution",
             confidence=_signal_confidence(sample_size, sample_override=count),
             source_inputs={"occurrences": count},
@@ -705,7 +705,7 @@ def _skill_gap_themes(
 
 
 def _career_narrative_themes(
-    evaluations: Iterable[StrideEvaluation],
+    evaluations: Iterable[CompassEvaluation],
     sample_size: StrategySampleSize,
 ) -> list[StrategySignal]:
     counts: Counter[str] = Counter()
@@ -720,10 +720,10 @@ def _career_narrative_themes(
     return [
         StrategySignal(
             id=f"narrative:{_slug(label)}",
-            category="stride",
+            category="compass",
             label=label,
-            message=f"{label} appears in higher-fit stored STRIDE strengths.",
-            basis="Counts repeated strengths from completed high-fit STRIDE evaluations.",
+            message=f"{label} appears in higher-fit stored COMPASS strengths.",
+            basis="Counts repeated strengths from completed high-fit COMPASS evaluations.",
             severity="positive",
             confidence=_signal_confidence(sample_size, sample_override=count),
             source_inputs={"occurrences": count},
@@ -762,7 +762,7 @@ def _role_market_positioning(
     *,
     workspace: Workspace,
     roles: list[Role],
-    evaluations: Iterable[StrideEvaluation],
+    evaluations: Iterable[CompassEvaluation],
     sample_size: StrategySampleSize,
 ) -> RoleMarketPositioningSummary:
     categories = Counter(_role_category(role) for role in roles)
@@ -778,13 +778,13 @@ def _role_market_positioning(
         top = themes[0].replace("_", " ")
         summary = (
             f"Stored opportunities in {workspace.title} appear concentrated around {top}. "
-            f"{high_fit} completed STRIDE evaluations are currently high-fit."
+            f"{high_fit} completed COMPASS evaluations are currently high-fit."
         )
     else:
         summary = "Stored opportunities are too broad to identify a clear internal positioning theme."
     return RoleMarketPositioningSummary(
         summary=summary,
-        basis="Uses stored opportunity titles, workspace type, metadata, and STRIDE scores only.",
+        basis="Uses stored opportunity titles, workspace type, metadata, and COMPASS scores only.",
         confidence=_signal_confidence(sample_size, sample_override=len(roles)),
         themes=themes,
     )
@@ -819,7 +819,7 @@ def _retrospective(
     notes.extend(str(message) for message in historical.get("insufficient_data", [])[:2])
     return StrategyRetrospective(
         summary=summary,
-        basis="Synthesizes local workspace evidence from opportunities, applications, STRIDE, historical learning, and outcomes.",
+        basis="Synthesizes local workspace evidence from opportunities, applications, COMPASS, historical learning, and outcomes.",
         confidence=_confidence(sample_size),
         notes=notes,
     )
@@ -863,8 +863,8 @@ def _action_candidates(
                 "review-skill-gap-plan",
                 "review_skill_gap_plan",
                 "Review repeated skill-gap themes",
-                "Repeated STRIDE gaps may point to a resume positioning or target-scope issue.",
-                "Derived from repeated missing keywords and STRIDE gaps.",
+                "Repeated COMPASS gaps may point to a resume positioning or target-scope issue.",
+                "Derived from repeated missing keywords and COMPASS gaps.",
                 sample_size,
                 {"themes": [theme.label for theme in skill_gap_themes[:5]]},
             )

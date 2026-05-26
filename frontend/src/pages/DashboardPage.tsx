@@ -20,7 +20,7 @@ import { getRecommendations } from "../api/recommendations";
 import { getSearchAnalytics } from "../api/searchAnalytics";
 import { getSearchHealth } from "../api/searchHealth";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
-import { getStrideInsights } from "../api/strideInsights";
+import { getCompassInsights } from "../api/compassInsights";
 import { ErrorState, LoadingState } from "../components/States";
 import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
 import { InsightMeta } from "../components/InsightMeta";
@@ -32,14 +32,14 @@ import type { RecommendationListResponse } from "../types/recommendations";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 import type { SearchHealthResponse } from "../types/searchHealth";
 import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
-import type { StrideInsightsResponse } from "../types/strideInsights";
+import type { CompassInsightsResponse } from "../types/compassInsights";
 
 export function DashboardPage() {
   const [analytics, setAnalytics] = useState<SearchAnalyticsResponse | null>(null);
   const [artifactPerformance, setArtifactPerformance] =
     useState<ArtifactPerformanceResponse | null>(null);
-  const [strideInsights, setStrideInsights] =
-    useState<StrideInsightsResponse | null>(null);
+  const [compassInsights, setCompassInsights] =
+    useState<CompassInsightsResponse | null>(null);
   const [sourceIntelligence, setSourceIntelligence] =
     useState<SourceIntelligenceResponse | null>(null);
   const [compensationIntelligence, setCompensationIntelligence] =
@@ -61,7 +61,7 @@ export function DashboardPage() {
       const [
         searchAnalytics,
         artifactAnalytics,
-        strideAnalytics,
+        compassAnalytics,
         sourceAnalytics,
         compensationAnalytics,
         searchHealthAnalytics,
@@ -71,7 +71,7 @@ export function DashboardPage() {
       ] = await Promise.all([
         getSearchAnalytics(),
         getArtifactPerformance(),
-        getStrideInsights(),
+        getCompassInsights(),
         getSourceIntelligence(),
         getCompensationIntelligence(),
         getSearchHealth(),
@@ -81,7 +81,7 @@ export function DashboardPage() {
       ]);
       setAnalytics(searchAnalytics);
       setArtifactPerformance(artifactAnalytics);
-      setStrideInsights(strideAnalytics);
+      setCompassInsights(compassAnalytics);
       setSourceIntelligence(sourceAnalytics);
       setCompensationIntelligence(compensationAnalytics);
       setSearchHealth(searchHealthAnalytics);
@@ -118,7 +118,7 @@ export function DashboardPage() {
           {artifactPerformance ? (
             <ArtifactPerformancePanel performance={artifactPerformance} />
           ) : null}
-          {strideInsights ? <StrideInsightsPanel insights={strideInsights} /> : null}
+          {compassInsights ? <CompassInsightsPanel insights={compassInsights} /> : null}
           {sourceIntelligence ? (
             <SourceIntelligencePanel intelligence={sourceIntelligence} />
           ) : null}
@@ -341,21 +341,21 @@ function SourceIntelligencePanel({
   );
 }
 
-function StrideInsightsPanel({
+function CompassInsightsPanel({
   insights,
 }: {
-  insights: StrideInsightsResponse;
+  insights: CompassInsightsResponse;
 }) {
   return (
     <Paper withBorder radius="md" p="lg">
       <Group justify="space-between" align="flex-start">
         <div>
-          <Title order={3}>STRIDE search trends</Title>
+          <Title order={3}>COMPASS search trends</Title>
           <Text c="dimmed" size="sm">
             Average score:{" "}
-            {insights.average_stride_score === null
+            {insights.average_compass_score === null
               ? "Not enough data"
-              : insights.average_stride_score.toFixed(1)}
+              : insights.average_compass_score.toFixed(1)}
           </Text>
         </div>
       </Group>
@@ -377,7 +377,7 @@ function StrideInsightsPanel({
           ))
         ) : (
           <Text c="dimmed" size="sm">
-            Complete STRIDE evaluations to build search-level trend insight.
+            Complete COMPASS evaluations to build search-level trend insight.
           </Text>
         )}
       </Stack>

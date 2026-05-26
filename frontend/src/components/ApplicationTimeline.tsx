@@ -13,7 +13,7 @@ function eventColor(eventType: string) {
   if (eventType.includes("reactivated")) {
     return "green";
   }
-  if (eventType.includes("stride")) {
+  if (eventType.includes("compass")) {
     return "violet";
   }
   if (eventType.includes("artifact")) {

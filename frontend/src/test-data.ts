@@ -1,5 +1,5 @@
 import type { Role } from "./types/roles";
-import type { StrideEvaluation } from "./types/strideEvaluations";
+import type { CompassEvaluation } from "./types/compassEvaluations";
 
 export const sampleRole: Role = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -32,7 +32,7 @@ export const sampleRole: Role = {
   },
 };
 
-export const sampleEvaluation: StrideEvaluation = {
+export const sampleEvaluation: CompassEvaluation = {
   id: "44444444-4444-4444-8444-444444444444",
   user_id: "00000000-0000-4000-8000-000000000001",
   role_id: sampleRole.id,

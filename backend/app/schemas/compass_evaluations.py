@@ -5,23 +5,23 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.constants import StrideEvaluationStatus
+from app.constants import CompassEvaluationStatus
 
 
-class StrideEvaluationCreate(BaseModel):
+class CompassEvaluationCreate(BaseModel):
     user_notes: str | None = Field(default=None, max_length=5000)
     user_context: dict[str, Any] = Field(default_factory=dict)
     force: bool = False
 
 
-class StrideEvaluationResponse(BaseModel):
+class CompassEvaluationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
     user_id: uuid.UUID
     workspace_id: uuid.UUID
     role_id: uuid.UUID
-    evaluation_status: StrideEvaluationStatus
+    evaluation_status: CompassEvaluationStatus
     overall_score: Decimal | None
     recommendation: str | None
     confidence_level: str | None

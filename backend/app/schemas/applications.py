@@ -37,7 +37,7 @@ class ApplicationRoleSummary(BaseModel):
     remote_type: str | None = None
 
 
-class ApplicationStrideSummary(BaseModel):
+class ApplicationCompassSummary(BaseModel):
     id: uuid.UUID
     evaluation_status: str
     recommendation: str | None = None
@@ -75,7 +75,7 @@ class ApplicationListItemResponse(BaseModel):
     updated_at: datetime
     archived_at: datetime | None = None
     available_next_states: list[ApplicationWorkflowState] = Field(default_factory=list)
-    stride: ApplicationStrideSummary | None = None
+    compass: ApplicationCompassSummary | None = None
     resume_artifact: ApplicationArtifactSummary | None = None
     cover_letter_artifact: ApplicationArtifactSummary | None = None
     counts: ApplicationWorkflowCounts

@@ -6,10 +6,10 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.constants import ApplicationWorkflowState, StrideEvaluationStatus
+from app.constants import ApplicationWorkflowState, CompassEvaluationStatus
 from app.database import get_db
 from app.main import create_app
-from app.models import Application, ApplicationReminder, StrideEvaluation
+from app.models import Application, ApplicationReminder, CompassEvaluation
 from app.schemas.applications import (
     ApplicationInterviewStageCreate,
     ApplicationNoteCreate,
@@ -105,19 +105,19 @@ def test_search_analytics_calculates_counts_conversions_and_segments(
     )
     db_session.add_all(
         [
-            StrideEvaluation(
+            CompassEvaluation(
                 user_id=first.user_id,
                 workspace_id=first.workspace_id,
                 role_id=first.role_id,
-                evaluation_status=StrideEvaluationStatus.COMPLETED.value,
+                evaluation_status=CompassEvaluationStatus.COMPLETED.value,
                 overall_score=Decimal("86"),
                 compensation_alignment={"status": "aligned"},
             ),
-            StrideEvaluation(
+            CompassEvaluation(
                 user_id=second.user_id,
                 workspace_id=second.workspace_id,
                 role_id=second.role_id,
-                evaluation_status=StrideEvaluationStatus.COMPLETED.value,
+                evaluation_status=CompassEvaluationStatus.COMPLETED.value,
                 overall_score=Decimal("52"),
                 compensation_alignment={"status": "below_target"},
             ),
@@ -141,13 +141,13 @@ def test_search_analytics_calculates_counts_conversions_and_segments(
     assert applied_to_interview["numerator"] == 1
     assert applied_to_interview["denominator"] == 2
     assert applied_to_interview["rate"] == 0.5
-    stride_segments = {
+    compass_segments = {
         item["segment"]: item for item in analytics["segment_response_rates"]
     }
-    assert stride_segments["high_stride_fit"]["response_rate"] == 1
-    assert stride_segments["low_stride_fit"]["response_rate"] == 0
-    assert stride_segments["compensation_aligned"]["response_rate"] == 1
-    assert stride_segments["compensation_risk"]["response_rate"] == 0
+    assert compass_segments["high_compass_fit"]["response_rate"] == 1
+    assert compass_segments["low_compass_fit"]["response_rate"] == 0
+    assert compass_segments["compensation_aligned"]["response_rate"] == 1
+    assert compass_segments["compensation_risk"]["response_rate"] == 0
 
 
 def test_search_analytics_rejects_unknown_workspace(db_session: Session) -> None:
