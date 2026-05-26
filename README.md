@@ -45,7 +45,7 @@ Current planning hierarchy:
 - Analytics and dashboard surfaces for search analytics, STRIDE insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
-- Local-only advisor packet preview and Markdown export with redacted defaults for private notes, STRIDE rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
+- Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, STRIDE rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
 - Local development documentation.

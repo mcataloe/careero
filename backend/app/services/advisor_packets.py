@@ -16,10 +16,12 @@ from app.models import (
     ApplicationExternalLink,
     ApplicationInterviewStage,
     ApplicationNote,
+    ApplicationReminder,
     GeneratedArtifact,
     Role,
     User,
 )
+from app.schemas.advisor_packets import AdvisorPacketIncludeOptions
 from app.seed import DEFAULT_LOCAL_USER_ID
 
 
@@ -62,19 +64,28 @@ class AdvisorPacketService:
             )
         return user
 
-    def get_application_packet(self, application_id: uuid.UUID) -> dict[str, Any]:
+    def get_application_packet(
+        self,
+        application_id: uuid.UUID,
+        include_options: AdvisorPacketIncludeOptions | None = None,
+    ) -> dict[str, Any]:
         user = self.get_default_user()
         application = self._get_application(application_id=application_id, user_id=user.id)
         if application is None:
             raise AdvisorPacketNotFoundError("Application workflow not found")
 
-        return _packet_response(application=application, artifacts=self._artifacts(application))
+        return _packet_response(
+            application=application,
+            artifacts=self._artifacts(application),
+            include_options=include_options or AdvisorPacketIncludeOptions(),
+        )
 
     def export_application_packet_markdown(
         self,
         application_id: uuid.UUID,
+        include_options: AdvisorPacketIncludeOptions | None = None,
     ) -> AdvisorPacketExportResult:
-        packet = self.get_application_packet(application_id)
+        packet = self.get_application_packet(application_id, include_options)
         content = _render_markdown(packet).encode("utf-8")
         content_hash = f"sha256:{hashlib.sha256(content).hexdigest()}"
         title = packet["opportunity"]["title"]
@@ -129,11 +140,39 @@ def _packet_response(
     *,
     application: Application,
     artifacts: list[GeneratedArtifact],
+    include_options: AdvisorPacketIncludeOptions,
 ) -> dict[str, Any]:
     role = application.role
     active_notes = _active_notes(application)
     active_interviews = _active_interviews(application)
     active_links = _active_links(application)
+    active_reminders = list(application.reminders)
+    selected_artifact_ids = set(include_options.artifact_ids)
+    selected_link_ids = set(include_options.external_link_ids)
+    selected_interview_ids = set(include_options.interview_stage_ids)
+    selected_reminder_ids = set(include_options.reminder_ids)
+    selected_links = [link for link in active_links if link.id in selected_link_ids]
+    selected_interviews = [
+        interview for interview in active_interviews if interview.id in selected_interview_ids
+    ]
+    selected_reminders = [
+        reminder for reminder in active_reminders if reminder.id in selected_reminder_ids
+    ]
+    advisor_context = _trim_context(include_options.advisor_context)
+    artifact_summaries = [
+        _artifact_summary(
+            artifact,
+            include_content=artifact.id in selected_artifact_ids,
+        )
+        for artifact in artifacts
+    ]
+    warnings = _warnings(
+        artifacts=artifact_summaries,
+        selected_link_count=len(selected_links),
+        selected_interview_count=len(selected_interviews),
+        selected_reminder_count=len(selected_reminders),
+        advisor_context=advisor_context,
+    )
     return {
         "packet_version": PACKET_VERSION,
         "mode": "local_preview",
@@ -141,6 +180,23 @@ def _packet_response(
         "local_only": True,
         "external_sharing_enabled": False,
         "advisory_notice": ADVISORY_NOTICE,
+        "include_options": {
+            "artifact_ids": list(include_options.artifact_ids),
+            "external_link_ids": list(include_options.external_link_ids),
+            "interview_stage_ids": list(include_options.interview_stage_ids),
+            "reminder_ids": list(include_options.reminder_ids),
+            "advisor_context": advisor_context,
+        },
+        "sections": _sections(
+            artifact_count=len(artifacts),
+            artifact_content_count=sum(
+                1 for artifact in artifact_summaries if artifact["content_included"]
+            ),
+            link_count=len(selected_links),
+            interview_count=len(selected_interviews),
+            reminder_count=len(selected_reminders),
+            advisor_context=advisor_context,
+        ),
         "opportunity": {
             "id": role.id,
             "workspace_id": role.workspace_id,
@@ -162,34 +218,37 @@ def _packet_response(
                 "external_links": len(active_links),
             },
         },
-        "artifacts": [_artifact_summary(artifact) for artifact in artifacts],
+        "artifacts": artifact_summaries,
+        "selected_external_links": [_link_summary(link) for link in selected_links],
+        "selected_interviews": [
+            _interview_summary(interview) for interview in selected_interviews
+        ],
+        "selected_reminders": [
+            _reminder_summary(reminder) for reminder in selected_reminders
+        ],
+        "advisor_context": advisor_context,
         "redactions": _redactions(
             notes_count=len(active_notes),
             links_count=len(active_links),
             interviews_count=len(active_interviews),
+            reminders_count=len(active_reminders),
+            selected_artifact_content_count=sum(
+                1 for artifact in artifact_summaries if artifact["content_included"]
+            ),
+            selected_links_count=len(selected_links),
+            selected_interviews_count=len(selected_interviews),
+            selected_reminders_count=len(selected_reminders),
+            advisor_context_included=advisor_context is not None,
         ),
-        "warnings": [
-            {
-                "code": "local_only_preview",
-                "message": (
-                    "This packet is a local preview/export only. It does not create "
-                    "hosted access, invitations, accounts, public links, comments, "
-                    "or external sharing."
-                ),
-            },
-            {
-                "code": "redacted_by_default",
-                "message": (
-                    "Private notes, compensation strategy, STRIDE rationale, ATS "
-                    "risk notes, recruiter intelligence, raw sources, and artifact "
-                    "content are excluded by default."
-                ),
-            },
-        ],
+        "warnings": warnings,
     }
 
 
-def _artifact_summary(artifact: GeneratedArtifact) -> dict[str, Any]:
+def _artifact_summary(
+    artifact: GeneratedArtifact,
+    *,
+    include_content: bool,
+) -> dict[str, Any]:
     contract = (
         artifact.artifact_metadata.get("contract")
         if artifact.artifact_metadata
@@ -201,10 +260,19 @@ def _artifact_summary(artifact: GeneratedArtifact) -> dict[str, Any]:
     )
     warnings = [
         {
-            "code": "artifact_content_excluded",
+            "code": (
+                "artifact_content_included"
+                if include_content
+                else "artifact_content_excluded"
+            ),
             "message": (
-                "Artifact content is not included in the default advisor packet. "
-                "Only lifecycle summary metadata is shown."
+                "Artifact content was explicitly selected for this local-only "
+                "preview. Keep lifecycle and truthfulness warnings attached."
+                if include_content
+                else (
+                    "Artifact content is not included in the default advisor packet. "
+                    "Only lifecycle summary metadata is shown."
+                )
             ),
         }
     ]
@@ -224,10 +292,246 @@ def _artifact_summary(artifact: GeneratedArtifact) -> dict[str, Any]:
         "title": artifact.title,
         "lifecycle_status": lifecycle_status,
         "revision_number": revision.get("revisionNumber"),
-        "content_included": False,
+        "content_included": include_content,
+        "content": artifact.content if include_content else None,
         "updated_at": artifact.updated_at,
         "warnings": warnings,
     }
+
+
+def _link_summary(link: ApplicationExternalLink) -> dict[str, Any]:
+    return {
+        "id": link.id,
+        "label": link.label,
+        "url": link.url,
+        "link_type": link.link_type,
+        "warning": (
+            "This link was explicitly selected for local preview. Verify it does "
+            "not expose private portals, tracking URLs, or account-specific access."
+        ),
+    }
+
+
+def _interview_summary(interview: ApplicationInterviewStage) -> dict[str, Any]:
+    return {
+        "id": interview.id,
+        "title": interview.title,
+        "stage_type": interview.stage_type,
+        "status": interview.status,
+        "scheduled_at": interview.scheduled_at,
+        "completed_at": interview.completed_at,
+        "notes_included": True,
+        "notes": interview.notes,
+        "preparation_notes": interview.preparation_notes,
+        "outcome_notes": interview.outcome_notes,
+        "warning": (
+            "Interview notes were explicitly selected for local preview. "
+            "Interviewer names and meeting links remain redacted."
+        ),
+    }
+
+
+def _reminder_summary(reminder: ApplicationReminder) -> dict[str, Any]:
+    return {
+        "id": reminder.id,
+        "title": reminder.title,
+        "due_at": reminder.due_at,
+        "completed_at": reminder.completed_at,
+        "notes_included": reminder.notes is not None,
+        "notes": reminder.notes,
+        "warning": (
+            "Reminder details were explicitly selected for local preview. Confirm "
+            "the text does not reveal private deadlines or pressure points."
+        ),
+    }
+
+
+def _sections(
+    *,
+    artifact_count: int,
+    artifact_content_count: int,
+    link_count: int,
+    interview_count: int,
+    reminder_count: int,
+    advisor_context: str | None,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "key": "opportunity_summary",
+            "title": "Opportunity summary",
+            "status": "included",
+            "item_count": 1,
+            "warnings": [],
+        },
+        {
+            "key": "application_summary",
+            "title": "Application summary",
+            "status": "included",
+            "item_count": 1,
+            "warnings": [],
+        },
+        {
+            "key": "artifact_summaries",
+            "title": "Artifact summaries",
+            "status": "summary_only" if artifact_count else "excluded",
+            "item_count": artifact_count,
+            "warnings": [
+                {
+                    "code": "artifact_lifecycle_warning",
+                    "message": (
+                        "Generated artifacts must keep lifecycle, source-grounding, "
+                        "and truthfulness warnings visible."
+                    ),
+                }
+            ],
+        },
+        {
+            "key": "selected_artifact_content",
+            "title": "Selected artifact content",
+            "status": "included" if artifact_content_count else "excluded",
+            "item_count": artifact_content_count,
+            "warnings": [
+                {
+                    "code": "explicit_selection_required",
+                    "message": "Artifact content is excluded unless explicitly selected.",
+                }
+            ],
+        },
+        {
+            "key": "selected_external_links",
+            "title": "Selected external links",
+            "status": "included" if link_count else "excluded",
+            "item_count": link_count,
+            "warnings": [
+                {
+                    "code": "link_exposure_warning",
+                    "message": (
+                        "Links can expose private portals, tracking URLs, or account "
+                        "context; include only reviewed links."
+                    ),
+                }
+            ],
+        },
+        {
+            "key": "selected_interview_notes",
+            "title": "Selected interview notes",
+            "status": "included" if interview_count else "excluded",
+            "item_count": interview_count,
+            "warnings": [
+                {
+                    "code": "interview_note_redaction_warning",
+                    "message": (
+                        "Interview notes are excluded by default and interviewer names "
+                        "and meeting links remain redacted."
+                    ),
+                }
+            ],
+        },
+        {
+            "key": "selected_reminders",
+            "title": "Selected reminders",
+            "status": "included" if reminder_count else "excluded",
+            "item_count": reminder_count,
+            "warnings": [
+                {
+                    "code": "reminder_privacy_warning",
+                    "message": "Reminders are excluded unless explicitly selected.",
+                }
+            ],
+        },
+        {
+            "key": "advisor_context",
+            "title": "Advisor context",
+            "status": "included" if advisor_context else "excluded",
+            "item_count": 1 if advisor_context else 0,
+            "warnings": [
+                {
+                    "code": "user_authored_context",
+                    "message": (
+                        "Advisor context is user-authored for this local preview and "
+                        "is not persisted as a collaborator record."
+                    ),
+                }
+            ],
+        },
+    ]
+
+
+def _warnings(
+    *,
+    artifacts: list[dict[str, Any]],
+    selected_link_count: int,
+    selected_interview_count: int,
+    selected_reminder_count: int,
+    advisor_context: str | None,
+) -> list[dict[str, str]]:
+    warnings = [
+        {
+            "code": "local_only_preview",
+            "message": (
+                "This packet is a local preview/export only. It does not create "
+                "hosted access, invitations, accounts, public links, comments, "
+                "or external sharing."
+            ),
+        },
+        {
+            "code": "redacted_by_default",
+            "message": (
+                "Private notes, compensation strategy, STRIDE rationale, ATS "
+                "risk notes, recruiter intelligence, raw sources, and automation "
+                "logs are excluded by default."
+            ),
+        },
+        {
+            "code": "truthguard_source_grounding",
+            "message": (
+                "Generated artifacts remain draft/local records and must retain "
+                "TruthGuard and source-grounding warnings."
+            ),
+        },
+    ]
+    if any(artifact["content_included"] for artifact in artifacts):
+        warnings.append(
+            {
+                "code": "artifact_content_explicitly_selected",
+                "message": (
+                    "Artifact content appears only because it was explicitly selected "
+                    "for this local preview."
+                ),
+            }
+        )
+    if selected_link_count:
+        warnings.append(
+            {
+                "code": "external_links_explicitly_selected",
+                "message": "External links appear only because they were explicitly selected.",
+            }
+        )
+    if selected_interview_count:
+        warnings.append(
+            {
+                "code": "interview_notes_explicitly_selected",
+                "message": "Interview notes appear only because they were explicitly selected.",
+            }
+        )
+    if selected_reminder_count:
+        warnings.append(
+            {
+                "code": "reminders_explicitly_selected",
+                "message": "Reminders appear only because they were explicitly selected.",
+            }
+        )
+    if advisor_context:
+        warnings.append(
+            {
+                "code": "advisor_context_user_authored",
+                "message": (
+                    "Advisor context is user-authored local preview text and is not "
+                    "stored as a collaborator note."
+                ),
+            }
+        )
+    return warnings
 
 
 def _redactions(
@@ -235,73 +539,146 @@ def _redactions(
     notes_count: int,
     links_count: int,
     interviews_count: int,
-) -> list[dict[str, str]]:
+    reminders_count: int,
+    selected_artifact_content_count: int,
+    selected_links_count: int,
+    selected_interviews_count: int,
+    selected_reminders_count: int,
+    advisor_context_included: bool,
+) -> list[dict[str, Any]]:
     return [
         {
             "data_class": "Raw job description",
+            "field": "opportunity.raw_description",
             "default_visibility": "Private",
             "status": "excluded",
+            "included": False,
             "reason": "Raw source material is for grounding and is not advisor-visible by default.",
+            "warning": "Raw opportunity source text can leak proprietary posting details.",
         },
         {
             "data_class": "STRIDE score and explanation",
+            "field": "stride_evaluation",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": "Internal fit analysis remains advisory, source-grounded, and private by default.",
+            "warning": "STRIDE is advisory, not deterministic truth.",
         },
         {
             "data_class": "ATS risk notes",
+            "field": "stride_evaluation.ats",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": "ATS risk notes are internal strategy and are not employer- or advisor-visible by default.",
+            "warning": "ATS notes must not become employer-facing material.",
         },
         {
             "data_class": "Compensation targets and strategy",
+            "field": "opportunity.compensation",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": "Negotiation-sensitive compensation data is excluded from default packets.",
+            "warning": "Compensation information can weaken negotiation posture if exposed.",
         },
         {
             "data_class": "Private user notes",
+            "field": "application_notes.body",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": f"{notes_count} note(s) exist and require explicit future selection before inclusion.",
+            "warning": "Private notes are not advisor comments and remain separate.",
         },
         {
             "data_class": "Recruiter/source/contact metadata",
+            "field": "role.source_id",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": "Recruiter and contact intelligence is excluded by default.",
+            "warning": "Source and contact metadata can reveal private search channels.",
         },
         {
             "data_class": "Interview notes",
+            "field": "application_interview_stages.notes",
             "default_visibility": "Private by default",
-            "status": "summary_only" if interviews_count else "excluded",
-            "reason": f"{interviews_count} interview stage(s) are counted, but notes and names are redacted.",
+            "status": "included" if selected_interviews_count else "excluded",
+            "included": selected_interviews_count > 0,
+            "reason": (
+                f"{selected_interviews_count} of {interviews_count} interview "
+                "stage(s) explicitly selected; names and meeting links remain redacted."
+            ),
+            "warning": "Interview notes can contain sensitive impressions and preparation strategy.",
         },
         {
             "data_class": "External links",
+            "field": "application_external_links.url",
             "default_visibility": "Packet-eligible if selected",
-            "status": "excluded",
-            "reason": f"{links_count} link(s) exist and require explicit future selection before inclusion.",
+            "status": "included" if selected_links_count else "excluded",
+            "included": selected_links_count > 0,
+            "reason": (
+                f"{selected_links_count} of {links_count} link(s) explicitly "
+                "selected for this local preview."
+            ),
+            "warning": "Links can expose private portals, tracking URLs, or account context.",
         },
         {
             "data_class": "Generated artifact content",
+            "field": "generated_artifacts.content",
             "default_visibility": "Packet-eligible if selected",
-            "status": "excluded",
-            "reason": "Only artifact lifecycle summaries are included in this default packet preview.",
+            "status": "included" if selected_artifact_content_count else "excluded",
+            "included": selected_artifact_content_count > 0,
+            "reason": (
+                f"{selected_artifact_content_count} artifact(s) explicitly selected "
+                "for content inclusion; lifecycle summaries remain visible."
+            ),
+            "warning": "Generated artifacts need lifecycle, TruthGuard, and source-grounding warnings.",
+        },
+        {
+            "data_class": "Reminders",
+            "field": "application_reminders",
+            "default_visibility": "Private by default",
+            "status": "included" if selected_reminders_count else "excluded",
+            "included": selected_reminders_count > 0,
+            "reason": (
+                f"{selected_reminders_count} of {reminders_count} reminder(s) "
+                "explicitly selected for this local preview."
+            ),
+            "warning": "Reminder text can expose private deadlines or pressure points.",
+        },
+        {
+            "data_class": "User-authored advisor context",
+            "field": "advisor_context",
+            "default_visibility": "Packet-eligible if user-authored",
+            "status": "included" if advisor_context_included else "excluded",
+            "included": advisor_context_included,
+            "reason": (
+                "User-authored context is included only for this local preview."
+                if advisor_context_included
+                else "No advisor context was provided for this local preview."
+            ),
+            "warning": "This context is not persisted as a collaborator record.",
         },
         {
             "data_class": "Career strategy synthesis",
+            "field": "strategy",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": "Strategy synthesis is internal, advisory, source-derived, and private by default.",
+            "warning": "Strategy synthesis can reveal private decision rationale.",
         },
         {
             "data_class": "Activity and automation approval logs",
+            "field": "activity_log.automation",
             "default_visibility": "Private by default",
             "status": "excluded",
+            "included": False,
             "reason": "Audit and automation records are not shareable packet content by default.",
+            "warning": "Automation logs remain internal audit records.",
         },
     ]
 
@@ -341,11 +718,40 @@ def _render_markdown(packet: dict[str, Any]) -> str:
                     f"- {artifact['title']} ({artifact['artifact_type']})",
                     f"  - Lifecycle status: {_display(artifact.get('lifecycle_status'))}",
                     f"  - Revision: {_display(artifact.get('revision_number'))}",
-                    "  - Content included: no",
+                    f"  - Content included: {'yes' if artifact.get('content_included') else 'no'}",
                 ]
             )
+            if artifact.get("content_included") and artifact.get("content"):
+                lines.extend(
+                    [
+                        "",
+                        f"### {artifact['title']} content",
+                        "",
+                        str(artifact["content"]),
+                        "",
+                    ]
+                )
     else:
         lines.append("- No generated resume or cover-letter artifacts found.")
+    if packet.get("selected_external_links"):
+        lines.extend(["", "## Selected External Links", ""])
+        for link in packet["selected_external_links"]:
+            lines.append(f"- {link['label']}: {link['url']}")
+    if packet.get("selected_interviews"):
+        lines.extend(["", "## Selected Interview Notes", ""])
+        for interview in packet["selected_interviews"]:
+            lines.append(f"- {interview['title']} ({interview['status']})")
+            for key in ("notes", "preparation_notes", "outcome_notes"):
+                if interview.get(key):
+                    lines.append(f"  - {key.replace('_', ' ').title()}: {interview[key]}")
+    if packet.get("selected_reminders"):
+        lines.extend(["", "## Selected Reminders", ""])
+        for reminder in packet["selected_reminders"]:
+            lines.append(f"- {reminder['title']} due {_display(reminder.get('due_at'))}")
+            if reminder.get("notes"):
+                lines.append(f"  - Notes: {reminder['notes']}")
+    if packet.get("advisor_context"):
+        lines.extend(["", "## Advisor Context", "", str(packet["advisor_context"])])
     lines.extend(["", "## Redactions", ""])
     for redaction in packet.get("redactions") or []:
         lines.append(
@@ -371,6 +777,15 @@ def _display(value: Any) -> str:
 def _slug(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value).strip("-").lower()
     return slug or "careero"
+
+
+def _trim_context(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    if not normalized:
+        return None
+    return normalized[:4000]
 
 
 def _active_notes(application: Application) -> list[ApplicationNote]:

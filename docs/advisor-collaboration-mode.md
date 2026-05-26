@@ -7,10 +7,11 @@ preserving privacy, user ownership, explicit consent, scoped visibility,
 revocation, and auditability.
 
 This document is the active readiness and design source. Current code is limited
-to local-only owner-visible advisor packet preview and Markdown export
-scaffolding. Careero still does not implement hosted collaboration, advisor
-accounts, invitations, external sharing, public links, comments, production
-auth, tenant isolation, or employer/recruiter visibility.
+to local-only owner-visible advisor packet preview, deterministic redaction
+metadata, explicit local include options, and Markdown export scaffolding.
+Careero still does not implement hosted collaboration, advisor accounts,
+invitations, external sharing, public links, comments, production auth, tenant
+isolation, or employer/recruiter visibility.
 
 Advisor collaboration must keep Careero job-seeker-first. STRIDE remains
 advisory, source-grounded, explainable, and never deterministic truth. Private
@@ -24,7 +25,10 @@ Layer 12 status: future / local-only packet preview started.
 
 Careero now has local-only advisor packet preview and Markdown export
 scaffolding from application detail. The packet is owner-visible, read-only,
-redacted by default, and creates no external access.
+redacted by default, and creates no external access. It also returns redaction
+metadata and local-only include-option metadata so explicitly selected artifact
+content, links, interview notes, reminders, and user-authored advisor context
+can be previewed without creating share records.
 
 Careero currently has:
 
@@ -146,7 +150,9 @@ It must not include by default:
 
 The current safe packet behavior is local-only owner preview/export with no
 hosted access, no invitations, no external send, and no persistent collaborator
-records.
+records. Explicit include options affect only the generated local preview or
+Markdown export response; they do not persist advisor access, collaborator
+state, or share records.
 
 ## Permission Model: Design Only
 
@@ -216,10 +222,10 @@ sync, and production auth/provider choices are outside this Build Unit.
 | Build Unit | Status |
 | --- | --- |
 | 12A Advisor collaboration strategy doc | Current docs-first Build Unit. |
-| 12B Collaboration data-class/redaction matrix | Design-only, may refine this document or become a dedicated design doc. |
+| 12B Collaboration data-class/redaction matrix | Implemented as local packet redaction metadata for default exclusions and explicit local include status; no hosted policy enforcement. |
 | 12C Permission model design | Design-only. |
 | 12D Advisor packet model design | Design-only. |
-| 12E Local-only packet preview/export scaffolding | Implemented locally after separate approval; owner-visible only, redacted by default, no hosted sharing. |
+| 12E Local-only packet preview/export scaffolding | Implemented locally after separate approval; owner-visible only, redacted by default, explicit include options are local-preview only, no hosted sharing. |
 | 12F Comment-only workflow design | Design-only; implementation blocked. |
 | 12G Revocation/audit design | Design-only; implementation blocked until account/auth decisions exist. |
 | 12H UI trust copy | Design-only, no implementation without approval. |

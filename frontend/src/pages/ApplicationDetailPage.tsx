@@ -26,7 +26,10 @@ import type {
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
 } from "../types/applications";
-import type { AdvisorPacket } from "../types/advisorPackets";
+import type {
+  AdvisorPacket,
+  AdvisorPacketPreviewOptions,
+} from "../types/advisorPackets";
 import type { AutomationSuggestion } from "../types/automation";
 
 const STATE_COLORS: Record<ApplicationWorkflowState, string> = {
@@ -96,6 +99,14 @@ export function ApplicationDetailPage() {
     }
   }
 
+  async function refreshAdvisorPacket(options: AdvisorPacketPreviewOptions) {
+    if (!applicationId) {
+      throw new Error("Application id is required");
+    }
+    const nextAdvisorPacket = await getAdvisorPacket(applicationId, options);
+    setAdvisorPacket(nextAdvisorPacket);
+  }
+
   useEffect(() => {
     void loadApplication();
   }, [applicationId]);
@@ -163,6 +174,9 @@ export function ApplicationDetailPage() {
         <AdvisorPacketPanel
           applicationId={application.id}
           packet={advisorPacket}
+          externalLinks={links}
+          interviews={interviews}
+          onRefresh={refreshAdvisorPacket}
         />
       ) : null}
 

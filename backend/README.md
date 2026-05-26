@@ -571,6 +571,16 @@ source resume/profile material, career strategy synthesis, activity logs,
 automation approval logs, and generated artifact content are excluded by
 default.
 
+Explicit local preview options use a non-persisted POST body:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -ContentType "application/json" `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/advisor-packet/preview `
+  -Body '{"artifact_ids":[],"external_link_ids":[],"interview_stage_ids":[],"reminder_ids":[],"advisor_context":"Review positioning only."}'
+```
+
 ## Career Strategy API
 
 Layer 10 strategy synthesis is read-only and workspace-scoped. It uses stored

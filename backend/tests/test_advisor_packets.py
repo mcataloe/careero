@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -9,9 +10,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.main import create_app
 from app.models import (
+    ActivityLog,
     Application,
     ApplicationExternalLink,
+    ApplicationInterviewStage,
     ApplicationNote,
+    ApplicationReminder,
     GeneratedArtifact,
     StrideEvaluation,
 )
@@ -74,6 +78,27 @@ def create_application_with_private_inputs(db_session: Session) -> Application:
                 url="https://example.com/recruiter/private",
                 link_type="recruiter_profile",
             ),
+            ApplicationInterviewStage(
+                application_id=application.id,
+                user_id=application.user_id,
+                workspace_id=application.workspace_id,
+                stage_type="recruiter_screen",
+                title="Recruiter screen",
+                status="scheduled",
+                notes="Private interview notes about concerns.",
+                preparation_notes="Private prep plan.",
+                outcome_notes="Private outcome notes.",
+                interviewer_names=["Recruiter One"],
+                location_or_meeting_link="https://meet.example.com/private",
+            ),
+            ApplicationReminder(
+                application_id=application.id,
+                user_id=application.user_id,
+                workspace_id=application.workspace_id,
+                title="Private follow-up deadline",
+                notes="Reminder note with private timing.",
+                due_at=datetime.now(timezone.utc),
+            ),
             StrideEvaluation(
                 user_id=application.user_id,
                 workspace_id=application.workspace_id,
@@ -120,11 +145,17 @@ def test_advisor_packet_preview_is_local_only_and_redacted_by_default(
     assert packet["mode"] == "local_preview"
     assert packet["local_only"] is True
     assert packet["external_sharing_enabled"] is False
+    assert packet["include_options"]["artifact_ids"] == []
+    assert packet["sections"][0]["key"] == "opportunity_summary"
     assert packet["opportunity"]["title"] == "Staff Platform Engineer"
     assert packet["opportunity"]["company_name"] == "Packet Co"
     assert packet["application"]["counts"]["notes"] == 1
     assert packet["artifacts"][0]["content_included"] is False
+    assert packet["artifacts"][0]["content"] is None
     assert packet["artifacts"][0]["lifecycle_status"] == "draft"
+    assert packet["selected_external_links"] == []
+    assert packet["selected_interviews"] == []
+    assert packet["selected_reminders"] == []
 
     body = response.text
     assert "Private negotiation note" not in body
@@ -132,8 +163,62 @@ def test_advisor_packet_preview_is_local_only_and_redacted_by_default(
     assert "Private STRIDE summary" not in body
     assert "Private generated artifact content" not in body
     assert "https://example.com/recruiter/private" not in body
+    assert "Private interview notes" not in body
+    assert "Reminder note with private timing" not in body
+    assert "https://meet.example.com/private" not in body
     assert "Compensation targets and strategy" in body
     assert "STRIDE score and explanation" in body
+
+
+def test_advisor_packet_preview_includes_only_explicit_local_selections(
+    advisor_packet_client: TestClient,
+    db_session: Session,
+) -> None:
+    application = create_application_with_private_inputs(db_session)
+    artifact = db_session.query(GeneratedArtifact).filter_by(role_id=application.role_id).one()
+    link = db_session.query(ApplicationExternalLink).filter_by(
+        application_id=application.id,
+    ).one()
+    interview = db_session.query(ApplicationInterviewStage).filter_by(
+        application_id=application.id,
+    ).one()
+    reminder = db_session.query(ApplicationReminder).filter_by(
+        application_id=application.id,
+    ).one()
+
+    response = advisor_packet_client.post(
+        f"/api/applications/{application.id}/advisor-packet/preview",
+        json={
+            "artifact_ids": [str(artifact.id)],
+            "external_link_ids": [str(link.id)],
+            "interview_stage_ids": [str(interview.id)],
+            "reminder_ids": [str(reminder.id)],
+            "advisor_context": "Please review positioning only.",
+        },
+    )
+
+    assert response.status_code == 200
+    packet = response.json()
+    assert packet["artifacts"][0]["content_included"] is True
+    assert packet["artifacts"][0]["content"] == "Private generated artifact content."
+    assert packet["selected_external_links"][0]["url"] == (
+        "https://example.com/recruiter/private"
+    )
+    assert packet["selected_interviews"][0]["notes"] == (
+        "Private interview notes about concerns."
+    )
+    assert packet["selected_interviews"][0]["preparation_notes"] == "Private prep plan."
+    assert packet["selected_reminders"][0]["notes"] == (
+        "Reminder note with private timing."
+    )
+    assert packet["advisor_context"] == "Please review positioning only."
+    assert "artifact_content_explicitly_selected" in {
+        warning["code"] for warning in packet["warnings"]
+    }
+    assert "Private negotiation note" not in response.text
+    assert "Private raw job description" not in response.text
+    assert "Private STRIDE summary" not in response.text
+    assert "https://meet.example.com/private" not in response.text
 
 
 def test_advisor_packet_markdown_export_is_local_only(
@@ -154,6 +239,23 @@ def test_advisor_packet_markdown_export_is_local_only(
     assert b"Advisor Packet Preview: Staff Platform Engineer" in response.content
     assert b"Private negotiation note" not in response.content
     assert b"Private generated artifact content" not in response.content
+
+
+def test_advisor_packet_preview_does_not_persist_share_records(
+    advisor_packet_client: TestClient,
+    db_session: Session,
+) -> None:
+    application = create_application_with_private_inputs(db_session)
+    activity_log_count = db_session.query(ActivityLog).count()
+    artifact_count = db_session.query(GeneratedArtifact).count()
+
+    response = advisor_packet_client.get(
+        f"/api/applications/{application.id}/advisor-packet"
+    )
+
+    assert response.status_code == 200
+    assert db_session.query(ActivityLog).count() == activity_log_count
+    assert db_session.query(GeneratedArtifact).count() == artifact_count
 
 
 def test_missing_application_advisor_packet_returns_404(
