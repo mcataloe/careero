@@ -10,10 +10,12 @@ import {
   listApplicationInterviews,
   listApplicationLinks,
   listApplicationNotes,
+  listApplicationReminders,
 } from "../api/applications";
 import { ApplicationInterviewPanel } from "../components/ApplicationInterviewPanel";
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
 import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
+import { ApplicationRemindersPanel } from "../components/ApplicationRemindersPanel";
 import { ApplicationTimeline } from "../components/ApplicationTimeline";
 import { AdvisorPacketPanel } from "../components/AdvisorPacketPanel";
 import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
@@ -23,6 +25,7 @@ import type {
   ApplicationExternalLink,
   ApplicationInterviewStage,
   ApplicationNote,
+  ApplicationReminder,
   ApplicationTimelineEvent,
   ApplicationWorkflowState,
 } from "../types/applications";
@@ -49,6 +52,7 @@ export function ApplicationDetailPage() {
   const [timeline, setTimeline] = useState<ApplicationTimelineEvent[]>([]);
   const [notes, setNotes] = useState<ApplicationNote[]>([]);
   const [links, setLinks] = useState<ApplicationExternalLink[]>([]);
+  const [reminders, setReminders] = useState<ApplicationReminder[]>([]);
   const [interviews, setInterviews] = useState<ApplicationInterviewStage[]>([]);
   const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
   const [advisorPacket, setAdvisorPacket] = useState<AdvisorPacket | null>(null);
@@ -69,6 +73,7 @@ export function ApplicationDetailPage() {
         nextTimeline,
         nextNotes,
         nextLinks,
+        nextReminders,
         nextInterviews,
         nextSuggestions,
         nextAdvisorPacket,
@@ -78,6 +83,7 @@ export function ApplicationDetailPage() {
           getApplicationTimeline(applicationId),
           listApplicationNotes(applicationId),
           listApplicationLinks(applicationId),
+          listApplicationReminders(applicationId),
           listApplicationInterviews(applicationId),
           listAutomationSuggestions({
             targetType: "application",
@@ -89,6 +95,7 @@ export function ApplicationDetailPage() {
       setTimeline(nextTimeline);
       setNotes(nextNotes);
       setLinks(nextLinks);
+      setReminders(nextReminders);
       setInterviews(nextInterviews);
       setSuggestions(nextSuggestions.suggestions);
       setAdvisorPacket(nextAdvisorPacket);
@@ -145,7 +152,8 @@ export function ApplicationDetailPage() {
         <Stack gap="xs">
           <Text fw={600}>Workflow summary</Text>
           <Text size="sm" c="dimmed">
-            Notes: {application.counts.notes} - Reminders:{" "}
+            Notes: {application.counts.notes} - Links:{" "}
+            {application.counts.external_links} - Reminders:{" "}
             {application.counts.reminders} - Interviews:{" "}
             {application.counts.interviews}
           </Text>
@@ -161,6 +169,12 @@ export function ApplicationDetailPage() {
         applicationId={application.id}
         currentState={application.current_state}
         interviews={interviews}
+        onChanged={loadApplication}
+      />
+
+      <ApplicationRemindersPanel
+        applicationId={application.id}
+        reminders={reminders}
         onChanged={loadApplication}
       />
 

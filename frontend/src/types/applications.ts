@@ -16,6 +16,7 @@ export interface ApplicationCompanySummary {
 
 export interface ApplicationWorkflowCounts {
   notes: number;
+  external_links: number;
   reminders: number;
   interviews: number;
 }
@@ -102,6 +103,25 @@ export interface ApplicationNotePayload {
   body: string;
   author?: string | null;
   note_type?: ApplicationNoteType;
+}
+
+export interface ApplicationReminder {
+  id: string;
+  application_id: string;
+  workspace_id: string;
+  due_at: string;
+  title: string;
+  notes: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApplicationReminderPayload {
+  due_at: string;
+  title: string;
+  notes?: string | null;
+  completed_at?: string | null;
 }
 
 export type ApplicationExternalLinkType =

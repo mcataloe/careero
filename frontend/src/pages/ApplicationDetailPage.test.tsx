@@ -8,6 +8,7 @@ import type {
   ApplicationExternalLink,
   ApplicationInterviewStage,
   ApplicationNote,
+  ApplicationReminder,
   ApplicationTimelineEvent,
 } from "../types/applications";
 import type { AdvisorPacket } from "../types/advisorPackets";
@@ -40,6 +41,7 @@ const application: ApplicationDetail = {
   available_next_states: ["applied", "withdrawn", "archived"],
   counts: {
     notes: 1,
+    external_links: 1,
     reminders: 0,
     interviews: 2,
   },
@@ -125,6 +127,8 @@ const links: ApplicationExternalLink[] = [
     updated_at: "2026-05-16T15:00:00Z",
   },
 ];
+
+const reminders: ApplicationReminder[] = [];
 
 const automationSuggestions: AutomationSuggestionListResponse = {
   workspace_id: "workspace-1",
@@ -292,6 +296,7 @@ describe("ApplicationDetailPage", () => {
         .mockResolvedValueOnce(jsonResponse(timeline))
         .mockResolvedValueOnce(jsonResponse(notes))
         .mockResolvedValueOnce(jsonResponse(links))
+        .mockResolvedValueOnce(jsonResponse(reminders))
         .mockResolvedValueOnce(jsonResponse(interviews))
         .mockResolvedValueOnce(jsonResponse(automationSuggestions))
         .mockResolvedValueOnce(jsonResponse(advisorPacket)),
@@ -309,7 +314,8 @@ describe("ApplicationDetailPage", () => {
       "rel",
       "noreferrer noopener",
     );
-    expect(screen.getByText(/Notes: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/Notes: 1 - Links: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
+    expect(screen.getByText("No reminders yet.")).toBeInTheDocument();
     expect(screen.getByText("Prepare follow-up draft")).toBeInTheDocument();
     expect(screen.getByText(/Draft only. Careero will not send this message./i)).toBeInTheDocument();
     expect(screen.getByText("Advisor Packet Preview")).toBeInTheDocument();

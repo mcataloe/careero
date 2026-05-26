@@ -493,6 +493,7 @@ class ApplicationWorkflowService:
             ),
             "counts": {
                 "notes": len(_active_notes(application)),
+                "external_links": len(_active_external_links(application)),
                 "reminders": len(application.reminders),
                 "interviews": len(_active_interview_stages(application)),
             },
@@ -620,7 +621,21 @@ class ApplicationWorkflowService:
             details={"reminder_id": str(reminder.id)},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        self.db.refresh(reminder)
+        return _reminder_response(reminder)
+
+    def list_reminders(self, application_id: uuid.UUID) -> list[dict[str, Any]]:
+        application = self._require_application(application_id)
+        reminders = self.db.scalars(
+            select(ApplicationReminder)
+            .where(ApplicationReminder.application_id == application.id)
+            .order_by(
+                ApplicationReminder.completed_at.is_not(None),
+                ApplicationReminder.due_at.asc(),
+                ApplicationReminder.created_at.asc(),
+            )
+        )
+        return [_reminder_response(reminder) for reminder in reminders]
 
     def update_reminder(
         self,
@@ -641,7 +656,8 @@ class ApplicationWorkflowService:
             details={"reminder_id": str(reminder.id)},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        self.db.refresh(reminder)
+        return _reminder_response(reminder)
 
     def complete_reminder(
         self,
@@ -650,7 +666,8 @@ class ApplicationWorkflowService:
     ) -> dict[str, Any]:
         application = self._require_application(application_id)
         reminder = self._require_child(ApplicationReminder, application, reminder_id)
-        reminder.completed_at = datetime.now(timezone.utc)
+        if reminder.completed_at is None:
+            reminder.completed_at = datetime.now(timezone.utc)
         self.db.flush()
         self._sync_next_action(application)
         self._log_activity(
@@ -660,7 +677,8 @@ class ApplicationWorkflowService:
             details={"reminder_id": str(reminder.id)},
         )
         self.db.commit()
-        return self.get_application(application.id)
+        self.db.refresh(reminder)
+        return _reminder_response(reminder)
 
     def list_interview_stages(
         self,
@@ -1408,6 +1426,20 @@ def _note_response(note: ApplicationNote) -> dict[str, Any]:
         "body": note.body,
         "created_at": note.created_at,
         "updated_at": note.updated_at,
+    }
+
+
+def _reminder_response(reminder: ApplicationReminder) -> dict[str, Any]:
+    return {
+        "id": reminder.id,
+        "application_id": reminder.application_id,
+        "workspace_id": reminder.workspace_id,
+        "due_at": reminder.due_at,
+        "title": reminder.title,
+        "notes": reminder.notes,
+        "completed_at": reminder.completed_at,
+        "created_at": reminder.created_at,
+        "updated_at": reminder.updated_at,
     }
 
 

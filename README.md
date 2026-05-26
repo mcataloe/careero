@@ -42,8 +42,8 @@ Current planning hierarchy:
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
 - Backend artifact-generation foundations for resume and cover-letter drafts, with truthfulness checks and generated-artifact persistence.
 - Backend local Markdown/DOCX/PDF export for stored generated artifacts.
-- Application workflow tracking with state machine, state history, notes, external links, timeline, pipeline views, and structured interview tracking.
-- Local reminder persistence/count/timeline support; reminder API routes and frontend reminder UX are not implemented in `main`.
+- Application workflow tracking with state machine, state history, notes, external links, local reminders, timeline, pipeline views, and structured interview tracking.
+- Local reminder API routes and application-detail reminder UX for listing, creating, editing, and completing reminders. No cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
 - Analytics and dashboard surfaces for search analytics, COMPASS insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.

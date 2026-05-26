@@ -10,6 +10,8 @@ import type {
   ApplicationNote,
   ApplicationNotePayload,
   ApplicationPipelineResponse,
+  ApplicationReminder,
+  ApplicationReminderPayload,
   ApplicationStateTransitionPayload,
   ApplicationSummary,
   ApplicationTimelineEvent,
@@ -118,6 +120,53 @@ export function deleteApplicationNote(
   return apiRequest<void>(`/api/applications/${applicationId}/notes/${noteId}`, {
     method: "DELETE",
   });
+}
+
+export function listApplicationReminders(
+  applicationId: string,
+): Promise<ApplicationReminder[]> {
+  return apiRequest<ApplicationReminder[]>(
+    `/api/applications/${applicationId}/reminders`,
+  );
+}
+
+export function createApplicationReminder(
+  applicationId: string,
+  payload: ApplicationReminderPayload,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateApplicationReminder(
+  applicationId: string,
+  reminderId: string,
+  payload: Partial<ApplicationReminderPayload>,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders/${reminderId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function completeApplicationReminder(
+  applicationId: string,
+  reminderId: string,
+): Promise<ApplicationReminder> {
+  return apiRequest<ApplicationReminder>(
+    `/api/applications/${applicationId}/reminders/${reminderId}/complete`,
+    {
+      method: "POST",
+    },
+  );
 }
 
 export function listApplicationLinks(

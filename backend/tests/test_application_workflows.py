@@ -32,6 +32,8 @@ from app.schemas.applications import (
     ApplicationMetadataUpdate,
     ApplicationNoteCreate,
     ApplicationNoteUpdate,
+    ApplicationReminderCreate,
+    ApplicationReminderUpdate,
     ApplicationStateTransitionRequest,
 )
 from app.schemas.roles import CompanyLookup, RoleCreate, SourceLookup
@@ -101,6 +103,14 @@ def add_workflow_children(db_session: Session, application: Application) -> None
                 workspace_id=application.workspace_id,
                 due_at=application.created_at,
                 title="Follow up",
+            ),
+            ApplicationExternalLink(
+                application_id=application.id,
+                user_id=application.user_id,
+                workspace_id=application.workspace_id,
+                label="Job posting",
+                url="https://example.com/jobs/platform",
+                link_type="job_posting",
             ),
             ApplicationInterviewStage(
                 application_id=application.id,
@@ -215,7 +225,12 @@ def test_service_lists_by_workspace_and_aggregates_summaries(
     assert item["compass"]["summary"] == "Strong platform fit."
     assert item["resume_artifact"]["revision_number"] == 2
     assert item["cover_letter_artifact"]["revision_number"] == 1
-    assert item["counts"] == {"notes": 1, "reminders": 1, "interviews": 1}
+    assert item["counts"] == {
+        "notes": 1,
+        "external_links": 1,
+        "reminders": 1,
+        "interviews": 1,
+    }
 
 
 def test_service_detail_and_metadata_update(db_session: Session) -> None:
@@ -485,6 +500,7 @@ def test_service_timeline_includes_typed_children_evaluations_and_artifacts(
 
     by_type = {event["event_type"]: event for event in timeline}
     assert "note.created" in by_type
+    assert "external_link.created" in by_type
     assert "reminder.created" in by_type
     assert "reminder.completed" in by_type
     assert "interview.created" in by_type
@@ -493,6 +509,67 @@ def test_service_timeline_includes_typed_children_evaluations_and_artifacts(
     assert "artifact.resume.created" in by_type
     assert "artifact.cover_letter.created" in by_type
     assert "content" not in by_type["artifact.resume.created"]["metadata"]
+
+
+def test_service_reminder_crud_complete_and_next_action_sync(
+    db_session: Session,
+) -> None:
+    seed_local_data(db_session)
+    role = create_role(db_session)
+    service = ApplicationWorkflowService(db_session)
+    detail = service.get_or_create_for_role(role.id)
+    application_id = UUID(detail["id"])
+
+    created = service.create_reminder(
+        application_id,
+        ApplicationReminderCreate(
+            title="Follow up with recruiter",
+            due_at="2026-05-20T15:00:00Z",
+            notes="Ask about next steps.",
+        ),
+    )
+    assert created["title"] == "Follow up with recruiter"
+    assert created["notes"] == "Ask about next steps."
+    assert service.list_reminders(application_id)[0]["id"] == created["id"]
+    assert service.get_application(application_id)["counts"]["reminders"] == 1
+
+    application = db_session.get(Application, application_id)
+    assert application is not None
+    assert application.next_action_at is not None
+    assert application.next_action_at.isoformat().startswith("2026-05-20T15:00:00")
+
+    updated = service.update_reminder(
+        application_id,
+        created["id"],
+        ApplicationReminderUpdate(
+            title="Follow up after recruiter screen",
+            due_at="2026-05-21T15:00:00Z",
+            notes="Send a concise note.",
+        ),
+    )
+    assert updated["title"] == "Follow up after recruiter screen"
+    assert updated["notes"] == "Send a concise note."
+    db_session.refresh(application)
+    assert application.next_action_at is not None
+    assert application.next_action_at.isoformat().startswith("2026-05-21T15:00:00")
+
+    completed = service.complete_reminder(application_id, created["id"])
+    assert completed["completed_at"] is not None
+    db_session.refresh(application)
+    assert application.next_action_at is None
+
+    timeline_types = [event["event_type"] for event in service.get_timeline(application_id)]
+    assert "reminder.created" in timeline_types
+    assert "reminder.completed" in timeline_types
+
+    actions = list(
+        db_session.scalars(
+            select(ActivityLog.action).where(ActivityLog.entity_id == application_id)
+        )
+    )
+    assert "application.reminder.created" in actions
+    assert "application.reminder.updated" in actions
+    assert "application.reminder.completed" in actions
 
 
 def test_service_note_crud_uses_soft_delete_and_updates_counts(
@@ -994,6 +1071,61 @@ def test_api_note_and_link_crud(
     assert application_client.get(
         f"/api/applications/{application_id}/links"
     ).json() == []
+
+
+def test_api_reminder_crud_and_complete(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+    application_id = application_client.post(
+        f"/api/roles/{role.id}/application"
+    ).json()["id"]
+
+    create_response = application_client.post(
+        f"/api/applications/{application_id}/reminders",
+        json={
+            "title": "Follow up",
+            "due_at": "2026-05-20T15:00:00Z",
+            "notes": "Ask about next steps.",
+        },
+    )
+    assert create_response.status_code == 201
+    reminder = create_response.json()
+    assert reminder["title"] == "Follow up"
+    assert reminder["completed_at"] is None
+
+    list_response = application_client.get(
+        f"/api/applications/{application_id}/reminders"
+    )
+    assert list_response.status_code == 200
+    assert [item["id"] for item in list_response.json()] == [reminder["id"]]
+
+    detail_response = application_client.get(f"/api/applications/{application_id}")
+    assert detail_response.status_code == 200
+    assert detail_response.json()["counts"]["reminders"] == 1
+    assert detail_response.json()["next_action_at"] is not None
+
+    update_response = application_client.patch(
+        f"/api/applications/{application_id}/reminders/{reminder['id']}",
+        json={
+            "title": "Follow up after recruiter screen",
+            "due_at": "2026-05-21T15:00:00Z",
+            "notes": "Send a concise note.",
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["title"] == "Follow up after recruiter screen"
+
+    complete_response = application_client.post(
+        f"/api/applications/{application_id}/reminders/{reminder['id']}/complete"
+    )
+    assert complete_response.status_code == 200
+    assert complete_response.json()["completed_at"] is not None
+
+    refreshed_response = application_client.get(f"/api/applications/{application_id}")
+    assert refreshed_response.status_code == 200
+    assert refreshed_response.json()["next_action_at"] is None
 
 
 def test_api_list_detail_ensure_filter_and_update(

@@ -20,6 +20,9 @@ from app.schemas.applications import (
     ApplicationNoteResponse,
     ApplicationNoteUpdate,
     ApplicationPipelineResponse,
+    ApplicationReminderCreate,
+    ApplicationReminderResponse,
+    ApplicationReminderUpdate,
     ApplicationStateTransitionRequest,
     ApplicationTimelineEventResponse,
 )
@@ -258,6 +261,75 @@ def delete_application_note(
 ):
     try:
         service.delete_note(application_id, note_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/applications/{application_id}/reminders",
+    response_model=list[ApplicationReminderResponse],
+)
+def list_application_reminders(
+    application_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.list_reminders(application_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/reminders",
+    response_model=ApplicationReminderResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_application_reminder(
+    application_id: uuid.UUID,
+    payload: ApplicationReminderCreate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.create_reminder(application_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.patch(
+    "/applications/{application_id}/reminders/{reminder_id}",
+    response_model=ApplicationReminderResponse,
+)
+def update_application_reminder(
+    application_id: uuid.UUID,
+    reminder_id: uuid.UUID,
+    payload: ApplicationReminderUpdate,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.update_reminder(application_id, reminder_id, payload)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.post(
+    "/applications/{application_id}/reminders/{reminder_id}/complete",
+    response_model=ApplicationReminderResponse,
+)
+def complete_application_reminder(
+    application_id: uuid.UUID,
+    reminder_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.complete_reminder(application_id, reminder_id)
     except ApplicationWorkflowNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ApplicationWorkflowSeedMissingError as exc:

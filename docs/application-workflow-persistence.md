@@ -69,8 +69,8 @@ duplicating records.
 `GET /api/applications` and workspace-scoped list endpoints return compact
 summaries for the Applications page: role title, company, state, dates, latest
 COMPASS summary/status, latest resume and cover letter artifact summaries, and
-note/reminder/interview counts. They do not return full COMPASS or artifact
-payloads and do not trigger generation.
+workflow counts for notes, external links, reminders, and interviews. They do
+not return full COMPASS or artifact payloads and do not trigger generation.
 
 `GET /api/applications/pipeline` and
 `GET /api/workspaces/{workspace_id}/applications/pipeline` return the same
@@ -100,10 +100,22 @@ External links:
 - `PATCH /api/applications/{application_id}/links/{link_id}`
 - `DELETE /api/applications/{application_id}/links/{link_id}`
 
+Reminders:
+
+- `GET /api/applications/{application_id}/reminders`
+- `POST /api/applications/{application_id}/reminders`
+- `PATCH /api/applications/{application_id}/reminders/{reminder_id}`
+- `POST /api/applications/{application_id}/reminders/{reminder_id}/complete`
+
 Notes are not reminders and are not interview stages. External links are
 manually attached resources such as job postings, portals, recruiter profiles,
 and prep material. Email/calendar integrations and automatic imports remain out
 of scope.
+
+Reminders are local workflow records only. Creating, editing, and completing a
+reminder can update `Application.next_action_at` based on the earliest open due
+date, but it does not schedule background jobs, send notifications, create
+calendar events, sync email, or trigger external automation.
 
 `PATCH /api/applications/{application_id}` updates workflow metadata and dates.
 It does not change `Application.current_state`; state changes must use the
@@ -156,5 +168,5 @@ include `application.created`, `application.state_changed`,
 `interview.created`, `interview.completed`, `compass.completed`,
 `artifact.resume.created`, and `artifact.cover_letter.created`. ActivityLog may
 enrich update/delete events such as `note.updated`, `note.deleted`,
-`external_link.updated`, and `external_link.deleted`, but it does not replace
-typed workflow records.
+`reminder.updated`, `external_link.updated`, and `external_link.deleted`, but it
+does not replace typed workflow records.

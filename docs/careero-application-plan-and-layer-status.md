@@ -147,10 +147,10 @@ The current repo already includes meaningful implementation for:
 
 The current repo also has partially completed or not-yet-fully-validated work for:
 
-- local application reminders: current `main` has reminder tables, service methods, counts, next-action synchronization, activity-log events, analytics inputs, and timeline events, but no FastAPI reminder routes, frontend reminder API wrapper, or frontend reminder panel.
-- external-link workflow summaries: external-link CRUD API routes, frontend panel, activity-log events, timeline update/delete events, and tests exist in `main`; application list/detail summary counts still include notes, reminders, and interviews only, not links.
+- local application reminders: current `main` has reminder tables, service methods, FastAPI routes, frontend API wrappers, application-detail reminder UX, counts, next-action synchronization, activity-log events, analytics inputs, and timeline events. Reminders remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
+- external-link workflow summaries: external-link CRUD API routes, frontend panel, activity-log events, timeline update/delete events, and tests exist in `main`; application list/detail summary counts now include links alongside notes, reminders, and interviews.
 - private remote branch or PR drift, if any, is outside the current local clone; this clone currently exposes only `main` and `origin/main`.
-- Layer 4 workflow completion, especially reminder API/UI completion and final summary-count decisions.
+- Layer 4 workflow validation after reminder API/UI completion and summary-count reconciliation.
 - Layer 5 insight stabilization.
 
 These should not be treated as cleanly complete until implemented or validated in `main` and reflected in documentation. During this documentation refresh, repo files and local git state were inspected; full DB-backed test validation was not completed.
@@ -197,7 +197,7 @@ The repo does not yet fully include:
 | Layer 1 | Local Platform Foundation | Built locally / production incomplete | Local backend, frontend, database, migrations, config, and seed model exist. Production auth, multi-user identity, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
 | Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
-| Layer 4 | Application Workflow | Substantially built / reminders still partial | Applications, state transitions, timeline, notes, external links, and structured interview tracking exist. Reminder persistence/service/count/timeline support exists, but reminder API routes and frontend reminder UX are not in `main`. External-link CRUD/UI exists; summary counts still omit links. |
+| Layer 4 | Application Workflow | Substantially built / local reminder reconciliation implemented | Applications, state transitions, timeline, notes, external links, local reminders, and structured interview tracking exist. Reminder persistence/service/API/UI/count/timeline support exists for local user-triggered workflow actions. Summary counts include notes, external links, reminders, and interviews. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
 | Layer 6 | Advanced COMPASS + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, COMPASS history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
@@ -368,7 +368,7 @@ Do not focus next on adding more generation logic. Focus on lifecycle, reviewabi
 
 ### Status
 
-Substantially built / reminders still partial.
+Substantially built / local reminder reconciliation implemented.
 
 ### Purpose
 
@@ -393,24 +393,24 @@ Manage the day-to-day job-search workflow around saved opportunities.
 - Interview-stage timeline events and state-transition suggestion.
 - Reminder persistence tables.
 - Reminder service logic.
-- Reminder counts, analytics input, and timeline events.
+- Reminder API routes.
+- Frontend reminder API wrapper.
+- Application detail reminder panel for listing, creating, editing, and completing reminders.
+- Reminder counts, next-action synchronization, analytics input, and timeline events.
 - Metadata updates.
 - ActivityLog integration.
 
 ### Partially accomplished
 
-- Reminder persistence, service methods, next-action synchronization, counts, activity logs, analytics inputs, and timeline events exist in `main`.
+- Reminder persistence, service methods, API routes, frontend API wrappers, application-detail UX, next-action synchronization, counts, activity logs, analytics inputs, and timeline events exist in `main`.
 - External-link CRUD API routes, frontend panel, activity logs, timeline update/delete events, and tests exist in `main`.
 
 ### Remaining work
 
-- Add reminder FastAPI routes.
-- Add frontend reminder API wrapper and reminder panel.
-- Ensure application detail page surfaces all first-class workflow records.
-- Confirm timeline includes notes, links, reminders, interviews, COMPASS, artifacts, and state changes.
-- Decide whether application summary counts should include external links, then update backend/frontend/tests if needed.
-- Confirm pipeline/dashboard counts align with backend records after reminder API/UI completion and external-link count decisions.
-- Validate migrations after reminder API/UI completion.
+- Keep application detail page surfaces for all first-class workflow records coherent as adjacent layers evolve.
+- Continue confirming timeline includes notes, links, reminders, interviews, COMPASS, artifacts, and state changes.
+- Confirm pipeline/dashboard counts align with backend records after future workflow changes.
+- Validate migrations and DB-backed tests in environments with reachable PostgreSQL test databases.
 - Confirm backend, frontend, and contracts tests pass.
 
 ### Guidance
@@ -857,9 +857,9 @@ Keep `main` in a clean, truthful state as new feature work lands.
 ### Tasks
 
 - Review private remote branch/PR drift when external GitHub/PR access is available.
-- Confirm reminder implementation gaps against `main`: service/model/timeline exist; API routes and frontend UX do not.
+- Confirm reminder implementation against `main`: service/model/timeline/API routes/frontend UX now exist for local workflow reminders.
 - Confirm structured interview tracking remains clean in `main`.
-- Confirm whether external links should be included in application summary counts.
+- Keep external links included in application summary counts alongside notes, reminders, and interviews.
 - Reconcile migrations carefully.
 - Run backend compile/tests.
 - Run frontend tests/build.
@@ -882,12 +882,11 @@ Finish the workflow records users expect before modeling Opportunity more deeply
 
 ### Tasks
 
-- Add reminder API routes.
-- Add frontend reminder API wrapper and application detail reminder panel.
+- Maintain reminder API routes and the application detail reminder panel.
 - Validate structured interview tracking across backend, frontend, timeline, and tests.
 - Confirm notes, links, reminders, interviews, and timeline work consistently.
 - Ensure application detail page surfaces all first-class workflow records.
-- Confirm pipeline, dashboard, and workflow summary counts are accurate, including the explicit decision on whether links should be counted.
+- Confirm pipeline, dashboard, and workflow summary counts remain accurate for notes, links, reminders, and interviews.
 - Ensure all workflow events appear in timeline/activity where appropriate.
 
 ### Exit criteria
@@ -1051,7 +1050,7 @@ Preserve:
 Revise:
 
 - Do not call Layer 1 fully complete until production auth/identity exists.
-- Do not call Layer 4 complete until reminder API/UI work is implemented in `main` and workflow counts/timeline behavior are validated.
+- Do not call Layer 4 productization-ready just because local reminder API/UI and summary-count reconciliation exist; hosted reminders, external notifications, production auth, and Layer 11 gates remain future.
 - Do not call Layer 5 merely next; it is already partially implemented.
 - Move Integrations from Layer 7 to Layer 8.
 - Introduce Opportunity Model Strategy as Layer 7.

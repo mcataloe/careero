@@ -53,6 +53,7 @@ const populatedPipeline: ApplicationPipelineResponse = {
         available_next_states: ["interested", "withdrawn", "archived"],
         counts: {
           notes: 1,
+          external_links: 3,
           reminders: 2,
           interviews: 0,
         },
@@ -116,6 +117,7 @@ describe("ApplicationsPage", () => {
     );
     expect(screen.getByText("Example Company")).toBeInTheDocument();
     expect(screen.getByText("1 notes")).toBeInTheDocument();
+    expect(screen.getByText("3 links")).toBeInTheDocument();
     expect(screen.getByText("2 reminders")).toBeInTheDocument();
     expect(screen.getByText("Move to interested")).toBeInTheDocument();
     expect(screen.getByText("Move to withdrawn")).toBeInTheDocument();

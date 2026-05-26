@@ -57,6 +57,7 @@ class ApplicationArtifactSummary(BaseModel):
 
 class ApplicationWorkflowCounts(BaseModel):
     notes: int = 0
+    external_links: int = 0
     reminders: int = 0
     interviews: int = 0
 
@@ -157,6 +158,20 @@ class ApplicationReminderUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=255)
     notes: str | None = None
     completed_at: datetime | None = None
+
+
+class ApplicationReminderResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    application_id: uuid.UUID
+    workspace_id: uuid.UUID
+    due_at: datetime
+    title: str
+    notes: str | None = None
+    completed_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 def _require_timezone(value: datetime | None) -> datetime | None:
