@@ -547,6 +547,40 @@ Invoke-WebRequest `
 
 Export is local-only. It does not send email, write to Google Docs, sync cloud storage, or mutate external systems.
 
+## Local Advisor Packet Preview
+
+Layer 12 advisor packet preview is local-only and owner-visible. It returns a
+redacted packet summary for an existing application workflow and can export that
+summary as Markdown. It does not create hosted access, advisor accounts,
+invitations, comments, public links, external sharing, or employer/recruiter
+visibility.
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}/advisor-packet
+
+Invoke-WebRequest `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/advisor-packet/exports/md `
+  -OutFile advisor-packet.md
+```
+
+Default packet output includes basic opportunity/application summaries and
+artifact lifecycle summaries only. Private notes, raw job descriptions, STRIDE
+rationale, ATS risk notes, compensation strategy, recruiter/contact details,
+source resume/profile material, career strategy synthesis, activity logs,
+automation approval logs, and generated artifact content are excluded by
+default.
+
+Explicit local preview options use a non-persisted POST body:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -ContentType "application/json" `
+  -Uri http://127.0.0.1:8000/api/applications/{application_id}/advisor-packet/preview `
+  -Body '{"artifact_ids":[],"external_link_ids":[],"interview_stage_ids":[],"reminder_ids":[],"advisor_context":"Review positioning only."}'
+```
+
 ## Career Strategy API
 
 Layer 10 strategy synthesis is read-only and workspace-scoped. It uses stored

@@ -70,6 +70,7 @@ Application workflow:
 - Open `/applications` to view application workflows grouped by pipeline state.
 - Open `/applications/:applicationId` for workflow summary, structured interview tracking, notes, external links, and timeline.
 - Structured interview tracking is manual-only; calendar invites, meeting generation, email, and coaching are intentionally out of scope.
+- Application detail includes a local-only advisor packet preview with Markdown export. It is redacted by default and does not create hosted sharing, advisor accounts, invitations, comments, or public links.
 - Reminder counts can appear from backend workflow data, but the fuller reminder management UI is not merged into `main`.
 
 Career strategy:
@@ -89,7 +90,7 @@ Long and structured text:
 - Markdown-like text is rendered safely as React text nodes. Basic headings, bullets, numbered lists, paragraphs, and fenced code blocks are displayed with lightweight structure.
 - Editable long text fields use bounded autosizing instead of expanding without limit.
 
-Careero does not run OCR, import Google Docs, create application packets, or perform automated discovery output from this UI phase. Backend local artifact export APIs exist for Markdown, DOCX, and PDF, but dedicated frontend artifact generation, review, approval, archive, and export workflows are still future/incomplete.
+Careero does not run OCR, import Google Docs, create hosted/shared application packets, or perform automated discovery output from this UI phase. Backend local artifact export APIs exist for Markdown, DOCX, and PDF, and local-only advisor packet Markdown export exists from application detail, but dedicated frontend artifact generation, review, approval, archive, and export workflows are still future/incomplete.
 
 Run component tests:
 

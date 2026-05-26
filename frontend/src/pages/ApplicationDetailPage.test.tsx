@@ -10,6 +10,7 @@ import type {
   ApplicationNote,
   ApplicationTimelineEvent,
 } from "../types/applications";
+import type { AdvisorPacket } from "../types/advisorPackets";
 import type { AutomationSuggestionListResponse } from "../types/automation";
 
 function jsonResponse(response: unknown, status = 200) {
@@ -163,6 +164,110 @@ const automationSuggestions: AutomationSuggestionListResponse = {
   ],
 };
 
+const advisorPacket: AdvisorPacket = {
+  packet_version: "advisor_packet.local_preview.v1",
+  mode: "local_preview",
+  generated_at: "2026-05-16T15:00:00Z",
+  local_only: true,
+  external_sharing_enabled: false,
+  advisory_notice:
+    "Local-only owner preview. Nothing is externally shared, no advisor account exists, and private strategy is redacted by default.",
+  include_options: {
+    artifact_ids: [],
+    external_link_ids: [],
+    interview_stage_ids: [],
+    reminder_ids: [],
+    advisor_context: null,
+  },
+  sections: [
+    {
+      key: "opportunity_summary",
+      title: "Opportunity summary",
+      status: "included",
+      item_count: 1,
+      warnings: [],
+    },
+    {
+      key: "artifact_summaries",
+      title: "Artifact summaries",
+      status: "summary_only",
+      item_count: 1,
+      warnings: [],
+    },
+  ],
+  opportunity: {
+    id: "role-1",
+    workspace_id: "workspace-1",
+    title: "Staff Platform Engineer",
+    company_name: "Example Company",
+    status: "interested",
+    location: "Remote",
+    remote_type: "remote",
+  },
+  application: {
+    id: "app-1",
+    current_state: "interested",
+    applied_at: null,
+    next_action_at: null,
+    counts: {
+      notes: 1,
+      reminders: 0,
+      interviews: 1,
+      external_links: 1,
+    },
+  },
+  artifacts: [
+    {
+      id: "artifact-1",
+      artifact_type: "cover_letter",
+      title: "Cover letter",
+      lifecycle_status: "draft",
+      revision_number: 1,
+      content_included: false,
+      content: null,
+      updated_at: "2026-05-16T15:00:00Z",
+      warnings: [
+        {
+          code: "artifact_not_approved",
+          message:
+            "Generated artifact lifecycle is not approved; keep draft and truthfulness warnings visible before any future sharing flow.",
+        },
+      ],
+    },
+  ],
+  selected_external_links: [],
+  selected_interviews: [],
+  selected_reminders: [],
+  advisor_context: null,
+  redactions: [
+    {
+      data_class: "Private user notes",
+      field: "application_notes.body",
+      default_visibility: "Private by default",
+      status: "excluded",
+      included: false,
+      reason: "1 note(s) exist and require explicit future selection before inclusion.",
+      warning: "Private notes are not advisor comments and remain separate.",
+    },
+    {
+      data_class: "STRIDE score and explanation",
+      field: "stride_evaluation",
+      default_visibility: "Private by default",
+      status: "excluded",
+      included: false,
+      reason: "Internal fit analysis remains advisory, source-grounded, and private by default.",
+      warning: "STRIDE is advisory, not deterministic truth.",
+    },
+  ],
+  warnings: [
+    {
+      code: "local_only_preview",
+      message:
+        "This packet is a local preview/export only. It does not create hosted access, invitations, accounts, public links, comments, or external sharing.",
+    },
+  ],
+};
+
 function renderDetailPage() {
   render(
     <MemoryRouter initialEntries={["/applications/app-1"]}>
@@ -188,7 +293,8 @@ describe("ApplicationDetailPage", () => {
         .mockResolvedValueOnce(jsonResponse(notes))
         .mockResolvedValueOnce(jsonResponse(links))
         .mockResolvedValueOnce(jsonResponse(interviews))
-        .mockResolvedValueOnce(jsonResponse(automationSuggestions)),
+        .mockResolvedValueOnce(jsonResponse(automationSuggestions))
+        .mockResolvedValueOnce(jsonResponse(advisorPacket)),
     );
 
     renderDetailPage();
@@ -206,6 +312,12 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByText(/Notes: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
     expect(screen.getByText("Prepare follow-up draft")).toBeInTheDocument();
     expect(screen.getByText(/Draft only. Careero will not send this message./i)).toBeInTheDocument();
+    expect(screen.getByText("Advisor Packet Preview")).toBeInTheDocument();
+    expect(screen.getByText("Local only")).toBeInTheDocument();
+    expect(screen.getByText(/Local preview only\. Nothing is shared externally\./i)).toBeInTheDocument();
+    expect(screen.getByText("Private user notes")).toBeInTheDocument();
+    expect(screen.getByText(/content excluded/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /share|send|invite/i })).not.toBeInTheDocument();
   });
 
   it("renders an error state", async () => {
