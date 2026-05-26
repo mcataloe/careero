@@ -33,5 +33,6 @@ class LocalDataExportResponse(BaseModel):
     external_links: list[dict[str, Any]]
     interview_stages: list[dict[str, Any]]
     activity_logs: list[dict[str, Any]]
+    account_lifecycle_requests: list[dict[str, Any]]
     automation_suggestions: list[dict[str, Any]]
     automation_approval_logs: list[dict[str, Any]]

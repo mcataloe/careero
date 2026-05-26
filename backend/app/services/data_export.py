@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.config import Settings, get_settings
 from app.models import (
     ActivityLog,
+    AccountLifecycleRequest,
     Application,
     ApplicationExternalLink,
     ApplicationInterviewStage,
@@ -243,6 +244,17 @@ class LocalDataExportService:
                     select(ActivityLog)
                     .where(user_filter(ActivityLog))
                     .order_by(ActivityLog.created_at.asc(), ActivityLog.id.asc())
+                )
+            ],
+            account_lifecycle_requests=[
+                _account_lifecycle_request(request)
+                for request in self._list(
+                    select(AccountLifecycleRequest)
+                    .where(user_filter(AccountLifecycleRequest))
+                    .order_by(
+                        AccountLifecycleRequest.requested_at.asc(),
+                        AccountLifecycleRequest.id.asc(),
+                    )
                 )
             ],
             automation_suggestions=[
@@ -583,6 +595,28 @@ def _activity_log(record: ActivityLog) -> dict[str, Any]:
     return _base(
         record,
         ["id", "user_id", "entity_type", "entity_id", "action", "details", "created_at"],
+    )
+
+
+def _account_lifecycle_request(record: AccountLifecycleRequest) -> dict[str, Any]:
+    return _base(
+        record,
+        [
+            "id",
+            "user_id",
+            "request_type",
+            "status",
+            "requested_at",
+            "acknowledged_at",
+            "completed_at",
+            "canceled_at",
+            "request_reason",
+            "target_type",
+            "target_id",
+            "request_metadata",
+            "created_at",
+            "updated_at",
+        ],
     )
 
 

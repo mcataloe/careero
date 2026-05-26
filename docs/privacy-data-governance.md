@@ -48,6 +48,7 @@ sharing design.
 | AI prompts | User/system | High | Store only when needed for audit/debug and with redaction policy; current retention policy TBD. | Export if stored and user-specific. | Delete with related AI run/account subject to future audit policy. | Log prompt version, hashes, and model metadata; avoid raw prompt logs by default. | Sent to provider only when AI feature is enabled. | Not monetized as content. |
 | AI outputs | User | High | Retain with generated/evaluation records. | Export outputs and trace metadata. | Delete with related record/account. | Log lifecycle, model, prompt/ruleset versions, warnings. | May be reused only as traceable, reviewable context. | May count usage, not steer hidden sponsorship. |
 | Activity logs | User/system | Medium | Retain for audit window TBD. | Export user-visible activity. | Delete/anonymize under account deletion policy after approved retention window. | Source of audit summaries, not source of domain truth. | Limited use for analytics and strategy. | Aggregate operational metrics only. |
+| Account lifecycle requests | User/system | Medium | Retain until future retention policy defines audit windows. | Export request type, status, target metadata, timestamps, and user-provided reason in the owner's local export. | Request-only today; destructive deletion and anonymization remain future. | Log request/cancel events without raw reasons or private content. | No direct AI use. | Not monetized. |
 | Automation suggestions | User/system | Medium to high | Retain while useful for audit and workflow; window TBD. | Export suggestion, reason, target, status, and preview metadata. | Delete with workspace/account or future cleanup policy. | Log suggestion lifecycle. | Yes, for local suggestions only. | Not used for employer-paid steering. |
 | Automation approval logs | User/system | High | Retain as audit records under approved retention window. | Export approval decision, target, actor, and status. | Delete/anonymize according to future account deletion policy. | First-class audit record. | Limited use for safety analytics. | Not monetized. |
 | Analytics/insight data | User/system | Medium | Retain derived summaries while source data exists. | Export user-visible insight summaries and basis where available. | Recompute or delete when source records are deleted. | Log generation/version metadata. | Yes, if source-grounded and confidence-labeled. | May support paid analytics tiers only with transparent limits. |
@@ -64,6 +65,8 @@ sharing design.
   provider credentials, or unrelated users' records.
 - Hosted account export, account deletion, and retention enforcement must be
   designed before production implementation.
+- Layer 11.5 lifecycle request records are tracking/audit records only; they do
+  not enforce deletion, anonymization, recovery, or retention policy.
 - Retention windows must be explicit before private hosted beta.
 - Logs must avoid raw resumes, prompts, private notes, API keys, and raw job
   descriptions unless an approved diagnostic mode exists.

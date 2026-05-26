@@ -894,6 +894,41 @@ class AutomationApprovalLog(Base):
     suggestion: Mapped[AutomationSuggestion] = relationship(back_populates="approval_logs")
 
 
+class AccountLifecycleRequest(TimestampMixin, Base):
+    __tablename__ = "account_lifecycle_requests"
+    __table_args__ = (
+        Index("ix_account_lifecycle_requests_user_id", "user_id"),
+        Index("ix_account_lifecycle_requests_status", "status"),
+        Index("ix_account_lifecycle_requests_user_status", "user_id", "status"),
+        Index("ix_account_lifecycle_requests_type", "request_type"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    request_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(100), nullable=False, default="requested")
+    requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    canceled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    request_reason: Mapped[str | None] = mapped_column(Text)
+    target_type: Mapped[str | None] = mapped_column(String(100))
+    target_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    request_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+
 class ActivityLog(Base):
     __tablename__ = "activity_log"
     __table_args__ = (

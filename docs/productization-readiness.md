@@ -49,6 +49,17 @@ Layer 11.4 adds a local-first data export foundation:
   production account support, legal compliance certification, runtime secrets,
   database URLs, API keys, provider credentials, or unrelated users' records.
 
+Layer 11.5 adds local-first account lifecycle request tracking:
+
+- Backend endpoints: `POST /api/account/lifecycle-requests`,
+  `GET /api/account/lifecycle-requests`, and
+  `POST /api/account/lifecycle-requests/{request_id}/cancel`.
+- Frontend surface: Settings page Account lifecycle requests panel.
+- Scope: records local request/audit rows for data export, deletion, targeted
+  deletion, and retention-review intent.
+- Safety boundary: deletion requests are non-destructive and explicitly state
+  that data has not been deleted and deletion enforcement remains future.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |
@@ -78,8 +89,8 @@ Layer 11.4 adds a local-first data export foundation:
 - Layer 11B service-level ownership checks are local boundary prep only and do
   not certify hosted tenant isolation.
 - Local-first JSON data export exists for the current local user.
-- Hosted account export, account deletion, and retention enforcement are not
-  implemented.
+- Hosted account export, destructive account deletion, anonymization, and
+  retention enforcement are not implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
 - Production deployment architecture is not implemented.

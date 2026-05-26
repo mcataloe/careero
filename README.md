@@ -49,6 +49,7 @@ Current planning hierarchy:
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
 - Local-first productization readiness reporting through `GET /api/productization/readiness` and the Settings page. This reports current blockers and does not implement production deployment.
 - Local-first JSON data export for the current seeded local user through `GET /api/data-export/local` and the Settings page. This creates no cloud download link, backup, hosted account export, or production account support.
+- Local-first account lifecycle request tracking through `GET/POST /api/account/lifecycle-requests` and the Settings page. This records audit requests only and does not delete or anonymize data.
 - Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, COMPASS rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
@@ -68,7 +69,7 @@ Careero does not yet include:
 - Billing or subscriptions.
 - Model catalog, credit wallet, usage ledger, or credit-based billing controls.
 - Production deployment architecture.
-- Hosted account export, destructive account deletion, retention enforcement, or production account lifecycle support.
+- Hosted account export, destructive account deletion, anonymization, retention enforcement, or production account lifecycle support.
 - Background job execution.
 - Destructive persistence migration from current `Role` table/model/foreign-key naming.
 - Mature workspace switching and management UX.

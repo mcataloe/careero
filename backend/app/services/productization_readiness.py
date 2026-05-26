@@ -78,7 +78,7 @@ def get_productization_readiness(
         "Production authentication is not implemented.",
         "Production authorization and tenant isolation are not implemented.",
         "Billing, subscriptions, invoices, checkout, and payment flows are not implemented.",
-        "Hosted account export, account deletion, and retention enforcement are not implemented.",
+        "Hosted account export, destructive account deletion, and retention enforcement are not implemented.",
         "Durable AI usage metering and cost controls are not implemented.",
         "Production deployment architecture, monitoring, backup, restore, and incident response are not implemented.",
         "Hosted collaboration and employer-side marketplace capabilities are not implemented.",
@@ -170,9 +170,9 @@ def get_productization_readiness(
             "No billing provider, checkout, subscriptions, invoices, credit wallet, or paid plan controls exist.",
         ),
         export_delete_status=_capability(
-            "local_export_available",
+            "local_export_and_request_tracking",
             True,
-            "A local-first JSON export endpoint exists for the current local user; hosted account export and deletion controls remain future.",
+            "A local-first JSON export endpoint and lifecycle request tracking exist; hosted account export and destructive deletion enforcement remain future.",
         ),
         retention_status=_capability(
             "not_enforced",

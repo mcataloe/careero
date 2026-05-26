@@ -124,6 +124,7 @@ def test_export_endpoint_returns_stable_local_json(db_session: Session) -> None:
         "external_links",
         "interview_stages",
         "activity_logs",
+        "account_lifecycle_requests",
         "automation_suggestions",
         "automation_approval_logs",
     }

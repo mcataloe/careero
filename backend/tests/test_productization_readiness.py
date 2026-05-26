@@ -37,7 +37,7 @@ def test_local_readiness_response(monkeypatch) -> None:
     assert body["auth_status"]["status"] == "not_implemented"
     assert body["tenant_boundary_prep_status"]["status"] == "local_boundary_prep"
     assert body["billing_status"]["status"] == "not_implemented"
-    assert body["export_delete_status"]["status"] == "local_export_available"
+    assert body["export_delete_status"]["status"] == "local_export_and_request_tracking"
 
 
 def test_production_like_readiness_response_reports_blocked(monkeypatch) -> None:

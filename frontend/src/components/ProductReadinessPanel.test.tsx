@@ -71,7 +71,7 @@ const readiness: ProductizationReadiness = {
     detail: "Billing is not implemented.",
   },
   export_delete_status: {
-    status: "local_export_available",
+    status: "local_export_and_request_tracking",
     implemented: true,
     detail: "Local export exists; hosted export and deletion remain future.",
   },

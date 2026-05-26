@@ -51,7 +51,11 @@ const readiness: ProductizationReadiness = {
     detail: "",
   },
   billing_status: { status: "not_implemented", implemented: false, detail: "" },
-  export_delete_status: { status: "local_export_available", implemented: true, detail: "" },
+  export_delete_status: {
+    status: "local_export_and_request_tracking",
+    implemented: true,
+    detail: "",
+  },
   retention_status: { status: "not_enforced", implemented: false, detail: "" },
   durable_usage_metering_status: {
     status: "not_implemented",
@@ -74,36 +78,52 @@ const readiness: ProductizationReadiness = {
     "Careero is not production-ready unless all required productization gates pass.",
 };
 
-describe("SettingsPage", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-  });
+const lifecycleList = {
+  requests: [],
+  lifecycle_note:
+    "Local lifecycle requests are audit records only. They do not delete, anonymize, recover, or submit support work.",
+};
 
-  it("renders the product readiness panel", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse(readiness)));
-
-    render(<SettingsPage />);
-
-    expect(await screen.findByText("Product readiness")).toBeInTheDocument();
-    expect(screen.getByText("Not production-ready")).toBeInTheDocument();
-  });
-
-  it("downloads a local data export from settings", async () => {
-    const createObjectURL = vi.fn(() => "blob:careero-export");
-    const revokeObjectURL = vi.fn();
-    const click = vi
-      .spyOn(HTMLAnchorElement.prototype, "click")
-      .mockImplementation(() => undefined);
-    const append = vi.spyOn(document.body, "append");
-    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValueOnce(jsonResponse(readiness))
-        .mockResolvedValueOnce(
-          jsonResponse({
+function fetchByPath(overrides: Record<string, unknown> = {}) {
+  return vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const path = String(input);
+    const method = init?.method ?? "GET";
+    if (path === "/api/productization/readiness") {
+      return Promise.resolve(jsonResponse(readiness));
+    }
+    if (path === "/api/account/lifecycle-requests" && method === "GET") {
+      return Promise.resolve(
+        jsonResponse(overrides.lifecycleList ?? lifecycleList),
+      );
+    }
+    if (path === "/api/account/lifecycle-requests" && method === "POST") {
+      return Promise.resolve(
+        jsonResponse(
+          overrides.lifecycleCreate ?? {
+            id: "request-1",
+            user_id: "00000000-0000-4000-8000-000000000001",
+            request_type: "account_deletion",
+            status: "requested",
+            requested_at: "2026-05-26T12:00:00Z",
+            acknowledged_at: null,
+            completed_at: null,
+            canceled_at: null,
+            request_reason: "User recorded a local deletion request from Settings.",
+            target_type: null,
+            target_id: null,
+            request_metadata: {},
+            created_at: "2026-05-26T12:00:00Z",
+            updated_at: "2026-05-26T12:00:00Z",
+            message:
+              "Deletion request recorded locally. Data has not been deleted; deletion enforcement remains future.",
+          },
+        ),
+      );
+    }
+    if (path === "/api/data-export/local") {
+      return Promise.resolve(
+        jsonResponse(
+          overrides.dataExport ?? {
             metadata: {
               schema_version: "careero.local_data_export.v1",
               generated_at: "2026-05-26T12:00:00Z",
@@ -133,11 +153,41 @@ describe("SettingsPage", () => {
             external_links: [],
             interview_stages: [],
             activity_logs: [],
+            account_lifecycle_requests: [],
             automation_suggestions: [],
             automation_approval_logs: [],
-          }),
+          },
         ),
-    );
+      );
+    }
+    return Promise.reject(new Error(`Unexpected fetch ${method} ${path}`));
+  });
+}
+
+describe("SettingsPage", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("renders the product readiness panel", async () => {
+    vi.stubGlobal("fetch", fetchByPath());
+
+    render(<SettingsPage />);
+
+    expect(await screen.findByText("Product readiness")).toBeInTheDocument();
+    expect(screen.getByText("Not production-ready")).toBeInTheDocument();
+  });
+
+  it("downloads a local data export from settings", async () => {
+    const createObjectURL = vi.fn(() => "blob:careero-export");
+    const revokeObjectURL = vi.fn();
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    const append = vi.spyOn(document.body, "append");
+    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+    vi.stubGlobal("fetch", fetchByPath());
 
     render(<SettingsPage />);
     await screen.findByText("Local data export");
@@ -148,5 +198,37 @@ describe("SettingsPage", () => {
     expect(append).toHaveBeenCalled();
     expect(click).toHaveBeenCalled();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:careero-export");
+  });
+
+  it("requires confirmation before recording a local deletion request", async () => {
+    const fetchMock = fetchByPath();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SettingsPage />);
+    const deletionButton = await screen.findByRole("button", {
+      name: /record deletion request/i,
+    });
+    expect(deletionButton).toBeDisabled();
+
+    await userEvent.click(
+      screen.getByLabelText(
+        "I understand this records a request and does not delete data.",
+      ),
+    );
+    expect(deletionButton).not.toBeDisabled();
+
+    await userEvent.click(deletionButton);
+
+    expect(
+      await screen.findByText(
+        "Deletion request recorded locally. Data has not been deleted; deletion enforcement remains future.",
+      ),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/account/lifecycle-requests",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
   });
 });
