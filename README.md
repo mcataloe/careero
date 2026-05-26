@@ -14,6 +14,8 @@ Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strat
 
 Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. First-party local username/password login now exists, while Google/LinkedIn SSO, account recovery, production auth hardening, billing, tenant isolation, and hosted deployment remain future.
 
+Auth-provider and hosted-beta direction is evaluated in [`docs/auth-provider-and-hosted-beta-evaluation.md`](docs/auth-provider-and-hosted-beta-evaluation.md). It is evaluation only and does not select or implement auth.
+
 Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
 
 Layer 14 model choice, credits, and API-first intelligence strategy is captured in [`docs/careero-layer-14-strategic-plan-section.md`](docs/careero-layer-14-strategic-plan-section.md) and summarized in the canonical layer plan. This is strategic planning only; model catalogs, credit wallets, usage ledgers, API job ingestion, company research caching, and scraping are not implemented in `main`.
@@ -50,6 +52,10 @@ Current planning hierarchy:
 - Local-first productization readiness reporting through `GET /api/productization/readiness` and the Settings page. This reports current blockers and does not implement production deployment.
 - First-party local username/password account registration and login with HttpOnly cookie-backed sessions, current-user lookup, logout, and route protection.
 - Disabled Google and LinkedIn SSO placeholders on the login page. OAuth is not implemented.
+- Local-first JSON data export for the authenticated local user through `GET /api/data-export/local` and the Settings page. This creates no cloud download link, backup, hosted account export, or production account support.
+- Local-first account lifecycle request tracking through `GET/POST /api/account/lifecycle-requests` and the Settings page. This records audit requests only and does not delete or anonymize data.
+- Local-first provider-agnostic AI usage metering through `GET /api/usage/ai` and the Settings page. This records safe metadata for local visibility only and does not implement credits, billing, or paid quotas.
+- Local-first entitlement boundary reporting through `GET /api/entitlements/current` and the Settings page. This models the `local_free` plan without payments, checkout, subscriptions, or invoices.
 - Local-only advisor packet preview and Markdown export with deterministic redaction metadata, explicit local include options, and redacted defaults for private notes, COMPASS rationale, ATS risk, compensation strategy, recruiter/contact details, raw sources, and artifact content.
 - Backend integration tests when PostgreSQL is configured.
 - Frontend component tests and production build validation.
@@ -67,8 +73,9 @@ Careero does not yet include:
 - Real multi-user tenant behavior.
 - Production authorization hardening and hosted tenant isolation certification.
 - Billing or subscriptions.
-- Model catalog, credit wallet, usage ledger, or credit-based billing controls.
+- Model catalog, credit wallet, credit-based billing controls, or paid usage enforcement.
 - Production deployment architecture.
+- Hosted account export, destructive account deletion, anonymization, retention enforcement, or production account lifecycle support.
 - Background job execution.
 - Destructive persistence migration from current `Role` table/model/foreign-key naming.
 - Mature workspace switching and management UX.

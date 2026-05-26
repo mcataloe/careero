@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.roles import get_role_parsing_service
+from app.api.roles import get_ai_usage_service, get_role_parsing_service
 from app.config import Settings
 from app.main import create_app
 from app.schemas.role_parsing import ParsedRole, RoleParseAIOutput, RoleParseResponse
@@ -27,6 +27,16 @@ class FakeResponses:
 class FakeClient:
     def __init__(self, responses: FakeResponses) -> None:
         self.responses = responses
+
+
+class FakeUsageService:
+    db = SimpleNamespace(commit=lambda: None)
+
+    def current_user(self):
+        return SimpleNamespace(id="00000000-0000-4000-8000-000000000001")
+
+    def record_event(self, payload):
+        return None
 
 
 def enabled_settings(**overrides) -> Settings:
@@ -185,6 +195,7 @@ def test_role_parse_endpoint_success_and_failures() -> None:
             )
 
     app.dependency_overrides[get_role_parsing_service] = lambda: FakeService()
+    app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
     with TestClient(app) as client:
         success = client.post("/api/roles/parse", json={"rawText": "Engineer at Acme"})
         empty = client.post("/api/roles/parse", json={"rawText": " "})
@@ -202,6 +213,7 @@ def test_role_parse_endpoint_maps_service_errors() -> None:
             raise RoleParsingUnavailableError("AI role parsing is disabled")
 
     app.dependency_overrides[get_role_parsing_service] = lambda: UnavailableService()
+    app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
     with TestClient(app) as client:
         unavailable = client.post("/api/roles/parse", json={"rawText": "Engineer"})
 
@@ -210,6 +222,7 @@ def test_role_parse_endpoint_maps_service_errors() -> None:
             raise RoleParsingValidationError("Role parser returned invalid data")
 
     app.dependency_overrides[get_role_parsing_service] = lambda: InvalidService()
+    app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
     with TestClient(app) as client:
         invalid = client.post("/api/roles/parse", json={"rawText": "Engineer"})
 

@@ -38,6 +38,7 @@ def test_local_readiness_response(monkeypatch) -> None:
     assert body["auth_status"]["implemented"] is True
     assert body["tenant_boundary_prep_status"]["status"] == "local_boundary_prep"
     assert body["billing_status"]["status"] == "not_implemented"
+    assert body["export_delete_status"]["status"] == "local_export_and_request_tracking"
 
 
 def test_production_like_readiness_response_reports_blocked(monkeypatch) -> None:
@@ -104,7 +105,7 @@ def test_ai_feature_flags_are_represented(monkeypatch) -> None:
         "cover_letter_generation_enabled": True,
         "provider_key_configured": False,
         "local_session_attempt_cap": 7,
-        "durable_metering_status": "not_implemented",
+        "durable_metering_status": "local_usage_events",
     }
 
 

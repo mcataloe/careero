@@ -3,7 +3,9 @@ import logging
 from fastapi import Depends, FastAPI, Response, status
 
 from app.api.activity_log import router as activity_log_router
+from app.api.account_lifecycle import router as account_lifecycle_router
 from app.api.advisor_packets import router as advisor_packets_router
+from app.api.ai_usage import router as ai_usage_router
 from app.api.auth import (
     require_authenticated_current_user_context,
     router as auth_router,
@@ -14,6 +16,8 @@ from app.api.artifact_performance import router as artifact_performance_router
 from app.api.applications import router as applications_router
 from app.api.compensation_intelligence import router as compensation_intelligence_router
 from app.api.cover_letter_artifacts import router as cover_letter_artifacts_router
+from app.api.data_export import router as data_export_router
+from app.api.entitlements import router as entitlements_router
 from app.api.historical_learning import router as historical_learning_router
 from app.api.opportunities import router as opportunities_router
 from app.api.productization import router as productization_router
@@ -47,10 +51,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     if provided_settings is not None:
         app.dependency_overrides[get_settings] = lambda: settings
+
     authenticated = [Depends(require_authenticated_current_user_context)]
     app.include_router(auth_router, prefix="/api")
     app.include_router(activity_log_router, prefix="/api", dependencies=authenticated)
+    app.include_router(account_lifecycle_router, prefix="/api", dependencies=authenticated)
     app.include_router(advisor_packets_router, prefix="/api", dependencies=authenticated)
+    app.include_router(ai_usage_router, prefix="/api", dependencies=authenticated)
     app.include_router(automation_router, prefix="/api", dependencies=authenticated)
     app.include_router(artifact_exports_router, prefix="/api", dependencies=authenticated)
     app.include_router(artifact_performance_router, prefix="/api", dependencies=authenticated)
@@ -65,6 +72,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         prefix="/api",
         dependencies=authenticated,
     )
+    app.include_router(data_export_router, prefix="/api", dependencies=authenticated)
+    app.include_router(entitlements_router, prefix="/api", dependencies=authenticated)
     app.include_router(historical_learning_router, prefix="/api", dependencies=authenticated)
     app.include_router(opportunities_router, prefix="/api", dependencies=authenticated)
     app.include_router(productization_router, prefix="/api")

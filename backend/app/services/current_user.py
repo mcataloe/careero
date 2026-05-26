@@ -55,7 +55,12 @@ def set_request_current_user_context(
 
 
 def reset_request_current_user_context(token) -> None:
-    _request_current_user_context.reset(token)
+    try:
+        _request_current_user_context.reset(token)
+    except ValueError:
+        # FastAPI may finalize sync generator dependencies from a different
+        # context than the one that created the token.
+        _request_current_user_context.set(None)
 
 
 def get_current_user_context() -> CurrentUserContext:

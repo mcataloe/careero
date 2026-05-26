@@ -57,6 +57,8 @@ def drop_known_schema(database_url: str) -> None:
                             auth_sessions,
                             automation_approval_logs,
                             automation_suggestions,
+                            ai_usage_events,
+                            account_lifecycle_requests,
                             activity_log,
                             artifact_performance_records,
                             generated_artifacts,

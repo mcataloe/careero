@@ -204,7 +204,7 @@ The repo does not yet fully include:
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface and local auth foundation started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and ownership-boundary prep. Layer 11C adds first-party local username/password auth with HttpOnly cookie sessions and disabled Google/LinkedIn SSO placeholders. Production auth hardening, account recovery, OAuth/SSO, billing, hosted tenant isolation certification, export/delete, retention enforcement, and usage metering remain future. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface and local foundations started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Layer 11C adds first-party local username/password auth with HttpOnly cookie sessions and disabled Google/LinkedIn SSO placeholders. Layer 11.4 adds local-first JSON data export for the authenticated local user. Layer 11.5 adds local lifecycle request tracking without destructive enforcement. Layer 11.6 adds provider-agnostic local AI usage events. Layer 11.7 adds local entitlement boundaries for `local_free`. Layer 11.8 documents hosted auth-provider and beta evaluation without selecting OAuth/SSO. Production auth hardening, account recovery, OAuth/SSO, billing, hosted tenant isolation certification, hosted export/delete, retention enforcement, paid quotas, credits, and production deployment remain future. |
 | Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
 | Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
@@ -738,6 +738,36 @@ LinkedIn SSO are disabled placeholders only. OAuth, JWT auth, hosted auth
 provider selection, account recovery, production auth hardening, billing,
 export/delete, and hosted tenant isolation certification remain future.
 
+Layer 11.4 adds `GET /api/data-export/local` and a Settings page JSON download
+panel for the resolved current local user. The export is local-first and
+owner-oriented; it does not create cloud storage, hosted account export,
+production auth, account recovery, deletion enforcement, retention enforcement,
+or legal compliance certification.
+
+Layer 11.5 adds local account lifecycle request tracking with
+`account_lifecycle_requests` and create/list/cancel endpoints. These records
+track export/deletion/retention-review intent and privacy-safe activity-log
+events only. They do not delete data, anonymize data, recover accounts, create
+hosted support workflows, or certify GDPR/CCPA/SOC2 compliance.
+
+Layer 11.6 adds local `ai_usage_events`, usage recording in role parsing,
+COMPASS enrichment, resume artifact generation, and cover-letter artifact
+generation, plus `GET /api/usage/ai` and a Settings page usage panel. Events
+store safe metadata only. They do not create billing events, credits, paid
+quota enforcement, model marketplaces, or production cost controls.
+
+Layer 11.7 adds `GET /api/entitlements/current` and a Settings page Local plan
+panel. It reports the local `local_free` plan, essential local entitlements,
+future-only paid/cloud/collaboration features, and monetization guardrails. It
+does not add Stripe, checkout, subscriptions, invoices, payment collection,
+upgrade buttons, or paid enforcement.
+
+Layer 11.8 adds
+[`docs/auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md)
+to evaluate hosted auth-provider and hosted beta options. It makes no final
+provider selection and adds no hosted auth dependencies, OAuth/SSO, account
+recovery, passkeys, or hosted readiness claim.
+
 Layer 14 extends the productization strategy for model choice, credits, and
 API-first intelligence, but those capabilities are not implemented in `main`.
 Layer 14A/14B should only be pulled forward when Layer 11 billing, metering,
@@ -751,8 +781,8 @@ privacy/account lifecycle, AI usage/cost controls, deployment readiness, and
 production blockers are resolved through a fresh LEAP Recon.
 
 Hosted collaboration, advisor accounts, employer/recruiter access, support/admin
-access, billing, deployment, data export/delete, and usage metering remain
-blocked after Layer 11B.
+access, billing, deployment, hosted export/delete, retention enforcement, and
+production billing/cost controls remain blocked after Layer 11.8.
 
 ---
 

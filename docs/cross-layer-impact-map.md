@@ -19,7 +19,7 @@ prompts so local-first readiness is not confused with production readiness.
 | Layer 8 Integrations | Local export boundary and future integration constraints. | Deferral of OAuth, token storage, background sync, and external account linking. | Frontend artifact export workflow and integration privacy design. | Hosted integrations require auth, secrets, consent, revocation, and audit design. |
 | Layer 9 Automation Guardrails | Suggestions, approval logs, workspace preferences, disabled external actions. | Suggestion-first, review-first, audit-first automation. | No external executors, batch approvals, or state-changing automation are approved. | Production automation requires fresh approval and safety review per action class. |
 | Layer 10 Advanced Search Tracks / Career Strategy | Read-only strategy synthesis from stored Careero evidence. | Advisory, source-grounded, non-mutating strategy behavior. | Strategy depends on Layer 4/5/6 data maturity. | Strategy may inform paid power-user value only after confidence is calibrated. |
-| Layer 11 Productization / Deployment / Monetization | Readiness docs, privacy/account/deployment/cost/monetization gates, local-first current-user boundary prep, Layer 11A local readiness endpoint/UI, and Layer 11C local password auth. | The fact that production auth hardening, account recovery, SSO, hosted tenant isolation, billing, deployment, lifecycle controls, and collaboration implementation remain future. | Auth hardening, billing, deployment, export/delete, retention, metering, and operations. | Implementation requires new LEAP Recon and explicit approvals for hosted auth/provider choices. Readiness reporting must stay privacy-safe and must not expose secrets or private user content. |
+| Layer 11 Productization / Deployment / Monetization | Readiness docs, privacy/account/deployment/cost/monetization gates, local-first current-user boundary prep in workspace/role/application services, Layer 11A local readiness endpoint/UI, Layer 11C local password auth, Layer 11.4 local data export, Layer 11.5 local lifecycle request tracking, Layer 11.6 local AI usage metering, Layer 11.7 local entitlement boundaries, and Layer 11.8 hosted-beta/auth evaluation. | The fact that production auth hardening, account recovery, SSO, hosted tenant isolation, billing, deployment, destructive lifecycle enforcement, paid usage enforcement, lifecycle controls, and collaboration implementation remain future. | Auth hardening, billing, deployment, hosted export/delete, retention, metering, production cost controls, and operations. | Implementation requires new LEAP Recon and explicit approvals for hosted auth/provider choices; auth-provider selection remains deferred. Readiness reporting must stay privacy-safe and must not expose secrets or private user content. |
 | Layer 12 Advisor / Collaboration Mode | Advisor collaboration readiness design in `docs/advisor-collaboration-mode.md`, local-only redacted packet preview/export scaffolding, deterministic redaction metadata, future account roles, scoped packets, comment boundaries, revocation, and audit. | Privacy boundaries, user ownership, COMPASS advisory/source-grounded limits, and separation of private strategy from shareable material. | No production auth, sharing model, tenant permissions, artifact lifecycle maturity, revocation implementation, or audit implementation. | Hosted collaboration remains blocked; current packet preview/export is local-only and creates no accounts, invitations, comments, public links, external sharing, persisted share records, or permission enforcement claims. |
 | Layer 13 Marketplace / Employer-Side Exploration | Future user-controlled visibility and strict disclosure. | Marketplace last, no pay-to-rank, no hidden sponsored steering. | No employer-side model, sharing controls, or trust review. | Employer-side work requires a separate trust and incentive review after user-side value is proven. |
 
@@ -36,6 +36,17 @@ prompts so local-first readiness is not confused with production readiness.
   adds local username/password sessions. Neither is OAuth, hosted auth-provider
   selection, JWT auth, account recovery, or hosted tenant isolation
   certification.
+- Layer 11.5 lifecycle request tracking is non-destructive auditability only; it
+  does not delete, anonymize, recover, or satisfy production account support.
+- Layer 11.6 AI usage metering is local metadata visibility only; it does not
+  create credits, billing events, paid quotas, model marketplaces, or production
+  cost controls.
+- Layer 11.7 entitlement boundaries are local/config-backed only; they do not
+  integrate Stripe, checkout, subscriptions, invoices, payment details, or paid
+  enforcement.
+- Layer 11.8 evaluates hosted auth and beta paths only; it does not select a
+  provider, add OAuth dependencies, implement SSO/account recovery, or claim
+  hosted readiness.
 - Productization cannot make employer-facing artifacts include internal COMPASS,
   ATS risk, compensation strategy, company commentary, or private rationale.
 - Billing and AI quotas must not create hidden sponsored prioritization.

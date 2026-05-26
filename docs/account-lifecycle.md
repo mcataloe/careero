@@ -24,9 +24,20 @@ account recovery, data export, or account deletion.
   isolation.
 - Production account lifecycle, recovery, support, and deletion flows are not
   implemented.
+- Layer 11.4 adds a local-first JSON data export for the resolved current local
+  user. This is a local owner export only and does not imply hosted account
+  export, production auth, cloud backup, account recovery, deletion, retention
+  enforcement, or legal compliance certification.
+- Layer 11.5 adds local account lifecycle request tracking. The request records
+  are local audit records for export, deletion, workspace/source/artifact
+  deletion, and retention-review intent. They do not delete, anonymize, recover,
+  or submit hosted support work.
 - No hosted auth provider has been selected. No OAuth, JWT, password recovery,
   email verification, MFA, support impersonation, or hosted collaboration
   account behavior has been added.
+- Layer 11.8 evaluates auth-provider and hosted-beta options while keeping the
+  final provider choice deferred. It adds no hosted provider dependency, OAuth,
+  JWT, account recovery, or passkey implementation.
 - Layer 11A readiness reporting surfaces this status in the backend and
   Settings page, but it does not add account controls.
 
@@ -107,9 +118,25 @@ Production deletion design must define:
 - Local exports and files outside app control.
 - Provider-side AI/billing data implications.
 
-Layer 11A reports export/delete status as not implemented. It does not add
-export buttons, deletion controls, deletion jobs, retention enforcement, or
+Layer 11.5 deletion requests are non-destructive. Recording an
+`account_deletion` request requires explicit confirmation and returns language
+that the request was recorded, data has not been deleted, and deletion
+enforcement remains future.
+
+Layer 11.4 adds `GET /api/data-export/local` and a Settings page download
+control for local JSON export. It does not add hosted export queues, cloud
+download links, deletion controls, deletion jobs, retention enforcement, or
 account lifecycle APIs.
+
+Layer 11.5 adds:
+
+- `POST /api/account/lifecycle-requests`
+- `GET /api/account/lifecycle-requests`
+- `POST /api/account/lifecycle-requests/{request_id}/cancel`
+
+These endpoints are local-first request tracking only. They use the resolved
+current local user, record privacy-safe activity-log events, and do not perform
+destructive deletion or anonymization.
 
 ## Data Export
 
@@ -157,6 +184,9 @@ Audit logs should capture lifecycle events and security-relevant actions without
 storing secrets, API keys, raw prompts, raw resumes, or private notes in general
 operational logs.
 
+Layer 11.5 lifecycle request activity logs include request type/status/target
+metadata and explicitly avoid raw request reasons or private content.
+
 ## Private Beta Requirements
 
 - Production-hardened auth and account recovery.
@@ -174,7 +204,7 @@ operational logs.
 - Backup/restore.
 - Incident response.
 - User-visible privacy controls.
-- Data export/delete implementation.
+- Hosted data export/delete implementation.
 - Billing only after provider and policy approval.
 - Monitoring, logging, cost controls, and support coverage.
 

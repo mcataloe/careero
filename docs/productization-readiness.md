@@ -46,6 +46,51 @@ workspace, role/opportunity, and application services now make owner-scoped
 service checks more explicit. This preserves local operation and does not
 implement production auth.
 
+Layer 11.4 adds a local-first data export foundation:
+
+- Backend endpoint: `GET /api/data-export/local`.
+- Frontend surface: Settings page Local data export panel.
+- Scope: returns a structured JSON package for records owned by the resolved
+  current local user, including user-owned private content where appropriate.
+- Safety boundary: no cloud storage, public links, hosted account export,
+  production account support, legal compliance certification, runtime secrets,
+  database URLs, API keys, provider credentials, or unrelated users' records.
+
+Layer 11.5 adds local-first account lifecycle request tracking:
+
+- Backend endpoints: `POST /api/account/lifecycle-requests`,
+  `GET /api/account/lifecycle-requests`, and
+  `POST /api/account/lifecycle-requests/{request_id}/cancel`.
+- Frontend surface: Settings page Account lifecycle requests panel.
+- Scope: records local request/audit rows for data export, deletion, targeted
+  deletion, and retention-review intent.
+- Safety boundary: deletion requests are non-destructive and explicitly state
+  that data has not been deleted and deletion enforcement remains future.
+
+Layer 11.6 adds local-first AI usage metering:
+
+- Backend endpoint: `GET /api/usage/ai`.
+- Frontend surface: Settings page AI usage panel.
+- Scope: records provider-agnostic local usage events for role parsing, COMPASS
+  enrichment, resume artifacts, and cover-letter artifacts.
+- Safety boundary: events contain safe metadata only and do not persist raw
+  prompts, resumes, private notes, job descriptions, provider credentials,
+  database URLs, API keys, or billing events.
+
+Layer 11.7 adds a local-first entitlement boundary model:
+
+- Backend endpoint: `GET /api/entitlements/current`.
+- Frontend surface: Settings page Local plan panel.
+- Scope: reports the `local_free` plan, enabled local baseline features,
+  future-only paid/collaboration/cloud features, and monetization guardrails.
+- Safety boundary: no Stripe, checkout, subscriptions, invoices, payment
+  details, credit wallet, upgrade buttons, or paid enforcement.
+
+Layer 11.8 adds
+[`auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md).
+This is evaluation only. It does not select a hosted auth provider, add OAuth
+dependencies, implement SSO/account recovery, or claim hosted readiness.
+
 ## Productization Stages
 
 | Stage | Definition | Current fit |
@@ -74,7 +119,13 @@ implement production auth.
 - Production authorization and tenant isolation are not implemented.
 - Layer 11B service-level ownership checks are local boundary prep only and do
   not certify hosted tenant isolation.
-- Data export, account deletion, and retention enforcement are not implemented.
+- Local-first JSON data export exists for the current local user.
+- Hosted account export, destructive account deletion, anonymization, and
+  retention enforcement are not implemented.
+- Credits, paid billing, quota enforcement, model marketplaces, and production
+  cost controls are not implemented.
+- Entitlement boundaries exist locally, but live billing and paid plan
+  enforcement are not implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
 - AI usage metering and durable cost controls are not implemented.
 - Production deployment architecture is not implemented.
@@ -95,6 +146,10 @@ implement production auth.
   private content.
 - Local-first current-user context and service-level boundary tests that prepare
   future auth injection without selecting an auth provider.
+- Local-first owner export surfaces that avoid cloud storage and runtime
+  secrets.
+- Local-first AI usage visibility that avoids private content and billing
+  claims.
 - Future implementation prompts that preserve job-seeker-first trust.
 
 ## What Must Stay Future

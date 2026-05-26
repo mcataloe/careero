@@ -953,6 +953,95 @@ class AutomationApprovalLog(Base):
     suggestion: Mapped[AutomationSuggestion] = relationship(back_populates="approval_logs")
 
 
+class AccountLifecycleRequest(TimestampMixin, Base):
+    __tablename__ = "account_lifecycle_requests"
+    __table_args__ = (
+        Index("ix_account_lifecycle_requests_user_id", "user_id"),
+        Index("ix_account_lifecycle_requests_status", "status"),
+        Index("ix_account_lifecycle_requests_user_status", "user_id", "status"),
+        Index("ix_account_lifecycle_requests_type", "request_type"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    request_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(100), nullable=False, default="requested")
+    requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    canceled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    request_reason: Mapped[str | None] = mapped_column(Text)
+    target_type: Mapped[str | None] = mapped_column(String(100))
+    target_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    request_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+
+class AIUsageEvent(Base):
+    __tablename__ = "ai_usage_events"
+    __table_args__ = (
+        Index("ix_ai_usage_events_user_id", "user_id"),
+        Index("ix_ai_usage_events_workspace_id", "workspace_id"),
+        Index("ix_ai_usage_events_role_id", "role_id"),
+        Index("ix_ai_usage_events_feature", "feature"),
+        Index("ix_ai_usage_events_event_type", "event_type"),
+        Index("ix_ai_usage_events_created_at", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+    workspace_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id"),
+    )
+    role_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("roles.id"))
+    application_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("applications.id"),
+    )
+    artifact_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("generated_artifacts.id"),
+    )
+    feature: Mapped[str] = mapped_column(String(100), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    provider: Mapped[str | None] = mapped_column(String(100))
+    model: Mapped[str | None] = mapped_column(String(100))
+    status: Mapped[str] = mapped_column(String(100), nullable=False)
+    prompt_version: Mapped[str | None] = mapped_column(String(100))
+    ruleset_version: Mapped[str | None] = mapped_column(String(100))
+    input_token_estimate: Mapped[int | None] = mapped_column(Integer)
+    output_token_estimate: Mapped[int | None] = mapped_column(Integer)
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    error_class: Mapped[str | None] = mapped_column(String(200))
+    content_hash: Mapped[str | None] = mapped_column(String(100))
+    event_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+
 class ActivityLog(Base):
     __tablename__ = "activity_log"
     __table_args__ = (
