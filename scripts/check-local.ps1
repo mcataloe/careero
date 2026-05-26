@@ -25,8 +25,8 @@ function Invoke-Check {
 $allOk = $true
 $allOk = (Invoke-Check -Name "Backend health" -Uri "http://127.0.0.1:8000/health") -and $allOk
 $allOk = (Invoke-Check -Name "Database health" -Uri "http://127.0.0.1:8000/health/database") -and $allOk
-$allOk = (Invoke-Check -Name "Frontend" -Uri "http://127.0.0.1:5173/roles/new") -and $allOk
-$allOk = (Invoke-Check -Name "Frontend API proxy roles" -Uri "http://127.0.0.1:5173/api/roles") -and $allOk
+$allOk = (Invoke-Check -Name "Frontend" -Uri "http://localhost:5173/roles/new") -and $allOk
+$allOk = (Invoke-Check -Name "Frontend API proxy roles" -Uri "http://localhost:5173/api/roles") -and $allOk
 
 if (-not $allOk) {
     Write-Host ""
