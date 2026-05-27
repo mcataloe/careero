@@ -15,9 +15,10 @@ function jsonResponse(response: unknown, status = 200) {
 
 const authUser = {
   id: "user-1",
-  username: "matthew",
   email: "matthew@example.com",
-  display_name: "Matthew",
+  first_name: "Matthew",
+  last_name: "Coleman",
+  display_name: "Matthew Coleman",
   auth_method: "local_password",
   account_status: "active",
   created_at: "2026-05-26T00:00:00Z",

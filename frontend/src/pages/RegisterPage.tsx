@@ -18,9 +18,9 @@ import { AuthLayout } from "./LoginPage";
 export function RegisterPage() {
   const { currentUser, isLoading, register } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export function RegisterPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    if (!username.trim() || !email.trim() || !displayName.trim() || !password) {
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
       setError("Complete all fields to create your account.");
       return;
     }
@@ -44,9 +44,9 @@ export function RegisterPage() {
     setSubmitting(true);
     try {
       await register({
-        username: username.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         email: email.trim(),
-        display_name: displayName.trim(),
         password,
       });
       navigate("/dashboard", { replace: true });
@@ -58,15 +58,15 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout title="Create your Careero account" subtitle="Use a local username and password for this workspace.">
+    <AuthLayout title="Create your Careero account" subtitle="Use your professional name, email, and password for this workspace.">
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           {error ? <Alert color="red">{error}</Alert> : null}
           <TextInput
-            label="Username"
-            value={username}
-            onChange={(event) => setUsername(event.currentTarget.value)}
-            autoComplete="username"
+            label="First name"
+            value={firstName}
+            onChange={(event) => setFirstName(event.currentTarget.value)}
+            autoComplete="given-name"
             required
           />
           <TextInput
@@ -78,10 +78,10 @@ export function RegisterPage() {
             required
           />
           <TextInput
-            label="Display name"
-            value={displayName}
-            onChange={(event) => setDisplayName(event.currentTarget.value)}
-            autoComplete="name"
+            label="Last name"
+            value={lastName}
+            onChange={(event) => setLastName(event.currentTarget.value)}
+            autoComplete="family-name"
             required
           />
           <PasswordInput

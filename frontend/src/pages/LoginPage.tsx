@@ -22,7 +22,7 @@ export function LoginPage() {
   const { currentUser, isLoading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -41,14 +41,14 @@ export function LoginPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    if (!usernameOrEmail.trim() || !password) {
-      setError("Enter your username or email and password.");
+    if (!email.trim() || !password) {
+      setError("Enter your email and password.");
       return;
     }
     setSubmitting(true);
     try {
       await login({
-        username_or_email: usernameOrEmail.trim(),
+        email: email.trim(),
         password,
       });
       navigate(redirectTo, { replace: true });
@@ -65,10 +65,11 @@ export function LoginPage() {
         <Stack gap="md">
           {error ? <Alert color="red">{error}</Alert> : null}
           <TextInput
-            label="Username or email"
-            value={usernameOrEmail}
-            onChange={(event) => setUsernameOrEmail(event.currentTarget.value)}
-            autoComplete="username"
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.currentTarget.value)}
+            autoComplete="email"
             required
           />
           <PasswordInput

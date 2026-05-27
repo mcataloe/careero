@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import re
 import secrets
 import uuid
 from dataclasses import dataclass
@@ -21,9 +20,8 @@ from app.services.current_user import CurrentUserContext
 
 LOCAL_PASSWORD_AUTH_METHOD = "local_password"
 ACTIVE_ACCOUNT_STATUS = "active"
-GENERIC_LOGIN_ERROR = "Invalid username/email or password"
+GENERIC_LOGIN_ERROR = "Invalid email or password"
 
-_USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,63}$")
 _PASSWORD_HASHER = PasswordHasher(
     time_cost=3,
     memory_cost=65536,
@@ -65,10 +63,6 @@ class AuthSessionResult:
     session: AuthSession
 
 
-def normalize_username(value: str) -> str:
-    return value.strip().lower()
-
-
 def normalize_email(value: str) -> str:
     return value.strip().lower()
 
@@ -93,7 +87,6 @@ def hash_session_token(token: str) -> str:
 def safe_user_response(user: User) -> dict[str, Any]:
     return {
         "id": user.id,
-        "username": user.username,
         "email": user.email,
         "display_name": user.display_name,
         "auth_method": user.auth_method,
@@ -110,9 +103,9 @@ class AuthService:
     def register_user(
         self,
         *,
-        username: str,
+        first_name: str,
+        last_name: str,
         email: str,
-        display_name: str,
         password: str,
         user_agent: str | None = None,
         ip_hint: str | None = None,
@@ -120,26 +113,25 @@ class AuthService:
         if not self.settings.allow_registration:
             raise RegistrationDisabledError("Registration is disabled")
 
-        username_clean = username.strip()
-        username_normalized = normalize_username(username_clean)
+        first_name_clean = first_name.strip()
+        last_name_clean = last_name.strip()
         email_clean = email.strip()
         email_normalized = normalize_email(email_clean)
-        display_name_clean = display_name.strip()
+        display_name_clean = f"{first_name_clean} {last_name_clean}".strip()
 
-        self._validate_username(username_clean)
+        self._validate_name(first_name_clean, "First name")
+        self._validate_name(last_name_clean, "Last name")
         self._validate_email(email_clean)
-        self._validate_display_name(display_name_clean)
         self._validate_password(password)
         self._ensure_identity_available(
-            username_normalized=username_normalized,
             email_normalized=email_normalized,
         )
 
         now = datetime.now(timezone.utc)
         user = User(
-            username=username_clean,
-            username_normalized=username_normalized,
             email=email_clean,
+            first_name=first_name_clean,
+            last_name=last_name_clean,
             email_normalized=email_normalized,
             display_name=display_name_clean,
             password_hash=hash_password(password),
@@ -167,27 +159,19 @@ class AuthService:
     def login(
         self,
         *,
-        username_or_email: str,
+        email: str,
         password: str,
         user_agent: str | None = None,
         ip_hint: str | None = None,
     ) -> AuthSessionResult:
-        identity = username_or_email.strip()
+        identity = email.strip()
         if not identity or not password:
             raise InvalidCredentialsError(GENERIC_LOGIN_ERROR)
 
-        normalized = (
-            normalize_email(identity)
-            if "@" in identity
-            else normalize_username(identity)
-        )
+        normalized = normalize_email(identity)
         user = self.db.scalar(
             select(User).where(
-                or_(
-                    User.username_normalized == normalized,
-                    User.email_normalized == normalized,
-                    User.email == normalized,
-                )
+                or_(User.email_normalized == normalized, User.email == normalized)
             )
         )
         if user is None or not verify_password(password, user.password_hash):
@@ -295,22 +279,15 @@ class AuthService:
         resolved = self.resolve_session(token)
         return resolved[0] if resolved is not None else None
 
-    def _validate_username(self, username: str) -> None:
-        if not _USERNAME_PATTERN.match(username):
-            raise PasswordPolicyError(
-                "Username must be 3-64 characters and use letters, numbers, "
-                "dots, dashes, or underscores."
-            )
+    def _validate_name(self, value: str, label: str) -> None:
+        if not value:
+            raise PasswordPolicyError(f"{label} is required.")
+        if len(value) > 100:
+            raise PasswordPolicyError(f"{label} must be 100 characters or fewer.")
 
     def _validate_email(self, email: str) -> None:
         if not email or "@" not in email or len(email) > 320:
             raise PasswordPolicyError("Enter a valid email address.")
-
-    def _validate_display_name(self, display_name: str) -> None:
-        if not display_name:
-            raise PasswordPolicyError("Display name is required.")
-        if len(display_name) > 200:
-            raise PasswordPolicyError("Display name must be 200 characters or fewer.")
 
     def _validate_password(self, password: str) -> None:
         if len(password) < self.settings.password_min_length:
@@ -321,20 +298,15 @@ class AuthService:
     def _ensure_identity_available(
         self,
         *,
-        username_normalized: str,
         email_normalized: str,
     ) -> None:
         existing = self.db.scalar(
             select(User.id).where(
-                or_(
-                    User.username_normalized == username_normalized,
-                    User.email_normalized == email_normalized,
-                    User.email == email_normalized,
-                )
+                or_(User.email_normalized == email_normalized, User.email == email_normalized)
             )
         )
         if existing is not None:
-            raise DuplicateIdentityError("Username or email is already registered.")
+            raise DuplicateIdentityError("Email is already registered.")
 
     def _create_default_job_sources(self, user: User) -> None:
         for source_type, display_name in SOURCE_DISPLAY_NAMES.items():
