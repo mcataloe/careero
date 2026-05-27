@@ -1,4 +1,4 @@
-"""repair legacy stride evaluation table name
+"""repair legacy COMPASS evaluation table compatibility
 
 Revision ID: 0016_compass_repair
 Revises: 0015_artifact_alignment
