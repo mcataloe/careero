@@ -18,8 +18,9 @@ Current planning hierarchy:
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
-3. `docs/archive/*` - historical context only.
-4. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+3. Active layer-specific docs listed below.
+4. `docs/archive/*` - historical context only.
+5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
 ## Documents
 
@@ -33,6 +34,9 @@ Current planning hierarchy:
 - [Cover letter artifact generation](cover-letter-artifact-generation.md)
 - [Workspace intelligence context](workspace-intelligence-context.md)
 - [Automation guardrails](automation-guardrails.md)
+- [Layer 14 — Model catalog and prompt architecture](careero-layer-14-model-catalog-and-prompt-architecture.md)
+- [Layer 15 — API job sources and managed deltas](careero-layer-15-api-job-sources-and-managed-deltas.md)
+- [Layer 16 — Guided onboarding and first-search activation](careero-layer-16-guided-onboarding-and-first-search-activation.md)
 
 ## Archive
 
