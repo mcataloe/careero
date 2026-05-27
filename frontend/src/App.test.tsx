@@ -17,12 +17,15 @@ function jsonResponse(response: unknown, status = 200) {
 const authUser = {
   id: "user-1",
   email: "matthew@example.com",
-  first_name: "Matthew",
-  last_name: "Coleman",
-  display_name: "Matthew Coleman",
-  auth_method: "local_password",
-  account_status: "active",
-  created_at: "2026-05-26T00:00:00Z",
+  firstName: "Matthew",
+  lastName: "Coleman",
+  displayName: "Matthew Coleman",
+  salutation: null,
+  pronouns: null,
+  headshotUrl: null,
+  authMethod: "local_password",
+  accountStatus: "active",
+  createdAt: "2026-05-26T00:00:00Z",
 };
 
 function renderAppAt(path: string) {
@@ -119,6 +122,6 @@ describe("Opportunity routes", () => {
     renderAppAt("/dashboard");
 
     expect(await screen.findByRole("heading", { name: "Careero" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^email/i)).toBeInTheDocument();
   });
 });

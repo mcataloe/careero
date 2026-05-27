@@ -32,6 +32,8 @@ def local_boundary_contexts(db_session: Session):
     user_b = User(
         id=uuid4(),
         email="other-local-user@careero.local",
+        first_name="Other",
+        last_name="Local User",
         display_name="Other Local User",
     )
     db_session.add(user_b)
@@ -41,12 +43,16 @@ def local_boundary_contexts(db_session: Session):
     context_a = CurrentUserContext(
         user_id=user_a.id,
         email=user_a.email,
+        first_name=user_a.first_name,
+        last_name=user_a.last_name,
         display_name=user_a.display_name,
         mode="test",
     )
     context_b = CurrentUserContext(
         user_id=user_b.id,
         email=user_b.email,
+        first_name=user_b.first_name,
+        last_name=user_b.last_name,
         display_name=user_b.display_name,
         mode="test",
     )

@@ -89,6 +89,8 @@ def test_cannot_cancel_another_users_lifecycle_request(db_session: Session) -> N
     user_b = User(
         id=uuid4(),
         email="lifecycle-other@careero.local",
+        first_name="Lifecycle",
+        last_name="Other",
         display_name="Lifecycle Other",
     )
     db_session.add(user_b)

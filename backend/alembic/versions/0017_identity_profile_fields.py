@@ -1,7 +1,7 @@
 """add professional identity fields
 
 Revision ID: 0017_identity_profile_fields
-Revises: 0016_compass_table_repair
+Revises: 0016_compass_repair
 Create Date: 2026-05-27
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = "0017_identity_profile_fields"
-down_revision = "0016_compass_table_repair"
+down_revision = "0016_compass_repair"
 branch_labels = None
 depends_on = None
 

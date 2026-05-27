@@ -19,7 +19,7 @@ export function SettingsPage() {
         <List spacing="xs">
           <List.Item>Backend API is expected at http://127.0.0.1:8000.</List.Item>
           <List.Item>Vite proxies frontend `/api` requests to the backend.</List.Item>
-          <List.Item>First-party username/password login is enabled locally.</List.Item>
+          <List.Item>First-party email/password login is enabled locally.</List.Item>
           <List.Item>Google and LinkedIn SSO are visible placeholders and are not active.</List.Item>
           <List.Item>Workspace switching and hosted account recovery remain future work.</List.Item>
         </List>

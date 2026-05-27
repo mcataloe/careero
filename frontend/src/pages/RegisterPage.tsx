@@ -18,9 +18,9 @@ import { AuthLayout } from "./LoginPage";
 export function RegisterPage() {
   const { currentUser, isLoading, register } = useAuth();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export function RegisterPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+    if (!email.trim() || !firstName.trim() || !lastName.trim() || !password) {
       setError("Complete all fields to create your account.");
       return;
     }
@@ -44,9 +44,9 @@ export function RegisterPage() {
     setSubmitting(true);
     try {
       await register({
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
         email: email.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         password,
       });
       navigate("/dashboard", { replace: true });
@@ -63,18 +63,18 @@ export function RegisterPage() {
         <Stack gap="md">
           {error ? <Alert color="red">{error}</Alert> : null}
           <TextInput
-            label="First name"
-            value={firstName}
-            onChange={(event) => setFirstName(event.currentTarget.value)}
-            autoComplete="given-name"
-            required
-          />
-          <TextInput
             label="Email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.currentTarget.value)}
             autoComplete="email"
+            required
+          />
+          <TextInput
+            label="First name"
+            value={firstName}
+            onChange={(event) => setFirstName(event.currentTarget.value)}
+            autoComplete="given-name"
             required
           />
           <TextInput

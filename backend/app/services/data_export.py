@@ -74,7 +74,12 @@ class LocalDataExportService:
                 "current_user": {
                     "id": str(user.id),
                     "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
                     "display_name": user.display_name,
+                    "salutation": user.salutation,
+                    "pronouns": user.pronouns,
+                    "headshot_url": user.headshot_url,
                     "mode": self.current_user_context.mode,
                     "environment": self.settings.environment,
                 },

@@ -67,6 +67,10 @@ def normalize_email(value: str) -> str:
     return value.strip().lower()
 
 
+def build_display_name(first_name: str, last_name: str) -> str:
+    return f"{first_name.strip()} {last_name.strip()}".strip()
+
+
 def hash_password(password: str) -> str:
     return _PASSWORD_HASHER.hash(password)
 
@@ -88,10 +92,15 @@ def safe_user_response(user: User) -> dict[str, Any]:
     return {
         "id": user.id,
         "email": user.email,
-        "display_name": user.display_name,
-        "auth_method": user.auth_method,
-        "account_status": user.account_status,
-        "created_at": user.created_at,
+        "firstName": user.first_name,
+        "lastName": user.last_name,
+        "displayName": user.display_name,
+        "salutation": user.salutation,
+        "pronouns": user.pronouns,
+        "headshotUrl": user.headshot_url,
+        "authMethod": user.auth_method,
+        "accountStatus": user.account_status,
+        "createdAt": user.created_at,
     }
 
 
@@ -103,9 +112,9 @@ class AuthService:
     def register_user(
         self,
         *,
+        email: str,
         first_name: str,
         last_name: str,
-        email: str,
         password: str,
         user_agent: str | None = None,
         ip_hint: str | None = None,
@@ -113,26 +122,24 @@ class AuthService:
         if not self.settings.allow_registration:
             raise RegistrationDisabledError("Registration is disabled")
 
-        first_name_clean = first_name.strip()
-        last_name_clean = last_name.strip()
         email_clean = email.strip()
         email_normalized = normalize_email(email_clean)
-        display_name_clean = f"{first_name_clean} {last_name_clean}".strip()
+        first_name_clean = first_name.strip()
+        last_name_clean = last_name.strip()
+        display_name_clean = build_display_name(first_name_clean, last_name_clean)
 
-        self._validate_name(first_name_clean, "First name")
-        self._validate_name(last_name_clean, "Last name")
         self._validate_email(email_clean)
+        self._validate_profile_name("First name", first_name_clean)
+        self._validate_profile_name("Last name", last_name_clean)
         self._validate_password(password)
-        self._ensure_identity_available(
-            email_normalized=email_normalized,
-        )
+        self._ensure_identity_available(email_normalized=email_normalized)
 
         now = datetime.now(timezone.utc)
         user = User(
             email=email_clean,
+            email_normalized=email_normalized,
             first_name=first_name_clean,
             last_name=last_name_clean,
-            email_normalized=email_normalized,
             display_name=display_name_clean,
             password_hash=hash_password(password),
             password_updated_at=now,
@@ -171,7 +178,10 @@ class AuthService:
         normalized = normalize_email(identity)
         user = self.db.scalar(
             select(User).where(
-                or_(User.email_normalized == normalized, User.email == normalized)
+                or_(
+                    User.email_normalized == normalized,
+                    User.email == normalized,
+                )
             )
         )
         if user is None or not verify_password(password, user.password_hash):
@@ -259,6 +269,8 @@ class AuthService:
         return CurrentUserContext(
             user_id=user.id,
             email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
             display_name=user.display_name,
             mode="authenticated",
         )
@@ -279,15 +291,15 @@ class AuthService:
         resolved = self.resolve_session(token)
         return resolved[0] if resolved is not None else None
 
-    def _validate_name(self, value: str, label: str) -> None:
+    def _validate_email(self, email: str) -> None:
+        if not email or "@" not in email or len(email) > 320:
+            raise PasswordPolicyError("Enter a valid email address.")
+
+    def _validate_profile_name(self, label: str, value: str) -> None:
         if not value:
             raise PasswordPolicyError(f"{label} is required.")
         if len(value) > 100:
             raise PasswordPolicyError(f"{label} must be 100 characters or fewer.")
-
-    def _validate_email(self, email: str) -> None:
-        if not email or "@" not in email or len(email) > 320:
-            raise PasswordPolicyError("Enter a valid email address.")
 
     def _validate_password(self, password: str) -> None:
         if len(password) < self.settings.password_min_length:
@@ -302,7 +314,10 @@ class AuthService:
     ) -> None:
         existing = self.db.scalar(
             select(User.id).where(
-                or_(User.email_normalized == email_normalized, User.email == email_normalized)
+                or_(
+                    User.email_normalized == email_normalized,
+                    User.email == email_normalized,
+                )
             )
         )
         if existing is not None:

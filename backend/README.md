@@ -1,6 +1,6 @@
 # Backend
 
-The backend is a local FastAPI application for Careero. It now supports the local platform foundation, first-party local username/password auth, workspace-scoped role intake, COMPASS evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-auth-hardened.
+The backend is a local FastAPI application for Careero. It now supports the local platform foundation, first-party local email/password auth, workspace-scoped role intake, COMPASS evaluation, artifact-generation foundations, application workflow persistence, and early analytics surfaces. It is still local-first and not production-auth-hardened.
 
 ## PostgreSQL
 
@@ -487,7 +487,7 @@ The activity log is scoped to the authenticated current user when password auth 
 5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
 6. Inspect lifecycle events with `GET /api/activity-log`.
 
-The original Layer 2 local flow does not add automated discovery, generated application packets, or application submission. Local username/password auth now exists separately from those intake workflows. Backend resume and cover-letter artifact generation foundations now exist separately as draft-only services; frontend rendering, review/approval lifecycle, and submission remain future work. Local Markdown/DOCX/PDF export is available for stored generated artifacts.
+The original Layer 2 local flow does not add automated discovery, generated application packets, or application submission. Local email/password auth now exists separately from those intake workflows. Backend resume and cover-letter artifact generation foundations now exist separately as draft-only services; frontend rendering, review/approval lifecycle, and submission remain future work. Local Markdown/DOCX/PDF export is available for stored generated artifacts.
 
 ## Resume Artifact Generation
 

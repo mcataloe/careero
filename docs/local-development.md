@@ -235,7 +235,7 @@ npm run validate
 
 ## Current Boundaries
 
-Layer 2 is local-first and evaluation-focused only. Later layers add workspace-aware artifact generation. The app now includes local username/password authentication, but it still does not include production auth hardening, tenants, frontend workspace switching, billing, cloud deployment, automated discovery, application packets, or automated application submission.
+Layer 2 is local-first and evaluation-focused only. Later layers add workspace-aware artifact generation. The app now includes local email/password authentication, but it still does not include production auth hardening, tenants, frontend workspace switching, billing, cloud deployment, automated discovery, application packets, or automated application submission.
 
 ## Layer 2 Completion
 

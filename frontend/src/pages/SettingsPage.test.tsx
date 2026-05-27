@@ -182,7 +182,12 @@ function fetchByPath(overrides: Record<string, unknown> = {}) {
               current_user: {
                 id: "00000000-0000-4000-8000-000000000001",
                 email: "local-user@careero.local",
+                first_name: "Local",
+                last_name: "User",
                 display_name: "Local User",
+                salutation: null,
+                pronouns: null,
+                headshot_url: null,
                 mode: "local",
                 environment: "local",
               },
@@ -232,7 +237,7 @@ describe("SettingsPage", () => {
     expect(
       screen.queryByText("Authentication and workspace switching are intentionally absent."),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("First-party username/password login is enabled locally.")).toBeInTheDocument();
+    expect(screen.getByText("First-party email/password login is enabled locally.")).toBeInTheDocument();
   });
 
   it("downloads a local data export from settings", async () => {

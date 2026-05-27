@@ -10,7 +10,7 @@ prompt.
 
 Careero currently runs as a local-first FastAPI backend, React + Vite frontend,
 PostgreSQL database, Alembic migrations, local scripts, and local health checks.
-It also has first-party local username/password auth with HttpOnly cookie
+It also has first-party local email/password auth with HttpOnly cookie
 sessions. This is a local foundation, not production-hardened hosted auth.
 The `infra/` directory is reserved for future infrastructure notes and does not
 contain production cloud deployment logic.

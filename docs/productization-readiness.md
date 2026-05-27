@@ -28,8 +28,8 @@ Layer 11A adds a local-first productization readiness surface:
 
 Layer 11A is not production deployment. It adds reporting only.
 
-It now has a local-first first-party username/password auth foundation:
-registration, login with username or email, Argon2id password hashing,
+It now has a local-first first-party email/password auth foundation:
+registration, login with email, Argon2id password hashing,
 server-side session records, HttpOnly cookie sessions, `/api/auth/me`, logout,
 and frontend app-route protection. Google and LinkedIn SSO are visible disabled
 placeholders only. OAuth is not implemented.
@@ -106,7 +106,7 @@ dependencies, implement SSO/account recovery, or claim hosted readiness.
 | Gate | Local POC | Local beta | Private hosted beta | Production SaaS | Marketplace/employer-side |
 | --- | --- | --- | --- | --- | --- |
 | Core workflow | Manual local workflow works. | Application, reminders, artifacts, analytics, and strategy are coherent. | Hosted workflows are stable for invited users. | Public workflows are supportable and observable. | User-side workflow remains the product center. |
-| Identity | Local username/password auth is available; seeded local user remains for seed/test paths. | Local user and bootstrap assumptions are documented. | Hardened auth and account recovery are implemented. | Auth is hardened and supportable. | Sharing identity model is explicit and user-controlled. |
+| Identity | Local email/password auth is available; seeded local user remains for seed/test paths. | Local user and bootstrap assumptions are documented. | Hardened auth and account recovery are implemented. | Auth is hardened and supportable. | Sharing identity model is explicit and user-controlled. |
 | Authorization | Local-only boundary. | No false tenant claims. | Workspace/account authorization is enforced. | Tenant isolation is tested and monitored. | Employer access is scoped, revocable, and audited. |
 | Privacy | Local data expectations documented. | Data classes, export, deletion, and retention designs exist. | Export/delete and retention controls are implemented. | Privacy controls are operationally supportable. | No employer visibility without explicit user sharing. |
 | AI governance | Source-grounded AI and TruthGuard checks. | Usage transparency and reviewability are clear. | Usage metering and cost controls are implemented. | Abuse, cost, and quality controls are monitored. | AI never sells attention or hides sponsored steering. |

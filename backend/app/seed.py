@@ -10,6 +10,8 @@ from app.models import JobSource, User, Workspace
 DEFAULT_LOCAL_USER_ID = uuid.UUID("00000000-0000-4000-8000-000000000001")
 DEFAULT_WORKSPACE_ID = uuid.UUID("00000000-0000-4000-8000-000000000101")
 DEFAULT_LOCAL_USER_EMAIL = "local-user@careero.local"
+DEFAULT_LOCAL_USER_FIRST_NAME = "Local"
+DEFAULT_LOCAL_USER_LAST_NAME = "User"
 DEFAULT_LOCAL_USER_DISPLAY_NAME = "Local User"
 
 
@@ -25,8 +27,8 @@ def seed_default_local_user(db: Session) -> User:
             id=DEFAULT_LOCAL_USER_ID,
             email=DEFAULT_LOCAL_USER_EMAIL,
             email_normalized=DEFAULT_LOCAL_USER_EMAIL,
-            username="local-user",
-            username_normalized="local-user",
+            first_name=DEFAULT_LOCAL_USER_FIRST_NAME,
+            last_name=DEFAULT_LOCAL_USER_LAST_NAME,
             display_name=DEFAULT_LOCAL_USER_DISPLAY_NAME,
             auth_method="local_seeded",
             account_status="active",
@@ -35,8 +37,8 @@ def seed_default_local_user(db: Session) -> User:
     else:
         user.email = DEFAULT_LOCAL_USER_EMAIL
         user.email_normalized = DEFAULT_LOCAL_USER_EMAIL
-        user.username = user.username or "local-user"
-        user.username_normalized = user.username_normalized or "local-user"
+        user.first_name = DEFAULT_LOCAL_USER_FIRST_NAME
+        user.last_name = DEFAULT_LOCAL_USER_LAST_NAME
         user.display_name = DEFAULT_LOCAL_USER_DISPLAY_NAME
         user.auth_method = "local_seeded"
         user.account_status = "active"

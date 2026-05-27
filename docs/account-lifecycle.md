@@ -9,7 +9,7 @@ account recovery, data export, or account deletion.
 
 ## Current Local-First Account Reality
 
-- Careero now supports first-party local username/password registration and
+- Careero now supports first-party local email/password registration and
   login backed by Argon2id password hashes and HttpOnly cookie sessions.
 - Google and LinkedIn SSO appear as disabled login-page placeholders only.
   OAuth is not implemented and no provider configuration exists.

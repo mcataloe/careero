@@ -33,7 +33,7 @@ prompts so local-first readiness is not confused with production readiness.
   descriptions, generated artifacts, compensation targets, or private user
   records.
 - Layer 11B local current-user context is injectable boundary prep. Layer 11C
-  adds local username/password sessions. Neither is OAuth, hosted auth-provider
+  adds local email/password sessions. Neither is OAuth, hosted auth-provider
   selection, JWT auth, account recovery, or hosted tenant isolation
   certification.
 - Layer 11.5 lifecycle request tracking is non-destructive auditability only; it

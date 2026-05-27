@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
@@ -30,9 +30,17 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 class RegisterRequest(BaseModel):
-    first_name: str = Field(min_length=1, max_length=100)
-    last_name: str = Field(min_length=1, max_length=100)
     email: str = Field(min_length=3, max_length=320)
+    first_name: str = Field(
+        min_length=1,
+        max_length=100,
+        validation_alias=AliasChoices("firstName", "first_name"),
+    )
+    last_name: str = Field(
+        min_length=1,
+        max_length=100,
+        validation_alias=AliasChoices("lastName", "last_name"),
+    )
     password: str = Field(min_length=1, max_length=256)
 
 
@@ -44,12 +52,15 @@ class LoginRequest(BaseModel):
 class AuthUserResponse(BaseModel):
     id: str
     email: str
-    first_name: str
-    last_name: str
-    display_name: str
-    auth_method: str
-    account_status: str
-    created_at: str
+    firstName: str
+    lastName: str
+    displayName: str
+    salutation: str | None
+    pronouns: str | None
+    headshotUrl: str | None
+    authMethod: str
+    accountStatus: str
+    createdAt: str
 
 
 def _cookie_name(settings: Settings) -> str:

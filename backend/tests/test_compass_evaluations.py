@@ -81,6 +81,8 @@ def create_evaluation(client: TestClient, role_id: str) -> dict:
 def add_other_user_role(db_session: Session) -> Role:
     user = User(
         email="other-user@careero.local",
+        first_name="Other",
+        last_name="User",
         display_name="Other User",
     )
     db_session.add(user)

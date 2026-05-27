@@ -16,12 +16,15 @@ function jsonResponse(response: unknown, status = 200) {
 const authUser = {
   id: "user-1",
   email: "matthew@example.com",
-  first_name: "Matthew",
-  last_name: "Coleman",
-  display_name: "Matthew Coleman",
-  auth_method: "local_password",
-  account_status: "active",
-  created_at: "2026-05-26T00:00:00Z",
+  firstName: "Matthew",
+  lastName: "Coleman",
+  displayName: "Matthew Coleman",
+  salutation: null,
+  pronouns: null,
+  headshotUrl: null,
+  authMethod: "local_password",
+  accountStatus: "active",
+  createdAt: "2026-05-26T00:00:00Z",
 };
 
 function renderAppAt(path: string) {
@@ -46,7 +49,7 @@ describe("auth pages", () => {
     renderAppAt("/login");
 
     expect(await screen.findByRole("heading", { name: "Careero" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password/i, { selector: "input" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /continue with google - coming soon/i }),
@@ -67,8 +70,8 @@ describe("auth pages", () => {
     expect(
       await screen.findByRole("heading", { name: "Create your Careero account" }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/^first name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
   });
 
@@ -81,7 +84,7 @@ describe("auth pages", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     renderAppAt("/login");
-    await userEvent.type(await screen.findByLabelText(/email/i), "matthew@example.com");
+    await userEvent.type(await screen.findByLabelText(/^email/i), "matthew@example.com");
     await userEvent.type(
       screen.getByLabelText(/^password/i, { selector: "input" }),
       "secret password",
@@ -103,9 +106,9 @@ describe("auth pages", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     renderAppAt("/register");
-    await userEvent.type(await screen.findByLabelText(/^first name/i), "matthew@example.com");
     await userEvent.type(screen.getByLabelText(/^email/i), "matthew@example.com");
-    await userEvent.type(screen.getByLabelText(/last name/i), "Matthew");
+    await userEvent.type(screen.getByLabelText(/first name/i), "Matthew");
+    await userEvent.type(screen.getByLabelText(/last name/i), "Coleman");
     await userEvent.type(
       screen.getByLabelText(/^password/i, { selector: "input" }),
       "secret password",

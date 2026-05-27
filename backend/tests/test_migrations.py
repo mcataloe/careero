@@ -255,9 +255,12 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
 
     user_columns = {column["name"] for column in inspector.get_columns("users")}
     assert {
-        "username",
-        "username_normalized",
         "email_normalized",
+        "first_name",
+        "last_name",
+        "salutation",
+        "pronouns",
+        "headshot_url",
         "password_hash",
         "password_updated_at",
         "last_login_at",
@@ -266,6 +269,8 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "failed_login_count",
         "locked_until",
     }.issubset(user_columns)
+    assert "username" not in user_columns
+    assert "username_normalized" not in user_columns
 
     auth_session_columns = {
         column["name"] for column in inspector.get_columns("auth_sessions")

@@ -34,7 +34,10 @@ export function AppShellLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { currentUser, logout } = useAuth();
   const userLabel =
-    currentUser?.display_name || currentUser?.email || "User";
+    currentUser?.displayName ||
+    [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(" ") ||
+    currentUser?.email ||
+    "User";
 
   return (
     <MantineAppShell

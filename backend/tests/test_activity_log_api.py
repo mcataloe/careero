@@ -31,7 +31,12 @@ def test_activity_log_lists_and_filters_default_user_entries(
 ) -> None:
     role_id = uuid4()
     evaluation_id = uuid4()
-    other_user = User(email="activity-other@careero.local", display_name="Other")
+    other_user = User(
+        email="activity-other@careero.local",
+        first_name="Activity",
+        last_name="Other",
+        display_name="Activity Other",
+    )
     db_session.add(other_user)
     db_session.flush()
     db_session.add_all(

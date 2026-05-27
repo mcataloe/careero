@@ -10,7 +10,9 @@ from app.models import User
 from app.seed import (
     DEFAULT_LOCAL_USER_DISPLAY_NAME,
     DEFAULT_LOCAL_USER_EMAIL,
+    DEFAULT_LOCAL_USER_FIRST_NAME,
     DEFAULT_LOCAL_USER_ID,
+    DEFAULT_LOCAL_USER_LAST_NAME,
 )
 
 
@@ -22,6 +24,8 @@ class CurrentUserResolutionError(Exception):
 class CurrentUserContext:
     user_id: uuid.UUID
     email: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
     display_name: str | None = None
     mode: str = "local"
 
@@ -32,11 +36,15 @@ class LocalUserContext(CurrentUserContext):
         *,
         user_id: uuid.UUID = DEFAULT_LOCAL_USER_ID,
         email: str | None = DEFAULT_LOCAL_USER_EMAIL,
+        first_name: str | None = DEFAULT_LOCAL_USER_FIRST_NAME,
+        last_name: str | None = DEFAULT_LOCAL_USER_LAST_NAME,
         display_name: str | None = DEFAULT_LOCAL_USER_DISPLAY_NAME,
     ) -> None:
         super().__init__(
             user_id=user_id,
             email=email,
+            first_name=first_name,
+            last_name=last_name,
             display_name=display_name,
             mode="local",
         )

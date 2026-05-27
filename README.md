@@ -12,7 +12,7 @@ Use that document as the source of truth for Careero-specific LEAP Recon, layer 
 
 Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md).
 
-Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. First-party local username/password login now exists, while Google/LinkedIn SSO, account recovery, production auth hardening, billing, tenant isolation, and hosted deployment remain future.
+Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. First-party local email/password login now exists, while Google/LinkedIn SSO, account recovery, production auth hardening, billing, tenant isolation, and hosted deployment remain future.
 
 Auth-provider and hosted-beta direction is evaluated in [`docs/auth-provider-and-hosted-beta-evaluation.md`](docs/auth-provider-and-hosted-beta-evaluation.md). It is evaluation only and does not select or implement auth.
 
@@ -54,7 +54,7 @@ Current planning hierarchy:
 - Local automation suggestion, approval-log, and workspace preference guardrails with external actions disabled.
 - Read-only career strategy synthesis for workspace/search-track retrospectives and internal cross-track comparison based only on stored Careero data.
 - Local-first productization readiness reporting through `GET /api/productization/readiness` and the Settings page. This reports current blockers and does not implement production deployment.
-- First-party local username/password account registration and login with HttpOnly cookie-backed sessions, current-user lookup, logout, and route protection.
+- First-party local email/password account registration and login with HttpOnly cookie-backed sessions, current-user lookup, logout, and route protection.
 - Disabled Google and LinkedIn SSO placeholders on the login page. OAuth is not implemented.
 - Local-first JSON data export for the authenticated local user through `GET /api/data-export/local` and the Settings page. This creates no cloud download link, backup, hosted account export, or production account support.
 - Local-first account lifecycle request tracking through `GET/POST /api/account/lifecycle-requests` and the Settings page. This records audit requests only and does not delete or anonymize data.

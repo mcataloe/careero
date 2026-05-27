@@ -12,7 +12,7 @@ hosted readiness.
 
 ## 1. Current Local-First Identity Reality
 
-Careero currently supports first-party local username/password registration and
+Careero currently supports first-party local email/password registration and
 login backed by Argon2id password hashes, server-side session records, and
 HttpOnly cookie sessions. It also keeps the seeded local user/workspace for
 seed, direct service, and auth-disabled test paths, and has local-first data

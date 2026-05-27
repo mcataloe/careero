@@ -44,7 +44,6 @@ class SoftDeleteMixin:
 class User(TimestampMixin, SoftDeleteMixin, Base):
     __tablename__ = "users"
     __table_args__ = (
-        Index("ix_users_username_normalized", "username_normalized", unique=True),
         Index("ix_users_email_normalized", "email_normalized", unique=True),
         Index("ix_users_account_status", "account_status"),
     )
@@ -56,10 +55,8 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     )
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
     email_normalized: Mapped[str | None] = mapped_column(String(320))
-    username: Mapped[str | None] = mapped_column(String(100))
-    username_normalized: Mapped[str | None] = mapped_column(String(100))
-    first_name: Mapped[str | None] = mapped_column(String(100))
-    last_name: Mapped[str | None] = mapped_column(String(100))
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     display_name: Mapped[str] = mapped_column(String(200), nullable=False)
     salutation: Mapped[str | None] = mapped_column(String(50))
     pronouns: Mapped[str | None] = mapped_column(String(50))

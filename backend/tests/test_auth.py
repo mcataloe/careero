@@ -50,9 +50,9 @@ def _register(
     response = client.post(
         "/api/auth/register",
         json={
-            "first_name": first_name,
-            "last_name": last_name,
             "email": email,
+            "firstName": first_name,
+            "lastName": last_name,
             "password": password,
         },
     )
@@ -88,6 +88,7 @@ def test_registration_creates_user_workspace_sources_and_session(
     assert PASSWORD not in user.password_hash
     assert user.first_name == "Matthew"
     assert user.last_name == "Coleman"
+    assert user.display_name == "Matthew Coleman"
     assert user.email_normalized == "matthew@example.com"
     assert db_session.scalar(
         select(func.count()).select_from(Workspace).where(Workspace.user_id == user.id)
@@ -113,13 +114,29 @@ def test_duplicate_email_is_rejected(auth_client: TestClient) -> None:
     duplicate_email = auth_client.post(
         "/api/auth/register",
         json={
-            "first_name": "Other",
-            "last_name": "Person",
             "email": "Matthew@Example.com",
+            "firstName": "Other",
+            "lastName": "Person",
             "password": PASSWORD,
         },
     )
     assert duplicate_email.status_code == 409
+
+
+def test_registration_accepts_snake_case_name_payload(auth_client: TestClient) -> None:
+    response = auth_client.post(
+        "/api/auth/register",
+        json={
+            "first_name": "Snake",
+            "last_name": "Case",
+            "email": "snake@example.com",
+            "password": PASSWORD,
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    assert response.json()["firstName"] == "Snake"
+    assert response.json()["lastName"] == "Case"
 
 
 def test_login_succeeds_with_email(auth_client: TestClient) -> None:
@@ -132,6 +149,8 @@ def test_login_succeeds_with_email(auth_client: TestClient) -> None:
     )
     assert email_login.status_code == 200
     assert email_login.json()["email"] == "matthew@example.com"
+    assert email_login.json()["firstName"] == "Matthew"
+    assert email_login.json()["lastName"] == "Coleman"
 
 
 def test_login_rejects_wrong_password_with_generic_error(auth_client: TestClient) -> None:

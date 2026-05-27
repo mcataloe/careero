@@ -86,6 +86,8 @@ def test_usage_endpoint_is_scoped_to_current_user(db_session: Session) -> None:
     user_b = User(
         id=uuid4(),
         email="usage-other@careero.local",
+        first_name="Usage",
+        last_name="Other",
         display_name="Usage Other",
     )
     db_session.add(user_b)

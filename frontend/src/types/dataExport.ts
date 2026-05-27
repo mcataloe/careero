@@ -6,7 +6,12 @@ export interface LocalDataExport {
     current_user: {
       id: string;
       email: string;
+      first_name: string;
+      last_name: string;
       display_name: string;
+      salutation: string | null;
+      pronouns: string | null;
+      headshot_url: string | null;
       mode: string;
       environment: string;
     };

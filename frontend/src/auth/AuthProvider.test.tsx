@@ -16,19 +16,22 @@ function jsonResponse(response: unknown, status = 200) {
 const authUser = {
   id: "user-1",
   email: "matthew@example.com",
-  first_name: "Matthew",
-  last_name: "Coleman",
-  display_name: "Matthew Coleman",
-  auth_method: "local_password",
-  account_status: "active",
-  created_at: "2026-05-26T00:00:00Z",
+  firstName: "Matthew",
+  lastName: "Coleman",
+  displayName: "Matthew Coleman",
+  salutation: null,
+  pronouns: null,
+  headshotUrl: null,
+  authMethod: "local_password",
+  accountStatus: "active",
+  createdAt: "2026-05-26T00:00:00Z",
 };
 
 function AuthProbe() {
   const { currentUser, logout } = useAuth();
   return (
     <>
-      <Text>{currentUser ? currentUser.display_name : "No user"}</Text>
+      <Text>{currentUser ? currentUser.displayName : "No user"}</Text>
       <Button onClick={() => void logout()}>Log out</Button>
     </>
   );
@@ -59,7 +62,7 @@ describe("AuthProvider", () => {
       </AuthProvider>,
     );
 
-    expect(await screen.findByText("Matthew")).toBeInTheDocument();
+    expect(await screen.findByText("Matthew Coleman")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: /log out/i }));
 
     await waitFor(() => {

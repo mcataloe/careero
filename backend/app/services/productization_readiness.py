@@ -157,7 +157,7 @@ def get_productization_readiness(
         auth_status=_capability(
             "local_password_enabled",
             True,
-            "First-party local username/password auth and HttpOnly cookie sessions exist; OAuth, SSO, account recovery, and production auth hardening remain future.",
+            "First-party local email/password auth and HttpOnly cookie sessions exist; OAuth, SSO, account recovery, and production auth hardening remain future.",
         ),
         tenant_boundary_prep_status=_capability(
             "local_boundary_prep",

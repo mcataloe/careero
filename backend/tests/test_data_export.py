@@ -146,6 +146,8 @@ def test_export_is_scoped_to_current_user(db_session: Session) -> None:
     other_user = User(
         id=uuid4(),
         email="other-user@careero.local",
+        first_name="Other",
+        last_name="User",
         display_name="Other User",
     )
     db_session.add(other_user)
@@ -154,6 +156,8 @@ def test_export_is_scoped_to_current_user(db_session: Session) -> None:
     other_context = CurrentUserContext(
         user_id=other_user.id,
         email=other_user.email,
+        first_name=other_user.first_name,
+        last_name=other_user.last_name,
         display_name=other_user.display_name,
         mode="test",
     )
