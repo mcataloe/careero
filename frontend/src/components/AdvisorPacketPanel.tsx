@@ -17,6 +17,7 @@ import { exportAdvisorPacketMarkdown } from "../api/advisorPackets";
 import type {
   ApplicationExternalLink,
   ApplicationInterviewStage,
+  ApplicationReminder,
 } from "../types/applications";
 import type {
   AdvisorPacket,
@@ -29,6 +30,7 @@ interface AdvisorPacketPanelProps {
   packet: AdvisorPacket;
   externalLinks: ApplicationExternalLink[];
   interviews: ApplicationInterviewStage[];
+  reminders: ApplicationReminder[];
   onRefresh: (options: AdvisorPacketPreviewOptions) => Promise<void>;
 }
 
@@ -37,11 +39,13 @@ export function AdvisorPacketPanel({
   packet,
   externalLinks,
   interviews,
+  reminders,
   onRefresh,
 }: AdvisorPacketPanelProps) {
   const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
   const [selectedExternalLinkIds, setSelectedExternalLinkIds] = useState<string[]>([]);
   const [selectedInterviewIds, setSelectedInterviewIds] = useState<string[]>([]);
+  const [selectedReminderIds, setSelectedReminderIds] = useState<string[]>([]);
   const [advisorContext, setAdvisorContext] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -51,6 +55,7 @@ export function AdvisorPacketPanel({
     artifactIds: selectedArtifactIds,
     externalLinkIds: selectedExternalLinkIds,
     interviewStageIds: selectedInterviewIds,
+    reminderIds: selectedReminderIds,
     advisorContext,
   };
 
@@ -170,6 +175,19 @@ export function AdvisorPacketPanel({
             }
           />
         ))}
+        {reminders.map((reminder) => (
+          <Checkbox
+            key={reminder.id}
+            checked={selectedReminderIds.includes(reminder.id)}
+            label={`Include reminder: ${reminder.title}`}
+            description="Reminder text can expose private deadlines or pressure points. Review before including."
+            onChange={(event) =>
+              setSelectedReminderIds((current) =>
+                toggleId(current, reminder.id, event.currentTarget.checked),
+              )
+            }
+          />
+        ))}
         <Textarea
           label="Advisor context"
           value={advisorContext}
@@ -255,6 +273,18 @@ export function AdvisorPacketPanel({
           {packet.selected_interviews.map((interview) => (
             <Text key={interview.id} size="sm" c="dimmed">
               {interview.title} - notes included
+            </Text>
+          ))}
+        </Stack>
+      ) : null}
+
+
+      {packet.selected_reminders.length > 0 ? (
+        <Stack gap="xs" mt="md">
+          <Text fw={600}>Selected reminders</Text>
+          {packet.selected_reminders.map((reminder) => (
+            <Text key={reminder.id} size="sm" c="dimmed">
+              {reminder.title} - notes {reminder.notes_included ? "included" : "excluded"}
             </Text>
           ))}
         </Stack>

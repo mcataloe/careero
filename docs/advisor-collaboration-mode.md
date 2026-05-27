@@ -153,6 +153,9 @@ hosted access, no invitations, no external send, and no persistent collaborator
 records. Explicit include options affect only the generated local preview or
 Markdown export response; they do not persist advisor access, collaborator
 state, or share records.
+Reminder include options are also local-preview-only: selecting reminders changes
+only the local preview/export payload and does not create advisor access,
+sharing records, collaborator records, invitations, or external visibility.
 
 ## Permission Model: Design Only
 
@@ -228,7 +231,7 @@ sync, and production auth/provider choices are outside this Build Unit.
 | 12E Local-only packet preview/export scaffolding | Implemented locally after separate approval; owner-visible only, redacted by default, explicit include options are local-preview only, no hosted sharing. |
 | 12F Comment-only workflow design | Design-only; implementation blocked. |
 | 12G Revocation/audit design | Design-only; implementation blocked until account/auth decisions exist. |
-| 12H UI trust copy | Design-only, no implementation without approval. |
+| 12H UI trust copy | Partially implemented locally for local-only advisor packet preview messaging; hosted collaboration trust UX remains blocked pending approval. |
 | Hosted collaboration implementation | Blocked. |
 | Advisor accounts/invitations | Blocked. |
 | Employer/marketplace sharing | Blocked / Layer 13. |
