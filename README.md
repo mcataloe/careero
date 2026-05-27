@@ -22,13 +22,15 @@ Layer 14 model catalog, Careero Prompt Architecture, model choice, usage account
 
 Layer 15 API job sources, import pipelines, source snapshots, and managed-delta strategy is captured in [`docs/careero-layer-15-api-job-sources-and-managed-deltas.md`](docs/careero-layer-15-api-job-sources-and-managed-deltas.md). This is strategic planning only; ATS/job-data provider adapters, job posting snapshots, import candidates, managed deltas, and API source governance are not implemented in `main`.
 
+Layer 16 guided onboarding, first-search activation, contextual help, and support/feedback strategy is captured in [`docs/careero-layer-16-guided-onboarding-and-first-search-activation.md`](docs/careero-layer-16-guided-onboarding-and-first-search-activation.md). This is strategic planning only; persisted onboarding state, guided first-run flow, tour skip/resume/replay behavior, contextual onboarding empty states, and support/feedback capture are not implemented in `main`.
+
 Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
 
 Current planning hierarchy:
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md) - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md), [`docs/productization-readiness.md`](docs/productization-readiness.md), [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md), [`docs/careero-layer-14-model-catalog-and-prompt-architecture.md`](docs/careero-layer-14-model-catalog-and-prompt-architecture.md), and [`docs/careero-layer-15-api-job-sources-and-managed-deltas.md`](docs/careero-layer-15-api-job-sources-and-managed-deltas.md).
+3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md), [`docs/productization-readiness.md`](docs/productization-readiness.md), [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md), [`docs/careero-layer-14-model-catalog-and-prompt-architecture.md`](docs/careero-layer-14-model-catalog-and-prompt-architecture.md), [`docs/careero-layer-15-api-job-sources-and-managed-deltas.md`](docs/careero-layer-15-api-job-sources-and-managed-deltas.md), and [`docs/careero-layer-16-guided-onboarding-and-first-search-activation.md`](docs/careero-layer-16-guided-onboarding-and-first-search-activation.md).
 4. `docs/archive/*` - historical context only.
 5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
@@ -79,6 +81,12 @@ Careero does not yet include:
 - Background job execution.
 - Destructive persistence migration from current `Role` table/model/foreign-key naming.
 - Mature workspace switching and management UX.
+- First-run guided onboarding workflow.
+- Persisted per-user onboarding state.
+- Tour skip/resume/replay behavior.
+- Contextual onboarding empty states.
+- Support/help/bug/suggestion feedback capture.
+- Privacy-safe support payload governance.
 - Durable strategy tables, hidden strategy memory, or user-unreviewed saved retrospectives.
 - Dedicated artifact list/detail/review/edit/approve/archive UX.
 - Submitted artifact tracking.
