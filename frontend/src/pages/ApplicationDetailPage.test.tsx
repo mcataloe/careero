@@ -128,7 +128,19 @@ const links: ApplicationExternalLink[] = [
   },
 ];
 
-const reminders: ApplicationReminder[] = [];
+const reminders: ApplicationReminder[] = [
+  {
+    id: "reminder-1",
+    application_id: "app-1",
+    workspace_id: "workspace-1",
+    title: "Follow up with recruiter",
+    notes: "Mention compensation range privately.",
+    due_at: "2026-05-21T15:00:00Z",
+    completed_at: null,
+    created_at: "2026-05-16T15:00:00Z",
+    updated_at: "2026-05-16T15:00:00Z",
+  },
+];
 
 const automationSuggestions: AutomationSuggestionListResponse = {
   workspace_id: "workspace-1",
@@ -315,12 +327,15 @@ describe("ApplicationDetailPage", () => {
       "noreferrer noopener",
     );
     expect(screen.getByText(/Notes: 1 - Links: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
-    expect(screen.getByText("No reminders yet.")).toBeInTheDocument();
+    expect(screen.getByText("Follow up with recruiter")).toBeInTheDocument();
     expect(screen.getByText("Prepare follow-up draft")).toBeInTheDocument();
     expect(screen.getByText(/Draft only. Careero will not send this message./i)).toBeInTheDocument();
     expect(screen.getByText("Advisor Packet Preview")).toBeInTheDocument();
     expect(screen.getByText("Local only")).toBeInTheDocument();
     expect(screen.getByText(/Local preview only\. Nothing is shared externally\./i)).toBeInTheDocument();
+    expect(screen.getByText(/Reminder text can expose private deadlines or pressure points\. Review before including\./i)).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: /Include reminder: Follow up with recruiter/i })).toBeInTheDocument();
+    expect(screen.getByText(/This packet is a local preview\/export only\./i)).toBeInTheDocument();
     expect(screen.getByText("Private user notes")).toBeInTheDocument();
     expect(screen.getByText(/content excluded/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /share|send|invite/i })).not.toBeInTheDocument();

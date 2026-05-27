@@ -190,6 +190,7 @@ export function ApplicationDetailPage() {
           packet={advisorPacket}
           externalLinks={links}
           interviews={interviews}
+          reminders={reminders}
           onRefresh={refreshAdvisorPacket}
         />
       ) : null}
