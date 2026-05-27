@@ -30,21 +30,22 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 class RegisterRequest(BaseModel):
-    username: str = Field(min_length=3, max_length=64)
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
     email: str = Field(min_length=3, max_length=320)
-    display_name: str = Field(min_length=1, max_length=200)
     password: str = Field(min_length=1, max_length=256)
 
 
 class LoginRequest(BaseModel):
-    username_or_email: str = Field(min_length=1, max_length=320)
+    email: str = Field(min_length=1, max_length=320)
     password: str = Field(min_length=1, max_length=256)
 
 
 class AuthUserResponse(BaseModel):
     id: str
-    username: str | None
     email: str
+    first_name: str
+    last_name: str
     display_name: str
     auth_method: str
     account_status: str
@@ -149,9 +150,9 @@ def register(
         )
     try:
         result = AuthService(db, settings).register_user(
-            username=payload.username,
+            first_name=payload.first_name,
+            last_name=payload.last_name,
             email=payload.email,
-            display_name=payload.display_name,
             password=payload.password,
             user_agent=_user_agent(request),
             ip_hint=_client_host(request),
@@ -185,7 +186,7 @@ def login(
         )
     try:
         result = AuthService(db, settings).login(
-            username_or_email=payload.username_or_email,
+            email=payload.email,
             password=payload.password,
             user_agent=_user_agent(request),
             ip_hint=_client_host(request),

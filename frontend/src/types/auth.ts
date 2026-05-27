@@ -1,7 +1,8 @@
 export interface AuthUser {
   id: string;
-  username: string | null;
   email: string;
+  first_name: string;
+  last_name: string;
   display_name: string;
   auth_method: string;
   account_status: string;
@@ -9,13 +10,13 @@ export interface AuthUser {
 }
 
 export interface LoginPayload {
-  username_or_email: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterPayload {
-  username: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  display_name: string;
   password: string;
 }

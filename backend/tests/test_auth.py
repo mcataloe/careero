@@ -42,17 +42,17 @@ def auth_client(db_session: Session) -> Generator[TestClient, None, None]:
 def _register(
     client: TestClient,
     *,
-    username: str = "matthew",
+    first_name: str = "Matthew",
+    last_name: str = "Coleman",
     email: str = "matthew@example.com",
-    display_name: str = "Matthew",
     password: str = PASSWORD,
 ) -> dict:
     response = client.post(
         "/api/auth/register",
         json={
-            "username": username,
+            "first_name": first_name,
+            "last_name": last_name,
             "email": email,
-            "display_name": display_name,
             "password": password,
         },
     )
@@ -86,7 +86,8 @@ def test_registration_creates_user_workspace_sources_and_session(
     assert user is not None
     assert user.password_hash is not None
     assert PASSWORD not in user.password_hash
-    assert user.username_normalized == "matthew"
+    assert user.first_name == "Matthew"
+    assert user.last_name == "Coleman"
     assert user.email_normalized == "matthew@example.com"
     assert db_session.scalar(
         select(func.count()).select_from(Workspace).where(Workspace.user_id == user.id)
@@ -105,48 +106,29 @@ def test_registration_creates_user_workspace_sources_and_session(
     assert session.session_token_hash != raw_cookie
 
 
-def test_duplicate_username_and_email_are_rejected(auth_client: TestClient) -> None:
+def test_duplicate_email_is_rejected(auth_client: TestClient) -> None:
     _register(auth_client)
     _logout(auth_client)
-
-    duplicate_username = auth_client.post(
-        "/api/auth/register",
-        json={
-            "username": "MATTHEW",
-            "email": "other@example.com",
-            "display_name": "Other",
-            "password": PASSWORD,
-        },
-    )
-    assert duplicate_username.status_code == 409
 
     duplicate_email = auth_client.post(
         "/api/auth/register",
         json={
-            "username": "other",
+            "first_name": "Other",
+            "last_name": "Person",
             "email": "Matthew@Example.com",
-            "display_name": "Other",
             "password": PASSWORD,
         },
     )
     assert duplicate_email.status_code == 409
 
 
-def test_login_succeeds_with_username_and_email(auth_client: TestClient) -> None:
+def test_login_succeeds_with_email(auth_client: TestClient) -> None:
     _register(auth_client)
-    _logout(auth_client)
-
-    username_login = auth_client.post(
-        "/api/auth/login",
-        json={"username_or_email": "matthew", "password": PASSWORD},
-    )
-    assert username_login.status_code == 200
-    assert username_login.json()["username"] == "matthew"
     _logout(auth_client)
 
     email_login = auth_client.post(
         "/api/auth/login",
-        json={"username_or_email": "matthew@example.com", "password": PASSWORD},
+        json={"email": "matthew@example.com", "password": PASSWORD},
     )
     assert email_login.status_code == 200
     assert email_login.json()["email"] == "matthew@example.com"
@@ -158,11 +140,11 @@ def test_login_rejects_wrong_password_with_generic_error(auth_client: TestClient
 
     response = auth_client.post(
         "/api/auth/login",
-        json={"username_or_email": "matthew", "password": "not the password"},
+        json={"email": "matthew@example.com", "password": "not the password"},
     )
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid username/email or password"
+    assert response.json()["detail"] == "Invalid email or password"
 
 
 def test_login_rejects_inactive_user(auth_client: TestClient, db_session: Session) -> None:
@@ -175,11 +157,11 @@ def test_login_rejects_inactive_user(auth_client: TestClient, db_session: Sessio
 
     response = auth_client.post(
         "/api/auth/login",
-        json={"username_or_email": "matthew", "password": PASSWORD},
+        json={"email": "matthew@example.com", "password": PASSWORD},
     )
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid username/email or password"
+    assert response.json()["detail"] == "Invalid email or password"
 
 
 def test_me_and_logout_use_revocable_cookie_session(
@@ -214,7 +196,7 @@ def test_protected_endpoint_uses_authenticated_user_not_seeded_local_user(
     db_session: Session,
 ) -> None:
     seed_local_data(db_session)
-    payload = _register(auth_client, username="owner", email="owner@example.com")
+    payload = _register(auth_client, first_name="Owner", last_name="One", email="owner@example.com")
 
     response = auth_client.get("/api/workspaces")
 
@@ -238,9 +220,9 @@ def test_user_cannot_access_another_users_workspace(db_session: Session) -> None
 
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as user_a, TestClient(app) as user_b:
-        _register(user_a, username="owner-a", email="owner-a@example.com")
+        _register(user_a, first_name="Owner", last_name="A", email="owner-a@example.com")
         workspace = user_a.get("/api/workspaces").json()[0]
-        _register(user_b, username="owner-b", email="owner-b@example.com")
+        _register(user_b, first_name="Owner", last_name="B", email="owner-b@example.com")
 
         cross_user = user_b.get(f"/api/workspaces/{workspace['id']}")
 
