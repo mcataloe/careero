@@ -2,18 +2,9 @@
 
 ## Purpose
 
-This document is the Careero-specific source of truth for:
+This document is the Careero-specific source of truth for current layer status, build order, and LEAP Recon / Codex prompt planning.
 
-- What has already been built in the Careero application.
-- What remains to be built.
-- The recommended execution order for upcoming work.
-- The layer status used to drive Careero-specific LEAP Recon work and LEAP implementation prompts.
-
-This document is intentionally specific to the `mjcataldi/careero` application.
-
-General LEAP framework guidance, reusable LEAP prompt patterns, and application-buildout methodology should live in the separate GitHub `leap` repository, not in this Careero repo.
-
-Careero-specific product strategy, implementation status, domain model decisions, and layer planning belong here.
+Careero-specific product strategy, implementation status, domain model decisions, and layer planning belong here. Reusable LEAP methodology belongs in the separate LEAP framework repository.
 
 ---
 
@@ -21,67 +12,31 @@ Careero-specific product strategy, implementation status, domain model decisions
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
 2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including `docs/opportunity-model-strategy.md`, `docs/productization-readiness.md`, `docs/advisor-collaboration-mode.md`, and `docs/careero-layer-14-strategic-plan-section.md`.
+3. Active layer-specific docs:
+   - `docs/opportunity-model-strategy.md`
+   - `docs/productization-readiness.md`
+   - `docs/advisor-collaboration-mode.md`
+   - `docs/careero-layer-14-model-catalog-and-prompt-architecture.md`
+   - `docs/careero-layer-15-api-job-sources-and-managed-deltas.md`
 4. `docs/archive/*` - historical context only.
-5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+5. LEAP repo - reusable framework methodology, not Careero product truth.
 
 Archived roadmap material must not be used for current LEAP Recon or Codex implementation prompts unless a task explicitly asks for historical comparison.
+
+The older combined `docs/careero-layer-14-strategic-plan-section.md` is superseded by the split Layer 14 and Layer 15 docs and should not be used for new implementation prompts.
 
 ---
 
 ## Strategic Context
 
-Careero is no longer just a local job tracker or COMPASS evaluation prototype. The repo now contains meaningful parts of a career operations platform:
+Careero is no longer just a local job tracker or COMPASS evaluation prototype. The repo now contains meaningful parts of a career operations platform: local-first backend/frontend foundation, PostgreSQL persistence, workspace/search-track persistence, Opportunity-facing intake backed by current Role persistence, resume/profile source grounding, COMPASS evaluation, artifact generation foundations, application workflow tracking, state history, notes, external links, structured interview tracking, analytics, and dashboard intelligence surfaces.
 
-- local-first backend and frontend foundation
-- PostgreSQL persistence
-- workspace/search-track persistence
-- Opportunity-facing intake backed by current Role persistence
-- resume/profile source grounding
-- COMPASS evaluation
-- artifact generation foundations
-- application workflow tracking
-- state history
-- notes
-- external links
-- structured interview tracking
-- analytics and dashboard intelligence surfaces
+The current strategic move is to stabilize existing workflow and intelligence reality while keeping Layer 10 as derived, read-only career strategy synthesis. Later strategic expansion is now split after Layer 13:
 
-However, the implementation is not yet fully stabilized. Some roadmap claims are ahead of current product completeness, and any private remote branch or PR work still needs validation before it should be treated as complete.
+- **Layer 14** owns user-selected model routing, model catalog architecture, Careero Prompt Architecture, model gateway behavior, prompt-only export, quality checks, usage accounting, and credit controls.
+- **Layer 15** owns API job sources, official ATS/job-board imports, source snapshots, managed deltas, import candidates, source governance, and review-before-save source workflows.
 
-The current strategic move is to stabilize existing workflow and intelligence reality while keeping Layer 10 as derived, read-only career strategy synthesis. A later strategic expansion now belongs after Layer 13: user-selected model routing, credit economics, API-only job-posting ingestion, and source-governed company research memory. Layer 14 is planning-only in `main`; none of its model catalog, credit wallet, job-posting ingestion, or company research cache has been implemented.
-
----
-
-## Repository Ownership Boundary
-
-### Careero repo
-
-The Careero repo should contain:
-
-- Careero application roadmap
-- Careero layer status
-- Careero product decisions
-- Careero domain model strategy
-- Careero-specific LEAP Recon outputs
-- Careero-specific LEAP implementation prompts
-- Careero-specific implementation notes
-- Careero-specific architecture decisions
-
-### LEAP repo
-
-The separate `leap` repo should contain:
-
-- generic LEAP framework methodology
-- generic LEAP Recon structure
-- generic LEAP Prompt / implementation prompt templates
-- reusable layer-buildout methodology
-- reusable app-development orchestration guidance
-- methodology that applies to applications beyond Careero
-
-Rule of thumb:
-
-> If the content describes how to build Careero, store it in Careero. If the content describes how LEAP should work for any application, store it in LEAP.
+Layers 14 and 15 are planning-only in `main`; none of their model catalog, prompt gateway, credit wallet, API job-source ingestion, source snapshot, or managed-delta capabilities have been implemented.
 
 ---
 
@@ -89,75 +44,37 @@ Rule of thumb:
 
 ### Strongly present / already built
 
-The current repo already includes meaningful implementation for:
-
 - FastAPI backend
 - React + Vite frontend
 - Mantine-based UI
 - PostgreSQL persistence
 - Alembic migrations
-- local development scripts
-- local health checks
+- local development scripts and health checks
 - default local user seed model
 - workspace persistence
 - manual role intake
 - optional AI-assisted role parsing
 - role listing/detail/update/archive
-- resume/profile source storage
-- resume/profile source versions
+- resume/profile source storage and versions
 - active resume/profile source grounding
-- COMPASS evaluation generation
-- deterministic COMPASS scoring
-- optional OpenAI COMPASS enrichment
-- evaluation caching/reuse
-- evaluation metadata and input hashing
-- canonical TypeScript/Zod contracts package
-- generated JSON Schema contracts
-- resume artifact generation service
-- cover-letter artifact generation service
-- GeneratedArtifact persistence
-- artifact truthfulness checks
-- artifact performance records
-- application persistence
-- application state machine
-- application state history
-- application list/detail APIs
-- application pipeline APIs
-- application notes
-- application external links
-- structured application interview tracking
-- application timeline aggregation
-- activity log
-- local integration adapter boundary
-- backend local Markdown/DOCX/PDF artifact export
-- automation suggestion persistence and API
-- automation approval log persistence and API
-- workspace automation preferences
-- search analytics endpoint
-- artifact performance analytics endpoint
-- COMPASS insights endpoint
-- source intelligence endpoint
-- compensation intelligence endpoint
-- search health endpoint
-- recommendations endpoint
-- historical learning endpoint
-- dashboard surfaces for analytics and recommendations
+- COMPASS evaluation generation, deterministic scoring, optional OpenAI enrichment, metadata, input hashing, and caching/reuse
+- canonical TypeScript/Zod contracts and generated JSON Schema contracts
+- resume and cover-letter artifact generation services
+- GeneratedArtifact persistence, truthfulness checks, and artifact performance records
+- application persistence, state machine, state history, list/detail APIs, and pipeline APIs
+- application notes, external links, structured interviews, local reminders, timeline aggregation, and activity log
+- local integration adapter boundary and backend local Markdown/DOCX/PDF artifact export
+- automation suggestion persistence, approval logs, workspace automation preferences, and review surfaces
+- search analytics, artifact performance analytics, COMPASS insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and dashboard surfaces
 
 ### Partially built / needs reconciliation or validation
 
-The current repo also has partially completed or not-yet-fully-validated work for:
-
-- local application reminders: current `main` has reminder tables, service methods, FastAPI routes, frontend API wrappers, application-detail reminder UX, counts, next-action synchronization, activity-log events, analytics inputs, and timeline events. Reminders remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
-- external-link workflow summaries: external-link CRUD API routes, frontend panel, activity-log events, timeline update/delete events, and tests exist in `main`; application list/detail summary counts now include links alongside notes, reminders, and interviews.
-- private remote branch or PR drift, if any, is outside the current local clone; this clone currently exposes only `main` and `origin/main`.
-- Layer 4 workflow validation after reminder API/UI completion and summary-count reconciliation.
-- Layer 5 insight stabilization.
-
-These should not be treated as cleanly complete until implemented or validated in `main` and reflected in documentation. During this documentation refresh, repo files and local git state were inspected; full DB-backed test validation was not completed.
+- Local application reminders exist but remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
+- External-link workflow summaries exist and application list/detail summary counts include links alongside notes, reminders, and interviews.
+- Private remote branch or PR drift, if any, must be validated before being treated as complete.
+- Layer 4 workflow validation, Layer 5 insight stabilization, and Layer 6 artifact lifecycle remain important near-term completion work.
 
 ### Not yet built / still future
-
-The repo does not yet fully include:
 
 - production authentication hardening and account recovery
 - real multi-user tenant behavior
@@ -180,11 +97,12 @@ The repo does not yet fully include:
 - hosted coach/advisor collaboration mode
 - marketplace or employer-side capabilities
 - user-selected model routing and a provider/model catalog
-- modular prompt compiler architecture beyond the current artifact-generation prompt foundations
+- Careero Prompt Architecture / modular prompt compiler architecture beyond current artifact-generation prompt foundations
+- model gateway, prompt-only export, model task defaults, and model price snapshots
 - credit wallet, durable credit ledger, usage metering, credit reservation/debit/refund, rollover, top-ups, or billing-linked credits
-- API-only job posting ingestion from official ATS/job-data providers
-- API-only company research ingestion, source record caching, fact extraction, summary regeneration, and freshness tracking
-- external source licensing/compliance governance for company research and review/salary/culture data
+- API-only job-source adapters from official ATS/job-data providers
+- imported job posting source records, immutable snapshots, import candidates, managed deltas, or review-before-save import workflows
+- API source governance, provider validation, source storage policy, and source-freshness tracking
 - scraping or restricted-source extraction; this is explicitly deferred for later legal/product/technical review
 
 ---
@@ -197,17 +115,18 @@ The repo does not yet fully include:
 | Layer 1 | Local Platform Foundation | Built locally / first-party password auth foundation started; production incomplete | Local backend, frontend, database, migrations, config, seed model, username/password registration/login, and local HttpOnly session cookies exist. Production auth hardening, account recovery, SSO, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
 | Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
-| Layer 4 | Application Workflow | Substantially built / local reminder reconciliation implemented | Applications, state transitions, timeline, notes, external links, local reminders, and structured interview tracking exist. Reminder persistence/service/API/UI/count/timeline support exists for local user-triggered workflow actions. Summary counts include notes, external links, reminders, and interviews. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
+| Layer 4 | Application Workflow | Substantially built / local reminder reconciliation implemented | Applications, state transitions, timeline, notes, external links, local reminders, and structured interview tracking exist. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
 | Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
 | Layer 6 | Advanced COMPASS + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, COMPASS history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
-| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface and local foundations started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Layer 11A adds a local-first readiness endpoint and Settings panel. Layer 11B adds local-first current-user context and service-level ownership-boundary prep for workspace, role/opportunity, and application workflows. Layer 11C adds first-party local username/password auth with HttpOnly cookie sessions and disabled Google/LinkedIn SSO placeholders. Layer 11.4 adds local-first JSON data export for the authenticated local user. Layer 11.5 adds local lifecycle request tracking without destructive enforcement. Layer 11.6 adds provider-agnostic local AI usage events. Layer 11.7 adds local entitlement boundaries for `local_free`. Layer 11.8 documents hosted auth-provider and beta evaluation without selecting OAuth/SSO. Production auth hardening, account recovery, OAuth/SSO, billing, hosted tenant isolation certification, hosted export/delete, retention enforcement, paid quotas, credits, and production deployment remain future. |
-| Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md). Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future; current advisor packet behavior is local-only preview/export and must not be interpreted as hosted collaboration. |
+| Layer 11 | Productization / Deployment / Monetization | Future / readiness surface and local foundations started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Local readiness, current-user context, local auth, local export, lifecycle request tracking, local AI usage events, and local entitlement reporting exist. Production auth hardening, account recovery, OAuth/SSO, billing, tenant isolation, hosted export/delete, retention enforcement, paid quotas, credits, and production deployment remain future. |
+| Layer 12 | Advisor / Collaboration Mode | Future / local-only packet preview started | Advisor collaboration readiness is documented in `docs/advisor-collaboration-mode.md`. Local-only redacted advisor packet preview/Markdown export and redaction metadata exist for application detail. Hosted collaboration, advisor accounts, invitations, comments, public links, external sharing, and employer/recruiter visibility remain future. |
 | Layer 13 | Marketplace / Employer-Side Exploration | Future / last employer-facing layer | Recruiter-facing workflows, ethical matching, user-controlled visibility, employer partnerships, strict disclosure rules. |
-| Layer 14 | Model Choice, Credits & API-First Intelligence | Future / appended strategic layer | Planning source exists in [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md). No model catalog, prompt compiler gateway, credit ledger, API job ingestion, company research cache, or scraping capability exists in `main`. 14A/14B may be pulled forward with Layer 11; 14C/14D wait on Opportunity and integration boundaries. |
+| Layer 14 | Model Catalog, Prompt Architecture & Credit Controls | Future / appended model strategy layer | Planning source exists in `docs/careero-layer-14-model-catalog-and-prompt-architecture.md`. No model catalog, prompt compiler/gateway, model task defaults, prompt-only export, quality-check pipeline, credit ledger, or model-cost controls exist in `main`. May be pulled forward with Layer 11 when model usage, billing, and cost controls are actively scoped. |
+| Layer 15 | API Job Sources, Import Pipelines & Managed Deltas | Future / appended API intelligence layer | Planning source exists in `docs/careero-layer-15-api-job-sources-and-managed-deltas.md`. No ATS/job-data provider adapters, job source connections, job posting snapshots, import candidates, managed deltas, or API source governance exist in `main`. Waits on Opportunity semantics and integration boundaries; scraping remains out of scope. |
 
 ---
 
@@ -215,690 +134,97 @@ The repo does not yet fully include:
 
 ## Layer 0 — Product Foundation
 
-### Status
-
-Built / defined.
-
-### Purpose
-
-Layer 0 defines the product conscience for Careero.
-
-Careero should remain job-seeker-first, AI-grounded, source-traceable, emotionally humane, and search-track-aware.
-
-### Already accomplished
-
-- Mission and product principles defined.
-- Target users defined.
-- MVP boundary defined.
-- Workspace/search-track concept defined.
-- AI governance posture defined.
-- UX philosophy defined.
-- Monetization caution defined.
-- Risk boundaries defined.
-
-### Remaining work
-
-- Keep docs updated as implementation reality changes.
-- Ensure future features do not drift into employer-first, marketplace-first, or automation-first behavior.
-
----
+Layer 0 defines the product conscience for Careero. Careero should remain job-seeker-first, AI-grounded, source-traceable, emotionally humane, and search-track-aware.
 
 ## Layer 1 — Local Platform Foundation
 
-### Status
-
-Built locally / first-party password auth foundation started; production incomplete.
-
-### Purpose
-
-Provide the local-first technical foundation for Careero.
-
-### Already accomplished
-
-- FastAPI backend.
-- React + Vite frontend.
-- PostgreSQL persistence.
-- Alembic migrations.
-- Local development scripts.
-- Backend and frontend health checks.
-- Default local user seed model.
-- First-party local username/password registration and login.
-- HttpOnly local session cookies, current-user lookup, and logout.
-- Disabled Google and LinkedIn SSO placeholders on the login page.
-- Environment/config structure.
-- Workspace persistence.
-- Core repository structure.
-
-### Remaining work
-
-- Production auth hardening.
-- Account recovery.
-- OAuth/SSO provider implementation.
-- Multi-user account support.
-- Production authorization model.
-- Runtime tenant isolation.
-- Secrets/config hardening.
-- Deployment-ready environment model.
-
-### Guidance
-
-Do not block local product iteration on production auth yet, but do not call Layer 1 fully complete until identity and authorization are production-grade.
-
----
+Layer 1 provides the local-first technical foundation. It is built locally but production incomplete. Production auth hardening, account recovery, OAuth/SSO, multi-user account support, tenant isolation, secrets/config hardening, and deployment-ready environment modeling remain future.
 
 ## Layer 2 — Intake, Parsing & Grounding
 
-### Status
-
-Mostly built.
-
-### Purpose
-
-Turn raw job/opportunity and source-material input into structured, reviewable, grounded system data.
-
-### Already accomplished
-
-- Manual role intake.
-- Role creation/list/detail/update/archive.
-- Optional AI-assisted role parsing.
-- Editable review-before-save behavior.
-- Resume/profile source storage.
-- Resume/profile source versions.
-- Active source grounding.
-- Supported local document imports.
-- COMPASS grounding flow.
-
-### Remaining work
-
-- Better parser confidence UX.
-- Field-level parse warnings.
-- Source deduplication.
-- Company/source/recruiter normalization.
-- Google Docs import later under integrations.
-
-### Guidance
-
-Treat Layer 2 as stable enough to build on. Improve opportunistically, but do not restart the architecture here.
-
----
+Layer 2 turns raw job/opportunity and source-material input into structured, reviewable, grounded system data. It is stable enough to build on, while parser confidence UX, source deduplication, company/source/recruiter normalization, and Google Docs import remain future.
 
 ## Layer 3 — COMPASS + Artifact Foundation
 
-### Status
-
-Mostly built / lifecycle incomplete.
-
-### Purpose
-
-Evaluate opportunities and generate grounded application artifacts.
-
-### Already accomplished
-
-- COMPASS evaluation persistence.
-- Deterministic scoring.
-- Optional AI enrichment.
-- Evaluation metadata.
-- Prompt/ruleset versioning.
-- Input hashing.
-- Evaluation caching/reuse.
-- Canonical contracts package.
-- Generated JSON Schema contracts.
-- Resume artifact generation service.
-- Cover-letter artifact generation service.
-- GeneratedArtifact persistence.
-- Contract validation.
-- Truthfulness checks.
-- Artifact performance recording.
-- Backend local Markdown/DOCX/PDF artifact export through the Layer 8 local export boundary.
-
-### Remaining work
-
-- Artifact list page.
-- Artifact detail page.
-- Review/edit/approve/archive flow.
-- Submitted artifact tracking.
-- Dedicated frontend artifact export workflow for the existing backend export API.
-- Artifact comparison/diff.
-- Better artifact visibility from role/application pages.
-- Explicit UI separation of draft, reviewed, approved, exported, submitted, and archived artifacts.
-
-### Guidance
-
-Do not focus next on adding more generation logic. Focus on lifecycle, reviewability, retrieval, frontend export workflow, and submitted-artifact clarity.
-
----
+Layer 3 evaluates opportunities and generates grounded application artifacts. Generation foundations exist, but artifact lifecycle, submitted version tracking, artifact comparison, artifact retrieval UX, and explicit internal-strategy vs employer-facing separation remain future.
 
 ## Layer 4 — Application Workflow
 
-### Status
-
-Substantially built / local reminder reconciliation implemented.
-
-### Purpose
-
-Manage the day-to-day job-search workflow around saved opportunities.
-
-### Already accomplished
-
-- Application persistence.
-- Ensure/create application for role.
-- Application list.
-- Workspace-scoped application list.
-- Application pipeline grouping.
-- Application detail.
-- Application timeline.
-- State transition endpoint.
-- Backend-enforced state machine.
-- State history.
-- Notes CRUD.
-- External links CRUD.
-- Structured interview tracking APIs.
-- Structured interview tracking frontend panel.
-- Interview-stage timeline events and state-transition suggestion.
-- Reminder persistence tables.
-- Reminder service logic.
-- Reminder API routes.
-- Frontend reminder API wrapper.
-- Application detail reminder panel for listing, creating, editing, and completing reminders.
-- Reminder counts, next-action synchronization, analytics input, and timeline events.
-- Metadata updates.
-- ActivityLog integration.
-
-### Partially accomplished
-
-- Reminder persistence, service methods, API routes, frontend API wrappers, application-detail UX, next-action synchronization, counts, activity logs, analytics inputs, and timeline events exist in `main`.
-- External-link CRUD API routes, frontend panel, activity logs, timeline update/delete events, and tests exist in `main`.
-
-### Remaining work
-
-- Keep application detail page surfaces for all first-class workflow records coherent as adjacent layers evolve.
-- Continue confirming timeline includes notes, links, reminders, interviews, COMPASS, artifacts, and state changes.
-- Confirm pipeline/dashboard counts align with backend records after future workflow changes.
-- Validate migrations and DB-backed tests in environments with reachable PostgreSQL test databases.
-- Confirm backend, frontend, and contracts tests pass.
-
-### Guidance
-
-Layer 4 should be stabilized before deeper Opportunity intelligence. Otherwise later analytics and model strategy will inherit incomplete workflow data.
-
----
+Layer 4 manages saved-opportunity workflow. Applications, states, notes, external links, reminders, interviews, and timeline are substantially built locally. Hosted reminders, notifications, calendar sync, email integration, and production auth dependencies remain future.
 
 ## Layer 5 — Workflow Intelligence / Insights
 
-### Status
-
-Partially built.
-
-### Purpose
-
-Turn accumulated workflow activity into useful guidance.
-
-### Already accomplished
-
-- Search analytics endpoint.
-- Artifact performance endpoint.
-- COMPASS insights endpoint.
-- Source intelligence endpoint.
-- Compensation intelligence endpoint.
-- Search health endpoint.
-- Recommendations endpoint.
-- Historical learning endpoint.
-- Dashboard panels for analytics and insight summaries.
-
-### Remaining work
-
-- Validate analytics against deterministic fixture data.
-- Add workspace selector/filtering to dashboard UX.
-- Improve insufficient-data handling.
-- Improve signal explainability.
-- Calibrate confidence levels.
-- Ensure all insights use current workflow records consistently.
-- Tie insight generation to Opportunity model strategy.
-
-### Guidance
-
-Layer 5 is no longer merely “next.” It exists. The work now is stabilization, accuracy, and cohesion.
-
----
+Layer 5 turns workflow activity into useful guidance. Analytics and dashboards exist, but validation, workspace filtering, confidence calibration, insufficient-data handling, and signal explainability need stabilization.
 
 ## Layer 6 — Advanced COMPASS + Artifact Lifecycle
 
-### Status
+Layer 6 should turn generated output from “AI result” into durable, inspectable, user-approved product records through evidence mapping, comparison, lifecycle states, submitted tracking, review/edit/export flows, and strict employer-facing artifact boundaries.
 
-Partially built / next lifecycle layer.
+## Layer 7 — Opportunity Model Strategy
 
-### Purpose
-
-Make COMPASS evaluations and generated artifacts more trustworthy, traceable, comparable, and useful.
-
-### Already accomplished
-
-- COMPASS evaluation records.
-- COMPASS metadata/versioning.
-- Artifact generation services.
-- TruthGuard-style checks.
-- Artifact performance data foundation.
-- Missing keyword/alignment concepts.
-
-### Remaining work
-
-- JD-to-resume evidence mapping.
-- Missing requirement explanations.
-- COMPASS history and comparison.
-- Cross-opportunity COMPASS comparison.
-- Artifact lifecycle states.
-- Submitted version tracking.
-- Resume/cover-letter variant comparison.
-- Review/edit/export flow.
-- Strict internal strategy vs employer-facing artifact separation in UI.
-
-### Guidance
-
-Layer 6 should turn generated output from “AI result” into durable, inspectable, user-approved product records.
-
----
-
-## Layer 7 - Opportunity Model Strategy
-
-### Status
-
-In progress / compatibility surface started.
-
-### Purpose
-
-Define Opportunity as the central durable intelligence object in Careero.
-
-Layer 7A design source of truth: [Opportunity model strategy](opportunity-model-strategy.md).
-
-Layer 7B has started by adding Opportunity-facing API and frontend compatibility surfaces while preserving the current `Role` model, `roles` table, `role_id` foreign keys, and `/roles` compatibility behavior.
-
-### Why this layer moves ahead of integrations
-
-The app already has workflow, artifact, evaluation, analytics, and dashboard infrastructure. The next bottleneck is not external data ingestion. The next bottleneck is semantic clarity around the core object.
-
-Current backend naming still uses `Role`, but Careero needs `Opportunity` as the canonical object that can represent:
-
-- job posting
-- recruiter lead
-- contract possibility
-- consulting engagement
-- referral
-- role being watched
-- archived historical lead
-- strategic comparison target
-
-### Core goals
-
-- Define Opportunity as the canonical successor to Role.
-- Separate opportunity status from application workflow state.
-- Preserve raw/source/parsed/normalized/provenance data.
-- Link Opportunity to workspace, company, recruiter/source, COMPASS, artifacts, applications, notes, reminders, interviews, outcomes, and analytics.
-- Support deduplication and similarity detection.
-- Support opportunity lineage/history.
-- Support historical analytics such as response rate by source, compensation fit, role category, artifact variant, and search-track strategy.
-
-### Required LEAP Recon questions
-
-- What is an Opportunity in Careero?
-- What belongs on Opportunity vs Application?
-- What belongs on Opportunity vs Artifact?
-- What belongs on Opportunity vs Workspace/Search Track?
-- Should `roles` be renamed to `opportunities`, aliased, or migrated gradually?
-- How should source/provenance/recruiter intelligence work?
-- How should opportunity similarity/deduplication work?
-- What historical intelligence should opportunities accumulate?
-
-### Recommended deliverables / current status
-
-1. Layer 7A Opportunity strategy document: [Opportunity model strategy](opportunity-model-strategy.md). Done.
-2. Current-state Role-to-Opportunity mapping. Done in the Layer 7A artifact.
-3. Schema migration plan. Defined as hybrid compatibility first, destructive persistence rename later if still justified.
-4. API transition plan. Started with `/api/opportunities` aliases while `/api/roles` remains compatible.
-5. Frontend naming and route plan. Started with `/opportunities` canonical routes and `/roles` redirects.
-6. Analytics integration plan. Defined in the Layer 7A artifact; implementation remains Role-backed.
-7. LEAP Prompt/LHS implementation slices for any later destructive migration. Still future.
-
-### Guidance
-
-Use the Layer 7A strategy artifact before further implementation prompts. Layer 7B compatibility work has started; Layer 7C destructive persistence rename remains a separate future decision.
-
----
+Layer 7 defines Opportunity as the central durable intelligence object. Opportunity-facing API and UX aliases have started while persistence remains Role-backed. The destructive Role-to-Opportunity persistence rename remains a separate future decision.
 
 ## Layer 8 — Integrations
 
-### Status
-
-Partially built / local export started.
-
-### Purpose
-
-Reduce manual entry by connecting Careero to tools job seekers already use.
-
-### Candidate capabilities
-
-- Google Docs import.
-- Gmail/Outlook linkage.
-- Calendar interview sync.
-- LinkedIn/job-board save helpers.
-- Browser extension or share-sheet intake.
-- Resume source sync.
-- DOCX/PDF/Markdown export.
-- Optional cloud storage sync.
-
-### Guidance
-
-Layer 8 begins with Layer 7 compatibility cleanup. Integration-facing APIs should target Opportunity-facing routes and contracts while persistence remains Role-backed until a separate Layer 7C destructive rename is explicitly approved.
-
-For the first Layer 8 MVP/prototype build, OAuth and account-linked sync are intentionally deferred. Do not implement Gmail/Outlook account linking, Google Docs account import, cloud sync, background polling, or external account token storage in this build. Local/manual integration paths come first: paste, local file import/export, generated files, manual links, and reviewable captured payloads.
-
-Markdown, DOCX, and PDF artifact export belong in the Layer 8 local export boundary. Backend export is now present; the dedicated frontend export workflow remains future work.
-
-Current `main` includes backend local Markdown, DOCX, and PDF artifact export
-through the local integration adapter boundary. A dedicated frontend artifact
-export workflow remains future work.
-
-All integrations must preserve review-before-save, review-before-send, no-auto-apply, and TruthGuard boundaries. Imported content should remain reviewable and source/provenance-aware before it becomes durable Opportunity/Application/Artifact data.
-
----
+Layer 8 reduces manual entry through integrations while preserving review-before-save, review-before-send, no-auto-apply, and TruthGuard boundaries. Local/manual integration paths come first; OAuth, account-linked sync, background polling, and external token storage remain future.
 
 ## Layer 9 — Automation Guardrails
 
-### Status
-
-Partially built / local guardrail foundation started.
-
-### Purpose
-
-Automate repetitive actions safely while preserving user control.
-
-### Candidate capabilities
-
-- Suggested follow-ups.
-- Draft-only application material generation.
-- Reminder automation.
-- Review-before-send workflows.
-- Approval logs.
-- No-auto-apply boundaries.
-- Workspace-level automation preferences.
-- TruthGuard checks before artifact generation/submission.
-
-### Guidance
-
-Automation should suggest or draft before it acts. User-visible state changes and external communication must remain reviewable and auditable.
-
-Current `main` includes durable automation suggestions, approval logs, workspace
-automation preferences, dashboard/application review surfaces, and settings for
-local guardrails. Approving a suggestion records an audit decision only; it does
-not send externally, sync externally, auto-apply, batch-approve, or silently
-mutate application state. Communication drafts remain local previews.
-
-Layer 9 details are tracked in [Automation guardrails](automation-guardrails.md).
-
----
+Layer 9 automates repetitive actions safely while preserving user control. Automation should suggest or draft before it acts. External communication, batch approvals, and state-changing automation remain prohibited until review/audit boundaries are mature.
 
 ## Layer 10 — Advanced Search Tracks / Career Strategy
 
-### Status
-
-Partially built / derived strategy synthesis MVP started.
-
-### Purpose
-
-Make Careero more strategic than tactical by helping users evaluate whether their overall search strategy is working.
-
-### Already accomplished
-
-- Read-only strategy synthesis contracts.
-- Workspace-scoped career strategy backend service.
-- `GET /api/strategy/workspaces/{workspace_id}` endpoint.
-- `GET /api/strategy/workspaces?include_cross_track=true` endpoint for internal cross-track comparison.
-- Frontend career strategy surface with workspace selection.
-- Insufficient-data, confidence, sample-size, source-input, warning, retrospective, compensation, role-positioning, skill-gap, narrative, and action-candidate sections.
-- No durable strategy tables.
-- No external market data.
-- No state mutation or automation suggestion creation.
-
-### Candidate capabilities / remaining work
-
-- Full-time vs contract strategy comparison.
-- Compensation target modeling.
-- Skill-gap planning.
-- Role-market positioning.
-- Career narrative refinement.
-- Search-track retrospectives.
-- Strategic category adjustments.
-- Search-track archival retrospectives.
-- Durable user-reviewed retrospectives if explicitly scoped later.
-- Optional source-grounded AI summarization after deterministic synthesis is mature.
-- Explicit user-selected strategy-to-automation handoff through Layer 9 approval logs.
-
-### Guidance
-
-Layer 10 remains stronger as Layer 7, Layer 5, and artifact lifecycle data mature. Strategy synthesis must remain advisory, source-visible, and based on stored Careero evidence only.
-
----
+Layer 10 makes Careero more strategic by helping users evaluate whether their overall search strategy is working. Current strategy synthesis remains read-only, advisory, source-visible, and based on stored Careero evidence only.
 
 ## Layer 11 — Productization / Deployment / Monetization
 
-### Status
-
-Future / readiness surface started.
-
-### Purpose
-
-Turn Careero into a sustainable product without compromising user trust.
-
-### Candidate capabilities
-
-- Production deployment plan.
-- Authentication hardening.
-- Authorization hardening.
-- Privacy model.
-- Billing/subscription model.
-- Free tier.
-- Paid AI/artifact usage.
-- Power-user tier.
-- Cost controls.
-- Account deletion/export.
-- Data retention policy.
-
-### Readiness docs
-
-Layer 11 readiness docs define productization, privacy, account lifecycle,
-AI usage/cost, monetization, and deployment gates:
-
-- [Productization readiness](productization-readiness.md)
-- [Privacy and data governance](privacy-data-governance.md)
-- [Account lifecycle](account-lifecycle.md)
-- [AI usage and cost controls](ai-usage-cost-controls.md)
-- [Monetization boundary](monetization-boundary.md)
-- [Deployment readiness](deployment-readiness.md)
-- [Cross-layer impact map](cross-layer-impact-map.md)
-- [Execution drift ledger](execution-drift-ledger.md)
-
-Layer 11A adds `GET /api/productization/readiness` and a Settings page Product
-readiness panel. This is a local-first reporting surface only. It reports
-environment, readiness stage, local-first status, coarse database health, AI
-feature flags, auth/tenant/billing/export/delete/retention/metering/deployment
-status, hosted collaboration status, marketplace/employer-side status, and
-known blockers without exposing secrets or private user content.
-
-These documents and surfaces are readiness and boundary design only. They do not implement
-production auth, billing, tenant isolation, hosted deployment, data export/delete,
-retention enforcement, or AI usage metering.
-
-Layer 11B adds a local-first current-user context abstraction and explicit
-service-level ownership-boundary helpers. Layer 11C connects that boundary to
-first-party local username/password authentication with Argon2id password
-hashing, server-side session records, HttpOnly cookies, `/api/auth/*` routes,
-frontend login/register pages, app route protection, and logout. Seeded local
-user fallback remains for seed, direct service, and auth-disabled test paths
-only; authenticated app requests must resolve from a valid session. Google and
-LinkedIn SSO are disabled placeholders only. OAuth, JWT auth, hosted auth
-provider selection, account recovery, production auth hardening, billing,
-export/delete, and hosted tenant isolation certification remain future.
-
-Layer 11.4 adds `GET /api/data-export/local` and a Settings page JSON download
-panel for the resolved current local user. The export is local-first and
-owner-oriented; it does not create cloud storage, hosted account export,
-production auth, account recovery, deletion enforcement, retention enforcement,
-or legal compliance certification.
-
-Layer 11.5 adds local account lifecycle request tracking with
-`account_lifecycle_requests` and create/list/cancel endpoints. These records
-track export/deletion/retention-review intent and privacy-safe activity-log
-events only. They do not delete data, anonymize data, recover accounts, create
-hosted support workflows, or certify GDPR/CCPA/SOC2 compliance.
-
-Layer 11.6 adds local `ai_usage_events`, usage recording in role parsing,
-COMPASS enrichment, resume artifact generation, and cover-letter artifact
-generation, plus `GET /api/usage/ai` and a Settings page usage panel. Events
-store safe metadata only. They do not create billing events, credits, paid
-quota enforcement, model marketplaces, or production cost controls.
-
-Layer 11.7 adds `GET /api/entitlements/current` and a Settings page Local plan
-panel. It reports the local `local_free` plan, essential local entitlements,
-future-only paid/cloud/collaboration features, and monetization guardrails. It
-does not add Stripe, checkout, subscriptions, invoices, payment collection,
-upgrade buttons, or paid enforcement.
-
-Layer 11.8 adds
-[`docs/auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md)
-to evaluate hosted auth-provider and hosted beta options. It makes no final
-provider selection and adds no hosted auth dependencies, OAuth/SSO, account
-recovery, passkeys, or hosted readiness claim.
-
-Layer 14 extends the productization strategy for model choice, credits, and
-API-first intelligence, but those capabilities are not implemented in `main`.
-Layer 14A/14B should only be pulled forward when Layer 11 billing, metering,
-and model-usage controls are actively scoped.
-
-### Guidance
-
-Do not productize until the user-side workflow has proven durable value locally.
-Layer 11 implementation should not proceed until local workflow value,
-privacy/account lifecycle, AI usage/cost controls, deployment readiness, and
-production blockers are resolved through a fresh LEAP Recon.
-
-Hosted collaboration, advisor accounts, employer/recruiter access, support/admin
-access, billing, deployment, hosted export/delete, retention enforcement, and
-production billing/cost controls remain blocked after Layer 11.8.
-
----
+Layer 11 turns Careero into a sustainable product without compromising trust. Current work is readiness and local foundations only. Layer 14 may be pulled forward with Layer 11 only when billing, metering, model usage, and credit controls are actively scoped. Layer 15 should not be treated as part of Layer 11 productization unless API-source costs and provider governance are explicitly included.
 
 ## Layer 12 — Advisor / Collaboration Mode
 
-### Status
-
-Future / local-only packet preview started.
-
-### Purpose
-
-Allow trusted external help while preserving privacy boundaries.
-
-Active readiness/design source: [`docs/advisor-collaboration-mode.md`](advisor-collaboration-mode.md).
-
-Current implementation is limited to local-only owner-visible advisor packet
-preview, deterministic redaction metadata, explicit local include options, and
-Markdown export from application detail. It does not create hosted access,
-advisor accounts, invitations, comments, public links, external sharing, or
-employer/recruiter visibility.
-
-### Candidate capabilities
-
-- Career coach access.
-- Resume reviewer access.
-- Spouse/advisor review mode.
-- Comment-only permissions.
-- Shared opportunity packets.
-- Privacy-scoped collaboration.
-
-### Guidance
-
-Hosted collaboration should wait until artifacts, opportunities, and application records are cleanly separated and until production auth, authorization, tenant isolation, privacy controls, revocation, audit, and account lifecycle are implemented. Current Layer 12 implementation is local-only packet preview/export scaffolding and does not start hosted collaboration implementation.
-
----
+Layer 12 allows trusted external help while preserving privacy boundaries. Current implementation is local-only packet preview/export scaffolding and does not start hosted collaboration implementation.
 
 ## Layer 13 — Marketplace / Employer-Side Exploration
 
-### Status
+Layer 13 remains the last employer-facing/marketplace expansion. Careero should not compromise user trust by becoming employer-first too early.
 
-Future / last employer-facing layer.
+## Layer 14 — Model Catalog, Prompt Architecture & Credit Controls
 
-### Purpose
+Active planning source: `docs/careero-layer-14-model-catalog-and-prompt-architecture.md`.
 
-Explore employer-side or marketplace capabilities only after user-side value is strong.
+Layer 14 owns user-selected model choice, model catalog architecture, Careero Prompt Architecture, prompt-only export, model gateway behavior, quality checks, usage accounting, and credit controls.
 
-### Candidate capabilities
+Layer 14 may be pulled forward with Layer 11 productization when model usage, billing, metering, and cost controls are actively scoped. It does not include API job-source ingestion; that work belongs to Layer 15.
 
-- Recruiter-facing opportunity intake.
-- Ethical matching.
-- User-controlled visibility.
-- Optional employer partnerships.
-- Strict disclosure rules.
-- No pay-to-rank distortion.
+Layer 14 should make Careero flexible without making it chaotic. Users may choose model and budget; Careero should control prompt structure, source grounding, no-fabrication policy, output contracts, quality checks, cost estimates, and credit ledger behavior.
 
-### Guidance
+Candidate sublayers:
 
-This layer should remain the last employer-facing/marketplace expansion. Careero should not compromise user trust by becoming employer-first too early.
+- Layer 14A: Careero Prompt Architecture & Prompt Compiler.
+- Layer 14B: Model Catalog, Provider Adapters & Model Gateway.
+- Layer 14C: Prompt-Only Export & User Model Defaults.
+- Layer 14D: Quality Checks, Usage Metering & Credit Ledger.
 
----
+Do not implement API job-source ingestion, ATS adapters, imported job snapshots, managed deltas, or source refresh logic in Layer 14.
 
-## Layer 14 - Model Choice, Credits & API-First Intelligence
+## Layer 15 — API Job Sources, Import Pipelines & Managed Deltas
 
-### Status
+Active planning source: `docs/careero-layer-15-api-job-sources-and-managed-deltas.md`.
 
-Future / appended strategic layer.
+Layer 15 owns official-API-first job-source ingestion, imported job records, source snapshots, managed deltas, provider adapters, provenance, and review-before-save flows.
 
-Active planning source: [`docs/careero-layer-14-strategic-plan-section.md`](careero-layer-14-strategic-plan-section.md).
+Layer 15 should reduce manual entry without weakening Careero's user-owned data model. Imported postings should be reviewable candidates before they become durable Opportunities. Source snapshots should be immutable. Managed deltas should be visible before they affect user-edited Opportunity fields.
 
-Layer 14 is appended after the existing layer list to preserve roadmap continuity. It does not mean every Layer 14 capability must wait until after Marketplace/Employer-Side Exploration.
+Candidate sublayers:
 
-Execution split:
+- Layer 15A: Provider/source validation matrix.
+- Layer 15B: Job-source provider adapter interface.
+- Layer 15C: Normalized job posting source records and snapshots.
+- Layer 15D: Import candidates, deduplication, and Opportunity matching.
+- Layer 15E: Managed deltas and field-level review.
+- Layer 15F: Future scraping review backlog item.
 
-- Layer 14A Prompt Compiler & Model Gateway and Layer 14B Credit Wallet, Usage Metering & Cost Controls can be pulled forward with Layer 11 productization when billing, metering, and model usage controls are actively implemented.
-- Layer 14C API-Only Job Posting Ingestion and Layer 14D Company Research Memory should wait until Opportunity semantics, integration boundaries, source governance, and productization controls are stable.
-- Layer 13 remains the last employer-facing/trust-sensitive expansion.
-
-### Purpose
-
-Give Careero a flexible but controlled system for user-selected AI models, credit-based usage, API-only job-posting ingestion, and reusable company research intelligence.
-
-The strategic goal:
-
-> Careero owns the workflow, prompt compiler, source grounding, quality checks, credit ledger, and research memory. Users can choose model, budget, and research depth inside those guardrails.
-
-### Current `main` reality
-
-Layer 14 is not implemented in the codebase. Current `main` has optional OpenAI-backed parsing/COMPASS/artifact-generation foundations and readiness docs for AI cost controls, but it does not have:
-
-- model catalog tables or provider price snapshots
-- user-selectable model defaults
-- a general prompt compiler/gateway
-- prompt-only export mode
-- credit wallet, credit transactions, usage events, or artifact-linked usage records
-- billing-linked credit grants, rollover, top-ups, reservations, debits, or refunds
-- API job posting ingestion records or ATS/job-data provider integrations
-- company research source records, facts, summaries, refresh runs, TTLs, or freshness UI
-- scraping, restricted-source extraction, browser-driven collection, or background polling
-
-### Hard boundary
-
-Layer 14 is API-only for external data acquisition.
-
-Do not implement scraping, restricted-source extraction, browser-driven collection, or terms-sensitive data collection in this layer. Scraping can be revisited later only through an explicit legal/product/technical review.
-
-### Candidate sublayers
-
-- Layer 14A: Prompt Compiler & Model Gateway.
-- Layer 14B: Credit Wallet, Usage Metering & Cost Controls.
-- Layer 14C: API-Only Job Posting Ingestion.
-- Layer 14D: Company Research Memory & Source-Governed Caching.
-- Layer 14E: Future Scraping Review Backlog Item.
-
-### Guidance
-
-Layer 14 should make Careero flexible without making it chaotic. The user may choose the model and budget; Careero should control prompt structure, source grounding, no-fabrication policy, quality checks, cost estimates, credit ledger, source provenance, research freshness, and API/licensing boundaries.
+Hard boundary: Layer 15 is API-only or licensed-source-only. Do not implement scraping, restricted-source extraction, browser-driven collection, or terms-sensitive data collection in this layer. Scraping can be revisited later only through explicit legal, product, privacy, retention, source-terms, operational, and technical review.
 
 ---
 
@@ -906,14 +232,12 @@ Layer 14 should make Careero flexible without making it chaotic. The user may ch
 
 ## Step 1 — Repo Reality Reconciliation
 
-### Goal
-
 Keep `main` in a clean, truthful state as new feature work lands.
 
-### Tasks
+Tasks:
 
 - Review private remote branch/PR drift when external GitHub/PR access is available.
-- Confirm reminder implementation against `main`: service/model/timeline/API routes/frontend UX now exist for local workflow reminders.
+- Confirm reminder implementation against `main`.
 - Confirm structured interview tracking remains clean in `main`.
 - Keep external links included in application summary counts alongside notes, reminders, and interviews.
 - Reconcile migrations carefully.
@@ -922,142 +246,44 @@ Keep `main` in a clean, truthful state as new feature work lands.
 - Run contracts tests.
 - Update README and roadmap docs to match actual implementation.
 
-### Suggested commit theme
-
-```text
-Update roadmap to current main reality
-```
-
----
-
 ## Step 2 — Layer 4 Completion Pass
-
-### Goal
 
 Finish the workflow records users expect before modeling Opportunity more deeply.
 
-### Tasks
-
-- Maintain reminder API routes and the application detail reminder panel.
-- Validate structured interview tracking across backend, frontend, timeline, and tests.
-- Confirm notes, links, reminders, interviews, and timeline work consistently.
-- Ensure application detail page surfaces all first-class workflow records.
-- Confirm pipeline, dashboard, and workflow summary counts remain accurate for notes, links, reminders, and interviews.
-- Ensure all workflow events appear in timeline/activity where appropriate.
-
-### Exit criteria
-
-- Application detail page shows notes, links, reminders, interviews, and timeline.
-- Application list/pipeline counts match backend records.
-- All workflow state transitions are tested.
-- Current local clone exposes no unmerged branches; private remote PR state may still need external verification.
-
----
-
 ## Step 3 — Layer 5 Insight Stabilization
-
-### Goal
 
 Make current analytics trustworthy before expanding the intelligence model.
 
-### Tasks
-
-- Validate each dashboard panel against deterministic fixture data.
-- Add workspace filtering in the dashboard.
-- Calibrate insufficient-data behavior.
-- Improve explainability for each recommendation/signal.
-- Ensure analytics use current workflow records consistently.
-- Confirm artifact performance records are created and readable.
-
-### Exit criteria
-
-- Dashboard panels are believable.
-- Signals explain their basis.
-- Empty states are helpful.
-- Workspace-scoped analytics work.
-
----
-
 ## Step 4 — Layer 6 Artifact Lifecycle Completion
-
-### Goal
 
 Turn generated artifacts into usable product objects.
 
-### Tasks
-
-- Add artifact list/detail page.
-- Add review/edit/approve/archive lifecycle.
-- Add submitted artifact tracking.
-- Add dedicated frontend export workflow for existing backend Markdown/DOCX/PDF export.
-- Add artifact retrieval from application and opportunity pages.
-- Add artifact lineage/revision display.
-- Add basic diff/compare if feasible.
-
-### Exit criteria
-
-- User can generate, review, retrieve, and mark a resume/cover letter as submitted.
-- Artifact records are tied to opportunity/application/workspace.
-- Internal strategy stays out of employer-facing artifacts.
-
----
-
-## Step 5 - Layer 7 LEAP Recon: Opportunity Model Strategy
-
-### Goal
+## Step 5 — Layer 7 LEAP Recon: Opportunity Model Strategy
 
 Design the durable Opportunity model before integrations.
 
-### Tasks
+## Step 6 — Layer 14 LEAP Recon: Model Catalog, Prompt Architecture & Credit Controls
 
-- Define Opportunity semantics.
-- Define Role-to-Opportunity migration or compatibility plan.
-- Define Opportunity vs Application boundaries.
-- Define Opportunity vs Artifact boundaries.
-- Define Opportunity vs Workspace/Search Track boundaries.
-- Define source/provenance/recruiter intelligence.
-- Define deduplication/similarity strategy.
-- Define historical intelligence requirements.
-- Produce LEAP Prompt/LHS slices for implementation.
+Plan model choice, model catalog architecture, Careero Prompt Architecture, prompt-only export, quality checks, usage accounting, and credit controls without mixing in job-source API ingestion.
 
-### Exit criteria
-
-- Canonical Opportunity strategy is documented.
-- Migration plan exists.
-- API transition plan exists.
-- Frontend language/route plan exists.
-- Analytics integration plan exists.
-- LEAP implementation slices are ready.
-
----
-
-## Step 6 - Layer 14 Strategic Recon
-
-### Goal
-
-Plan model choice, credits, API-only job ingestion, and company research caching without destabilizing the existing workflow roadmap.
-
-### Tasks
-
-- Define the Prompt Compiler module model.
-- Define the model provider/catalog/price snapshot architecture.
-- Define default model selection UX by artifact type.
-- Define prompt-only export behavior.
-- Define credit wallet, reservation, debit, refund, rollover, and top-up rules.
-- Define provider/tool/API cost tracking.
-- Validate official API access for target job posting sources.
-- Define normalized `job_posting` ingestion records.
-- Define company research source categories, source records, facts, summaries, and TTLs.
-- Define source licensing/compliance review workflow.
-- Add a backlog item to revisit scraping later; do not implement scraping in this pass.
-
-### Exit criteria
+Exit criteria:
 
 - Layer 14 implementation slices are ready.
+- Model catalog and prompt architecture boundaries are clear.
+- Credit economics are transparent and ledger-backed.
+- Prompt-only export is specified.
+- API job-source ingestion is explicitly deferred to Layer 15.
+
+## Step 7 — Layer 15 LEAP Recon: API Job Sources, Imports & Managed Deltas
+
+Plan official-API-first job-source ingestion, imported job records, source snapshots, managed deltas, provider governance, and review-before-save flows.
+
+Exit criteria:
+
+- Layer 15 implementation slices are ready.
 - API-only boundary is clear.
 - Scraping revisit is tracked as a future TODO only.
-- Credit economics are transparent and ledger-backed.
-- Source freshness and source governance rules are explicit.
+- Source snapshots, managed deltas, and source governance rules are explicit.
 
 ---
 
@@ -1076,13 +302,12 @@ Recommended order from here:
 9. Layer 11 productization implementation only after readiness gates are satisfied.
 10. Layer 12 advisor/collaboration mode.
 11. Layer 13 marketplace/employer-side exploration.
-12. Layer 14 model choice, credits, and API-first intelligence. Pull 14A/14B forward during Layer 11 if billing/model usage requires it; keep 14C/14D API-only and after Opportunity/integration boundaries are stable; keep Layer 13 as the last employer-side expansion.
+12. Layer 14 model catalog, Careero Prompt Architecture, model choice, usage accounting, and credit controls. Pull forward during Layer 11 if billing/model usage requires it.
+13. Layer 15 API job sources, import pipelines, source snapshots, and managed deltas. Keep API-only and after Opportunity/integration boundaries are stable; keep Layer 13 as the last employer-side expansion.
 
 ---
 
 # Preserved Value From Original Plan
-
-The original roadmap still contains valuable direction and should not be discarded.
 
 Preserve:
 
@@ -1101,7 +326,8 @@ Preserve:
 - Marketplace/employer-side work last among employer-facing capabilities.
 - User-selected model flexibility under a Careero-owned prompt framework.
 - Credit transparency, usage metering, capped rollover, and top-up economics.
-- API-first job and company intelligence with source freshness and no scraping in current scope.
+- API-first job-source intelligence with source snapshots, managed deltas, source freshness, and no scraping in current scope.
+- Clear separation between model/prompt architecture and external job-source API ingestion.
 
 Revise:
 
@@ -1110,7 +336,8 @@ Revise:
 - Do not call Layer 5 merely next; it is already partially implemented.
 - Move Integrations from Layer 7 to Layer 8.
 - Introduce Opportunity Model Strategy as Layer 7.
-- Add Layer 14 as an appended model-choice, credit-economy, API-first intelligence layer. Parts of 14A/14B may execute with Layer 11 productization even though the layer is documented after Layer 13.
+- Add Layer 14 as an appended model catalog, prompt architecture, and credit-control layer. Parts of Layer 14 may execute with Layer 11 productization even though the layer is documented after Layer 13.
+- Add Layer 15 as an appended API job-source, import pipeline, source snapshot, and managed-delta layer.
 
 Delay:
 
@@ -1129,20 +356,14 @@ The next architectural center should be:
 
 > Opportunity as the durable, strategic, historical intelligence object.
 
-Everything else should orbit that:
+Layer 14 adds a second strategic center for productization-scale model intelligence:
 
-- COMPASS evaluates the opportunity.
-- Artifacts target the opportunity.
-- Applications track pursuit of the opportunity.
-- Notes, reminders, and interviews describe activity around the opportunity.
-- Analytics learn from opportunity outcomes.
-- Integrations import/export opportunity-related data.
-- Automation suggests actions around opportunity lifecycle.
+> Careero should let users choose the model and budget while Careero controls prompts, source grounding, quality, cost exposure, and credit behavior.
 
-Layer 14 adds a second strategic center for productization-scale intelligence:
+Layer 15 adds a third strategic center for source-governed job intelligence:
 
-> Careero should let users choose the model and budget while Careero controls prompts, source grounding, quality, cost exposure, and API-only research memory.
+> Careero should ingest permitted external job-source data through official APIs, preserve source snapshots, compute managed deltas, and keep the user in control before imported data changes Opportunity records.
 
-The long-term strategic system is not merely an AI resume generator. It is a career application intelligence platform where users can generate, compare, and improve job-search materials using the model, research depth, and budget they choose while Careero protects source truth, freshness, and user control.
+The long-term strategic system is not merely an AI resume generator. It is a career application intelligence platform where users can generate, compare, import, refresh, and improve job-search materials using the model, source depth, and budget they choose while Careero protects source truth, freshness, and user control.
 
-This document should be updated whenever implementation reality changes, especially after private PR reconciliation, Layer 4 completion, Layer 7 LEAP Recon output, and Layer 14 source/provider validation.
+This document should be updated whenever implementation reality changes, especially after private PR reconciliation, Layer 4 completion, Layer 7 LEAP Recon output, Layer 14 model/prompt validation, and Layer 15 source/provider validation.
