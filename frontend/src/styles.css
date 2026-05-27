@@ -56,6 +56,48 @@ a {
   background: var(--mantine-color-body);
 }
 
+.global-navigation {
+  position: fixed;
+  top: 76px;
+  left: 16px;
+  z-index: 300;
+  width: min(320px, calc(100vw - 32px));
+  background: var(--mantine-color-white);
+}
+
+.strategy-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  gap: var(--mantine-spacing-lg);
+  align-items: start;
+}
+
+.strategy-local-navigation {
+  position: sticky;
+  top: 88px;
+}
+
+.strategy-detail-panel {
+  min-width: 0;
+}
+
+.strategy-metric {
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-gray-0);
+  padding: var(--mantine-spacing-sm);
+}
+
+@media (max-width: 62em) {
+  .strategy-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .strategy-local-navigation {
+    position: static;
+  }
+}
+
 .auth-page {
   min-height: 100vh;
   display: grid;

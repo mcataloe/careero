@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import { StrategyPage } from "./StrategyPage";
-import { render, screen, waitFor } from "../test-utils";
+import { render, screen, userEvent, waitFor } from "../test-utils";
 import type { CareerStrategySummary, SearchTrackStrategySummary } from "../types/strategy";
 import type { Workspace } from "../types/workspaces";
 
@@ -148,6 +148,20 @@ describe("StrategyPage", () => {
     vi.unstubAllGlobals();
   });
 
+  function renderStrategyAt(path: string) {
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/strategy/:section" element={<StrategyPage />} />
+          <Route
+            path="/workspaces/:workspaceId/strategy/:section"
+            element={<StrategyPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+  }
+
   it("renders workspace strategy synthesis", async () => {
     vi.stubGlobal(
       "fetch",
@@ -158,18 +172,14 @@ describe("StrategyPage", () => {
         .mockResolvedValueOnce(jsonResponse(careerStrategy)),
     );
 
-    render(
-      <MemoryRouter>
-        <StrategyPage />
-      </MemoryRouter>,
-    );
+    renderStrategyAt("/strategy/overview");
 
     expect(screen.getByText("Loading strategy synthesis")).toBeInTheDocument();
     expect(await screen.findByText("Career strategy")).toBeInTheDocument();
     expect(screen.getAllByText("Full-time search").length).toBeGreaterThan(0);
-    expect(screen.getByText("Review compensation target")).toBeInTheDocument();
-    expect(screen.getByText("Cross-track comparison")).toBeInTheDocument();
-    expect(screen.getByText("This is not external market data.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Full-time search" })).toBeInTheDocument();
+    expect(screen.getByText("Data is still thin")).toBeInTheDocument();
+    expect(screen.queryByText("Review compensation target")).not.toBeInTheDocument();
   });
 
   it("requests the selected workspace strategy", async () => {
@@ -180,11 +190,7 @@ describe("StrategyPage", () => {
       .mockResolvedValueOnce(jsonResponse(careerStrategy));
     vi.stubGlobal("fetch", fetchMock);
 
-    render(
-      <MemoryRouter>
-        <StrategyPage />
-      </MemoryRouter>,
-    );
+    renderStrategyAt("/workspaces/workspace-1/strategy/overview");
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
@@ -196,5 +202,52 @@ describe("StrategyPage", () => {
       "/api/strategy/workspaces?include_cross_track=true",
       expect.any(Object),
     );
+  });
+
+  it("renders the active routed strategy subsection only", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse([workspace]))
+        .mockResolvedValueOnce(jsonResponse(strategy))
+        .mockResolvedValueOnce(jsonResponse(careerStrategy)),
+    );
+
+    renderStrategyAt("/workspaces/workspace-1/strategy/actions");
+
+    expect(
+      await screen.findByRole("heading", { name: "Action candidates" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Review compensation target")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Full-time search" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("changes the focused section through local strategy navigation", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse([workspace]))
+        .mockResolvedValueOnce(jsonResponse(strategy))
+        .mockResolvedValueOnce(jsonResponse(careerStrategy)),
+    );
+
+    renderStrategyAt("/workspaces/workspace-1/strategy/actions");
+
+    expect(
+      await screen.findByRole("heading", { name: "Action candidates" }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("link", { name: /compensation/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Compensation alignment" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Action candidates" }),
+    ).not.toBeInTheDocument();
   });
 });

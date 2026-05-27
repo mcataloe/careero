@@ -38,7 +38,16 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/strategy" element={<StrategyPage />} />
+      <Route path="/strategy" element={<Navigate to="/strategy/overview" replace />} />
+      <Route path="/strategy/:section" element={<StrategyPage />} />
+      <Route
+        path="/workspaces/:workspaceId/strategy"
+        element={<WorkspaceStrategyRedirect />}
+      />
+      <Route
+        path="/workspaces/:workspaceId/strategy/:section"
+        element={<StrategyPage />}
+      />
       <Route path="/opportunities" element={<RolesPage />} />
       <Route path="/opportunities/new" element={<RoleNewPage />} />
       <Route path="/opportunities/:opportunityId" element={<RoleDetailPage />} />
@@ -81,6 +90,11 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
 function LegacyRoleDetailRedirect() {
   const { roleId } = useParams();
   return <Navigate to={`/opportunities/${roleId ?? ""}`} replace />;
+}
+
+function WorkspaceStrategyRedirect() {
+  const { workspaceId } = useParams();
+  return <Navigate to={`/workspaces/${workspaceId ?? ""}/strategy/overview`} replace />;
 }
 
 export default App;

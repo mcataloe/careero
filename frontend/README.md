@@ -31,6 +31,16 @@ not store session tokens in local storage. Google and LinkedIn buttons on the
 login page are disabled "coming soon" placeholders only and do not trigger
 OAuth or external redirects.
 
+App shell navigation:
+
+- Authenticated pages use a compact header with a hamburger button for the
+  global Careero navigation.
+- The floating global navigation contains only implemented top-level
+  destinations: Dashboard, Career strategy, Opportunities, Applications, and
+  Settings.
+- Feature-specific navigation stays inside the feature workspace instead of
+  taking permanent global sidebar width.
+
 AI enrichment is controlled by backend configuration. The frontend works with the deterministic backend fallback when AI is disabled, missing, or unavailable.
 
 Manual opportunity intake is available at:
@@ -81,11 +91,14 @@ Application workflow:
 
 Career strategy:
 
-- Open `/strategy` to review a read-only workspace/search-track strategy summary.
-- The strategy surface shows confidence, sample size, source basis,
-  insufficient-data reasons, retrospective text, compensation alignment, role
-  positioning, skill gaps, narrative themes, advisory actions, warnings, and
-  internal cross-track comparison.
+- Open `/strategy` to enter the read-only strategy workspace.
+- Strategy subsection routes use `/strategy/:section` and workspace-scoped
+  deep links use `/workspaces/:workspaceId/strategy/:section`.
+- The local Career strategy sidebar routes between overview, retrospective,
+  compensation, role positioning, skill gaps, career narrative, strategy
+  signals, action candidates, uncertainty, and internal cross-track comparison.
+- The right-hand detail panel displays only the selected subsection so the
+  workspace does not expose every strategy section at once.
 - Strategy synthesis is based only on stored Careero data. It does not export
   employer-facing content, mutate records, create automation suggestions, or use
   external market data.

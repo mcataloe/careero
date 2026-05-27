@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import App from "./App";
 import { sampleRole } from "./test-data";
-import { render, screen } from "./test-utils";
+import { render, screen, userEvent } from "./test-utils";
 
 function jsonResponse(response: unknown, status = 200) {
   return {
@@ -51,6 +51,30 @@ describe("Opportunity routes", () => {
 
     expect(await screen.findByRole("heading", { name: "Opportunities" })).toBeInTheDocument();
     expect(await screen.findByText("No opportunities yet")).toBeInTheDocument();
+  });
+
+  it("opens the floating global navigation from the app header", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(jsonResponse(authUser)).mockResolvedValueOnce(jsonResponse([])),
+    );
+
+    renderAppAt("/opportunities");
+
+    expect(await screen.findByRole("heading", { name: "Opportunities" })).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Open global navigation" }),
+    );
+
+    expect(
+      screen.getByRole("navigation", { name: "Global navigation" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /career strategy/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /opportunities/i })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 
   it("renders the canonical add opportunity route", async () => {
