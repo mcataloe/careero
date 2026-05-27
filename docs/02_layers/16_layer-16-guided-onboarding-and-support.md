@@ -1,4 +1,13 @@
-# Layer 16 — Guided Onboarding & First Search Activation
+﻿# Layer 16 â€” Guided Onboarding & First Search Activation
+
+Status: Draft  
+Doc Type: Layer Spec  
+Layer: Layer 16  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/01_strategy/00_product-strategy.md
+- docs/03_domain-design/workspace-intelligence.md
 
 ## Status
 
@@ -78,13 +87,13 @@ Keep the first-run flow short and action-oriented.
 
 Recommended first-run sequence:
 
-1. **Welcome** — Explain Careero in one sentence and set the expectation that the user can begin lightly.
-2. **Workspace/Search Track** — Explain the search-track concept and help the user create or select one.
-3. **Opportunity Intake** — Show how to paste a job description or manually add an opportunity.
-4. **COMPASS Preview** — Explain that COMPASS evaluates role fit and application strategy using available source material.
-5. **Source Materials** — Encourage resume/profile source material and COMPASS source-of-truth setup without requiring it.
-6. **Support & Feedback** — Show where to report bugs, ask for help, or suggest improvements.
-7. **Finish** — Land the user in the workspace dashboard or first opportunity workflow.
+1. **Welcome** â€” Explain Careero in one sentence and set the expectation that the user can begin lightly.
+2. **Workspace/Search Track** â€” Explain the search-track concept and help the user create or select one.
+3. **Opportunity Intake** â€” Show how to paste a job description or manually add an opportunity.
+4. **COMPASS Preview** â€” Explain that COMPASS evaluates role fit and application strategy using available source material.
+5. **Source Materials** â€” Encourage resume/profile source material and COMPASS source-of-truth setup without requiring it.
+6. **Support & Feedback** â€” Show where to report bugs, ask for help, or suggest improvements.
+7. **Finish** â€” Land the user in the workspace dashboard or first opportunity workflow.
 
 The flow should teach by doing. Avoid a passive slideshow.
 
@@ -218,39 +227,39 @@ These names are candidates, not final schema commitments. LEAP Recon should vali
 
 ## Relationship to Existing Layers
 
-### Layer 0 — Product Foundation
+### Layer 0 â€” Product Foundation
 
 Layer 16 operationalizes Layer 0's calm, humane, user-first UX philosophy. The user should leave onboarding clearer, calmer, and more in control.
 
-### Layer 1 — Local Platform Foundation
+### Layer 1 â€” Local Platform Foundation
 
 Layer 16 depends on account/session state and user ownership boundaries so onboarding progress can persist per user.
 
-### Layer 2 — Intake, Parsing & Grounding
+### Layer 2 â€” Intake, Parsing & Grounding
 
 Layer 16 introduces the user to opportunity intake and explains why source materials improve COMPASS quality.
 
-### Layer 3 — COMPASS + Artifact Foundation
+### Layer 3 â€” COMPASS + Artifact Foundation
 
 Layer 16 explains COMPASS as advisory, grounded, and optional at first. It should not hide the difference between lightweight analysis and source-grounded analysis.
 
-### Layer 4 — Application Workflow
+### Layer 4 â€” Application Workflow
 
 Layer 16 should land users in the workspace or application workflow after first setup, not trap them in onboarding screens.
 
-### Layer 5 — Workflow Intelligence / Insights
+### Layer 5 â€” Workflow Intelligence / Insights
 
 Layer 16 may eventually use lightweight activation analytics, but should not become a pressure machine or gamified productivity system.
 
-### Layer 11 — Productization / Deployment / Monetization
+### Layer 11 â€” Productization / Deployment / Monetization
 
 Layer 16 support and feedback data will matter for product readiness, but it should remain local-first until hosted support, retention, privacy, and production account boundaries are defined.
 
-### Layer 14 — Model Catalog, Prompt Architecture & Credit Controls
+### Layer 14 â€” Model Catalog, Prompt Architecture & Credit Controls
 
 Layer 16 should not require model choice or paid credits to complete onboarding.
 
-### Layer 15 — API Job Sources, Import Pipelines & Managed Deltas
+### Layer 15 â€” API Job Sources, Import Pipelines & Managed Deltas
 
 Layer 16 should not depend on external job-source import. Manual/paste-in opportunity intake remains the first activation path.
 
@@ -328,3 +337,4 @@ Layer 16 is implemented when:
 - Onboarding progress persists per user.
 - The flow can be skipped, resumed, and replayed.
 - No support payload silently includes private application materials or source content.
+

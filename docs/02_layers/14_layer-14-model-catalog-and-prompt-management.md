@@ -1,4 +1,13 @@
-# Layer 14 — Model Catalog, Prompt Architecture & Credit Controls
+﻿# Layer 14 â€” Model Catalog, Prompt Architecture & Credit Controls
+
+Status: Draft  
+Doc Type: Layer Spec  
+Layer: Layer 14  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/04_ai-and-compass/prompt-management.md
+- docs/04_ai-and-compass/ai-usage-cost-controls.md
 
 ## Status
 
@@ -6,7 +15,7 @@ Future / appended strategic layer.
 
 Layer 14 replaces the model-related portions of the older combined Layer 14 planning concept. It should remain focused on model choice, Careero-owned prompt architecture, model routing, quality checks, usage accounting, and credit controls.
 
-API job-source ingestion, official ATS/job-board adapters, imported job snapshots, and managed deltas now belong to **Layer 15 — API Job Sources, Import Pipelines & Managed Deltas**.
+API job-source ingestion, official ATS/job-board adapters, imported job snapshots, and managed deltas now belong to **Layer 15 â€” API Job Sources, Import Pipelines & Managed Deltas**.
 
 Layer 14 may be pulled forward with Layer 11 productization work when model usage, AI cost controls, billing boundaries, and credit economics are actively scoped. It does not require employer-side or marketplace work to be complete.
 
@@ -338,3 +347,4 @@ Layer 14 is implementation-ready when:
 - User-facing model-choice UX is defined.
 - Non-goals are explicit.
 - Layer 15 job-source ingestion is clearly out of scope for this layer.
+

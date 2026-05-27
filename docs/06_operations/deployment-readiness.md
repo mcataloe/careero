@@ -1,4 +1,13 @@
-# Deployment Readiness
+﻿# Deployment Readiness
+
+Status: Draft  
+Doc Type: Operations  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/auth-provider-and-hosted-beta-evaluation.md
+- docs/01_strategy/06_productization-readiness.md
 
 ## Purpose
 
@@ -22,7 +31,7 @@ an inspection surface, not deployment infrastructure.
 Careero is not production-ready.
 
 Layer 11.8 adds
-[`auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md)
+[`auth-provider-and-hosted-beta-evaluation.md`](../05_security-privacy-governance/auth-provider-and-hosted-beta-evaluation.md)
 to compare local packaged app, single-user hosted app, private hosted beta, and
 production SaaS paths. It is evaluation only and does not add deployment
 infrastructure or hosted readiness.
@@ -100,3 +109,5 @@ Docker/Kubernetes/Terraform/cloud resources, production auth hardening, billing,
 account deletion/export, retention enforcement, durable usage metering, or
 external integrations. Production-like environments should report blocked
 readiness until those controls exist.
+
+

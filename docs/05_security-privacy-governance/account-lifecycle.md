@@ -1,4 +1,13 @@
-# Account Lifecycle
+﻿# Account Lifecycle
+
+Status: Active  
+Doc Type: Governance  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/auth-provider-and-hosted-beta-evaluation.md
+- docs/05_security-privacy-governance/privacy-data-governance.md
 
 ## Purpose
 
@@ -219,3 +228,4 @@ Layer 11B does not remove those stop conditions. Hosted collaboration, advisor
 accounts, employer/recruiter access, and support/admin access remain blocked
 until production auth, authorization, revocation, audit, privacy, and lifecycle
 work is explicitly scoped.
+

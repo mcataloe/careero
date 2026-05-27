@@ -1,4 +1,13 @@
-# Monetization Boundary
+﻿# Monetization Boundary
+
+Status: Active  
+Doc Type: Strategy  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/01_strategy/06_productization-readiness.md
+- docs/04_ai-and-compass/ai-usage-cost-controls.md
 
 ## Purpose
 
@@ -123,3 +132,4 @@ paid enforcement.
 - Billing provider and legal/compliance implications are approved.
 - No employer-first, marketplace-first, or hidden sponsorship incentives are
   introduced.
+

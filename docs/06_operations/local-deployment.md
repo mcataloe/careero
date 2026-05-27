@@ -1,5 +1,13 @@
-# Local Development
+﻿# Local Development
 
+Status: Active  
+Doc Type: Operations  
+Layer: Layer 1  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/00_start-here.md
+- docs/06_operations/deployment-readiness.md
 Careero Layer 1 runs locally with a FastAPI backend and a React + Vite frontend.
 
 ## Root Commands
@@ -240,3 +248,4 @@ Layer 2 is local-first and evaluation-focused only. Later layers add workspace-a
 ## Layer 2 Completion
 
 Layer 2 is considered locally stable when the backend, frontend, and PostgreSQL all pass readiness checks and the role-to-resume-to-COMPASS workflow can create, display, cache, force re-run, and audit evaluations.
+

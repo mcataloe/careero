@@ -1,5 +1,13 @@
-# Application Workflow Persistence
+﻿# Application Workflow Persistence
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 4  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/application-interview-tracking.md
+- docs/03_domain-design/opportunity-model.md
 Layer 4 makes the existing `Application` row the workflow aggregate for a saved
 role/opportunity and exposes workspace-aware service/API operations for list,
 detail, ensure, state transition, and metadata update. It does not duplicate
@@ -170,3 +178,4 @@ include `application.created`, `application.state_changed`,
 enrich update/delete events such as `note.updated`, `note.deleted`,
 `reminder.updated`, `external_link.updated`, and `external_link.deleted`, but it
 does not replace typed workflow records.
+

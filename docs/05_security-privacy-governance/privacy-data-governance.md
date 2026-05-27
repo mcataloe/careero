@@ -1,4 +1,13 @@
-# Privacy and Data Governance
+﻿# Privacy and Data Governance
+
+Status: Active  
+Doc Type: Governance  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/account-lifecycle.md
+- docs/01_strategy/06_productization-readiness.md
 
 ## Purpose
 
@@ -80,3 +89,4 @@ sharing design.
 - AI use must be opt-in where provider calls are involved.
 - Future collaboration and employer-side modes require separate sharing,
   revocation, audit, and disclosure design.
+

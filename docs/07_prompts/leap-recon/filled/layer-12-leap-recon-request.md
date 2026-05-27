@@ -1,5 +1,12 @@
-# Careero Layer 12 LEAP Recon Request
+﻿# Careero Layer 12 LEAP Recon Request
 
+Status: Historical  
+Doc Type: Prompt  
+Layer: Layer 12  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/07_prompts/00_prompt-index.md
 Filled from `templates/leap-recon-template.md` in `mjcataldi/leap_framework` for the current state of `mjcataldi/careero` on `main`.
 
 ```text
@@ -20,16 +27,16 @@ Phase 0 / project baseline status:
   - Is the near-term goal personal use with trusted reviewers, future coach/advisor subscription support, or eventual product collaboration capability?
 
 Source-of-truth manifest:
-- Manifest path or pasted manifest: README.md current planning hierarchy plus docs/careero-application-plan-and-layer-status.md
-- Project charter path: docs/careero-application-plan-and-layer-status.md and Layer 0 strategy synopsis
-- MVP boundary path: docs/careero-application-plan-and-layer-status.md and Layer 0 strategy synopsis
+- Manifest path or pasted manifest: README.md current planning hierarchy plus docs/01_strategy/00_product-strategy.md
+- Project charter path: docs/01_strategy/00_product-strategy.md and Layer 0 strategy synopsis
+- MVP boundary path: docs/01_strategy/00_product-strategy.md and Layer 0 strategy synopsis
 - Pressure-test summary path: none found as a dedicated current Careero doc; infer from Layer 0 risk boundaries, productization readiness gates, execution drift ledger, and current layer status only
-- Implementation strategy path: docs/careero-application-plan-and-layer-status.md
-- Layer map path: docs/careero-application-plan-and-layer-status.md
-- Execution log path: docs/execution-drift-ledger.md
-- Cross-layer impact map path: docs/cross-layer-impact-map.md
-- Layer 11 readiness path: docs/productization-readiness.md plus docs/privacy-data-governance.md, docs/account-lifecycle.md, docs/ai-usage-cost-controls.md, docs/monetization-boundary.md, and docs/deployment-readiness.md
-- Stale / archived / do-not-use docs: docs/archive/*, especially docs/archive/strategic-layer-roadmap-legacy.md, unless explicitly requested for historical comparison
+- Implementation strategy path: docs/01_strategy/00_product-strategy.md
+- Layer map path: docs/01_strategy/00_product-strategy.md
+- Execution log path: docs/06_operations/execution-drift-ledger.md
+- Cross-layer impact map path: docs/01_strategy/04_cross-layer-impact-map.md
+- Layer 11 readiness path: docs/01_strategy/06_productization-readiness.md plus docs/05_security-privacy-governance/privacy-data-governance.md, docs/05_security-privacy-governance/account-lifecycle.md, docs/04_ai-and-compass/ai-usage-cost-controls.md, docs/01_strategy/05_monetization-boundary.md, and docs/06_operations/deployment-readiness.md
+- Stale / archived / do-not-use docs: docs/99_archive/*, especially docs/99_archive/strategic-layer-roadmap-legacy.md, unless explicitly requested for historical comparison
 
 Solution/system overview:
 - Solution name: Careero
@@ -53,7 +60,7 @@ Solution/system overview:
   - Any collaboration workflow must preserve user ownership, explicit consent, least-privilege access, revocation, auditability, and review-before-externalization.
 
 Target layer or target task:
-- Layer 12 — Advisor / Collaboration Mode
+- Layer 12 â€” Advisor / Collaboration Mode
 
 Repo / branch context:
 - Repository: mjcataldi/careero
@@ -63,17 +70,17 @@ Repo / branch context:
   - PR #1: Surface external link counts in application summaries; Layer 4-related and not Layer 12, but relevant because unfinished workflow reconciliation should gate collaboration readiness.
   - No Layer 12 branch found by branch search.
 - Areas likely affected:
-  - docs/careero-application-plan-and-layer-status.md
+  - docs/01_strategy/00_product-strategy.md
   - README.md
-  - docs/productization-readiness.md
-  - docs/privacy-data-governance.md
-  - docs/account-lifecycle.md
-  - docs/cross-layer-impact-map.md
-  - docs/execution-drift-ledger.md
-  - docs/opportunity-model-strategy.md
-  - docs/automation-guardrails.md
-  - docs/resume-artifact-generation.md
-  - docs/cover-letter-artifact-generation.md
+  - docs/01_strategy/06_productization-readiness.md
+  - docs/05_security-privacy-governance/privacy-data-governance.md
+  - docs/05_security-privacy-governance/account-lifecycle.md
+  - docs/01_strategy/04_cross-layer-impact-map.md
+  - docs/06_operations/execution-drift-ledger.md
+  - docs/03_domain-design/opportunity-model.md
+  - docs/03_domain-design/automation-guardrails.md
+  - docs/03_domain-design/resume-artifact-generation.md
+  - docs/03_domain-design/cover-letter-artifact-generation.md
   - backend account/user/authorization models if collaboration implementation is later approved
   - backend workspace/opportunity/application/artifact sharing boundary services if later approved
   - backend comments/review/audit models if comment-only collaboration is later approved
@@ -81,7 +88,7 @@ Repo / branch context:
   - packages/contracts for shared packet, advisor role, permission, comment, invitation, revocation, and audit schemas if introduced
 - Areas not to touch:
   - Do not overwrite generic LEAP methodology in the Careero repo.
-  - Do not treat docs/archive/* as current strategy.
+  - Do not treat docs/99_archive/* as current strategy.
   - Do not build marketplace, employer-side, recruiter-side, paid placement, or pay-to-rank capabilities.
   - Do not implement production external sharing until auth, authorization, tenant isolation, privacy controls, export/delete, and revocation/audit requirements are designed and approved.
   - Do not create hidden employer/recruiter visibility.
@@ -100,8 +107,8 @@ Buildout settings:
 - Destructive changes allowed: no by default; only recommend destructive changes if isolated, justified, and separately gated
 - One Build Unit per commit: yes
 - Source-of-truth updates required: yes
-- Execution log / drift ledger update required: yes, update docs/execution-drift-ledger.md if Layer 12 scope or gate decision is accepted
-- Cross-layer impact map update required: yes, update docs/cross-layer-impact-map.md if Layer 12 introduces new dependencies or constraints
+- Execution log / drift ledger update required: yes, update docs/06_operations/execution-drift-ledger.md if Layer 12 scope or gate decision is accepted
+- Cross-layer impact map update required: yes, update docs/01_strategy/04_cross-layer-impact-map.md if Layer 12 introduces new dependencies or constraints
 
 Required gate:
 - Verify whether the Phase 0 baseline and source-of-truth manifest are sufficient.
@@ -144,13 +151,13 @@ Layer 12-specific recon requirements:
 
 Return only the LEAP Recon output first. Do not generate the LEAP Prompt yet.
 At the end, ask any material clarification questions that should be answered before generating the LEAP Prompt.
-Then remind me that I can say: “Generate the LEAP Prompt.”
+Then remind me that I can say: â€œGenerate the LEAP Prompt.â€
 ```
 
 ## Expected Recon sections
 
 ```text
-# LEAP Recon — Layer 12 Advisor / Collaboration Mode
+# LEAP Recon â€” Layer 12 Advisor / Collaboration Mode
 
 ## 1. Framework Interpretation
 ## 2. Source-of-Truth Manifest Check
@@ -188,3 +195,5 @@ Then remind me that I can say: “Generate the LEAP Prompt.”
 | Scope Scale | Entire layer recon, then Build Unit-sized docs/design or local-only scaffolding | The layer should be decomposed into permission model, data packet model, comment model, audit/revocation model, and UI scaffolding only if approved. |
 | Validation | Tests/lint/typecheck/build plus explicit privacy and non-leakage test cases if implementation proceeds | Permission and redaction behavior must be tested, not eyeballed. |
 ```
+
+

@@ -1,5 +1,12 @@
-# Simple TODO List
+﻿# Simple TODO List
 
+Status: Draft  
+Doc Type: Audit  
+Layer: N/A  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/01_strategy/00_product-strategy.md
 This file is intentionally not the strategic roadmap.
 
 It captures unplanned functionality ideas, cleanup tasks, and future candidates
@@ -53,3 +60,4 @@ promoted into the layer plan or a LEAP prompt.
 - Which workspace strategy fields should become first-class versus metadata?
 - When should strategy retrospectives become durable, user-reviewed records?
 - Should strategy actions create Layer 9 suggestions only after an explicit user click?
+

@@ -1,4 +1,13 @@
-# Advisor Collaboration Mode
+﻿# Advisor Collaboration Mode
+
+Status: Draft  
+Doc Type: Domain Design  
+Layer: Layer 12  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/privacy-data-governance.md
+- docs/01_strategy/04_cross-layer-impact-map.md
 
 ## Purpose
 
@@ -263,3 +272,4 @@ The safest near-term implementation is docs/design plus the current local-only
 packet preview/export scaffold. Hosted collaboration requires a fresh LEAP Recon
 and explicit approval after production auth, authorization, tenant isolation,
 privacy controls, revocation, audit, and account lifecycle are implemented.
+

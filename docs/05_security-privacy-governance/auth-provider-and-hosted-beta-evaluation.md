@@ -1,4 +1,13 @@
-# Auth Provider and Hosted Beta Evaluation
+﻿# Auth Provider and Hosted Beta Evaluation
+
+Status: Draft  
+Doc Type: Governance  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/account-lifecycle.md
+- docs/06_operations/deployment-readiness.md
 
 ## Purpose
 
@@ -100,3 +109,4 @@ The user must decide:
 This document adds no hosted auth dependency, OAuth flow, SSO provider,
 passkey flow, account recovery, hosted tenant isolation claim, billing
 integration, or hosted deployment infrastructure.
+

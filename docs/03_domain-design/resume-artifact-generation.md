@@ -1,5 +1,13 @@
-# Resume Artifact Generation
+﻿# Resume Artifact Generation
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 3 / Layer 8  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/cover-letter-artifact-generation.md
+- docs/04_ai-and-compass/compass-evaluation-model.md
 Resume artifact generation creates a validated canonical `ResumeArtifact` draft for
 one workspace, target opportunity, COMPASS evaluation, and resume/profile source.
 It does not render the resume in the frontend. Local Markdown, DOCX, and PDF
@@ -63,3 +71,4 @@ canonical artifact rows.
 
 Generation is draft-only. User review, approval, export, and archive states are
 future workflow layers and should not be inferred from generation alone.
+

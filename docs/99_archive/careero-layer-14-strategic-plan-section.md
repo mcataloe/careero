@@ -1,4 +1,14 @@
-# Archived — Combined Layer 14 Strategic Plan Section
+﻿# Archived â€” Combined Layer 14 Strategic Plan Section
+
+Status: Historical  
+Doc Type: Archive  
+Layer: Layer 14 / Layer 15  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/99_archive/00_archive-index.md
+- docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md
+- docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md
 
 ## Archive status
 
@@ -11,12 +21,12 @@ The former combined Layer 14 plan bundled two separate concerns:
 
 Those concerns have now been split into separate active planning layers:
 
-- `docs/careero-layer-14-model-catalog-and-prompt-architecture.md`
-- `docs/careero-layer-15-api-job-sources-and-managed-deltas.md`
+- `docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`
+- `docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md`
 
 The canonical strategic matrix is now maintained in:
 
-- `docs/careero-application-plan-and-layer-status.md`
+- `docs/01_strategy/00_product-strategy.md`
 
 ## Do not use for new work
 
@@ -31,6 +41,9 @@ For current planning:
 
 Original active path before archival:
 
-- `docs/careero-layer-14-strategic-plan-section.md`
+- `docs/99_archive/careero-layer-14-strategic-plan-section.md`
 
 Archived on request after Layer 14 / Layer 15 split was incorporated into the strategic Careero plan.
+
+
+

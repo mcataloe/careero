@@ -1,4 +1,13 @@
-# Layer 15 — API Job Sources, Import Pipelines & Managed Deltas
+﻿# Layer 15 â€” API Job Sources, Import Pipelines & Managed Deltas
+
+Status: Draft  
+Doc Type: Layer Spec  
+Layer: Layer 15  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/opportunity-model.md
+- docs/05_security-privacy-governance/canonical-domain-model.md
 
 ## Status
 
@@ -428,3 +437,4 @@ Layer 15 is implementation-ready when:
 - Opportunity mapping strategy is defined.
 - Non-goals are explicit.
 - Scraping is clearly out of scope.
+

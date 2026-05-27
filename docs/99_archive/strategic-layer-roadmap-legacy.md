@@ -1,10 +1,18 @@
-# Archived: Careero Strategic Layer Roadmap
+﻿# Archived: Careero Strategic Layer Roadmap
 
+Status: Historical  
+Doc Type: Archive  
+Layer: N/A  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/99_archive/00_archive-index.md
+- docs/01_strategy/00_product-strategy.md
 > Archived on 2026-05-20.
 >
 > This document is retained for historical context only. Do not use it as the source of truth for Careero layer planning, LEAP Recon, or Codex implementation prompts.
 >
-> Current canonical planning document: `docs/careero-application-plan-and-layer-status.md`.
+> Current canonical planning document: `docs/01_strategy/00_product-strategy.md`.
 >
 > Reason archived: this roadmap used an older Layer 0-12 sequence where Layer 8 was Automation Guardrails. The current application plan revised the sequence so Layer 8 is Integrations and Automation Guardrails is Layer 9.
 
@@ -40,7 +48,7 @@ Careero's layer model should help the project preserve a coherent product direct
 
 ## Layer Details
 
-### Layer 0 — Product Foundation
+### Layer 0 â€” Product Foundation
 
 Layer 0 defines why Careero exists and what boundaries should guide product, UX, AI, monetization, and engineering decisions.
 
@@ -48,37 +56,37 @@ Its purpose is to keep the product job-seeker-first. Careero should reduce the c
 
 Layer 0 is not primarily feature work. It is the strategic foundation that later layers should answer to.
 
-### Layer 1 — Core Platform
+### Layer 1 â€” Core Platform
 
 Layer 1 provides the base application foundation.
 
 It covers identity, access, ownership, configuration, sessions, profiles, and database structure. The goal is to make Careero a durable application instead of a loose local prototype.
 
-### Layer 2 — Intake & Parsing
+### Layer 2 â€” Intake & Parsing
 
 Layer 2 focuses on getting role and source-material data into the system.
 
 It includes pasted job description intake, AI-assisted parsing, manual correction, resume/profile source storage, supported local document imports, and the review-before-save pattern. The layer should keep AI assistive, editable, and grounded in user-reviewed source material.
 
-### Layer 3 — Core Domain Model
+### Layer 3 â€” Core Domain Model
 
 Layer 3 defines the canonical objects Careero uses to reason about the job-search workflow.
 
 The central objects include Workspace, Opportunity, COMPASS Evaluation, Resume Artifact, Cover Letter Artifact, and Application State. These contracts should provide a stable bridge between frontend rendering, backend persistence, AI orchestration, workflow tracking, and future export generation.
 
-### Layer 4 — Application Workflow
+### Layer 4 â€” Application Workflow
 
 Layer 4 manages the actual job-search workflow.
 
 It includes saved opportunities, state transitions, notes, reminders, interviews, application history, status pipelines, archive/reactivate flows, and dashboard basics. The purpose is to help users manage active searches without collapsing everything into a spreadsheet or one flat opportunity list.
 
-### Layer 5 — Workflow Intelligence / Insights
+### Layer 5 â€” Workflow Intelligence / Insights
 
 Layer 5 turns accumulated workflow activity into useful guidance.
 
 Once Careero can save opportunities and track state, the natural user question becomes: what should I focus on next? This layer should answer that through dashboards, stale-opportunity detection, follow-up recommendations, COMPASS rollups, pipeline health, activity trends, and search-track-level insight.
 
-### Layer 6 — Advanced COMPASS + Artifact Lifecycle
+### Layer 6 â€” Advanced COMPASS + Artifact Lifecycle
 
 Layer 6 deepens evaluation quality and artifact traceability.
 
@@ -86,7 +94,7 @@ It should make COMPASS evaluations more comparable over time, connect role requi
 
 This layer should preserve a strict separation between internal strategy and employer-facing materials.
 
-### Layer 7 — Integrations
+### Layer 7 â€” Integrations
 
 Layer 7 reduces manual entry by connecting Careero to tools job seekers already use.
 
@@ -94,7 +102,7 @@ Candidate integrations include Google Docs, Gmail/Outlook, calendar interview sy
 
 Integrations should come after the internal workflow is stable enough to know what data should be imported, exported, or synchronized.
 
-### Layer 8 — Automation Guardrails
+### Layer 8 â€” Automation Guardrails
 
 Layer 8 adds automation while preserving user review and control.
 
@@ -102,7 +110,7 @@ The goal is to help with repetitive work without turning Careero into an unsuper
 
 No auto-apply behavior should exist without explicit user approval and a clear review boundary.
 
-### Layer 9 — Advanced Search Tracks / Career Strategy
+### Layer 9 â€” Advanced Search Tracks / Career Strategy
 
 Layer 9 makes Careero more strategic than tactical.
 
@@ -110,7 +118,7 @@ This layer supports long-running career paths, full-time vs. contract strategy c
 
 It should help users understand not only what they are applying to, but whether their overall search strategy is working.
 
-### Layer 10 — Monetization / Productization
+### Layer 10 â€” Monetization / Productization
 
 Layer 10 addresses sustainability without compromising trust.
 
@@ -118,7 +126,7 @@ Potential capabilities include a free tier, paid AI/artifact usage, power-user t
 
 The product should avoid monetization patterns that make users feel steered, ranked, or exploited during a stressful career transition.
 
-### Layer 11 — Team / Coach / Advisor Mode
+### Layer 11 â€” Team / Coach / Advisor Mode
 
 Layer 11 allows trusted external help.
 
@@ -126,7 +134,7 @@ This may include career coach access, resume reviewer access, spouse/advisor rev
 
 The layer should be permission-first. External reviewers should see only what the user intentionally shares.
 
-### Layer 12 — Marketplace / Employer-Side Exploration
+### Layer 12 â€” Marketplace / Employer-Side Exploration
 
 Layer 12 should be explored only after the user-side product is strong.
 
@@ -160,3 +168,5 @@ The practical sequence is:
 - Use separate implementation documents or prompt files for detailed LHS/Codex build slices.
 - When implementation reality diverges from this roadmap, update this document rather than relying on chat history as the source of truth.
 - Preserve the user-first, AI-grounded, review-before-action posture across all future layers.
+
+

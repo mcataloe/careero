@@ -1,5 +1,13 @@
-# Automation Guardrails
+﻿# Automation Guardrails
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 9  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/01_strategy/04_cross-layer-impact-map.md
+- docs/06_operations/execution-drift-ledger.md
 Layer 9 introduces local automation guardrails for Careero. Automation in this
 layer means reviewable suggestions, local draft previews, readiness checks,
 explicit approvals, dismissals, and audit records.
@@ -59,3 +67,4 @@ external action or silently mutate application workflow state.
 
 Future internal executors may be added only after they are explicitly scoped,
 tested, and gated behind a fresh approval for each action.
+

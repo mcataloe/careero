@@ -1,43 +1,27 @@
 # Documentation
 
-This directory contains Careero project documentation.
+Status: Active  
+Doc Type: Strategy  
+Layer: N/A  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/00_start-here.md
+- docs/01_strategy/00_product-strategy.md
+- docs/02_layers/00_layer-index.md
 
-## Source-of-truth guidance
+Start with [00_start-here.md](00_start-here.md).
 
-The canonical Careero strategic plan and layer-status source of truth is:
+Major sections:
 
-- [Careero application plan and layer status](careero-application-plan-and-layer-status.md)
+- [Strategy](01_strategy/00_product-strategy.md)
+- [Layers](02_layers/00_layer-index.md)
+- [Domain Design](03_domain-design/00_domain-index.md)
+- [AI and COMPASS](04_ai-and-compass/00_ai-compass-index.md)
+- [Security, Privacy, and Governance](05_security-privacy-governance/00_security-privacy-index.md)
+- [Operations](06_operations/00_operations-index.md)
+- [Prompts](07_prompts/00_prompt-index.md)
+- [Reports and Audits](08_reports-and-audits/00_reports-index.md)
+- [Archive](99_archive/00_archive-index.md)
 
-Use that document for Careero-specific LEAP Recon, layer planning, implementation sequencing, and Codex prompt grounding.
-
-Older roadmap material has been archived under `docs/archive/` for historical context only. Archived documents must not be used as current planning inputs unless a task explicitly asks for historical comparison.
-
-General LEAP framework guidance, reusable LEAP prompt patterns, and application-buildout methodology should live in the separate `leap` repository, not in this Careero repo.
-
-Current planning hierarchy:
-
-1. `README.md` - short project entry point and pointer to canonical planning docs.
-2. `docs/careero-application-plan-and-layer-status.md` - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs listed below.
-4. `docs/archive/*` - historical context only.
-5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
-
-## Documents
-
-- [Careero application plan and layer status](careero-application-plan-and-layer-status.md)
-- [Local development](local-development.md)
-- [Canonical domain model](canonical-domain-model.md)
-- [Opportunity model strategy](opportunity-model-strategy.md)
-- [Application workflow persistence](application-workflow-persistence.md)
-- [Application interview tracking](application-interview-tracking.md)
-- [Resume artifact generation](resume-artifact-generation.md)
-- [Cover letter artifact generation](cover-letter-artifact-generation.md)
-- [Workspace intelligence context](workspace-intelligence-context.md)
-- [Automation guardrails](automation-guardrails.md)
-- [Layer 14 — Model catalog and prompt architecture](careero-layer-14-model-catalog-and-prompt-architecture.md)
-- [Layer 15 — API job sources and managed deltas](careero-layer-15-api-job-sources-and-managed-deltas.md)
-- [Layer 16 — Guided onboarding and first-search activation](careero-layer-16-guided-onboarding-and-first-search-activation.md)
-
-## Archive
-
-- [Archived legacy strategic layer roadmap](archive/strategic-layer-roadmap-legacy.md)
+Canonical product strategy lives in [docs/01_strategy/00_product-strategy.md](01_strategy/00_product-strategy.md). Generated prompts live under [docs/07_prompts](07_prompts/00_prompt-index.md) and are not source-of-truth design docs.

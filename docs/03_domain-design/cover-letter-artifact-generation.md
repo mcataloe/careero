@@ -1,5 +1,13 @@
-# Cover Letter Artifact Generation
+﻿# Cover Letter Artifact Generation
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 3 / Layer 8  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/resume-artifact-generation.md
+- docs/04_ai-and-compass/compass-evaluation-model.md
 Cover letter artifact generation creates a validated canonical
 `CoverLetterArtifact` draft for one workspace and target opportunity. It can use
 a COMPASS evaluation and resume/profile source when they are available, but both
@@ -79,3 +87,4 @@ previous cover letter artifact.
 
 Generation is draft-only. User review, approval, export, and archive states are
 future workflow layers and should not be inferred from generation alone.
+

@@ -1,4 +1,13 @@
-# AI Usage and Cost Controls
+﻿# AI Usage and Cost Controls
+
+Status: Active  
+Doc Type: AI-COMPASS  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/01_strategy/06_productization-readiness.md
+- docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md
 
 ## Purpose
 
@@ -161,3 +170,4 @@ sponsored recommendations.
 Layer 11.7 references the existing local AI session attempt cap as a local
 feature limit only. It does not turn usage events into credits, paid quotas, or
 billing enforcement.
+

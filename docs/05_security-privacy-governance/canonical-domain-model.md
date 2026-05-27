@@ -1,5 +1,13 @@
-# Canonical Domain Model
+﻿# Canonical Domain Model
 
+Status: Active  
+Doc Type: Governance  
+Layer: N/A  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/opportunity-model.md
+- docs/03_domain-design/application-workflow-persistence.md
 Careero's canonical contracts define the long-term platform objects used across frontend rendering, backend persistence, AI orchestration, workflow tracking, and future export generation.
 
 The contracts live in `packages/contracts` and are executable TypeScript/Zod schemas. Generated JSON Schema files are available for backend and AI structured-output validation.
@@ -75,7 +83,7 @@ AI guidance:
 
 `Opportunity` is the canonical successor to the current `Role` concept. It represents a specific role, contract, consulting engagement, or professional opportunity.
 
-Layer 7 strategy guidance: [Opportunity model strategy](opportunity-model-strategy.md).
+Layer 7 strategy guidance: [Opportunity model strategy](../03_domain-design/opportunity-model.md).
 
 Responsibilities:
 
@@ -243,7 +251,7 @@ not the source of truth for approvals.
 Automation preferences are scoped to workspaces/search tracks first. Future
 external-action settings are disabled in the Layer 9 MVP.
 
-Layer 9 guidance: [Automation guardrails](automation-guardrails.md).
+Layer 9 guidance: [Automation guardrails](../03_domain-design/automation-guardrails.md).
 
 ### Career Strategy Summary
 
@@ -326,3 +334,5 @@ Recommended tests:
 - Add frontend workspace switching after backend workspace-aware workflows remain stable.
 - Add profile fact extraction only after resume/profile source storage and grounding behavior are stable.
 - Add artifact generation only after evaluation outputs are reliable and auditable.
+
+

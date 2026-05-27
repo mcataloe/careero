@@ -1,5 +1,12 @@
-# Application Interview Tracking
+﻿# Application Interview Tracking
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 4  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/application-workflow-persistence.md
 Layer 4G stores interview activity as structured application interview stages. Interview stages are part of the local application workflow record and should be used instead of relying on freeform notes as the only source of interview truth.
 
 ## Model
@@ -46,3 +53,4 @@ Layer 4G is manual interview tracking only. It intentionally does not:
 - Provide mock interview coaching or automated interview preparation.
 
 Those capabilities belong to later layers and should integrate with these structured interview stages rather than replacing them with freeform notes.
+

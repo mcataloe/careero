@@ -1,5 +1,13 @@
-# Workspace Intelligence Context
+﻿# Workspace Intelligence Context
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 5  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/03_domain-design/opportunity-model.md
+- docs/04_ai-and-compass/compass-evaluation-model.md
 Workspace context lets one local user run multiple independent career searches,
 such as a Staff Engineer search, a consulting search, and an exploratory
 leadership search. Each workspace owns its own preferences, notes, tags, and AI
@@ -82,3 +90,4 @@ an internal comparison across stored local tracks only.
 This layer does not add embeddings, vector search, external market intelligence,
 or long-term memory automation. Resume sources remain user-level for now;
 workspace-specific source selection can be added in a future layer.
+

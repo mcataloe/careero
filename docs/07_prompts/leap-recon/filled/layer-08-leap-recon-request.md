@@ -1,5 +1,12 @@
-# Careero Layer 8 LEAP Recon Request
+﻿# Careero Layer 8 LEAP Recon Request
 
+Status: Historical  
+Doc Type: Prompt  
+Layer: Layer 8  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/07_prompts/00_prompt-index.md
 Filled from `templates/leap-recon-template.md` for the current state of `mjcataldi/careero` on `main`.
 
 ```text
@@ -18,15 +25,15 @@ Phase 0 / project baseline status:
   - Which integrations should remain local/manual import only for MVP versus account-linked OAuth integrations?
 
 Source-of-truth manifest:
-- Manifest path or pasted manifest: README.md current planning hierarchy plus docs/careero-application-plan-and-layer-status.md
-- Project charter path: docs/careero-application-plan-and-layer-status.md and Layer 0 strategy synopsis
-- MVP boundary path: docs/careero-application-plan-and-layer-status.md and Layer 0 strategy synopsis
+- Manifest path or pasted manifest: README.md current planning hierarchy plus docs/01_strategy/00_product-strategy.md
+- Project charter path: docs/01_strategy/00_product-strategy.md and Layer 0 strategy synopsis
+- MVP boundary path: docs/01_strategy/00_product-strategy.md and Layer 0 strategy synopsis
 - Pressure-test summary path: none found as a dedicated current Careero doc; infer from Layer 0 risk boundaries and current layer status only
-- Implementation strategy path: docs/careero-application-plan-and-layer-status.md
-- Layer map path: docs/careero-application-plan-and-layer-status.md
+- Implementation strategy path: docs/01_strategy/00_product-strategy.md
+- Layer map path: docs/01_strategy/00_product-strategy.md
 - Execution log path: not found as a dedicated current file; use Git history, README, and layer-status doc until an execution/drift ledger exists
-- Cross-layer impact map path: not found as a dedicated current file; infer from layer-status doc and opportunity-model-strategy.md until a formal impact map exists
-- Stale / archived / do-not-use docs: docs/archive/*, especially docs/archive/strategic-layer-roadmap-legacy.md, unless explicitly requested for historical comparison
+- Cross-layer impact map path: docs/01_strategy/04_cross-layer-impact-map.md
+- Stale / archived / do-not-use docs: docs/99_archive/*, especially docs/99_archive/strategic-layer-roadmap-legacy.md, unless explicitly requested for historical comparison
 
 Solution/system overview:
 - Solution name: Careero
@@ -48,7 +55,7 @@ Solution/system overview:
   - Avoid building integrations before Opportunity semantics are stable enough to receive imported data without rework.
 
 Target layer or target task:
-- Layer 8 — Integrations
+- Layer 8 â€” Integrations
 
 Repo / branch context:
 - Repository: mjcataldi/careero
@@ -58,8 +65,8 @@ Repo / branch context:
   - PR #1: Surface external link counts in application summaries; Layer 4-related and not Layer 8, but relevant to workflow-summary reconciliation
   - No Layer 8 branch found by branch search
 - Areas likely affected:
-  - docs/careero-application-plan-and-layer-status.md
-  - docs/opportunity-model-strategy.md
+  - docs/01_strategy/00_product-strategy.md
+  - docs/03_domain-design/opportunity-model.md
   - backend app services/routes/schemas for opportunity intake, source/provenance, artifacts, applications, reminders, interviews, external links, and activity logs
   - frontend opportunity intake/detail/application/artifact surfaces
   - packages/contracts source schemas and generated JSON Schema contracts
@@ -67,7 +74,7 @@ Repo / branch context:
   - future integration adapter directories/services if introduced
 - Areas not to touch:
   - Do not overwrite generic LEAP methodology in the Careero repo.
-  - Do not treat docs/archive/* as current strategy.
+  - Do not treat docs/99_archive/* as current strategy.
   - Do not perform destructive Role-to-Opportunity persistence rename unless the recon explicitly gates it as required.
   - Do not implement production auth, billing, marketplace, employer-side workflows, automated application submission, or external sending as part of Layer 8 MVP.
   - Do not add vector/embedding-based dedupe unless deterministic matching is shown to be insufficient.
@@ -110,13 +117,13 @@ Layer 8-specific recon requirements:
 
 Return only the LEAP Recon output first. Do not generate the LEAP Prompt yet.
 At the end, ask any material clarification questions that should be answered before generating the LEAP Prompt.
-Then remind me that I can say: “Generate the LEAP Prompt.”
+Then remind me that I can say: â€œGenerate the LEAP Prompt.â€
 ```
 
 ## Expected Recon sections
 
 ```text
-# LEAP Recon — Layer 8 Integrations
+# LEAP Recon â€” Layer 8 Integrations
 
 ## 1. Framework Interpretation
 ## 2. Source-of-Truth Manifest Check
@@ -140,3 +147,6 @@ Then remind me that I can say: “Generate the LEAP Prompt.”
 ## 20. Clarification Questions Before LEAP Prompt Generation
 ## 21. Gate Decision / Next Step
 ```
+
+
+

@@ -1,5 +1,12 @@
-# Username Deprecation Audit
+﻿# Username Deprecation Audit
 
+Status: Active  
+Doc Type: Audit  
+Layer: Layer 1  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/account-lifecycle.md
 Date: 2026-05-27
 
 ## Decision
@@ -45,3 +52,4 @@ signup/auth/profile path:
   are not present in the final schema.
 
 These are compatibility/history references, not product identity fields.
+

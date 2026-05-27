@@ -1,4 +1,4 @@
-# Careero
+﻿# Careero
 
 Careero is a local-first career operations application for managing a personal job search and preparing strong applications. It is designed around a COMPASS-powered workflow for evaluating role fit, risk, positioning, and application priority.
 
@@ -6,32 +6,34 @@ The current repository is beyond the original Layer 2 prototype: it includes loc
 
 ## Strategic Plan and Layer Status
 
-The canonical Careero strategic plan, current layer status, and recommended build sequence are tracked in [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md).
+Documentation starts at [`docs/00_start-here.md`](docs/00_start-here.md).
+
+The canonical Careero strategic plan, current layer status, and recommended build sequence are tracked in [`docs/01_strategy/00_product-strategy.md`](docs/01_strategy/00_product-strategy.md).
 
 Use that document as the source of truth for Careero-specific LEAP Recon, layer planning, and Codex implementation prompts.
 
-Layer 7 Opportunity model strategy is captured in [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md).
+Layer 7 Opportunity model strategy is captured in [`docs/03_domain-design/opportunity-model.md`](docs/03_domain-design/opportunity-model.md).
 
-Layer 11 productization readiness is captured in [`docs/productization-readiness.md`](docs/productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. First-party local email/password login now exists, while Google/LinkedIn SSO, account recovery, production auth hardening, billing, tenant isolation, and hosted deployment remain future.
+Layer 11 productization readiness is captured in [`docs/01_strategy/06_productization-readiness.md`](docs/01_strategy/06_productization-readiness.md), with supporting privacy/data governance, account lifecycle, AI usage/cost control, monetization-boundary, and deployment-readiness docs. A local-first readiness endpoint and Settings panel now report the current gates honestly. First-party local email/password login now exists, while Google/LinkedIn SSO, account recovery, production auth hardening, billing, tenant isolation, and hosted deployment remain future.
 
-Auth-provider and hosted-beta direction is evaluated in [`docs/auth-provider-and-hosted-beta-evaluation.md`](docs/auth-provider-and-hosted-beta-evaluation.md). It is evaluation only and does not select or implement auth.
+Auth-provider and hosted-beta direction is evaluated in [`docs/05_security-privacy-governance/auth-provider-and-hosted-beta-evaluation.md`](docs/05_security-privacy-governance/auth-provider-and-hosted-beta-evaluation.md). It is evaluation only and does not select or implement auth.
 
-Layer 12 advisor collaboration readiness is captured in [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
+Layer 12 advisor collaboration readiness is captured in [`docs/03_domain-design/advisor-collaboration-mode.md`](docs/03_domain-design/advisor-collaboration-mode.md). Local-only advisor packet preview/export scaffolding exists; hosted collaboration, advisor accounts, invitations, comments, and external sharing remain future.
 
-Layer 14 model catalog, Careero Prompt Architecture, model choice, usage accounting, and credit-control strategy is captured in [`docs/careero-layer-14-model-catalog-and-prompt-architecture.md`](docs/careero-layer-14-model-catalog-and-prompt-architecture.md). This is strategic planning only; model catalogs, prompt gateways, prompt-only export, credit wallets, usage ledgers, and paid model-cost controls are not implemented in `main`.
+Layer 14 model catalog, Careero Prompt Architecture, model choice, usage accounting, and credit-control strategy is captured in [`docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`](docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md). This is strategic planning only; model catalogs, prompt gateways, prompt-only export, credit wallets, usage ledgers, and paid model-cost controls are not implemented in `main`.
 
-Layer 15 API job sources, import pipelines, source snapshots, and managed-delta strategy is captured in [`docs/careero-layer-15-api-job-sources-and-managed-deltas.md`](docs/careero-layer-15-api-job-sources-and-managed-deltas.md). This is strategic planning only; ATS/job-data provider adapters, job posting snapshots, import candidates, managed deltas, and API source governance are not implemented in `main`.
+Layer 15 API job sources, import pipelines, source snapshots, and managed-delta strategy is captured in [`docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md`](docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md). This is strategic planning only; ATS/job-data provider adapters, job posting snapshots, import candidates, managed deltas, and API source governance are not implemented in `main`.
 
-Layer 16 guided onboarding, first-search activation, contextual help, and support/feedback strategy is captured in [`docs/careero-layer-16-guided-onboarding-and-first-search-activation.md`](docs/careero-layer-16-guided-onboarding-and-first-search-activation.md). This is strategic planning only; persisted onboarding state, guided first-run flow, tour skip/resume/replay behavior, contextual onboarding empty states, and support/feedback capture are not implemented in `main`.
+Layer 16 guided onboarding, first-search activation, contextual help, and support/feedback strategy is captured in [`docs/02_layers/16_layer-16-guided-onboarding-and-support.md`](docs/02_layers/16_layer-16-guided-onboarding-and-support.md). This is strategic planning only; persisted onboarding state, guided first-run flow, tour skip/resume/replay behavior, contextual onboarding empty states, and support/feedback capture are not implemented in `main`.
 
-Older roadmap material is retained only under `docs/archive/` for historical context and should not be used as current planning input.
+Older roadmap material is retained only under `docs/99_archive/` for historical context and should not be used as current planning input.
 
 Current planning hierarchy:
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
-2. [`docs/careero-application-plan-and-layer-status.md`](docs/careero-application-plan-and-layer-status.md) - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including [`docs/opportunity-model-strategy.md`](docs/opportunity-model-strategy.md), [`docs/productization-readiness.md`](docs/productization-readiness.md), [`docs/advisor-collaboration-mode.md`](docs/advisor-collaboration-mode.md), [`docs/careero-layer-14-model-catalog-and-prompt-architecture.md`](docs/careero-layer-14-model-catalog-and-prompt-architecture.md), [`docs/careero-layer-15-api-job-sources-and-managed-deltas.md`](docs/careero-layer-15-api-job-sources-and-managed-deltas.md), and [`docs/careero-layer-16-guided-onboarding-and-first-search-activation.md`](docs/careero-layer-16-guided-onboarding-and-first-search-activation.md).
-4. `docs/archive/*` - historical context only.
+2. [`docs/01_strategy/00_product-strategy.md`](docs/01_strategy/00_product-strategy.md) - canonical Careero-specific layer status and build order.
+3. Active layer-specific docs, including [`docs/03_domain-design/opportunity-model.md`](docs/03_domain-design/opportunity-model.md), [`docs/01_strategy/06_productization-readiness.md`](docs/01_strategy/06_productization-readiness.md), [`docs/03_domain-design/advisor-collaboration-mode.md`](docs/03_domain-design/advisor-collaboration-mode.md), [`docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`](docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md), [`docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md`](docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md), and [`docs/02_layers/16_layer-16-guided-onboarding-and-support.md`](docs/02_layers/16_layer-16-guided-onboarding-and-support.md).
+4. `docs/99_archive/*` - historical context only.
 5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
 ## Current Local Capabilities
@@ -126,3 +128,4 @@ scripts/   Reserved for future developer automation
 - PostgreSQL
 
 On Windows PowerShell, if `npm` is blocked by script execution policy, use `npm.cmd` in the commands below.
+

@@ -1,4 +1,14 @@
-# Productization Readiness
+﻿# Productization Readiness
+
+Status: Active  
+Doc Type: Strategy  
+Layer: Layer 11  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/01_strategy/05_monetization-boundary.md
+- docs/05_security-privacy-governance/privacy-data-governance.md
+- docs/06_operations/deployment-readiness.md
 
 ## Purpose
 
@@ -87,7 +97,7 @@ Layer 11.7 adds a local-first entitlement boundary model:
   details, credit wallet, upgrade buttons, or paid enforcement.
 
 Layer 11.8 adds
-[`auth-provider-and-hosted-beta-evaluation.md`](auth-provider-and-hosted-beta-evaluation.md).
+[`auth-provider-and-hosted-beta-evaluation.md`](../05_security-privacy-governance/auth-provider-and-hosted-beta-evaluation.md).
 This is evaluation only. It does not select a hosted auth provider, add OAuth
 dependencies, implement SSO/account recovery, or claim hosted readiness.
 
@@ -212,3 +222,5 @@ Layer 11 readiness docs and the Layer 11A readiness endpoint/UI define and
 report gates so future agents do not confuse local-first readiness with
 production readiness. Production implementation remains future until the
 blockers above are resolved.
+
+

@@ -1,5 +1,13 @@
-# Opportunity Model Strategy
+﻿# Opportunity Model Strategy
 
+Status: Active  
+Doc Type: Domain Design  
+Layer: Layer 7  
+Source of Truth: Yes  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/05_security-privacy-governance/canonical-domain-model.md
+- docs/02_layers/00_layer-index.md
 Layer 7A design artifact.
 
 This document defines Careero's Opportunity model strategy before any destructive persistence migration. It is the source of truth for Layer 7B compatibility work and later Layer 7C migration decisions.
@@ -307,3 +315,4 @@ Layer 7A and the following Layer 7B naming/migration work do not implement:
 - Should existing `Role.status` values map exactly to `OpportunityStatusSchema`, or should the frontend/backend status set be expanded during Layer 7B?
 - Should ExternalLink attach to Opportunity as well as Application, or should Opportunity source URL remain the only canonical opportunity-level link for now?
 - How long should `/roles` API compatibility remain after `/opportunities` exists in a pre-production local-first app?
+

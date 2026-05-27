@@ -1,5 +1,12 @@
-# Careero Layer 11 LEAP Recon Request
+﻿# Careero Layer 11 LEAP Recon Request
 
+Status: Historical  
+Doc Type: Prompt  
+Layer: Layer 11  
+Source of Truth: No  
+Last Reviewed: 2026-05-27  
+Related Docs:
+- docs/07_prompts/00_prompt-index.md
 Filled from `templates/leap-recon-template.md` in `mjcataldi/leap_framework` for the current state of `mjcataldi/careero` on `main`.
 
 ```text
@@ -20,15 +27,15 @@ Phase 0 / project baseline status:
   - What account deletion/export requirements should exist before any hosted beta?
 
 Source-of-truth manifest:
-- Manifest path or pasted manifest: README.md current planning hierarchy plus docs/careero-application-plan-and-layer-status.md
-- Project charter path: docs/careero-application-plan-and-layer-status.md and Layer 0 strategy synopsis
-- MVP boundary path: docs/careero-application-plan-and-layer-status.md and Layer 0 strategy synopsis
+- Manifest path or pasted manifest: README.md current planning hierarchy plus docs/01_strategy/00_product-strategy.md
+- Project charter path: docs/01_strategy/00_product-strategy.md and Layer 0 strategy synopsis
+- MVP boundary path: docs/01_strategy/00_product-strategy.md and Layer 0 strategy synopsis
 - Pressure-test summary path: none found as a dedicated current Careero doc; infer from Layer 0 risk boundaries and current layer status only
-- Implementation strategy path: docs/careero-application-plan-and-layer-status.md
-- Layer map path: docs/careero-application-plan-and-layer-status.md
+- Implementation strategy path: docs/01_strategy/00_product-strategy.md
+- Layer map path: docs/01_strategy/00_product-strategy.md
 - Execution log path: not found as a dedicated current file; use Git history, README, and layer-status doc until an execution/drift ledger exists
-- Cross-layer impact map path: not found as a dedicated current file; infer from layer-status doc and opportunity-model-strategy.md until a formal impact map exists
-- Stale / archived / do-not-use docs: docs/archive/*, especially docs/archive/strategic-layer-roadmap-legacy.md, unless explicitly requested for historical comparison
+- Cross-layer impact map path: docs/01_strategy/04_cross-layer-impact-map.md
+- Stale / archived / do-not-use docs: docs/99_archive/*, especially docs/99_archive/strategic-layer-roadmap-legacy.md, unless explicitly requested for historical comparison
 
 Solution/system overview:
 - Solution name: Careero
@@ -49,7 +56,7 @@ Solution/system overview:
   - Do not productize into hosted multi-tenant SaaS until privacy, auth, export/delete, cost controls, and workflow maturity are clear.
 
 Target layer or target task:
-- Layer 11 — Productization / Deployment / Monetization
+- Layer 11 â€” Productization / Deployment / Monetization
 
 Repo / branch context:
 - Repository: mjcataldi/careero
@@ -59,20 +66,20 @@ Repo / branch context:
   - PR #1: Surface external link counts in application summaries; Layer 4-related and not Layer 11, but relevant because unfinished workflow reconciliation should gate production readiness.
   - No Layer 11 branch found by branch search.
 - Areas likely affected:
-  - docs/careero-application-plan-and-layer-status.md
+  - docs/01_strategy/00_product-strategy.md
   - README.md
-  - docs/local-development.md
-  - docs/automation-guardrails.md
-  - docs/resume-artifact-generation.md
-  - docs/cover-letter-artifact-generation.md
-  - docs/opportunity-model-strategy.md
+  - docs/06_operations/local-deployment.md
+  - docs/03_domain-design/automation-guardrails.md
+  - docs/03_domain-design/resume-artifact-generation.md
+  - docs/03_domain-design/cover-letter-artifact-generation.md
+  - docs/03_domain-design/opportunity-model.md
   - backend configuration, auth, user/account, privacy/export/delete, usage-metering, and billing boundary modules if introduced
   - frontend account/settings, data export/delete, usage visibility, billing placeholder, and deployment-readiness surfaces if introduced
   - packages/contracts for account, usage, privacy, billing, and lifecycle schemas if introduced
   - infra/README.md and future deployment/IaC docs if deployment planning is scoped
 - Areas not to touch:
   - Do not overwrite generic LEAP methodology in the Careero repo.
-  - Do not treat docs/archive/* as current strategy.
+  - Do not treat docs/99_archive/* as current strategy.
   - Do not build marketplace, employer-side, recruiter-side, or pay-to-rank capabilities.
   - Do not implement paid placement incentives or sponsored role prioritization.
   - Do not implement production billing before defining privacy, auth, account lifecycle, AI usage metering, and user trust boundaries.
@@ -125,13 +132,13 @@ Layer 11-specific recon requirements:
 
 Return only the LEAP Recon output first. Do not generate the LEAP Prompt yet.
 At the end, ask any material clarification questions that should be answered before generating the LEAP Prompt.
-Then remind me that I can say: “Generate the LEAP Prompt.”
+Then remind me that I can say: â€œGenerate the LEAP Prompt.â€
 ```
 
 ## Expected Recon sections
 
 ```text
-# LEAP Recon — Layer 11 Productization / Deployment / Monetization
+# LEAP Recon â€” Layer 11 Productization / Deployment / Monetization
 
 ## 1. Framework Interpretation
 ## 2. Source-of-Truth Manifest Check
@@ -155,3 +162,6 @@ Then remind me that I can say: “Generate the LEAP Prompt.”
 ## 20. Clarification Questions Before LEAP Prompt Generation
 ## 21. Gate Decision / Next Step
 ```
+
+
+
