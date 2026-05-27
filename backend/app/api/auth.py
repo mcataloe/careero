@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field
@@ -106,11 +106,11 @@ def _serialize_user(user) -> dict:
     return payload
 
 
-def require_authenticated_current_user_context(
+async def require_authenticated_current_user_context(
     request: Request,
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
-) -> Generator[CurrentUserContext, None, None]:
+) -> AsyncGenerator[CurrentUserContext, None]:
     if not settings.enable_password_auth:
         context = LocalUserContext()
     else:
