@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date
 from typing import Literal
 
@@ -16,6 +17,9 @@ from pydantic import (
 from app.constants import SourceType
 
 _url_adapter = TypeAdapter(AnyUrl)
+_BARE_DOMAIN_RE = re.compile(
+    r"^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?::\d+)?(?:[/?#].*)?$"
+)
 
 
 RemoteType = Literal["remote", "hybrid", "onsite"]
@@ -214,5 +218,7 @@ def _validate_url(value: str | None) -> str | None:
     normalized = value.strip()
     if not normalized:
         return None
+    if "://" not in normalized and _BARE_DOMAIN_RE.match(normalized):
+        normalized = f"https://{normalized}"
     _url_adapter.validate_python(normalized)
     return normalized

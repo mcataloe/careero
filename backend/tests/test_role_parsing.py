@@ -148,6 +148,32 @@ def test_role_parser_success_validates_and_applies_request_defaults() -> None:
     assert responses.kwargs["model"] == "gpt-5-mini"
 
 
+def test_role_parser_normalizes_explicit_bare_domain_urls() -> None:
+    responses = FakeResponses(
+        parsed=ai_output(
+            roleTitle="Senior Staff Software Engineer",
+            company="Octane",
+            companyWebsite="www.octane.co",
+            normalizedDescription="Build merchant financial products.",
+            confidence={"companyWebsite": 0.9},
+        )
+    )
+    service = RoleParsingService(
+        settings=enabled_settings(),
+        client=FakeClient(responses),
+    )
+    request = __import__(
+        "app.schemas.role_parsing",
+        fromlist=["RoleParseRequest"],
+    ).RoleParseRequest(
+        rawText="Senior Staff Software Engineer at Octane. Visit www.octane.co."
+    )
+
+    result = service.parse(request)
+
+    assert result.parsed.company_website == "https://www.octane.co"
+
+
 @pytest.mark.parametrize(
     "parsed",
     [
