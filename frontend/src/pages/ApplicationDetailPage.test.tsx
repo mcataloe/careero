@@ -320,6 +320,37 @@ describe("ApplicationDetailPage", () => {
     expect(screen.queryByText("Ask about team scope.")).not.toBeInTheDocument();
   });
 
+  it("renders timeline empty and error states", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(jsonResponse([])),
+    );
+
+    renderDetailPage("/applications/app-1/timeline");
+
+    expect(
+      await screen.findByText("No timeline events recorded yet."),
+    ).toBeInTheDocument();
+
+    vi.unstubAllGlobals();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(
+          jsonResponse({ detail: "Timeline unavailable" }, 500),
+        ),
+    );
+
+    renderDetailPage("/applications/app-1/timeline");
+
+    expect(await screen.findByText("Timeline unavailable")).toBeInTheDocument();
+  });
+
   it("updates application status from visible controls", async () => {
     const fetchMock = vi
       .fn()
@@ -351,6 +382,26 @@ describe("ApplicationDetailPage", () => {
       }),
     );
     expect(await screen.findByText("Application moved to applied")).toBeInTheDocument();
+  });
+
+  it("shows dismissible feedback when status update fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(
+          jsonResponse({ detail: "Unsupported transition" }, 409),
+        ),
+    );
+
+    renderDetailPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: /move to applied/i }));
+
+    expect(await screen.findByText("Unsupported transition")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: /dismiss error/i }));
+    expect(screen.queryByText("Unsupported transition")).not.toBeInTheDocument();
   });
 
   it("requires confirmation before archive transitions", async () => {

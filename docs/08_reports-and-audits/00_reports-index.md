@@ -14,6 +14,7 @@ This section contains findings, pressure tests, audits, and non-canonical task p
 - [Current pressure-test summary](current-pressure-test-summary.md)
 - [Repo reconciliation recon](repo-reconciliation-recon.md)
 - [Layer 4A application workflow recon](layer-recon-summaries/layer-4-workflow-recon.md)
+- [Layer 4D workflow readiness summary](layer-recon-summaries/layer-4-workflow-readiness-summary.md)
 - [Username deprecation audit](username-deprecation-audit.md)
 - [Simple TODO list](simple-todo-list.md)
 - `layer-recon-summaries/`: retained LEAP Recon findings by layer.

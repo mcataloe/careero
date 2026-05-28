@@ -222,12 +222,22 @@ export function ApplicationDetailPage() {
       </div>
 
       {notice ? (
-        <Alert color="green" withCloseButton onClose={() => setNotice(null)}>
+        <Alert
+          color="green"
+          withCloseButton
+          closeButtonLabel="Dismiss notification"
+          onClose={() => setNotice(null)}
+        >
           {notice}
         </Alert>
       ) : null}
       {transitionError ? (
-        <Alert color="red" withCloseButton onClose={() => setTransitionError(null)}>
+        <Alert
+          color="red"
+          withCloseButton
+          closeButtonLabel="Dismiss error"
+          onClose={() => setTransitionError(null)}
+        >
           {transitionError}
         </Alert>
       ) : null}

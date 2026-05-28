@@ -167,7 +167,33 @@ describe("ApplicationsPage", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/applications/pipeline", expect.any(Object));
   });
 
+  it("shows transition errors without dropping pipeline cards", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(populatedPipeline))
+      .mockResolvedValueOnce(jsonResponse({ detail: "Transition rejected" }, 409));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <ApplicationsPage />
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(await screen.findByText("Move to interested"));
+
+    expect(await screen.findByText("Transition rejected")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Staff Platform Engineer" })).toBeInTheDocument();
+  });
+
   it("requests archived workflows only when include archived is enabled", async () => {
+    const archivedApplication = {
+      ...populatedPipeline.states.discovered[0],
+      id: "app-archived",
+      current_state: "archived" as const,
+      archived_at: "2026-05-17T15:00:00Z",
+      available_next_states: ["discovered", "interested"],
+    };
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(emptyPipeline))
@@ -177,7 +203,7 @@ describe("ApplicationsPage", () => {
           include_inactive: true,
           states: {
             ...emptyPipeline.states,
-            archived: [],
+            archived: [archivedApplication],
           },
         }),
       );
@@ -197,5 +223,6 @@ describe("ApplicationsPage", () => {
         expect.any(Object),
       ),
     );
+    expect(await screen.findByText("1 archived included")).toBeInTheDocument();
   });
 });

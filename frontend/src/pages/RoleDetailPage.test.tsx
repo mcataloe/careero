@@ -204,7 +204,26 @@ describe("RoleDetailPage", () => {
       ),
     );
     expect(await screen.findByText("Application workflow started")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: /dismiss notification/i }));
+    expect(screen.queryByText("Application workflow started")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /open application/i })).toBeInTheDocument();
+  });
+
+  it("shows application workflow load errors without hiding opportunity details", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(
+        jsonResponse({ detail: "Application workflow unavailable" }, 500),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage(`/opportunities/${sampleRole.id}/overview`);
+
+    expect(await screen.findByText(sampleRole.title)).toBeInTheDocument();
+    expect(
+      await screen.findByText("Application workflow unavailable"),
+    ).toBeInTheDocument();
   });
 
   it("re-runs evaluation with force enabled", async () => {

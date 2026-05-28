@@ -1003,6 +1003,23 @@ def test_api_opportunity_application_timeline_matches_workflow_events(
     assert "application.reactivated" in event_types
 
 
+def test_api_opportunity_application_timeline_missing_workflow_returns_not_found(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+
+    response = application_client.get(
+        f"/api/opportunities/{role.id}/application/timeline"
+    )
+
+    assert response.status_code == 404
+    assert (
+        db_session.scalar(select(Application).where(Application.role_id == role.id))
+        is None
+    )
+
+
 def test_api_interview_stage_crud(
     application_client: TestClient,
     db_session: Session,
@@ -1286,6 +1303,21 @@ def test_api_transition_validation_and_pipeline(
         json={"state": "offer", "reason": "Invalid jump."},
     )
     assert invalid_response.status_code == 409
+
+    invalid_enum_response = application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={"state": "not_real", "reason": "Invalid enum."},
+    )
+    assert invalid_enum_response.status_code == 422
+
+    same_state_response = application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={"state": "discovered", "reason": "No-op."},
+    )
+    assert same_state_response.status_code == 200
+    assert same_state_response.json()["current_state"] == "discovered"
+    assert len(same_state_response.json()["state_history"]) == 1
+    assert same_state_response.json()["state_history"][0]["state"] == "discovered"
 
     transition_response = application_client.post(
         f"/api/applications/{application_id}/transition",
