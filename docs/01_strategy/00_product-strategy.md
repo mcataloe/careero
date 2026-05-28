@@ -86,7 +86,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - Local application reminders exist but remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
 - External-link workflow summaries exist and application list/detail summary counts include links alongside notes, reminders, and interviews.
 - Private remote branch or PR drift, if any, must be validated before being treated as complete.
-- Layer 4 workflow validation, Layer 5 insight stabilization, and Layer 6 artifact lifecycle remain important near-term completion work.
+- Layer 5 insight stabilization and Layer 6 artifact lifecycle remain important near-term completion work after Layer 4D hardening.
 
 ### Not yet built / still future
 
@@ -135,8 +135,8 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 | Layer 1 | Local Platform Foundation | Built locally / first-party password auth foundation started; production incomplete | Local backend, frontend, database, migrations, config, seed model, email/password registration/login, and local HttpOnly session cookies exist. Production auth hardening, account recovery, SSO, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
 | Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
-| Layer 4 | Application Workflow | Substantially built / local reminder reconciliation implemented | Applications, state transitions, timeline, notes, external links, local reminders, and structured interview tracking exist. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
-| Layer 5 | Workflow Intelligence / Insights | Partially built | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, and cohesive insight behavior. |
+| Layer 4 | Application Workflow | Complete for current local MVP scope | Applications, state transitions, timeline, notes, external links, local reminders, structured interview tracking, archive/reactivate, workspace context, workflow UX, and regression coverage exist. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
+| Layer 5 | Workflow Intelligence / Insights | Partially built / next focus | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, thin-data handling, and cohesive insight behavior. |
 | Layer 6 | Advanced COMPASS + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, COMPASS history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
@@ -171,7 +171,12 @@ Layer 3 evaluates opportunities and generates grounded application artifacts. Ge
 
 ## Layer 4 â€” Application Workflow
 
-Layer 4 manages saved-opportunity workflow. Applications, states, notes, external links, reminders, interviews, and timeline are substantially built locally. Hosted reminders, notifications, calendar sync, email integration, and production auth dependencies remain future.
+Layer 4 manages saved-opportunity workflow and is complete for current local
+MVP scope. Applications, states, notes, external links, local reminders,
+interviews, timeline, archive/reactivate, workspace context, and workflow UX are
+built locally. Hosted reminders, notifications, calendar sync, email
+integration, production auth dependencies, artifact lifecycle, and insight
+stabilization remain later-layer work.
 
 ## Layer 5 â€” Workflow Intelligence / Insights
 
@@ -346,8 +351,8 @@ Exit criteria:
 Recommended order from here:
 
 1. Repo reconciliation and roadmap correction.
-2. Layer 4 workflow completion.
-3. Layer 5 insight stabilization.
+2. Layer 4 workflow completion. Completed for current local MVP scope after Layer 4D.
+3. Layer 5 insight stabilization. Next implementation focus.
 4. Layer 6 artifact lifecycle completion.
 5. Layer 7 Opportunity Model Strategy and compatibility surface.
 6. Layer 8 integrations.

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -62,16 +63,17 @@ export function ApplicationsPage() {
   const [pipeline, setPipeline] = useState<ApplicationPipelineResponse | null>(null);
   const [includeInactive, setIncludeInactive] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [transitionError, setTransitionError] = useState<string | null>(null);
   const [transitioningId, setTransitioningId] = useState<string | null>(null);
 
   async function loadPipeline() {
     setLoading(true);
-    setError(null);
+    setLoadError(null);
     try {
       setPipeline(await getApplicationsPipeline({ includeInactive }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load applications");
+      setLoadError(err instanceof Error ? err.message : "Could not load applications");
     } finally {
       setLoading(false);
     }
@@ -82,7 +84,7 @@ export function ApplicationsPage() {
     nextState: ApplicationWorkflowState,
   ) {
     setTransitioningId(application.id);
-    setError(null);
+    setTransitionError(null);
     try {
       await transitionApplicationState(application.id, {
         state: nextState,
@@ -90,7 +92,9 @@ export function ApplicationsPage() {
       });
       await loadPipeline();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update application");
+      setTransitionError(
+        err instanceof Error ? err.message : "Could not update application",
+      );
     } finally {
       setTransitioningId(null);
     }
@@ -128,17 +132,28 @@ export function ApplicationsPage() {
       </Group>
 
       {loading ? <LoadingState label="Loading applications" /> : null}
-      {!loading && error ? (
-        <ErrorState message={error} onRetry={loadPipeline} />
+      {!loading && loadError ? (
+        <ErrorState message={loadError} onRetry={loadPipeline} />
       ) : null}
 
-      {!loading && !error && !hasApplications ? (
+      {!loading && !loadError && transitionError ? (
+        <Alert
+          color="red"
+          withCloseButton
+          closeButtonLabel="Dismiss error"
+          onClose={() => setTransitionError(null)}
+        >
+          {transitionError}
+        </Alert>
+      ) : null}
+
+      {!loading && !loadError && !hasApplications ? (
         <Paper withBorder radius="md" p="lg">
           <Text c="dimmed">No application workflows yet.</Text>
         </Paper>
       ) : null}
 
-      {!loading && !error && hasApplications ? (
+      {!loading && !loadError && hasApplications ? (
         <Stack gap="lg">
           <ApplicationAttentionStrip
             applications={allApplications}

@@ -119,8 +119,8 @@ workflow management remains under `/applications/{application_id}/...`.
 
 Layer 4C does not add notification delivery, calendar/email sync, recurring
 reminders, insight generation, artifact lifecycle review, or automation. Those
-remain later-layer work. Layer 4D should harden regression coverage and docs
-around these UX paths after the workflow surfaces settle.
+remain later-layer work. Layer 4D hardens regression coverage and documents
+Layer 4 as complete for current local MVP workflow scope.
 
 Notes:
 

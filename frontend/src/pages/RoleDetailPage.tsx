@@ -248,7 +248,12 @@ export function RoleDetailPage() {
       </Group>
 
       {notice ? (
-        <Alert color="green" withCloseButton onClose={() => setNotice(null)}>
+        <Alert
+          color="green"
+          withCloseButton
+          closeButtonLabel="Dismiss notification"
+          onClose={() => setNotice(null)}
+        >
           {notice}
         </Alert>
       ) : null}
