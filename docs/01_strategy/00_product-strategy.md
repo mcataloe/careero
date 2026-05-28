@@ -86,7 +86,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - Local application reminders exist but remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
 - External-link workflow summaries exist and application list/detail summary counts include links alongside notes, reminders, and interviews.
 - Private remote branch or PR drift, if any, must be validated before being treated as complete.
-- Layer 5 is stabilized for current local MVP insight behavior. Layer 6 artifact lifecycle remains the next important completion work.
+- Layer 5 is stabilized for current local MVP insight behavior. Layer 6 artifact lifecycle is complete for current local MVP lifecycle scope; comparison and frontend export convenience remain later work.
 
 ### Not yet built / still future
 
@@ -103,9 +103,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - contextual empty-state onboarding guidance
 - support/help/bug/suggestion feedback capture
 - privacy-safe support payload governance
-- dedicated artifact list/detail UX
-- artifact review/edit/approve/archive flow
-- submitted artifact tracking
+- artifact comparison workflow
 - dedicated frontend artifact export workflow
 - destructive persistence migration from Role table/model/foreign-key naming
 - Google Docs import
@@ -134,10 +132,10 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 | Layer 0 | Product Foundation | Built / defined | Product mission, user-first posture, search-track concept, AI governance, UX philosophy, monetization caution, and risk boundaries are defined. |
 | Layer 1 | Local Platform Foundation | Built locally / first-party password auth foundation started; production incomplete | Local backend, frontend, database, migrations, config, seed model, email/password registration/login, and local HttpOnly session cookies exist. Production auth hardening, account recovery, SSO, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
-| Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
+| Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle delegated | COMPASS and artifact generation foundations exist. Artifact lifecycle is implemented in Layer 6; artifact comparison and frontend export convenience remain future. |
 | Layer 4 | Application Workflow | Complete for current local MVP scope | Applications, state transitions, timeline, notes, external links, local reminders, structured interview tracking, archive/reactivate, workspace context, workflow UX, and regression coverage exist. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
 | Layer 5 | Workflow Intelligence / Insights | Stabilized for current local MVP scope | Analytics, dashboard insight surfaces, normalized contracts, provenance/confidence metadata, thin-data handling, shared UI rendering, and focused tests exist. Durable insight snapshots, richer workspace switching UX, artifact lifecycle integration, advanced strategy synthesis, model usage accounting, and onboarding guidance remain later-layer work. |
-| Layer 6 | Advanced COMPASS + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, COMPASS history, evidence mapping, submitted artifacts, and export flow. |
+| Layer 6 | Advanced COMPASS + Artifact Lifecycle | Complete for current local MVP scope | Four-state artifact lifecycle, versioning foundation, submitted-version protection, review/submit/archive API, application artifact UX, opportunity integration, timeline events, and employer-facing content boundaries exist. Artifact comparison, standalone workspace artifact browser, and frontend export convenience remain future. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
@@ -167,7 +165,7 @@ Layer 2 turns raw job/opportunity and source-material input into structured, rev
 
 ## Layer 3 â€” COMPASS + Artifact Foundation
 
-Layer 3 evaluates opportunities and generates grounded application artifacts. Generation foundations exist, but artifact lifecycle, submitted version tracking, artifact comparison, artifact retrieval UX, and explicit internal-strategy vs employer-facing separation remain future.
+Layer 3 evaluates opportunities and generates grounded application artifacts. Generation foundations exist and Layer 6 now owns artifact lifecycle, submitted-version tracking, artifact retrieval UX, and explicit internal-strategy vs employer-facing separation. Artifact comparison and frontend export convenience remain future.
 
 ## Layer 4 â€” Application Workflow
 
@@ -184,7 +182,7 @@ Layer 5 turns workflow activity into useful guidance. Current local MVP insight 
 
 ## Layer 6 â€” Advanced COMPASS + Artifact Lifecycle
 
-Layer 6 should turn generated output from â€œAI resultâ€ into durable, inspectable, user-approved product records through evidence mapping, comparison, lifecycle states, submitted tracking, review/edit/export flows, and strict employer-facing artifact boundaries.
+Layer 6 turns generated output from an AI result into durable, inspectable, user-reviewed product records through lifecycle states, submitted tracking, protected edit/version behavior, review/submit/archive flows, application retrieval UX, and strict employer-facing artifact boundaries. Deeper comparison, standalone workspace artifact browsing, and frontend export convenience remain later work.
 
 ## Layer 7 â€” Opportunity Model Strategy
 
@@ -353,7 +351,7 @@ Recommended order from here:
 1. Repo reconciliation and roadmap correction.
 2. Layer 4 workflow completion. Completed for current local MVP scope after Layer 4D.
 3. Layer 5 insight stabilization. Stabilized for current local MVP scope.
-4. Layer 6 artifact lifecycle completion.
+4. Layer 6 artifact lifecycle completion. Complete for current local MVP scope.
 5. Layer 7 Opportunity Model Strategy and compatibility surface.
 6. Layer 8 integrations.
 7. Layer 9 automation guardrails.

@@ -15,9 +15,11 @@ The current layer status table and detailed layer notes live in [product strateg
 Status summary:
 
 - Layers 0-4 are built for current local MVP scope, with production hardening still incomplete.
-- Layer 5 is the next immediate implementation sequence; Layers 5-10 are partially built or in active local-first evolution.
+- Layer 5 is stabilized for current local MVP insight behavior.
+- Layer 6 is complete for current local MVP artifact lifecycle scope; comparison, standalone workspace artifact browsing, and frontend export convenience remain future.
+- Layer 7 opportunity compatibility is the next immediate implementation sequence; Layers 7-10 are partially built or in active local-first evolution.
 - Layers 11-12 are readiness/governance layers with local foundations and future hosted blockers.
 - Layers 13-16 are future or appended strategic layers.
-- After Layer 4D hardening, Layer 5 insight stabilization is the next immediate implementation sequence.
+- After Layer 6E hardening, Layer 7 opportunity compatibility is the next immediate implementation sequence.
 
 Do not treat generated prompts under [docs/07_prompts](../07_prompts/00_prompt-index.md) as the layer status source of truth.

@@ -87,7 +87,7 @@ COMPASS is the active framework name. Current Layer 5 UI, contracts, tests, and 
 
 ## Deferred Work
 
-- Layer 6: artifact lifecycle, submitted artifact tracking, artifact provenance, review/edit/approve/archive, and export UX.
+- Layer 6: artifact lifecycle, submitted artifact tracking, artifact provenance, review/edit/submit/archive, comparison, and export UX.
 - Layer 7: Opportunity compatibility surface and any future Role-to-Opportunity persistence migration.
 - Layer 10: advanced search-track strategy and deeper cross-track comparison.
 - Layer 14: model usage accounting, model routing, prompt architecture, and credit controls.

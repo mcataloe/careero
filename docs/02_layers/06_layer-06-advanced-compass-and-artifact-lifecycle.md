@@ -1,6 +1,6 @@
 # Layer 6 - Advanced COMPASS and Artifact Lifecycle
 
-Status: Draft  
+Status: Complete for Current Local MVP Scope
 Doc Type: Layer Spec  
 Layer: Layer 6  
 Source of Truth: Yes  
@@ -73,3 +73,29 @@ Employer-facing artifact content is always the stored `title` and `content`.
 Internal analysis, source/evaluation traceability, generation metadata, export
 metadata, and user notes stay in separate fields and must not be appended to
 resume or cover-letter body content.
+
+## Hardening Notes
+
+Layer 6E validates the current local lifecycle scope:
+
+- Draft creation is supported by generation services and the lifecycle API.
+- Draft edits increment artifact version metadata.
+- Submitted artifacts are protected by creating a new draft revision on edit.
+- Active list/detail surfaces exclude archived artifacts by default and expose an
+  opt-in archived view in the application artifact panel.
+- Opportunity and application contexts can retrieve current resume and
+  cover-letter artifacts without exposing internal COMPASS rationale.
+- Export remains backend-local and uses only artifact `title` and `content`.
+
+Known limitations:
+
+- There is no standalone workspace-wide artifact browser yet; workspace-scoped
+  retrieval exists in the API and application UX shows the owning search track.
+- Frontend export/download controls are still Layer 8 work. Backend export
+  endpoints remain available for exact artifact versions.
+- Artifact comparison and richer evidence-map UX remain future Layer 6 expansion.
+- Hosted multi-user permission enforcement still depends on later Layer 11 auth
+  and authorization hardening.
+- Local DB-backed regression tests require `CAREERO_TEST_DATABASE_URL`; without
+  that environment variable, only pure backend lifecycle tests and frontend tests
+  can run locally.

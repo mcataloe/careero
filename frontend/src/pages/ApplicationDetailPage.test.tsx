@@ -429,6 +429,23 @@ describe("ApplicationDetailPage", () => {
     expect(screen.queryByText(/ATS risk|private strategy/i)).not.toBeInTheDocument();
   });
 
+  it("renders artifact empty state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(jsonResponse([])),
+    );
+
+    renderDetailPage("/applications/app-1/artifacts");
+
+    expect(await screen.findByText("No artifacts yet")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Generate or create a resume draft or cover-letter draft/i),
+    ).toBeInTheDocument();
+  });
+
   it("marks artifact reviewed and refreshes application artifacts", async () => {
     const reviewedArtifact = {
       ...resumeArtifact,

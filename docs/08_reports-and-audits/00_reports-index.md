@@ -4,7 +4,7 @@ Status: Active
 Doc Type: Audit  
 Layer: N/A  
 Source of Truth: No  
-Last Reviewed: 2026-05-27  
+Last Reviewed: 2026-05-28
 Related Docs:
 - docs/01_strategy/00_product-strategy.md
 - docs/06_operations/execution-drift-ledger.md
@@ -16,6 +16,7 @@ This section contains findings, pressure tests, audits, and non-canonical task p
 - [Layer 4A application workflow recon](layer-recon-summaries/layer-4-workflow-recon.md)
 - [Layer 4D workflow readiness summary](layer-recon-summaries/layer-4-workflow-readiness-summary.md)
 - [Layer 6A artifact lifecycle recon](layer-recon-summaries/layer-6-artifact-lifecycle-recon.md)
+- [Layer 6 artifact lifecycle completion summary](layer-recon-summaries/layer-6-artifact-lifecycle-completion-summary.md)
 - [Username deprecation audit](username-deprecation-audit.md)
 - [Simple TODO list](simple-todo-list.md)
 - `layer-recon-summaries/`: retained LEAP Recon findings by layer.

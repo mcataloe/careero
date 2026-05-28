@@ -35,8 +35,9 @@ Use this file for execution order. Use [product strategy](00_product-strategy.md
 14. Layer 16 guided onboarding, first-search activation, contextual help, and support/feedback capture.
 
 Layer 4 is complete for current MVP workflow scope after the Layer 4D hardening
-pass. Layer 5 is stabilized for current local MVP insight behavior; Layer 6
-artifact lifecycle completion is the next immediate implementation focus.
+pass. Layer 5 is stabilized for current local MVP insight behavior, and Layer 6
+artifact lifecycle is complete for current local MVP lifecycle scope. Layer 7
+opportunity model compatibility is the next immediate implementation focus.
 
 ## 3. Layer Status Table
 
@@ -45,10 +46,10 @@ artifact lifecycle completion is the next immediate implementation focus.
 | Layer 0 | Product Foundation | Implemented | Stable enough to guide all later layers. | None unless product direction changes. | Preserve job-seeker-first, grounded AI, and marketplace-last principles. |
 | Layer 1 | Core Platform | Partially implemented | Local foundation exists; production hardening is incomplete. | Layer 11 auth/ownership hardening when productization resumes. | Local auth and ownership prep exist; hosted auth, account recovery, SSO, tenant isolation, and deployment remain future. |
 | Layer 2 | Intake, Parsing, and Grounding | Partially implemented | Stable enough for Layer 4-6 work. | Source/provenance hardening after workflow priorities. | Manual intake, optional parsing, and resume/profile source grounding exist. |
-| Layer 3 | COMPASS and Artifact Foundation | Partially implemented | Stable enough for Layer 4 and Layer 6; lifecycle remains incomplete. | Layer 6 artifact lifecycle completion. | COMPASS traceability is strong; artifact review/submitted lifecycle is not complete. |
+| Layer 3 | COMPASS and Artifact Foundation | Partially implemented | Stable enough for Layer 4 and Layer 6; lifecycle is now owned by Layer 6. | Source/provenance hardening after workflow priorities. | COMPASS traceability and artifact generation are stable enough for current local MVP. |
 | Layer 4 | Application Workflow | Complete for current MVP workflow scope | Lower-layer local foundations exist; hosted/productized delivery remains later. | None unless Layer 4D validation finds a blocker. | State machine, notes, links, reminders, interviews, timeline, pipeline, workflow UX, and regression coverage exist locally. Hosted reminder delivery, calendar/email sync, and production hardening remain future. |
 | Layer 5 | Workflow Intelligence and Insights | Stabilized for current local MVP scope | Depends on reliable Layer 4 workflow data, now hardened for local MVP use. | None unless Layer 5D validation finds a blocker. | Dashboard and analytics surfaces, normalized contracts, confidence/basis/provenance metadata, thin-data behavior, shared insight UI, and focused tests exist. Durable snapshots and advanced strategy remain later-layer work. |
-| Layer 6 | Advanced COMPASS and Artifact Lifecycle | Partially implemented | Depends on Layer 3 generation and Layer 4 workflow context. | Layer 6 - Artifact lifecycle completion. | Generated artifacts and backend export exist; lifecycle UX, approval, archive, comparison, and submitted tracking remain missing. |
+| Layer 6 | Advanced COMPASS and Artifact Lifecycle | Complete for current local MVP lifecycle scope | Depends on Layer 3 generation and Layer 4 workflow context. | None unless Layer 6E validation finds a blocker. | Four-state lifecycle, versioning foundation, submitted-version protection, review/submit/archive API, application artifact UX, opportunity integration, timeline events, and employer-facing content boundaries exist. Comparison, standalone workspace artifact browsing, and frontend export convenience remain future. |
 | Layer 7 | Opportunity Model Strategy | Partially implemented | Depends on stable workflow and artifact semantics. | Layer 7 - Opportunity model compatibility recon. | Public Opportunity language exists while persistence remains Role-backed. |
 | Layer 8 | Integrations and Export | Partially implemented | Depends on Opportunity semantics and artifact lifecycle. | Layer 8 - Local export UX / integration recon. | Backend local export exists; frontend artifact export workflow and external integrations remain future. |
 | Layer 9 | Automation Guardrails | Partially implemented | Depends on trustworthy workflow and approval boundaries. | Layer 9 - Automation guardrail hardening. | Suggestions, approval logs, and preferences exist; external/state-changing automation remains prohibited. |
@@ -75,8 +76,8 @@ Immediate sequence:
 Later prompt groups:
 
 - Layer 5 - future insight expansion: durable snapshots, richer workspace switching UX, artifact lifecycle provenance, advanced strategy synthesis, model usage accounting, and onboarding help after later dependencies are ready.
-- Layer 6 - Artifact lifecycle completion: artifact list/detail, review/edit/approve/archive, submitted tracking, comparison, and frontend export.
-- Layer 7 - Opportunity compatibility: keep Role-backed persistence explicit or plan a separately approved migration.
+- Layer 6 - future artifact expansion: artifact comparison, standalone workspace artifact browsing, richer evidence mapping, and frontend export convenience.
+- Layer 7 - Opportunity compatibility: keep Role-backed persistence explicit or plan a separately approved migration. This is the next immediate implementation focus after Layer 6E.
 - Layer 8 - Integrations: start with local/manual export UX before OAuth, cloud sync, or external account linking.
 - Layer 9 - Automation: preserve suggestion-first, review-first, audit-first behavior.
 - Layer 10 - Strategy: keep strategy read-only, source-grounded, and non-mutating.
