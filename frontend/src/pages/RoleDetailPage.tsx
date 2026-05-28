@@ -381,13 +381,23 @@ function OpportunityApplicationSummary({
           {application.counts.reminders} - Interviews{" "}
           {application.counts.interviews}
         </Text>
+        {application.resume_artifact ? (
+          <Badge color="teal" variant="light">
+            Resume {application.resume_artifact.status ?? "draft"}
+          </Badge>
+        ) : null}
+        {application.cover_letter_artifact ? (
+          <Badge color="teal" variant="light">
+            Cover letter {application.cover_letter_artifact.status ?? "draft"}
+          </Badge>
+        ) : null}
         <Button
           component={Link}
-          to={`/applications/${application.id}/overview`}
+          to={`/applications/${application.id}/artifacts`}
           size="xs"
           variant="light"
         >
-          Open application
+          Open artifacts
         </Button>
       </Group>
     </Card>

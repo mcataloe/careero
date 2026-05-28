@@ -54,6 +54,21 @@ events. Timeline metadata identifies artifact type, lifecycle status, and versio
 only; it must not include generated document body text, COMPASS rationale, ATS
 risk notes, compensation strategy, or private decision rationale.
 
+Layer 6D adds the user-facing artifact workflow in application detail:
+
+- `/applications/{application_id}/artifacts` lists active resume and cover-letter
+  artifacts separately and can opt into archived artifacts.
+- Opportunity detail links tracked opportunities into the application artifact
+  workspace and shows current resume/cover-letter lifecycle badges when present.
+- Artifact detail shows status, version, submitted/final state, timestamps,
+  source/evaluation traceability ids, export formats, and employer-facing
+  content.
+- Draft artifacts can be edited from the detail panel. Submitted artifacts show
+  final-version language and expose a new-draft action instead of mutating the
+  submitted record.
+- Lifecycle actions use dismissible feedback for reviewed, submitted, archived,
+  and new-version outcomes.
+
 Employer-facing artifact content is always the stored `title` and `content`.
 Internal analysis, source/evaluation traceability, generation metadata, export
 metadata, and user notes stay in separate fields and must not be appended to

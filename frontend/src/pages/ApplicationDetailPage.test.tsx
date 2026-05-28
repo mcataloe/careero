@@ -12,6 +12,7 @@ import type {
   ApplicationTimelineEvent,
 } from "../types/applications";
 import type { AdvisorPacket } from "../types/advisorPackets";
+import type { ArtifactRecord } from "../types/artifacts";
 
 function jsonResponse(response: unknown, status = 200) {
   return {
@@ -240,6 +241,55 @@ const advisorPacket: AdvisorPacket = {
   ],
 };
 
+const resumeArtifact: ArtifactRecord = {
+  id: "artifact-resume-1",
+  workspace_id: "workspace-1",
+  application_id: "app-1",
+  role_id: "role-1",
+  opportunity_id: "role-1",
+  artifact_type: "tailored_resume",
+  lifecycle_status: "draft",
+  version_number: 1,
+  title: "Targeted resume",
+  content: "Employer-facing resume content.",
+  reviewed_at: null,
+  submitted_at: null,
+  archived_at: null,
+  created_at: "2026-05-16T15:00:00Z",
+  updated_at: "2026-05-16T15:00:00Z",
+  traceability: {
+    workspace_id: "workspace-1",
+    role_id: "role-1",
+    opportunity_id: "role-1",
+    application_id: "app-1",
+    evaluation_id: "evaluation-1",
+    source_resume_version_id: "source-version-1",
+    source_artifact_id: null,
+    parent_artifact_id: null,
+    generation_warnings: [],
+    export_formats: ["md"],
+  },
+  available_transitions: ["reviewed", "archived"],
+  new_version_created: false,
+  source_submitted_artifact_id: null,
+  metadata: {
+    revision_id: "revision-1",
+    change_summary: "Initial draft.",
+  },
+};
+
+const submittedCoverLetterArtifact: ArtifactRecord = {
+  ...resumeArtifact,
+  id: "artifact-cover-1",
+  artifact_type: "cover_letter",
+  lifecycle_status: "submitted",
+  title: "Submitted cover letter",
+  content: "Employer-facing cover letter content.",
+  reviewed_at: "2026-05-17T15:00:00Z",
+  submitted_at: "2026-05-18T15:00:00Z",
+  available_transitions: ["archived"],
+};
+
 function renderDetailPage(path = "/applications/app-1/overview") {
   render(
     <MemoryRouter initialEntries={[path]}>
@@ -352,6 +402,98 @@ describe("ApplicationDetailPage", () => {
     renderDetailPage("/applications/app-1/timeline");
 
     expect(await screen.findByText("Timeline unavailable")).toBeInTheDocument();
+  });
+
+  it("renders artifact lifecycle status and employer-facing detail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(
+          jsonResponse([resumeArtifact, submittedCoverLetterArtifact]),
+        ),
+    );
+
+    renderDetailPage("/applications/app-1/artifacts");
+
+    expect(
+      await screen.findByRole("heading", { name: "Artifacts" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Resume artifacts")).toBeInTheDocument();
+    expect(screen.getByText("Cover-letter artifacts")).toBeInTheDocument();
+    expect(screen.getAllByText("Targeted resume").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Submitted cover letter").length).toBeGreaterThan(0);
+    expect(screen.getByText("Employer-facing resume content.")).toBeInTheDocument();
+    expect(screen.getByText("Submitted versions")).toBeInTheDocument();
+    expect(screen.queryByText(/ATS risk|private strategy/i)).not.toBeInTheDocument();
+  });
+
+  it("marks artifact reviewed and refreshes application artifacts", async () => {
+    const reviewedArtifact = {
+      ...resumeArtifact,
+      lifecycle_status: "reviewed",
+      reviewed_at: "2026-05-17T15:00:00Z",
+      available_transitions: ["submitted", "archived"],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(application))
+      .mockResolvedValueOnce(jsonResponse([resumeArtifact]))
+      .mockResolvedValueOnce(jsonResponse(reviewedArtifact))
+      .mockResolvedValueOnce(jsonResponse([reviewedArtifact]))
+      .mockResolvedValueOnce(jsonResponse(application));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDetailPage("/applications/app-1/artifacts");
+
+    await userEvent.click(await screen.findByRole("button", { name: /review/i }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/artifacts/artifact-resume-1/review",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(await screen.findByText("Artifact marked reviewed.")).toBeInTheDocument();
+  });
+
+  it("creates a draft revision from a submitted artifact", async () => {
+    const newDraft = {
+      ...submittedCoverLetterArtifact,
+      id: "artifact-cover-2",
+      lifecycle_status: "draft",
+      submitted_at: null,
+      source_submitted_artifact_id: "artifact-cover-1",
+      traceability: {
+        ...submittedCoverLetterArtifact.traceability,
+        source_artifact_id: "artifact-cover-1",
+      },
+      available_transitions: ["reviewed", "archived"],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(application))
+      .mockResolvedValueOnce(jsonResponse([submittedCoverLetterArtifact]))
+      .mockResolvedValueOnce(jsonResponse(newDraft))
+      .mockResolvedValueOnce(jsonResponse([newDraft]))
+      .mockResolvedValueOnce(jsonResponse(application));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDetailPage("/applications/app-1/artifacts");
+
+    await userEvent.click(await screen.findByRole("button", { name: /new draft/i }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/artifacts/artifact-cover-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({
+          title: "Submitted cover letter",
+          content: "Employer-facing cover letter content.",
+          change_summary: "Created a new draft from submitted artifact.",
+        }),
+      }),
+    );
+    expect(await screen.findByText("New draft version created.")).toBeInTheDocument();
   });
 
   it("updates application status from visible controls", async () => {

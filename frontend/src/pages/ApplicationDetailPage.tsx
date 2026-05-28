@@ -14,6 +14,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { getAdvisorPacket } from "../api/advisorPackets";
+import { listApplicationArtifacts } from "../api/artifacts";
 import { listAutomationSuggestions } from "../api/automation";
 import {
   getApplication,
@@ -25,6 +26,7 @@ import {
   transitionApplicationState,
 } from "../api/applications";
 import { ApplicationInterviewPanel } from "../components/ApplicationInterviewPanel";
+import { ApplicationArtifactsPanel } from "../components/ApplicationArtifactsPanel";
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
 import { ApplicationNotesPanel } from "../components/ApplicationNotesPanel";
 import { ApplicationRemindersPanel } from "../components/ApplicationRemindersPanel";
@@ -46,6 +48,7 @@ import type {
   AdvisorPacket,
   AdvisorPacketPreviewOptions,
 } from "../types/advisorPackets";
+import type { ArtifactRecord } from "../types/artifacts";
 import type {
   AutomationSuggestionListResponse,
 } from "../types/automation";
@@ -71,6 +74,11 @@ const applicationSections = [
     id: "interviews",
     label: "Interviews",
     description: "Structured interview tracking",
+  },
+  {
+    id: "artifacts",
+    label: "Artifacts",
+    description: "Resume and cover-letter lifecycle",
   },
   {
     id: "reminders",
@@ -288,6 +296,13 @@ function ApplicationSectionContent({
           onApplicationChanged={onApplicationChanged}
         />
       );
+    case "artifacts":
+      return (
+        <ApplicationArtifactsSection
+          application={application}
+          onApplicationChanged={onApplicationChanged}
+        />
+      );
     case "reminders":
       return (
         <ApplicationRemindersSection
@@ -336,6 +351,13 @@ function ApplicationOverviewSection({
       label: "Links",
       value: application.counts.external_links,
       to: `/applications/${application.id}/links`,
+    },
+    {
+      label: "Artifacts",
+      value:
+        Number(Boolean(application.resume_artifact)) +
+        Number(Boolean(application.cover_letter_artifact)),
+      to: `/applications/${application.id}/artifacts`,
     },
     {
       label: "Timeline",
@@ -433,12 +455,13 @@ function ApplicationOverviewSection({
             ) : null}
             {application.resume_artifact ? (
               <Badge color="teal" variant="light">
-                Resume rev {application.resume_artifact.revision_number ?? "draft"}
+                Resume {application.resume_artifact.status ?? "draft"} rev{" "}
+                {application.resume_artifact.revision_number ?? "draft"}
               </Badge>
             ) : null}
             {application.cover_letter_artifact ? (
               <Badge color="teal" variant="light">
-                Cover letter rev{" "}
+                Cover letter {application.cover_letter_artifact.status ?? "draft"} rev{" "}
                 {application.cover_letter_artifact.revision_number ?? "draft"}
               </Badge>
             ) : null}
@@ -565,6 +588,62 @@ function ApplicationInterviewsSection({
         />
       )}
     </AsyncApplicationSection>
+  );
+}
+
+function ApplicationArtifactsSection({
+  application,
+  onApplicationChanged,
+}: {
+  application: ApplicationDetail;
+  onApplicationChanged: () => void;
+}) {
+  const [artifacts, setArtifacts] = useState<ArtifactRecord[]>([]);
+  const [includeArchived, setIncludeArchived] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadArtifacts() {
+    setLoading(true);
+    setError(null);
+    try {
+      setArtifacts(
+        await listApplicationArtifacts(application.id, {
+          includeArchived,
+        }),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load artifacts");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refreshArtifacts() {
+    await loadArtifacts();
+    onApplicationChanged();
+  }
+
+  useEffect(() => {
+    void loadArtifacts();
+  }, [application.id, includeArchived]);
+
+  if (loading) {
+    return <LoadingState label="Loading artifacts" />;
+  }
+
+  if (error) {
+    return <ErrorState message={error} onRetry={loadArtifacts} />;
+  }
+
+  return (
+    <ApplicationArtifactsPanel
+      application={application}
+      artifacts={artifacts}
+      includeArchived={includeArchived}
+      onIncludeArchivedChange={setIncludeArchived}
+      onChanged={refreshArtifacts}
+    />
   );
 }
 

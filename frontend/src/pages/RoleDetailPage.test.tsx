@@ -153,9 +153,9 @@ describe("RoleDetailPage", () => {
     expect(await screen.findByText("Application workflow")).toBeInTheDocument();
     expect(screen.getByText("interested")).toBeInTheDocument();
     expect(screen.getByText("Search track: Platform search")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /open application/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /open artifacts/i })).toHaveAttribute(
       "href",
-      `/applications/${sampleApplication.id}/overview`,
+      `/applications/${sampleApplication.id}/artifacts`,
     );
     expect(fetchMock).toHaveBeenCalledWith(
       `/api/opportunities/${sampleRole.id}/application`,
@@ -176,7 +176,7 @@ describe("RoleDetailPage", () => {
       await screen.findByText("Not tracked as an application yet."),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /open application/i }),
+      screen.queryByRole("link", { name: /open artifacts/i }),
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /track as application/i }),
@@ -206,7 +206,7 @@ describe("RoleDetailPage", () => {
     expect(await screen.findByText("Application workflow started")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: /dismiss notification/i }));
     expect(screen.queryByText("Application workflow started")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /open application/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open artifacts/i })).toBeInTheDocument();
   });
 
   it("shows application workflow load errors without hiding opportunity details", async () => {

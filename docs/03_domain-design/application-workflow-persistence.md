@@ -115,13 +115,14 @@ endpoints.
 Layer 4C adds the user-facing workflow UX on top of these same records. The
 Applications page is the main command center: it shows pipeline state, workspace
 context, next-action attention, recent updates, and quick links into notes,
-reminders, interviews, and timeline. Application detail keeps routed sections
-for overview, interviews, reminders, suggestions, advisor packet, notes, links,
-and timeline; the overview now surfaces current state, workspace/search-track
-context, next action, applied date, linked artifacts where present, and visible
-state-transition controls. Opportunity detail can start tracking an existing
-opportunity as an application by using the existing ensure endpoint, but full
-workflow management remains under `/applications/{application_id}/...`.
+reminders, interviews, artifacts, and timeline. Application detail keeps routed
+sections for overview, interviews, artifacts, reminders, suggestions, advisor
+packet, notes, links, and timeline; the overview now surfaces current state,
+workspace/search-track context, next action, applied date, linked artifacts where
+present, and visible state-transition controls. Opportunity detail can start
+tracking an existing opportunity as an application by using the existing ensure
+endpoint, and links tracked opportunities to the application artifact section;
+full workflow management remains under `/applications/{application_id}/...`.
 
 Layer 4C does not add notification delivery, calendar/email sync, recurring
 reminders, insight generation, artifact lifecycle review, or automation. Layer
