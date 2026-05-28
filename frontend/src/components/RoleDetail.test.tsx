@@ -31,4 +31,45 @@ describe("RoleDetail", () => {
 
     await waitFor(() => expect(onArchive).toHaveBeenCalledTimes(1));
   });
+
+  it("shows clearer intelligence signal confidence and basis", () => {
+    const onUpdate = vi.fn();
+    const onArchive = vi.fn();
+    const roleWithIntelligence = {
+      ...sampleRole,
+      parse_metadata: {
+        opportunityIntelligence: {
+          version: "test-v1",
+          evaluatedAt: "2026-05-28T15:00:00Z",
+          summary: "Stored deterministic caution signals.",
+          categories: ["platform"],
+          signals: [
+            {
+              type: "compensation_missing",
+              label: "Compensation needs review",
+              reason: "The posting did not include a stated range.",
+              severity: "medium",
+              confidence: "Moderate Confidence",
+              basis: "Parsed opportunity fields.",
+              evidence: [],
+            },
+          ],
+        },
+      },
+    };
+
+    render(
+      <RoleDetail
+        role={roleWithIntelligence}
+        onUpdate={onUpdate}
+        onArchive={onArchive}
+        activeSection="intelligence"
+      />,
+    );
+
+    expect(screen.getByText("Compensation needs review")).toBeInTheDocument();
+    expect(screen.getByText("medium severity")).toBeInTheDocument();
+    expect(screen.getByText("Moderate Confidence")).toBeInTheDocument();
+    expect(screen.getByText("Parsed opportunity fields.")).toBeInTheDocument();
+  });
 });

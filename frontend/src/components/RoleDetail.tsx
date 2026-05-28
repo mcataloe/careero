@@ -20,6 +20,7 @@ import type {
   RoleUpdatePayload,
 } from "../types/roles";
 import { ExpandableTextSection } from "./ExpandableTextSection";
+import { InsightMeta } from "./InsightMeta";
 import { MarkdownPreviewBlock } from "./MarkdownPreviewBlock";
 
 const statusOptions: { label: string; value: RoleStatus }[] = [
@@ -245,12 +246,10 @@ function SignalSummary({ signal }: { signal: OpportunitySignal }) {
           </Text>
         </div>
         <Badge color={signal.severity === "high" ? "red" : "yellow"} variant="light">
-          {signal.confidence}
+          {signal.severity} severity
         </Badge>
       </Group>
-      <Text size="xs" c="dimmed" mt="xs">
-        {signal.basis}
-      </Text>
+      <InsightMeta confidence={signal.confidence} basis={signal.basis} />
       <Divider mt="sm" />
     </div>
   );

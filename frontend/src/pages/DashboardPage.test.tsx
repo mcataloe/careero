@@ -4,9 +4,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DashboardPage } from "./DashboardPage";
 import { render, screen, userEvent, waitFor } from "../test-utils";
 import type { ApplicationPipelineResponse } from "../types/applications";
+import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
+import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
 import type { CompassInsightsResponse } from "../types/compassInsights";
+import type { RecommendationListResponse } from "../types/recommendations";
 import type { Insight } from "../types/insights";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
+import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
 
 function jsonResponse(response: unknown, status = 200) {
   return {
@@ -113,6 +117,116 @@ const compassInsights: CompassInsightsResponse = {
   insufficient_data: [],
 };
 
+const sourceIntelligence: SourceIntelligenceResponse = {
+  generated_at: generatedAt,
+  workspace_id: null,
+  summaries: [
+    {
+      source_type: "recruiter",
+      label: "Recruiter",
+      opportunities: 2,
+      applications: 2,
+      responses: 1,
+      interviews: 1,
+      response_rate: 0.5,
+      interview_rate: 0.5,
+      average_compass_score: 82,
+      recruiter_contacts: 2,
+      compensation_aligned: 1,
+      basis: "Tracked source metadata.",
+    },
+  ],
+  insights: [
+    insight({
+      id: "source-insight",
+      category: "source_intelligence",
+      label: "Recruiter channel is getting traction",
+      message: "Recruiter-sourced opportunities are producing responses.",
+      basis: "Compared tracked source outcomes.",
+      source_references: [
+        {
+          source_type: "workspace",
+          source_id: null,
+          label: "All tracked opportunities",
+          field: "source_type",
+          metadata: {},
+        },
+      ],
+    }),
+  ],
+  insufficient_data: [],
+};
+
+const artifactPerformance: ArtifactPerformanceResponse = {
+  generated_at: generatedAt,
+  workspace_id: null,
+  summary: [],
+  by_role_category: [],
+  by_variant: [
+    {
+      label: "Platform resume",
+      artifact_type: "resume",
+      variant_name: "Platform resume",
+      role_category: "platform",
+      total: 2,
+      responses: 1,
+      interviews: 1,
+      response_rate: 0.5,
+      interview_rate: 0.5,
+      basis: "Observed application outcomes.",
+    },
+  ],
+  insights: [
+    insight({
+      id: "artifact-insight",
+      category: "artifact_readiness",
+      label: "Platform resume has early signal",
+      message: "The platform resume variant has one observed response.",
+      basis: "Compared artifact usage with tracked outcomes.",
+    }),
+  ],
+  insufficient_data: [],
+};
+
+const recommendations: RecommendationListResponse = {
+  generated_at: generatedAt,
+  workspace_id: null,
+  read_only: true,
+  recommendations: [
+    {
+      ...insight({
+        id: "recommendation-insight",
+        category: "follow_up_action",
+        label: "Review COMPASS evaluation",
+        message: "Revisit the latest COMPASS rationale before tailoring.",
+        basis: "Latest evaluation has moderate confidence.",
+        recommended_action: {
+          action_type: "review_compass",
+          label: "Review COMPASS",
+          route_path: "/opportunities/role-1/compass",
+          review_required: true,
+          metadata: {},
+        },
+      }),
+      recommendation_type: "compass_review",
+      subject_type: "opportunity",
+      subject_id: "role-1",
+      action: "review_compass",
+      title: "Review COMPASS evaluation",
+      reason: "Latest evaluation has moderate confidence.",
+    },
+  ],
+};
+
+const emptyCompensation: CompensationIntelligenceResponse = {
+  generated_at: generatedAt,
+  workspace_id: null,
+  target_compensation_min: null,
+  observations: [],
+  insights: [],
+  insufficient_data: [],
+};
+
 const workflowPipeline: ApplicationPipelineResponse = {
   workspace_id: null,
   include_inactive: false,
@@ -187,6 +301,9 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Workflow attention")).toBeInTheDocument();
     expect(screen.getByText("1 active")).toBeInTheDocument();
     expect(screen.getByText("Prioritize active follow-ups")).toBeInTheDocument();
+    expect(screen.getAllByText("Moderate Confidence")[0]).toBeInTheDocument();
+    expect(screen.getByText(/Generated May 28, 2026/)).toBeInTheDocument();
+    expect(screen.getByText("Outcome history is still thin.")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/analytics/search", expect.any(Object));
     expect(fetchMock).toHaveBeenCalledWith("/api/applications/pipeline", expect.any(Object));
     expect(fetchMock).not.toHaveBeenCalledWith(
@@ -203,12 +320,66 @@ describe("DashboardPage", () => {
 
     expect(await screen.findByText("COMPASS search trends")).toBeInTheDocument();
     expect(screen.getByText("Strong platform fit")).toBeInTheDocument();
+    expect(screen.getByText("positive")).toBeInTheDocument();
+    expect(screen.getByText("All workspaces")).toBeInTheDocument();
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/analytics/compass",
         expect.any(Object),
       ),
     );
+  });
+
+  it("shows source insight messages alongside source metrics", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(sourceIntelligence));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboardAt("/dashboard/sources");
+
+    expect(
+      await screen.findByText("Recruiter channel is getting traction"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Recruiter")).toBeInTheDocument();
+    expect(screen.getByText("Compared tracked source outcomes.")).toBeInTheDocument();
+    expect(screen.getByText(/All tracked opportunities/)).toBeInTheDocument();
+  });
+
+  it("shows artifact insight messages alongside artifact metrics", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(artifactPerformance));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboardAt("/dashboard/artifacts");
+
+    expect(await screen.findByText("Platform resume has early signal")).toBeInTheDocument();
+    expect(screen.getByText("Platform resume")).toBeInTheDocument();
+    expect(
+      screen.getByText("Compared artifact usage with tracked outcomes."),
+    ).toBeInTheDocument();
+  });
+
+  it("renders recommended actions as route links when available", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(recommendations));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboardAt("/dashboard/recommendations");
+
+    expect(await screen.findByText("Review COMPASS evaluation")).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /review compass/i });
+    expect(link).toHaveAttribute("href", "/opportunities/role-1/compass");
+  });
+
+  it("renders calm empty states for insight sections", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(emptyCompensation));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboardAt("/dashboard/compensation");
+
+    expect(await screen.findByText("No compensation insight yet")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Add stated compensation ranges to saved opportunities to compare against search-track targets.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("reloads section data when a dashboard submenu item is clicked", async () => {

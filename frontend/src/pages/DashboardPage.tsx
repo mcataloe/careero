@@ -26,7 +26,7 @@ import { getCompassInsights } from "../api/compassInsights";
 import { FeatureWorkspaceLayout } from "../components/FeatureWorkspaceLayout";
 import { ErrorState, LoadingState } from "../components/States";
 import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
-import { InsightMeta } from "../components/InsightMeta";
+import { InsightListSection, InsightMeta } from "../components/InsightMeta";
 import type { ArtifactPerformanceResponse } from "../types/artifactPerformance";
 import type { AutomationSuggestionListResponse } from "../types/automation";
 import type { CompensationIntelligenceResponse } from "../types/compensationIntelligence";
@@ -311,6 +311,17 @@ function HistoricalLearningPanel({
       <Text c="dimmed" size="sm" mt="xs">
         Patterns from completed, archived, and prior tracked search activity.
       </Text>
+      {learning.insufficient_data.length > 0 ? (
+        <Alert color="gray" title="Data is still thin" mt="md">
+          <Stack gap={4}>
+            {learning.insufficient_data.map((message) => (
+              <Text key={message} size="sm">
+                {message}
+              </Text>
+            ))}
+          </Stack>
+        </Alert>
+      ) : null}
       <Table mt="md" verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
@@ -325,7 +336,9 @@ function HistoricalLearningPanel({
               <Table.Tr key={summary.label}>
                 <Table.Td>{summary.label}</Table.Td>
                 <Table.Td>{summary.value ?? "Not enough data"}</Table.Td>
-                <Table.Td>{summary.confidence}</Table.Td>
+                <Table.Td>
+                  <InsightMeta confidence={summary.confidence} insight={summary} />
+                </Table.Td>
               </Table.Tr>
             ))
           ) : (
@@ -355,25 +368,11 @@ function RecommendationsPanel({
         Read-only next steps with visible reasons.
       </Text>
       <Stack gap="sm" mt="md">
-        {recommendations.recommendations.length > 0 ? (
-          recommendations.recommendations.slice(0, 8).map((recommendation) => (
-            <div key={recommendation.id}>
-              <Text fw={600}>{recommendation.title}</Text>
-              <Text size="sm" c="dimmed">
-                {recommendation.action.replaceAll("_", " ")}:{" "}
-                {recommendation.reason}
-              </Text>
-              <InsightMeta
-                confidence={recommendation.confidence}
-                basis={recommendation.basis}
-              />
-            </div>
-          ))
-        ) : (
-          <Text c="dimmed" size="sm">
-            No recommendations are active from the current insight signals.
-          </Text>
-        )}
+        <InsightListSection
+          insights={recommendations.recommendations}
+          emptyTitle="No active recommendations"
+          emptyMessage="No recommendations are active from the current insight signals."
+        />
       </Stack>
     </Paper>
   );
@@ -387,27 +386,16 @@ function SearchHealthPanel({ health }: { health: SearchHealthResponse }) {
         Gentle sustainability signals based on tracked search activity.
       </Text>
       <Stack gap="sm" mt="md">
-        {health.signals.length > 0 ? (
-          health.signals.map((signal) => (
-            <div key={signal.signal_type}>
-              <Group justify="space-between" align="flex-start">
-                <Text fw={600}>{signal.label}</Text>
-                <Badge variant="light">{signal.confidence}</Badge>
-              </Group>
-              <Text size="sm" c="dimmed">
-                {signal.message}
-              </Text>
-              <Text size="sm">{signal.gentle_guidance}</Text>
-              <Text size="xs" c="dimmed">
-                {signal.basis}
-              </Text>
-            </div>
-          ))
-        ) : (
-          <Text c="dimmed" size="sm">
-            No search-health signals are active from the current tracked activity.
-          </Text>
-        )}
+        <InsightListSection
+          insights={health.signals.map((signal) => ({
+            ...signal,
+            message: signal.gentle_guidance
+              ? `${signal.message} ${signal.gentle_guidance}`
+              : signal.message,
+          }))}
+          emptyTitle="No active search-health signals"
+          emptyMessage="No search-health signals are active from the current tracked activity."
+        />
       </Stack>
     </Paper>
   );
@@ -425,26 +413,11 @@ function CompensationIntelligencePanel({
         Uses stated ranges only; no external salary guesses are generated.
       </Text>
       <Stack gap="sm" mt="md">
-        {intelligence.insights.length > 0 ? (
-          intelligence.insights.map((insight) => (
-            <div key={insight.label}>
-              <Group justify="space-between" align="flex-start">
-                <Text fw={600}>{insight.label}</Text>
-                <Badge variant="light">{insight.confidence}</Badge>
-              </Group>
-              <Text size="sm" c="dimmed">
-                {insight.message}
-              </Text>
-              <Text size="xs" c="dimmed">
-                {insight.basis}
-              </Text>
-            </div>
-          ))
-        ) : (
-          <Text c="dimmed" size="sm">
-            Add stated compensation ranges to saved opportunities to compare against search-track targets.
-          </Text>
-        )}
+        <InsightListSection
+          insights={intelligence.insights}
+          emptyTitle="No compensation insight yet"
+          emptyMessage="Add stated compensation ranges to saved opportunities to compare against search-track targets."
+        />
       </Stack>
     </Paper>
   );
@@ -461,6 +434,13 @@ function SourceIntelligencePanel({
       <Text c="dimmed" size="sm" mt="xs">
         Private source performance based on your own tracked opportunities.
       </Text>
+      <Stack gap="sm" mt="md">
+        <InsightListSection
+          insights={intelligence.insights}
+          emptyTitle="No source insight yet"
+          emptyMessage="Add source metadata to opportunities to compare private traction by channel."
+        />
+      </Stack>
       <Table mt="md" verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
@@ -514,26 +494,11 @@ function CompassInsightsPanel({
         </div>
       </Group>
       <Stack gap="sm" mt="md">
-        {insights.insights.length > 0 ? (
-          insights.insights.map((insight) => (
-            <div key={insight.label}>
-              <Group justify="space-between" align="flex-start">
-                <Text fw={600}>{insight.label}</Text>
-                <Badge variant="light">{insight.confidence}</Badge>
-              </Group>
-              <Text size="sm" c="dimmed">
-                {insight.message}
-              </Text>
-              <Text size="xs" c="dimmed">
-                {insight.basis}
-              </Text>
-            </div>
-          ))
-        ) : (
-          <Text c="dimmed" size="sm">
-            Complete COMPASS evaluations to build search-level trend insight.
-          </Text>
-        )}
+        <InsightListSection
+          insights={insights.insights}
+          emptyTitle="No COMPASS trend insight yet"
+          emptyMessage="Complete COMPASS evaluations to build search-level trend insight."
+        />
       </Stack>
     </Paper>
   );
@@ -552,6 +517,13 @@ function ArtifactPerformancePanel({
           {performance.insufficient_data[0]}
         </Text>
       ) : null}
+      <Stack gap="sm" mt="md">
+        <InsightListSection
+          insights={performance.insights}
+          emptyTitle="No artifact insight yet"
+          emptyMessage="Generate and use resume or cover-letter artifacts to build observed performance history."
+        />
+      </Stack>
       <Table mt="md" verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
@@ -641,19 +613,11 @@ function SearchAnalyticsPanel({
         <Paper withBorder radius="md" p="lg">
           <Title order={3}>Focus signals</Title>
           <Stack mt="md" gap="sm">
-            {analytics.signals.map((signal) => (
-              <div key={String(signal.label)}>
-                <Group justify="space-between" gap="sm">
-                  <Text fw={600}>{String(signal.label)}</Text>
-                  <Text size="xs" c="dimmed">
-                    {String(signal.confidence)}
-                  </Text>
-                </Group>
-                <Text size="sm" c="dimmed">
-                  {String(signal.message)}
-                </Text>
-              </div>
-            ))}
+            <InsightListSection
+              insights={analytics.signals}
+              emptyTitle="No focus signals"
+              emptyMessage="Careero will show focus signals after more tracked search activity exists."
+            />
           </Stack>
         </Paper>
       ) : null}
