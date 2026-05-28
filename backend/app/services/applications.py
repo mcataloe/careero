@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.constants import (
     ApplicationInterviewStatus,
     ApplicationWorkflowState,
+    ArtifactLifecycleStatus,
     RoleStatus,
 )
 from app.models import (
@@ -1219,9 +1220,11 @@ class ApplicationWorkflowService:
             if artifact.artifact_type == "tailored_resume":
                 event_type = "artifact.resume.created"
                 title = "Resume artifact generated"
+                label = "Resume artifact"
             else:
                 event_type = "artifact.cover_letter.created"
                 title = "Cover letter artifact generated"
+                label = "Cover letter artifact"
             contract = (
                 artifact.artifact_metadata.get("contract")
                 if artifact.artifact_metadata
@@ -1248,6 +1251,60 @@ class ApplicationWorkflowService:
                     },
                 )
             )
+            lifecycle_status = normalize_artifact_lifecycle_status(
+                artifact.lifecycle_status
+            )
+            lifecycle_metadata = {
+                "artifact_type": artifact.artifact_type,
+                "lifecycle_status": lifecycle_status,
+                "revision_number": artifact.version_number
+                or revision.get("revisionNumber"),
+            }
+            if artifact.reviewed_at is not None:
+                events.append(
+                    _timeline_event(
+                        application=application,
+                        event_id=f"artifact-reviewed-{artifact.id}",
+                        event_type="artifact.reviewed",
+                        title=f"{label} reviewed",
+                        description=artifact.title,
+                        occurred_at=artifact.reviewed_at,
+                        actor="user",
+                        source_type="generated_artifact",
+                        source_id=str(artifact.id),
+                        metadata=lifecycle_metadata,
+                    )
+                )
+            if artifact.submitted_at is not None:
+                events.append(
+                    _timeline_event(
+                        application=application,
+                        event_id=f"artifact-submitted-{artifact.id}",
+                        event_type="artifact.submitted",
+                        title=f"{label} marked submitted",
+                        description=artifact.title,
+                        occurred_at=artifact.submitted_at,
+                        actor="user",
+                        source_type="generated_artifact",
+                        source_id=str(artifact.id),
+                        metadata=lifecycle_metadata,
+                    )
+                )
+            if artifact.archived_at is not None:
+                events.append(
+                    _timeline_event(
+                        application=application,
+                        event_id=f"artifact-archived-{artifact.id}",
+                        event_type="artifact.archived",
+                        title=f"{label} archived",
+                        description=artifact.title,
+                        occurred_at=artifact.archived_at,
+                        actor="user",
+                        source_type="generated_artifact",
+                        source_id=str(artifact.id),
+                        metadata=lifecycle_metadata,
+                    )
+                )
         return events
 
     def _timeline_activity(self, application: Application) -> list[dict[str, Any]]:
@@ -1323,6 +1380,8 @@ class ApplicationWorkflowService:
                 GeneratedArtifact.role_id == application.role_id,
                 GeneratedArtifact.artifact_type == artifact_type,
                 GeneratedArtifact.deleted_at.is_(None),
+                GeneratedArtifact.lifecycle_status
+                != ArtifactLifecycleStatus.ARCHIVED.value,
             )
             .order_by(GeneratedArtifact.created_at.desc(), GeneratedArtifact.id.desc())
             .limit(1)

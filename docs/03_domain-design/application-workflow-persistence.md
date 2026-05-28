@@ -94,6 +94,12 @@ completed COMPASS evaluations, generated resume/cover-letter artifacts, and
 selected ActivityLog entries. The timeline stores no rows of its own and must
 not become the workflow source of truth.
 
+Layer 6 artifact lifecycle operations add reviewed, submitted, and archived
+artifact events to this same timeline. These events reference the artifact row
+and safe lifecycle metadata only; they do not include generated resume or
+cover-letter content, COMPASS rationale, ATS notes, compensation strategy, or
+private decision notes.
+
 Layer 4B also exposes Opportunity-facing read aliases for the same workflow
 foundation:
 
@@ -118,9 +124,10 @@ opportunity as an application by using the existing ensure endpoint, but full
 workflow management remains under `/applications/{application_id}/...`.
 
 Layer 4C does not add notification delivery, calendar/email sync, recurring
-reminders, insight generation, artifact lifecycle review, or automation. Those
-remain later-layer work. Layer 4D hardens regression coverage and documents
-Layer 4 as complete for current local MVP workflow scope.
+reminders, insight generation, artifact lifecycle review, or automation. Layer
+6 now owns artifact review, submitted-state, archive, and submitted-version
+protection. Layer 4D hardens regression coverage and documents Layer 4 as
+complete for current local MVP workflow scope.
 
 Notes:
 
@@ -202,8 +209,9 @@ include `application.created`, `application.state_changed`,
 `application.archived`, `application.reactivated`, `note.created`,
 `external_link.created`, `reminder.created`, `reminder.completed`,
 `interview.created`, `interview.completed`, `compass.completed`,
-`artifact.resume.created`, and `artifact.cover_letter.created`. ActivityLog may
-enrich update/delete events such as `note.updated`, `note.deleted`,
+`artifact.resume.created`, `artifact.cover_letter.created`, `artifact.reviewed`,
+`artifact.submitted`, and `artifact.archived`. ActivityLog may enrich
+update/delete events such as `note.updated`, `note.deleted`,
 `reminder.updated`, `external_link.updated`, and `external_link.deleted`, but it
 does not replace typed workflow records.
 

@@ -79,3 +79,11 @@ Layer 6 lifecycle workflow states and should not be inferred from generation
 alone. Export metadata records file generation and does not by itself make an
 artifact submitted.
 
+Layer 6 lifecycle APIs own post-generation operations. Drafts may be edited
+directly and receive an incremented `version_number`; submitted artifacts are
+protected from direct mutation, so an edit request creates a new draft revision
+linked by `source_artifact_id`. Active artifact lists exclude archived artifacts
+unless explicitly requested. Application timelines can reference resume artifact
+created, reviewed, submitted, and archived events, but timeline metadata must not
+include resume body content or internal COMPASS analysis.
+

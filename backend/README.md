@@ -487,7 +487,7 @@ The activity log is scoped to the authenticated current user when password auth 
 5. Run the same request again to reuse the cached evaluation, or send `"force": true` to create a new run.
 6. Inspect lifecycle events with `GET /api/activity-log`.
 
-The original Layer 2 local flow does not add automated discovery, generated application packets, or application submission. Local email/password auth now exists separately from those intake workflows. Backend resume and cover-letter artifact generation foundations now exist separately as draft-only services; frontend rendering, review/approval lifecycle, and submission remain future work. Local Markdown/DOCX/PDF export is available for stored generated artifacts.
+The original Layer 2 local flow does not add automated discovery, generated application packets, or application submission. Local email/password auth now exists separately from those intake workflows. Backend resume and cover-letter artifact generation foundations create draft artifacts, and Layer 6 lifecycle endpoints now handle review, submitted-state, archive, and submitted-version protection. Local Markdown/DOCX/PDF export is available for stored generated artifacts.
 
 ## Resume Artifact Generation
 
@@ -555,6 +555,63 @@ If `evaluation_id` is omitted, Careero uses the latest COMPASS evaluation when o
 The legacy `/api/roles/{role_id}/cover-letter-artifacts` route remains available as a compatibility alias while persistence is Role-backed.
 
 The generated cover letter is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Opportunity linkage, lifecycle status, optional source lineage, optional target evaluation linkage, tone metadata, generation metadata, and revision metadata are preserved. New generated cover letters start as `draft`; review, submitted, and archive state changes are separate lifecycle operations.
+
+## Artifact Lifecycle API
+
+Artifact lifecycle endpoints are local, user-owned workflow operations. They do
+not submit applications externally, email recruiters, write to cloud storage, or
+change application state automatically.
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/artifacts
+Invoke-RestMethod http://127.0.0.1:8000/api/workspaces/{workspace_id}/artifacts
+Invoke-RestMethod http://127.0.0.1:8000/api/opportunities/{opportunity_id}/artifacts
+Invoke-RestMethod http://127.0.0.1:8000/api/applications/{application_id}/artifacts
+Invoke-RestMethod http://127.0.0.1:8000/api/artifacts/{artifact_id}
+
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/artifacts/{artifact_id}/review
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/artifacts/{artifact_id}/submit
+Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/artifacts/{artifact_id}/archive
+```
+
+Create or edit a draft manually:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/api/artifacts `
+  -ContentType "application/json" `
+  -Body '{
+    "workspace_id": "workspace-uuid",
+    "opportunity_id": "optional-role-backed-opportunity-uuid",
+    "application_id": "optional-application-uuid",
+    "artifact_type": "tailored_resume",
+    "title": "Targeted resume",
+    "content": "Employer-facing content only."
+  }'
+
+Invoke-RestMethod `
+  -Method Patch `
+  -Uri http://127.0.0.1:8000/api/artifacts/{artifact_id} `
+  -ContentType "application/json" `
+  -Body '{
+    "content": "Updated employer-facing draft content.",
+    "change_summary": "Edited after review."
+  }'
+```
+
+Lifecycle transitions are `draft -> reviewed -> submitted`, with `draft`,
+`reviewed`, and `submitted` each allowed to move to `archived`. Archived
+artifacts are excluded from active artifact lists and application summaries by
+default. Direct edits are allowed only for drafts. Editing a submitted artifact
+creates a new draft revision linked to the submitted source artifact instead of
+mutating the submitted record.
+
+Artifact detail responses return employer-facing `title` and `content` separately
+from lifecycle and traceability metadata. COMPASS rationale, ATS risk notes,
+compensation strategy, private decision rationale, user notes, and source resume
+material must not be appended to artifact content or exported as part of the
+resume/cover-letter body.
 
 ## Local Artifact Export
 

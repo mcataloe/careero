@@ -11,6 +11,7 @@ from app.api.auth import (
     router as auth_router,
 )
 from app.api.automation import router as automation_router
+from app.api.artifacts import router as artifacts_router
 from app.api.artifact_exports import router as artifact_exports_router
 from app.api.artifact_performance import router as artifact_performance_router
 from app.api.applications import router as applications_router
@@ -59,6 +60,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(advisor_packets_router, prefix="/api", dependencies=authenticated)
     app.include_router(ai_usage_router, prefix="/api", dependencies=authenticated)
     app.include_router(automation_router, prefix="/api", dependencies=authenticated)
+    app.include_router(artifacts_router, prefix="/api", dependencies=authenticated)
     app.include_router(artifact_exports_router, prefix="/api", dependencies=authenticated)
     app.include_router(artifact_performance_router, prefix="/api", dependencies=authenticated)
     app.include_router(applications_router, prefix="/api", dependencies=authenticated)
