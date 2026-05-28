@@ -64,3 +64,7 @@ def test_compass_insights_avoid_false_precision_with_thin_data() -> None:
     assert insights[0]["category"] == "compass"
     assert insights[0]["source_inputs"] == {"score_count": 1}
     assert insights[0]["freshness"]["generated_at"]
+    assert insights[0]["generation_method"] == "deterministic"
+    assert insights[0]["visibility"] == "internal"
+    assert insights[0]["known_uncertainty"]
+    assert insights[0]["scope"]["user_scoped"] is True

@@ -86,7 +86,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - Local application reminders exist but remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
 - External-link workflow summaries exist and application list/detail summary counts include links alongside notes, reminders, and interviews.
 - Private remote branch or PR drift, if any, must be validated before being treated as complete.
-- Layer 5 insight stabilization and Layer 6 artifact lifecycle remain important near-term completion work after Layer 4D hardening.
+- Layer 5 is stabilized for current local MVP insight behavior. Layer 6 artifact lifecycle remains the next important completion work.
 
 ### Not yet built / still future
 
@@ -136,7 +136,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
 | Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle incomplete | COMPASS and artifact generation foundations exist. Artifact review, edit, approval, export, submitted tracking, and retrieval UX remain. |
 | Layer 4 | Application Workflow | Complete for current local MVP scope | Applications, state transitions, timeline, notes, external links, local reminders, structured interview tracking, archive/reactivate, workspace context, workflow UX, and regression coverage exist. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
-| Layer 5 | Workflow Intelligence / Insights | Partially built / next focus | Analytics and dashboard surfaces exist. Needs validation, workspace filtering, confidence calibration, thin-data handling, and cohesive insight behavior. |
+| Layer 5 | Workflow Intelligence / Insights | Stabilized for current local MVP scope | Analytics, dashboard insight surfaces, normalized contracts, provenance/confidence metadata, thin-data handling, shared UI rendering, and focused tests exist. Durable insight snapshots, richer workspace switching UX, artifact lifecycle integration, advanced strategy synthesis, model usage accounting, and onboarding guidance remain later-layer work. |
 | Layer 6 | Advanced COMPASS + Artifact Lifecycle | Partially built / next lifecycle layer | Build artifact lifecycle UX, COMPASS history, evidence mapping, submitted artifacts, and export flow. |
 | Layer 7 | Opportunity Model Strategy | In progress / compatibility surface started | Opportunity-facing API and UX aliases have started while persistence remains Role-backed. Destructive rename remains future. |
 | Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
@@ -180,7 +180,7 @@ stabilization remain later-layer work.
 
 ## Layer 5 â€” Workflow Intelligence / Insights
 
-Layer 5 turns workflow activity into useful guidance. Analytics and dashboards exist, but validation, workspace filtering, confidence calibration, insufficient-data handling, and signal explainability need stabilization.
+Layer 5 turns workflow activity into useful guidance. Current local MVP insight behavior is stabilized through normalized contracts, backend governance metadata, dashboard rendering, provenance/freshness/uncertainty display, and focused regression tests. Layer 5 remains computed rather than snapshot-persisted, and deeper artifact lifecycle, strategy, model accounting, and onboarding work belongs to later layers.
 
 ## Layer 6 â€” Advanced COMPASS + Artifact Lifecycle
 
@@ -298,7 +298,7 @@ Finish the workflow records users expect before modeling Opportunity more deeply
 
 ## Step 3 â€” Layer 5 Insight Stabilization
 
-Make current analytics trustworthy before expanding the intelligence model.
+Current analytics and dashboard insights are stabilized for local MVP behavior. Do not expand the intelligence model further until Layer 6 artifact lifecycle and later strategy/accounting/onboarding dependencies are ready.
 
 ## Step 4 â€” Layer 6 Artifact Lifecycle Completion
 
@@ -352,7 +352,7 @@ Recommended order from here:
 
 1. Repo reconciliation and roadmap correction.
 2. Layer 4 workflow completion. Completed for current local MVP scope after Layer 4D.
-3. Layer 5 insight stabilization. Next implementation focus.
+3. Layer 5 insight stabilization. Stabilized for current local MVP scope.
 4. Layer 6 artifact lifecycle completion.
 5. Layer 7 Opportunity Model Strategy and compatibility surface.
 6. Layer 8 integrations.
@@ -394,7 +394,7 @@ Revise:
 
 - Do not call Layer 1 fully complete until production auth/identity exists.
 - Do not call Layer 4 productization-ready just because local reminder API/UI and summary-count reconciliation exist; hosted reminders, external notifications, production auth, and Layer 11 gates remain future.
-- Do not call Layer 5 merely next; it is already partially implemented.
+- Do not call Layer 5 merely next; it is stabilized for current local MVP insight behavior while larger future insight scope remains deferred.
 - Move Integrations from Layer 7 to Layer 8.
 - Introduce Opportunity Model Strategy as Layer 7.
 - Add Layer 14 as an appended model catalog, prompt architecture, and credit-control layer. Parts of Layer 14 may execute with Layer 11 productization even though the layer is documented after Layer 13.

@@ -35,7 +35,8 @@ Use this file for execution order. Use [product strategy](00_product-strategy.md
 14. Layer 16 guided onboarding, first-search activation, contextual help, and support/feedback capture.
 
 Layer 4 is complete for current MVP workflow scope after the Layer 4D hardening
-pass. Layer 5 insight stabilization is the next immediate implementation focus.
+pass. Layer 5 is stabilized for current local MVP insight behavior; Layer 6
+artifact lifecycle completion is the next immediate implementation focus.
 
 ## 3. Layer Status Table
 
@@ -46,7 +47,7 @@ pass. Layer 5 insight stabilization is the next immediate implementation focus.
 | Layer 2 | Intake, Parsing, and Grounding | Partially implemented | Stable enough for Layer 4-6 work. | Source/provenance hardening after workflow priorities. | Manual intake, optional parsing, and resume/profile source grounding exist. |
 | Layer 3 | COMPASS and Artifact Foundation | Partially implemented | Stable enough for Layer 4 and Layer 6; lifecycle remains incomplete. | Layer 6 artifact lifecycle completion. | COMPASS traceability is strong; artifact review/submitted lifecycle is not complete. |
 | Layer 4 | Application Workflow | Complete for current MVP workflow scope | Lower-layer local foundations exist; hosted/productized delivery remains later. | None unless Layer 4D validation finds a blocker. | State machine, notes, links, reminders, interviews, timeline, pipeline, workflow UX, and regression coverage exist locally. Hosted reminder delivery, calendar/email sync, and production hardening remain future. |
-| Layer 5 | Workflow Intelligence and Insights | Partially implemented / next focus | Depends on reliable Layer 4 workflow data, now hardened for local MVP use. | Layer 5 - Insight stabilization. | Dashboard and analytics surfaces exist; workspace filtering, confidence, basis, and thin-data behavior need validation. |
+| Layer 5 | Workflow Intelligence and Insights | Stabilized for current local MVP scope | Depends on reliable Layer 4 workflow data, now hardened for local MVP use. | None unless Layer 5D validation finds a blocker. | Dashboard and analytics surfaces, normalized contracts, confidence/basis/provenance metadata, thin-data behavior, shared insight UI, and focused tests exist. Durable snapshots and advanced strategy remain later-layer work. |
 | Layer 6 | Advanced COMPASS and Artifact Lifecycle | Partially implemented | Depends on Layer 3 generation and Layer 4 workflow context. | Layer 6 - Artifact lifecycle completion. | Generated artifacts and backend export exist; lifecycle UX, approval, archive, comparison, and submitted tracking remain missing. |
 | Layer 7 | Opportunity Model Strategy | Partially implemented | Depends on stable workflow and artifact semantics. | Layer 7 - Opportunity model compatibility recon. | Public Opportunity language exists while persistence remains Role-backed. |
 | Layer 8 | Integrations and Export | Partially implemented | Depends on Opportunity semantics and artifact lifecycle. | Layer 8 - Local export UX / integration recon. | Backend local export exists; frontend artifact export workflow and external integrations remain future. |
@@ -69,11 +70,11 @@ Immediate sequence:
 4. Layer 4B - Application state and timeline completion.
 5. Layer 4C - Workflow UX completion.
 6. Layer 4D - Tests and docs hardening.
-7. Layer 5 - Insight stabilization.
+7. Layer 5 - Insight stabilization. Complete for current local MVP scope.
 
 Later prompt groups:
 
-- Layer 5 - Insight stabilization: workspace filters, confidence, basis strings, thin-data behavior, and dashboard actionability.
+- Layer 5 - future insight expansion: durable snapshots, richer workspace switching UX, artifact lifecycle provenance, advanced strategy synthesis, model usage accounting, and onboarding help after later dependencies are ready.
 - Layer 6 - Artifact lifecycle completion: artifact list/detail, review/edit/approve/archive, submitted tracking, comparison, and frontend export.
 - Layer 7 - Opportunity compatibility: keep Role-backed persistence explicit or plan a separately approved migration.
 - Layer 8 - Integrations: start with local/manual export UX before OAuth, cloud sync, or external account linking.

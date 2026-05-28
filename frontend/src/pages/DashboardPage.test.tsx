@@ -288,6 +288,27 @@ describe("DashboardPage", () => {
     vi.unstubAllGlobals();
   });
 
+  it("shows loading state while a dashboard section is pending", () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => undefined)));
+
+    renderDashboardAt("/dashboard/overview");
+
+    expect(screen.getByText("Loading search overview")).toBeInTheDocument();
+  });
+
+  it("shows recoverable error state for failed insight requests", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ detail: "Insight request failed" }, 500))
+      .mockResolvedValueOnce(jsonResponse(workflowPipeline));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboardAt("/dashboard/overview");
+
+    expect(await screen.findByText("Insight request failed")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+  });
+
   it("loads search analytics and workflow attention for the overview route", async () => {
     const fetchMock = vi
       .fn()

@@ -301,7 +301,10 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByRole("checkbox", { name: /Include reminder: Follow up with recruiter/i })).toBeInTheDocument();
     expect(screen.getByText(/This packet is a local preview\/export only\./i)).toBeInTheDocument();
     expect(screen.getByText("Private user notes")).toBeInTheDocument();
+    expect(screen.getByText("COMPASS score and explanation")).toBeInTheDocument();
+    expect(screen.getByText(/Internal fit analysis remains advisory/i)).toBeInTheDocument();
     expect(screen.getByText(/content excluded/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Latest COMPASS rationale before tailoring/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /share|send|invite/i })).not.toBeInTheDocument();
   });
 

@@ -52,6 +52,10 @@ def test_search_health_generates_gentle_low_fit_and_volume_signals() -> None:
     labels = {signal["signal_type"] for signal in signals}
     assert "excessive_application_volume" in labels
     assert "heavy_low_fit_focus" in labels
+    assert all(signal["category"] == "application_workflow" for signal in signals)
+    assert all(signal["visibility"] == "internal" for signal in signals)
+    assert all(signal["freshness"]["generated_at"] for signal in signals)
+    assert all(signal["known_uncertainty"] for signal in signals)
     all_text = " ".join(
         f"{signal['message']} {signal['gentle_guidance']}" for signal in signals
     ).lower()

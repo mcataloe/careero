@@ -2,7 +2,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 from uuid import uuid4
 
-from app.services.source_intelligence import summarize_source_performance
+from app.services.source_intelligence import _source_insights, summarize_source_performance
 
 
 def _role(source_type: str, *, score_id=None):
@@ -73,3 +73,33 @@ def test_source_intelligence_normalizes_ats_sources_to_company_site() -> None:
 
     assert summaries[0]["source_type"] == "company_site"
     assert summaries[0]["interview_rate"] == 1
+
+
+def test_source_intelligence_insights_are_internal_and_source_grounded() -> None:
+    summaries = [
+        {
+            "source_type": "linkedin",
+            "label": "LinkedIn",
+            "applications": 3,
+            "response_rate": 0.667,
+        },
+        {
+            "source_type": "recruiter",
+            "label": "Recruiter",
+            "applications": 2,
+            "response_rate": 0.5,
+        },
+    ]
+
+    insights = _source_insights(summaries)
+
+    assert len(insights) == 1
+    assert insights[0]["category"] == "source_intelligence"
+    assert insights[0]["visibility"] == "internal"
+    assert insights[0]["freshness"]["generated_at"]
+    assert insights[0]["source_inputs"] == {
+        "source_type": "linkedin",
+        "applications": 3,
+        "response_rate": 0.667,
+    }
+    assert "public recruiter" in insights[0]["basis"]

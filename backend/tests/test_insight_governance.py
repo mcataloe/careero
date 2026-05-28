@@ -6,6 +6,7 @@ from uuid import uuid4
 from app.services.artifact_performance import summarize_artifact_records
 from app.services.insight_governance import (
     CONFIDENCE_LABELS,
+    DEFAULT_UNCERTAINTY,
     governed_insight,
     has_governance_metadata,
     normalize_confidence,
@@ -64,8 +65,62 @@ def test_governed_insight_supports_sources_scope_and_actionability() -> None:
 
     assert insight["category"] == "follow_up_action"
     assert insight["scope"]["workspace_id"] == "workspace-1"
+    assert insight["scope"]["user_scoped"] is True
     assert insight["source_references"][0]["source_type"] == "application_event"
+    assert insight["source_references"][0]["field"] == "applied_at"
     assert insight["recommended_action"]["review_required"] is True
+    assert insight["recommended_action"]["route_path"] == "/applications/application-1/overview"
+
+
+def test_governed_insight_ids_are_stable_for_computed_inputs() -> None:
+    first = governed_insight(
+        category="compass",
+        label="Thin COMPASS sample",
+        message="Only one evaluation exists.",
+        basis="Counts completed COMPASS evaluations.",
+        confidence="insufficient_data",
+        scope={"workspace_id": "workspace-1"},
+        source_inputs={"score_count": 1},
+    )
+    second = governed_insight(
+        category="compass",
+        label="Thin COMPASS sample",
+        message="Only one evaluation exists.",
+        basis="Counts completed COMPASS evaluations.",
+        confidence="insufficient_data",
+        scope={"workspace_id": "workspace-1"},
+        source_inputs={"score_count": 1},
+    )
+
+    assert first["id"] == second["id"]
+    assert first["id"].startswith("insight_")
+    assert first["confidence_level"] == "insufficient_data"
+
+
+def test_governed_insight_preserves_stale_freshness_warnings_and_visibility() -> None:
+    insight = governed_insight(
+        label="Stale source fields",
+        message="Opportunity fields changed after this was generated.",
+        basis="Compares generated timestamp with source update timestamp.",
+        confidence="weak",
+        known_uncertainty=None,
+        warnings=["Refresh before relying on this recommendation."],
+        severity="warning",
+        visibility="internal",
+        freshness={
+            "generated_at": "2026-05-20T15:00:00+00:00",
+            "source_updated_at": "2026-05-28T15:00:00+00:00",
+            "is_stale": True,
+            "refresh_reason": "Opportunity fields changed.",
+        },
+    )
+
+    assert insight["known_uncertainty"] == [DEFAULT_UNCERTAINTY]
+    assert insight["warnings"] == ["Refresh before relying on this recommendation."]
+    assert insight["severity"] == "warning"
+    assert insight["visibility"] == "internal"
+    assert insight["freshness"]["is_stale"] is True
+    assert insight["freshness"]["refresh_reason"] == "Opportunity fields changed."
 
 
 def test_major_layer5_outputs_expose_confidence_and_basis() -> None:
@@ -122,3 +177,8 @@ def test_major_layer5_outputs_expose_confidence_and_basis() -> None:
             "high",
             "unknown",
         }
+        assert item["generation_method"] == "deterministic"
+        assert item["visibility"] == "internal"
+        assert item["freshness"]["generated_at"]
+        assert item["scope"]["user_scoped"] is True
+        assert isinstance(item["source_inputs"], dict)

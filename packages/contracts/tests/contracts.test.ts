@@ -15,6 +15,7 @@ import {
   InsightSchema,
   WorkspaceSchema,
   canonicalExamples,
+  insightExamples,
   canonicalSchemaRegistry,
   parseWorkspace,
   validateWorkspace,
@@ -68,6 +69,58 @@ describe("canonical contract validation", () => {
     const invalid = { ...canonicalExamples.Insight, confidenceLevel: "certain" };
 
     expect(InsightSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it("parses all canonical insight examples", () => {
+    for (const example of insightExamples) {
+      const parsed = InsightSchema.parse(example);
+
+      expect(parsed.id).toBe(example.id);
+      expect(parsed.visibility).toBe("internal");
+      expect(parsed.freshness.generatedAt).toMatch(/T/);
+    }
+  });
+
+  it("enforces required insight identity, basis, scope, and freshness", () => {
+    for (const field of ["id", "basis", "scope"] as const) {
+      const invalid = { ...canonicalExamples.Insight };
+      delete (invalid as Partial<typeof invalid>)[field];
+
+      expect(InsightSchema.safeParse(invalid).success).toBe(false);
+    }
+
+    const missingGeneratedAt = {
+      ...canonicalExamples.Insight,
+      freshness: { ...canonicalExamples.Insight.freshness },
+    };
+    delete (missingGeneratedAt.freshness as Partial<typeof missingGeneratedAt.freshness>).generatedAt;
+
+    expect(InsightSchema.safeParse(missingGeneratedAt).success).toBe(false);
+  });
+
+  it("validates insight provenance, uncertainty, freshness, and actionability", () => {
+    const parsed = InsightSchema.parse(canonicalExamples.Insight);
+
+    expect(parsed.confidenceLevel).toBe("moderate");
+    expect(parsed.severity).toBe("positive");
+    expect(parsed.generationMethod).toBe("deterministic");
+    expect(parsed.knownUncertainty).toContain("No external company research was included.");
+    expect(parsed.sourceReferences.map((source) => source.sourceType)).toEqual([
+      "opportunity",
+      "compass_evaluation",
+    ]);
+    expect(parsed.recommendedAction?.routePath).toMatch(/^\/opportunities\//);
+
+    const staleInsight = {
+      ...canonicalExamples.Insight,
+      freshness: {
+        ...canonicalExamples.Insight.freshness,
+        isStale: true,
+        refreshReason: "Opportunity fields changed after insight generation.",
+      },
+    };
+
+    expect(InsightSchema.parse(staleInsight).freshness.isStale).toBe(true);
   });
 
   it("requires state history for application state", () => {

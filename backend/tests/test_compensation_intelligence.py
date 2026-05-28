@@ -42,6 +42,10 @@ def test_compensation_intelligence_uses_stated_ranges_and_flags_risks() -> None:
     assert "Contract versus full-time assumptions" in labels
     assert all("external market data" not in insight["message"].lower() for insight in insights)
     assert any("not external market data" in insight["basis"] for insight in insights)
+    assert all(insight["category"] == "compensation" for insight in insights)
+    assert all(insight["visibility"] == "internal" for insight in insights)
+    assert all(insight["freshness"]["generated_at"] for insight in insights)
+    assert all(insight["source_inputs"] for insight in insights)
 
 
 def test_compensation_intelligence_does_not_fabricate_without_ranges() -> None:

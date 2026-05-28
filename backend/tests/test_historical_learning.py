@@ -63,6 +63,10 @@ def test_historical_learning_answers_prior_search_questions() -> None:
     assert "High-friction low-ROI pattern" in labels
     assert all(summary["basis"] for summary in summaries)
     assert all(summary["confidence"] for summary in summaries)
+    assert all(summary["category"] == "historical_learning" for summary in summaries)
+    assert all(summary["visibility"] == "internal" for summary in summaries)
+    assert all(summary["freshness"]["generated_at"] for summary in summaries)
+    assert all(isinstance(summary["source_inputs"], dict) for summary in summaries)
 
 
 def test_historical_learning_handles_empty_history() -> None:

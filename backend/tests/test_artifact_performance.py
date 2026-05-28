@@ -39,6 +39,11 @@ def test_artifact_performance_summarizes_variant_rates_without_causation() -> No
     assert platform["responses"] == 2
     assert platform["response_rate"] == 0.6667
     assert summary["insights"][0]["basis"].endswith("correlation, not proof.")
+    assert summary["insights"][0]["category"] == "artifact_readiness"
+    assert summary["insights"][0]["confidence_level"] == "weak"
+    assert summary["insights"][0]["visibility"] == "internal"
+    assert summary["insights"][0]["freshness"]["generated_at"]
+    assert summary["insights"][0]["source_inputs"]["variant"] == "tailored_resume: Platform Resume"
 
 
 def test_artifact_performance_reports_insufficient_data() -> None:

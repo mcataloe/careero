@@ -13,7 +13,7 @@ Related Docs:
 
 This section contains canonical LEAP layer specs and layer capsules. Layer specs are source-of-truth product/design documentation. Generated prompts belong under [docs/07_prompts](../07_prompts/00_prompt-index.md), not here.
 
-The current execution order, prompt sequence, readiness gates, and pull-forward rules live in [revised build order execution plan](../01_strategy/07_revised-build-order-execution-plan.md). After Layer 4D hardening, Layer 5 insight stabilization is the next immediate implementation focus.
+The current execution order, prompt sequence, readiness gates, and pull-forward rules live in [revised build order execution plan](../01_strategy/07_revised-build-order-execution-plan.md). Layer 5 is stabilized for current local MVP insight behavior after the Layer 5D tests/docs pass; Layer 6 artifact lifecycle completion is the next immediate implementation focus.
 
 - [Layer 0 - Product Foundation](00_layer-00-product-foundation.md)
 - [Layer 1 - Core Platform](01_layer-01-core-platform.md)

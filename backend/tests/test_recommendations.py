@@ -62,6 +62,24 @@ def test_recommendations_include_reason_basis_and_confidence() -> None:
     assert all(recommendation["reason"] for recommendation in recommendations)
     assert all(recommendation["basis"] for recommendation in recommendations)
     assert all(recommendation["confidence"] for recommendation in recommendations)
+    assert all(
+        recommendation["category"]
+        in {
+            "follow_up_action",
+            "artifact_readiness",
+            "search_track_strategy",
+            "application_workflow",
+        }
+        for recommendation in recommendations
+    )
+    assert all(recommendation["generation_method"] == "deterministic" for recommendation in recommendations)
+    assert all(recommendation["visibility"] == "internal" for recommendation in recommendations)
+    assert all(recommendation["freshness"]["generated_at"] for recommendation in recommendations)
+    assert all(recommendation["recommended_action"] for recommendation in recommendations)
+    assert all(
+        recommendation["recommended_action"]["review_required"] is True
+        for recommendation in recommendations
+    )
 
 
 def test_recommendations_are_not_taskmaster_language() -> None:
