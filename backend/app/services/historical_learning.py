@@ -12,6 +12,7 @@ from app.constants import ApplicationWorkflowState
 from app.models import Application, ArtifactPerformanceRecord, Role, User, Workspace
 from app.services.artifact_performance import summarize_artifact_records
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 class HistoricalLearningError(Exception):
@@ -57,6 +58,7 @@ class HistoricalLearningService:
         if len(applications) < 3:
             insufficient_data.append("Historical summaries need more tracked application outcomes.")
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "summaries": summaries,
             "insufficient_data": insufficient_data,
@@ -264,13 +266,15 @@ def _summary(
     *,
     source_inputs: dict[str, Any],
 ) -> dict[str, Any]:
-    return {
-        "label": label,
-        "value": value,
-        "basis": basis,
-        "confidence": confidence,
-        "source_inputs": source_inputs,
-    }
+    return governed_insight(
+        category="historical_learning",
+        label=label,
+        message=str(value) if value is not None else "Not enough data",
+        basis=basis,
+        confidence=confidence,
+        source_inputs=source_inputs,
+        value=value,
+    )
 
 
 def _has_response(application: Application) -> bool:

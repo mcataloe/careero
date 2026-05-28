@@ -9,6 +9,7 @@ from app.services.insight_governance import (
     governed_insight,
     has_governance_metadata,
     normalize_confidence,
+    normalize_confidence_level,
 )
 from app.services.recommendations import generate_recommendations
 from app.services.search_health import generate_search_health_signals
@@ -24,9 +25,47 @@ def test_governed_insight_normalizes_confidence_and_uncertainty() -> None:
     )
 
     assert insight["confidence"] == "Moderate Confidence"
+    assert insight["confidence_level"] == "moderate"
     assert insight["known_uncertainty"]
+    assert insight["id"].startswith("insight_")
+    assert insight["freshness"]["generated_at"]
+    assert insight["generation_method"] == "deterministic"
+    assert insight["visibility"] == "internal"
     assert has_governance_metadata(insight)
     assert normalize_confidence("unknown") == "Weak Signal"
+    assert normalize_confidence_level("insufficient_data") == "insufficient_data"
+
+
+def test_governed_insight_supports_sources_scope_and_actionability() -> None:
+    insight = governed_insight(
+        category="follow_up_action",
+        label="Review follow-up timing",
+        message="Application may need review.",
+        basis="Applied date is older than the follow-up threshold.",
+        confidence="weak",
+        scope={"workspace_id": "workspace-1", "application_id": "application-1"},
+        source_references=[
+            {
+                "source_type": "application_event",
+                "source_id": None,
+                "label": "Applied date",
+                "field": "applied_at",
+                "metadata": {},
+            }
+        ],
+        recommended_action={
+            "action_type": "review_follow_up",
+            "label": "Review follow-up",
+            "route_path": "/applications/application-1/overview",
+            "review_required": True,
+            "metadata": {},
+        },
+    )
+
+    assert insight["category"] == "follow_up_action"
+    assert insight["scope"]["workspace_id"] == "workspace-1"
+    assert insight["source_references"][0]["source_type"] == "application_event"
+    assert insight["recommended_action"]["review_required"] is True
 
 
 def test_major_layer5_outputs_expose_confidence_and_basis() -> None:
@@ -76,3 +115,10 @@ def test_major_layer5_outputs_expose_confidence_and_basis() -> None:
         assert item["basis"]
         assert item["confidence"]
         assert item["confidence"] in CONFIDENCE_LABELS
+        assert item["confidence_level"] in {
+            "insufficient_data",
+            "weak",
+            "moderate",
+            "high",
+            "unknown",
+        }

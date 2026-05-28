@@ -1,8 +1,8 @@
 import uuid
-from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.schemas.insights import InsightResponse
 
 class CompensationObservation(BaseModel):
     role_id: uuid.UUID
@@ -16,16 +16,12 @@ class CompensationObservation(BaseModel):
     source_basis: str
 
 
-class CompensationInsight(BaseModel):
-    label: str
-    message: str
-    basis: str
-    confidence: str
-    severity: str = "info"
-    source_inputs: dict[str, Any] = Field(default_factory=dict)
+class CompensationInsight(InsightResponse):
+    pass
 
 
 class CompensationIntelligenceResponse(BaseModel):
+    generated_at: str
     workspace_id: uuid.UUID | None = None
     target_compensation_min: float | None = None
     observations: list[CompensationObservation] = Field(default_factory=list)

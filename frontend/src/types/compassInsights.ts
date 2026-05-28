@@ -1,13 +1,9 @@
-export interface CompassTrendInsight {
-  label: string;
-  message: string;
-  basis: string;
-  confidence: string;
-  severity: string;
-  source_inputs: Record<string, unknown>;
-}
+import type { Insight } from "./insights";
+
+export type CompassTrendInsight = Insight;
 
 export interface CompassInsightsResponse {
+  generated_at: string;
   workspace_id: string | null;
   average_compass_score: number | null;
   insights: CompassTrendInsight[];

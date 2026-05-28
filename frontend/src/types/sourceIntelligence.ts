@@ -1,3 +1,5 @@
+import type { Insight } from "./insights";
+
 export interface SourceSummaryMetric {
   source_type: string;
   label: string;
@@ -14,8 +16,9 @@ export interface SourceSummaryMetric {
 }
 
 export interface SourceIntelligenceResponse {
+  generated_at: string;
   workspace_id: string | null;
   summaries: SourceSummaryMetric[];
-  insights: Array<Record<string, unknown>>;
+  insights: Insight[];
   insufficient_data: string[];
 }

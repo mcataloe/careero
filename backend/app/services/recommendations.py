@@ -12,6 +12,7 @@ from app.models import Application, ArtifactPerformanceRecord, Role, CompassEval
 from app.services.artifact_performance import summarize_artifact_records
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 from app.services.search_health import generate_search_health_signals
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 class RecommendationError(Exception):
@@ -61,6 +62,7 @@ class RecommendationService:
             now=datetime.now(timezone.utc),
         )
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "recommendations": recommendations,
             "read_only": True,
@@ -291,15 +293,25 @@ def _recommendation(
     source_inputs: dict[str, Any],
 ) -> dict[str, Any]:
     stable_id = f"{recommendation_type}:{subject_type}:{subject_id or action}:{action}"
-    return {
-        "id": stable_id,
-        "recommendation_type": recommendation_type,
-        "subject_type": subject_type,
-        "subject_id": subject_id,
-        "action": action,
-        "title": title,
-        "reason": reason,
-        "basis": basis,
-        "confidence": confidence,
-        "source_inputs": source_inputs,
-    }
+    return governed_insight(
+        insight_id=stable_id,
+        category="follow_up_action" if action == "follow_up" else "application_workflow",
+        label=title,
+        message=reason,
+        basis=basis,
+        confidence=confidence,
+        source_inputs=source_inputs,
+        recommended_action={
+            "action_type": action,
+            "label": title,
+            "route_path": None,
+            "review_required": True,
+            "metadata": {},
+        },
+        recommendation_type=recommendation_type,
+        subject_type=subject_type,
+        subject_id=subject_id,
+        action=action,
+        title=title,
+        reason=reason,
+    )

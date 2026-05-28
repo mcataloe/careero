@@ -14,12 +14,14 @@ import {
   SearchTrackStrategySummarySchema,
 } from "./strategy.js";
 import { CompassEvaluationSchema } from "./compass-evaluation.js";
+import { InsightSchema } from "./insights.js";
 import { WorkspaceSchema } from "./workspace.js";
 
 export const canonicalSchemaRegistry = {
   Workspace: WorkspaceSchema,
   Opportunity: OpportunitySchema,
   CompassEvaluation: CompassEvaluationSchema,
+  Insight: InsightSchema,
   ResumeArtifact: ResumeArtifactSchema,
   CoverLetterArtifact: CoverLetterArtifactSchema,
   ApplicationState: ApplicationStateSchema,

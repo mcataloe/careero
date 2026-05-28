@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Role, User, Workspace
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 class CompensationIntelligenceError(Exception):
@@ -55,6 +56,7 @@ class CompensationIntelligenceService:
                 "Compensation intelligence needs at least three stated ranges for trend comparison."
             )
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "target_compensation_min": target,
             "observations": observations,
@@ -213,14 +215,15 @@ def _insight(
     severity: str = "info",
     source_inputs: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
-        "label": label,
-        "message": message,
-        "basis": basis,
-        "confidence": confidence,
-        "severity": severity,
-        "source_inputs": source_inputs or {},
-    }
+    return governed_insight(
+        category="compensation",
+        label=label,
+        message=message,
+        basis=basis,
+        confidence=confidence,
+        severity=severity,
+        source_inputs=source_inputs,
+    )
 
 
 def _target_compensation(workspace: Workspace | None) -> float | None:

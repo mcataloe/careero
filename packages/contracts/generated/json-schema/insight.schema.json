@@ -1,0 +1,381 @@
+{
+  "$ref": "#/definitions/Insight",
+  "definitions": {
+    "Insight": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "const": "careero.contracts.v1"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/Insight/properties/createdAt"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "fit_alignment",
+            "risk_red_flag",
+            "compensation",
+            "remote_location_alignment",
+            "seniority_alignment",
+            "application_workflow",
+            "artifact_readiness",
+            "follow_up_action",
+            "cross_opportunity_comparison",
+            "search_track_strategy",
+            "compass",
+            "source_intelligence",
+            "historical_learning",
+            "other",
+            "unknown"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidenceLevel": {
+          "type": "string",
+          "enum": [
+            "insufficient_data",
+            "weak",
+            "moderate",
+            "high",
+            "unknown"
+          ]
+        },
+        "confidenceExplanation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "knownUncertainty": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "positive",
+            "caution",
+            "warning",
+            "critical"
+          ],
+          "default": "info"
+        },
+        "priority": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generationMethod": {
+          "type": "string",
+          "enum": [
+            "ai_generated",
+            "deterministic",
+            "user_authored",
+            "imported",
+            "hybrid",
+            "unknown"
+          ],
+          "default": "deterministic"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "internal",
+            "advisor_visible",
+            "user_exportable"
+          ],
+          "default": "internal"
+        },
+        "scope": {
+          "type": "object",
+          "properties": {
+            "userScoped": {
+              "type": "boolean",
+              "const": true,
+              "default": true
+            },
+            "workspaceId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "opportunityId": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Insight/properties/scope/properties/workspaceId/anyOf/0"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "compassEvaluationId": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Insight/properties/scope/properties/workspaceId/anyOf/0"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "artifactId": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Insight/properties/scope/properties/workspaceId/anyOf/0"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "applicationId": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Insight/properties/scope/properties/workspaceId/anyOf/0"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "additionalProperties": false
+        },
+        "sourceReferences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "opportunity",
+                  "raw_job_description",
+                  "parsed_fields",
+                  "compass_evaluation",
+                  "resume_source",
+                  "artifact",
+                  "user_note",
+                  "application_event",
+                  "workspace",
+                  "other"
+                ]
+              },
+              "sourceId": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/Insight/properties/scope/properties/workspaceId/anyOf/0"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "field": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {},
+                "default": {}
+              }
+            },
+            "required": [
+              "sourceType",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "sourceInputs": {
+          "$ref": "#/definitions/Insight/properties/sourceReferences/items/properties/metadata",
+          "default": {}
+        },
+        "freshness": {
+          "type": "object",
+          "properties": {
+            "generatedAt": {
+              "$ref": "#/definitions/Insight/properties/createdAt"
+            },
+            "sourceUpdatedAt": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Insight/properties/createdAt"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "isStale": {
+              "type": "boolean",
+              "default": false
+            },
+            "refreshReason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "required": [
+            "generatedAt"
+          ],
+          "additionalProperties": false
+        },
+        "recommendedAction": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "actionType": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "routePath": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null
+                },
+                "reviewRequired": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "metadata": {
+                  "$ref": "#/definitions/Insight/properties/sourceReferences/items/properties/metadata",
+                  "default": {}
+                }
+              },
+              "required": [
+                "actionType",
+                "label"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metadata": {
+          "$ref": "#/definitions/Insight/properties/sourceReferences/items/properties/metadata",
+          "default": {}
+        }
+      },
+      "required": [
+        "contractVersion",
+        "createdAt",
+        "updatedAt",
+        "id",
+        "category",
+        "label",
+        "message",
+        "basis",
+        "confidence",
+        "confidenceLevel",
+        "scope",
+        "freshness"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

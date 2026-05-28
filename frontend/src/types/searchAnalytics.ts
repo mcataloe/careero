@@ -1,3 +1,5 @@
+import type { Insight } from "./insights";
+
 export interface AnalyticsMetric {
   value: number | null;
   label: string;
@@ -30,12 +32,13 @@ export interface SegmentResponseMetric {
 }
 
 export interface SearchAnalyticsResponse {
+  generated_at: string;
   workspace_id: string | null;
   scope: string;
   summary: Record<string, AnalyticsMetric>;
   conversion_rates: StageConversionMetric[];
   average_stage_durations: StageDurationMetric[];
   segment_response_rates: SegmentResponseMetric[];
-  signals: Array<Record<string, unknown>>;
+  signals: Insight[];
   insufficient_data: string[];
 }

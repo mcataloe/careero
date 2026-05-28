@@ -1,8 +1,8 @@
 import uuid
-from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.schemas.insights import InsightResponse
 
 class SourceSummaryMetric(BaseModel):
     source_type: str
@@ -20,7 +20,8 @@ class SourceSummaryMetric(BaseModel):
 
 
 class SourceIntelligenceResponse(BaseModel):
+    generated_at: str
     workspace_id: uuid.UUID | None = None
     summaries: list[SourceSummaryMetric] = Field(default_factory=list)
-    insights: list[dict[str, Any]] = Field(default_factory=list)
+    insights: list[InsightResponse] = Field(default_factory=list)
     insufficient_data: list[str] = Field(default_factory=list)

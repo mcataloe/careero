@@ -1,12 +1,11 @@
-export interface HistoricalLearningSummary {
-  label: string;
+import type { Insight } from "./insights";
+
+export interface HistoricalLearningSummary extends Insight {
   value: string | number | null;
-  basis: string;
-  confidence: string;
-  source_inputs: Record<string, unknown>;
 }
 
 export interface HistoricalLearningResponse {
+  generated_at: string;
   workspace_id: string | null;
   summaries: HistoricalLearningSummary[];
   insufficient_data: string[];

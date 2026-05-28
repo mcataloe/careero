@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.constants import ApplicationWorkflowState
 from app.models import Application, Role, CompassEvaluation, User
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 SUBMITTED_STATES = {
@@ -65,6 +66,7 @@ class SearchHealthService:
                 "Search health guidance is limited until at least three opportunities are tracked."
             )
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "signals": signals,
             "insufficient_data": insufficient_data,
@@ -231,16 +233,17 @@ def _signal(
     severity: str = "info",
     source_inputs: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
-        "signal_type": signal_type,
-        "label": label,
-        "message": message,
-        "gentle_guidance": guidance,
-        "basis": basis,
-        "confidence": confidence,
-        "severity": severity,
-        "source_inputs": source_inputs or {},
-    }
+    return governed_insight(
+        category="application_workflow",
+        label=label,
+        message=message,
+        basis=basis,
+        confidence=confidence,
+        severity=severity,
+        source_inputs=source_inputs,
+        signal_type=signal_type,
+        gentle_guidance=guidance,
+    )
 
 
 def _is_submitted(application: Application) -> bool:

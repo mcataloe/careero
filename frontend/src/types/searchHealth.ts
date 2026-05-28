@@ -1,15 +1,12 @@
-export interface SearchHealthSignal {
+import type { Insight } from "./insights";
+
+export interface SearchHealthSignal extends Insight {
   signal_type: string;
-  label: string;
-  message: string;
   gentle_guidance: string;
-  basis: string;
-  confidence: string;
-  severity: string;
-  source_inputs: Record<string, unknown>;
 }
 
 export interface SearchHealthResponse {
+  generated_at: string;
   workspace_id: string | null;
   signals: SearchHealthSignal[];
   insufficient_data: string[];

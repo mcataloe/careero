@@ -12,6 +12,7 @@ import {
   MoneySchema,
   OpportunitySchema,
   CompassEvaluationSchema,
+  InsightSchema,
   WorkspaceSchema,
   canonicalExamples,
   canonicalSchemaRegistry,
@@ -59,6 +60,14 @@ describe("canonical contract validation", () => {
     delete (invalid as Partial<typeof invalid>).version;
 
     expect(CompassEvaluationSchema.safeParse(invalid).success).toBe(false);
+  });
+
+  it("requires normalized insight confidence and internal visibility", () => {
+    expect(InsightSchema.parse(canonicalExamples.Insight).visibility).toBe("internal");
+
+    const invalid = { ...canonicalExamples.Insight, confidenceLevel: "certain" };
+
+    expect(InsightSchema.safeParse(invalid).success).toBe(false);
   });
 
   it("requires state history for application state", () => {
@@ -151,6 +160,7 @@ describe("generated JSON Schema exports", () => {
     "workspace.schema.json",
     "opportunity.schema.json",
     "compass-evaluation.schema.json",
+    "insight.schema.json",
     "resume-artifact.schema.json",
     "cover-letter-artifact.schema.json",
     "application-state.schema.json",

@@ -1,8 +1,8 @@
-from typing import Any
 import uuid
 
 from pydantic import BaseModel, Field
 
+from app.schemas.insights import InsightResponse
 
 class AnalyticsMetric(BaseModel):
     value: int | float | None
@@ -44,11 +44,12 @@ class SegmentResponseMetric(BaseModel):
 
 
 class SearchAnalyticsResponse(BaseModel):
+    generated_at: str
     workspace_id: uuid.UUID | None = None
     scope: str = "all_workspaces"
     summary: dict[str, AnalyticsMetric]
     conversion_rates: list[StageConversionMetric] = Field(default_factory=list)
     average_stage_durations: list[StageDurationMetric] = Field(default_factory=list)
     segment_response_rates: list[SegmentResponseMetric] = Field(default_factory=list)
-    signals: list[dict[str, Any]] = Field(default_factory=list)
+    signals: list[InsightResponse] = Field(default_factory=list)
     insufficient_data: list[str] = Field(default_factory=list)

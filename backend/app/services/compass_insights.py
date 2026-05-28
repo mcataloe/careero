@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.constants import ApplicationWorkflowState
 from app.models import Application, Role, CompassEvaluation, User, Workspace
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 class CompassInsightsError(Exception):
@@ -64,6 +65,7 @@ class CompassInsightsService:
         if not scores:
             insufficient_data.append("Completed COMPASS evaluations need overall scores.")
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "average_compass_score": round(sum(scores) / len(scores), 1)
             if scores
@@ -348,14 +350,15 @@ def _insight(
     severity: str = "info",
     source_inputs: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
-        "label": label,
-        "message": message,
-        "basis": basis,
-        "confidence": confidence,
-        "severity": severity,
-        "source_inputs": source_inputs or {},
-    }
+    return governed_insight(
+        category="compass",
+        label=label,
+        message=message,
+        basis=basis,
+        confidence=confidence,
+        severity=severity,
+        source_inputs=source_inputs,
+    )
 
 
 def _compensation_midpoint(role: Role) -> float | None:

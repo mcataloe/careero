@@ -74,12 +74,10 @@ def test_historical_learning_handles_empty_history() -> None:
         now=datetime(2026, 5, 18, tzinfo=timezone.utc),
     )
 
-    assert summaries == [
-        {
-            "label": "Historical tracks reviewed",
-            "value": 0,
-            "basis": "Counts archived/completed tracks when no specific workspace filter is provided.",
-            "confidence": "Insufficient Data",
-            "source_inputs": {"workspace_count": 0},
-        }
-    ]
+    assert len(summaries) == 1
+    assert summaries[0]["label"] == "Historical tracks reviewed"
+    assert summaries[0]["value"] == 0
+    assert summaries[0]["confidence"] == "Insufficient Data"
+    assert summaries[0]["confidence_level"] == "insufficient_data"
+    assert summaries[0]["category"] == "historical_learning"
+    assert summaries[0]["source_inputs"] == {"workspace_count": 0}

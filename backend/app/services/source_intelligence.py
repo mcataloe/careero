@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.constants import ApplicationWorkflowState, SOURCE_DISPLAY_NAMES
 from app.models import Application, ApplicationNote, Role, CompassEvaluation, User
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
-from app.services.insight_governance import governed_insight
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 RESPONSE_STATES = {
@@ -64,6 +64,7 @@ class SourceIntelligenceService:
             latest_compass=latest_compass,
         )
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "summaries": summaries,
             "insights": _source_insights(summaries),
@@ -205,6 +206,7 @@ def _source_insights(summaries: list[dict[str, Any]]) -> list[dict[str, Any]]:
     best = max(eligible, key=lambda summary: summary["response_rate"] or 0)
     return [
         governed_insight(
+            category="source_intelligence",
             label="Highest observed source traction",
             message=f"{best['label']} currently has the strongest observed response rate among sources with at least two submitted applications.",
             basis="Simple private conversion by source type; this is not a public recruiter or source rating.",

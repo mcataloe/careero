@@ -1,16 +1,12 @@
 import uuid
-from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.schemas.insights import InsightResponse
 
-class CompassTrendInsight(BaseModel):
-    label: str
-    message: str
-    basis: str
-    confidence: str
-    severity: str = "info"
-    source_inputs: dict[str, Any] = Field(default_factory=dict)
+
+class CompassTrendInsight(InsightResponse):
+    pass
 
 
 class CompassTrendPoint(BaseModel):
@@ -23,6 +19,7 @@ class CompassTrendPoint(BaseModel):
 
 
 class CompassInsightsResponse(BaseModel):
+    generated_at: str
     workspace_id: uuid.UUID | None = None
     average_compass_score: float | None = None
     trend_points: list[CompassTrendPoint] = Field(default_factory=list)

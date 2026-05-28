@@ -13,6 +13,7 @@ const fileNames: Record<keyof typeof canonicalSchemaRegistry, string> = {
   Workspace: "workspace.schema.json",
   Opportunity: "opportunity.schema.json",
   CompassEvaluation: "compass-evaluation.schema.json",
+  Insight: "insight.schema.json",
   ResumeArtifact: "resume-artifact.schema.json",
   CoverLetterArtifact: "cover-letter-artifact.schema.json",
   ApplicationState: "application-state.schema.json",

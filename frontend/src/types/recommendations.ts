@@ -1,17 +1,16 @@
-export interface Recommendation {
-  id: string;
+import type { Insight } from "./insights";
+
+export interface Recommendation extends Insight {
   recommendation_type: string;
   subject_type: string;
   subject_id: string | null;
   action: string;
   title: string;
   reason: string;
-  basis: string;
-  confidence: string;
-  source_inputs: Record<string, unknown>;
 }
 
 export interface RecommendationListResponse {
+  generated_at: string;
   workspace_id: string | null;
   recommendations: Recommendation[];
   read_only: boolean;

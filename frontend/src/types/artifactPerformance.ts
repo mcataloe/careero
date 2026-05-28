@@ -1,3 +1,5 @@
+import type { Insight } from "./insights";
+
 export interface ArtifactPerformanceMetric {
   label: string;
   artifact_type: string | null;
@@ -12,10 +14,11 @@ export interface ArtifactPerformanceMetric {
 }
 
 export interface ArtifactPerformanceResponse {
+  generated_at: string;
   workspace_id: string | null;
   summary: ArtifactPerformanceMetric[];
   by_variant: ArtifactPerformanceMetric[];
   by_role_category: ArtifactPerformanceMetric[];
-  insights: Array<Record<string, unknown>>;
+  insights: Insight[];
   insufficient_data: string[];
 }

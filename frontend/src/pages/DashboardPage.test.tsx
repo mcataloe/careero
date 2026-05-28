@@ -5,6 +5,7 @@ import { DashboardPage } from "./DashboardPage";
 import { render, screen, userEvent, waitFor } from "../test-utils";
 import type { ApplicationPipelineResponse } from "../types/applications";
 import type { CompassInsightsResponse } from "../types/compassInsights";
+import type { Insight } from "../types/insights";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 
 function jsonResponse(response: unknown, status = 200) {
@@ -17,7 +18,49 @@ function jsonResponse(response: unknown, status = 200) {
   };
 }
 
+const generatedAt = "2026-05-28T15:00:00.000Z";
+
+function insight(overrides: Partial<Insight>): Insight {
+  return {
+    id: "insight-test",
+    category: "other",
+    label: "Insight",
+    message: "Insight message.",
+    basis: "Stored Careero data.",
+    confidence: "Weak Signal",
+    confidence_level: "weak",
+    confidence_explanation: null,
+    known_uncertainty: ["Outcome history is still thin."],
+    warnings: [],
+    severity: "info",
+    priority: null,
+    generation_method: "deterministic",
+    visibility: "internal",
+    scope: {
+      user_scoped: true,
+      workspace_id: null,
+      opportunity_id: null,
+      compass_evaluation_id: null,
+      artifact_id: null,
+      application_id: null,
+    },
+    source_references: [],
+    source_inputs: {},
+    freshness: {
+      generated_at: generatedAt,
+      source_updated_at: null,
+      is_stale: false,
+      refresh_reason: null,
+    },
+    recommended_action: null,
+    created_at: null,
+    updated_at: null,
+    ...overrides,
+  };
+}
+
 const searchAnalytics: SearchAnalyticsResponse = {
+  generated_at: generatedAt,
   workspace_id: null,
   scope: "all",
   summary: {
@@ -40,27 +83,32 @@ const searchAnalytics: SearchAnalyticsResponse = {
   average_stage_durations: [],
   segment_response_rates: [],
   signals: [
-    {
+    insight({
       label: "Prioritize active follow-ups",
-      confidence: "moderate",
+      confidence: "Moderate Confidence",
+      confidence_level: "moderate",
       message: "Some applications have next actions.",
-    },
+    }),
   ],
   insufficient_data: [],
 };
 
 const compassInsights: CompassInsightsResponse = {
+  generated_at: generatedAt,
   workspace_id: null,
   average_compass_score: 82,
   insights: [
-    {
+    insight({
+      id: "compass-insight",
+      category: "compass",
       label: "Strong platform fit",
       message: "COMPASS scores are strongest for platform roles.",
       basis: "Stored evaluations.",
-      confidence: "moderate",
+      confidence: "Moderate Confidence",
+      confidence_level: "moderate",
       severity: "positive",
       source_inputs: {},
-    },
+    }),
   ],
   insufficient_data: [],
 };

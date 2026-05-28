@@ -1,3 +1,5 @@
+import type { Insight } from "./insights";
+
 export interface CompensationObservation {
   role_id: string;
   title: string;
@@ -10,16 +12,10 @@ export interface CompensationObservation {
   source_basis: string;
 }
 
-export interface CompensationInsight {
-  label: string;
-  message: string;
-  basis: string;
-  confidence: string;
-  severity: string;
-  source_inputs: Record<string, unknown>;
-}
+export type CompensationInsight = Insight;
 
 export interface CompensationIntelligenceResponse {
+  generated_at: string;
   workspace_id: string | null;
   target_compensation_min: number | null;
   observations: CompensationObservation[];

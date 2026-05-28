@@ -18,7 +18,7 @@ from app.models import (
     User,
 )
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
-from app.services.insight_governance import governed_insight
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 POSITIVE_RESPONSE_STATES = {
@@ -98,6 +98,7 @@ class ArtifactPerformanceService:
         synced = [self._with_current_outcomes(record) for record in records]
         summary = summarize_artifact_records(synced)
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace_id,
             "summary": summary["summary"],
             "by_variant": summary["by_variant"],
@@ -230,6 +231,7 @@ def _insights(records: list[ArtifactPerformanceRecord]) -> list[dict[str, Any]]:
         best = max(meaningful, key=lambda metric: metric["response_rate"] or 0)
         insights.append(
             governed_insight(
+                category="artifact_readiness",
                 label="Observed artifact traction",
                 message=f"{best['label']} has the strongest observed response rate among variants with at least three uses.",
                 basis="Simple observed response rate by artifact variant. This is correlation, not proof.",

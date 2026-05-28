@@ -21,7 +21,7 @@ from app.models import (
     Workspace,
 )
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
-from app.services.insight_governance import governed_insight
+from app.services.insight_governance import generated_timestamp, governed_insight
 
 
 RESPONSE_STATES = {
@@ -164,6 +164,7 @@ class SearchAnalyticsService:
         )
 
         return {
+            "generated_at": generated_timestamp(),
             "workspace_id": workspace.id if workspace is not None else None,
             "scope": workspace.title if workspace is not None else "all_workspaces",
             "summary": summary,
@@ -438,6 +439,7 @@ def _focus_signals(
         if rate < 0.15:
             signals.append(
                 governed_insight(
+                    category="application_workflow",
                     label="Low observed response rate",
                     message="Recent traction appears limited; review fit and source quality before increasing application volume.",
                     basis="Interviews or positive responses divided by submitted applications.",
@@ -454,6 +456,7 @@ def _focus_signals(
     if high_fit_apps and sum(1 for app in high_fit_apps if _has_response(app)) > 0:
         signals.append(
             governed_insight(
+                category="fit_alignment",
                 label="High-fit opportunities are producing traction",
                 message="Prioritize opportunities with similar COMPASS fit signals before expanding the search.",
                 basis="At least one high-COMPASS-fit opportunity has reached an interview or offer signal.",

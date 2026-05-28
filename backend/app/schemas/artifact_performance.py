@@ -1,8 +1,8 @@
 import uuid
-from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.schemas.insights import InsightResponse
 
 class ArtifactPerformanceMetric(BaseModel):
     label: str
@@ -18,9 +18,10 @@ class ArtifactPerformanceMetric(BaseModel):
 
 
 class ArtifactPerformanceResponse(BaseModel):
+    generated_at: str
     workspace_id: uuid.UUID | None = None
     summary: list[ArtifactPerformanceMetric] = Field(default_factory=list)
     by_variant: list[ArtifactPerformanceMetric] = Field(default_factory=list)
     by_role_category: list[ArtifactPerformanceMetric] = Field(default_factory=list)
-    insights: list[dict[str, Any]] = Field(default_factory=list)
+    insights: list[InsightResponse] = Field(default_factory=list)
     insufficient_data: list[str] = Field(default_factory=list)

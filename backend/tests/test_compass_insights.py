@@ -57,13 +57,10 @@ def test_compass_insights_avoid_false_precision_with_thin_data() -> None:
         workspace=None,
     )
 
-    assert insights == [
-        {
-            "label": "COMPASS sample is thin",
-            "message": "Search-level COMPASS direction is still a weak signal.",
-            "basis": "Fewer than three completed COMPASS scores are available.",
-            "confidence": "Insufficient Data",
-            "severity": "info",
-            "source_inputs": {"score_count": 1},
-        }
-    ]
+    assert len(insights) == 1
+    assert insights[0]["label"] == "COMPASS sample is thin"
+    assert insights[0]["confidence"] == "Insufficient Data"
+    assert insights[0]["confidence_level"] == "insufficient_data"
+    assert insights[0]["category"] == "compass"
+    assert insights[0]["source_inputs"] == {"score_count": 1}
+    assert insights[0]["freshness"]["generated_at"]

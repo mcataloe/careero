@@ -3,6 +3,7 @@ export * from "./artifacts.js";
 export * from "./automation.js";
 export * from "./enums.js";
 export * from "./examples.js";
+export * from "./insights.js";
 export * from "./opportunity.js";
 export * from "./primitives.js";
 export * from "./registry.js";
