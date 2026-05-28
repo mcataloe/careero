@@ -1,10 +1,10 @@
-﻿# Canonical Domain Model
+# Canonical Domain Model
 
 Status: Active  
 Doc Type: Governance  
 Layer: N/A  
 Source of Truth: Yes  
-Last Reviewed: 2026-05-27  
+Last Reviewed: 2026-05-28
 Related Docs:
 - docs/03_domain-design/opportunity-model.md
 - docs/03_domain-design/application-workflow-persistence.md
@@ -181,9 +181,12 @@ Artifact lifecycle:
 
 - `draft`: generated or uploaded but not finalized.
 - `reviewed`: user has reviewed.
-- `approved`: ready to export or apply.
-- `exported`: exported to at least one format.
+- `submitted`: user marked this exact version as submitted or otherwise final for an application workflow.
 - `archived`: retained but inactive.
+
+Export history is metadata about generated files. It is not a lifecycle state.
+Legacy `approved` and `exported` lifecycle values should be treated as
+compatibility metadata and normalized before current UI/API rendering.
 
 ### Cover Letter Artifact
 

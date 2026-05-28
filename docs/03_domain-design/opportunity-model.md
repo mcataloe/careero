@@ -124,7 +124,7 @@ Opportunity status, Application workflow state, and Artifact lifecycle status ar
 | --- | --- | --- | --- |
 | Opportunity status | `OpportunityStatusSchema` | State of the saved professional possibility or listing, such as discovered, interested, evaluating, evaluated, applied, withdrawn, or archived | `Role.status`, with the frontend currently using a narrower `RoleStatus` union |
 | Application workflow state | `ApplicationWorkflowStateSchema` | State of the user's pursuit workflow, such as discovered, interested, applied, interviewing, offer, rejected, withdrawn, or archived | `Application.current_state` plus state history |
-| Artifact lifecycle status | `ArtifactLifecycleStatusSchema` | State of a generated artifact, such as draft, reviewed, approved, exported, or archived | Artifact contracts define it; current backend generated artifacts are still mostly draft foundations |
+| Artifact lifecycle status | `ArtifactLifecycleStatusSchema` | State of a generated artifact: draft, reviewed, submitted, or archived | Artifact contracts define it; current backend generated artifacts now have additive lifecycle fields while workflow APIs remain in progress |
 
 Opportunity status is not the same as Application state.
 

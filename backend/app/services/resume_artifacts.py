@@ -208,7 +208,16 @@ class ResumeArtifactService:
                 user_id=user.id,
                 workspace_id=workspace.id,
                 role_id=role.id,
+                source_artifact_id=(
+                    uuid.UUID(artifact["revision"]["parentArtifactId"])
+                    if artifact["revision"]["parentArtifactId"]
+                    else None
+                ),
+                evaluation_id=evaluation.id,
+                source_resume_version_id=source_version.id,
                 artifact_type=artifact["artifactType"],
+                lifecycle_status=artifact["lifecycleStatus"],
+                version_number=artifact["revision"]["revisionNumber"],
                 title=artifact["title"],
                 content=artifact["content"],
                 artifact_metadata={
@@ -375,6 +384,7 @@ class ResumeArtifactService:
             "opportunityId": str(role.id),
             "sourceArtifactId": None,
             "artifactType": "tailored_resume",
+            "lifecycleStatus": "draft",
             "title": output["title"].strip(),
             "content": output["content"].strip(),
             "formatMetadata": {
@@ -414,6 +424,9 @@ class ResumeArtifactService:
             "uploadMetadata": None,
             "parsingMetadata": None,
             "tailoringNotes": output.get("tailoring_notes"),
+            "reviewedAt": None,
+            "submittedAt": None,
+            "archivedAt": None,
             "metadata": {
                 "targetEvaluationId": str(evaluation.id),
                 "sourceResume": _source_resume_metadata(source_version),

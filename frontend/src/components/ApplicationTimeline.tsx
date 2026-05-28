@@ -39,6 +39,7 @@ const METADATA_LABELS: Record<string, string> = {
   recommendation: "Recommendation",
   confidence: "Confidence",
   revision_number: "Revision",
+  lifecycle_status: "Artifact status",
   reactivate: "Reactivation",
 };
 

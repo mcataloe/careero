@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   CoverLetterToneSchema,
   ExportFormatSchema,
+  ArtifactLifecycleStatusSchema,
   ResumeArtifactTypeSchema,
 } from "./enums.js";
 import {
@@ -64,6 +65,7 @@ export const ResumeArtifactSchema = ContractEnvelopeSchema.merge(TimestampFields
   opportunityId: IdSchema.nullable(),
   sourceArtifactId: IdSchema.nullable(),
   artifactType: ResumeArtifactTypeSchema,
+  lifecycleStatus: ArtifactLifecycleStatusSchema.default("draft"),
   title: z.string().min(1),
   content: z.string().min(1),
   formatMetadata: FormatMetadataSchema,
@@ -73,6 +75,9 @@ export const ResumeArtifactSchema = ContractEnvelopeSchema.merge(TimestampFields
   uploadMetadata: ArtifactUploadMetadataSchema.nullable(),
   parsingMetadata: ArtifactParsingMetadataSchema.nullable(),
   tailoringNotes: z.string().nullable(),
+  reviewedAt: IsoDateTimeSchema.nullable(),
+  submittedAt: IsoDateTimeSchema.nullable(),
+  archivedAt: IsoDateTimeSchema.nullable(),
   metadata: MetadataSchema,
 });
 
@@ -86,6 +91,9 @@ export const CoverLetterArtifactSchema = ContractEnvelopeSchema.merge(TimestampF
   id: IdSchema,
   workspaceId: IdSchema,
   opportunityId: IdSchema.nullable(),
+  sourceArtifactId: IdSchema.nullable(),
+  artifactType: z.literal("cover_letter").default("cover_letter"),
+  lifecycleStatus: ArtifactLifecycleStatusSchema.default("draft"),
   title: z.string().min(1),
   content: z.string().min(1),
   tone: CoverLetterToneSchema,
@@ -93,6 +101,9 @@ export const CoverLetterArtifactSchema = ContractEnvelopeSchema.merge(TimestampF
   editHistory: z.array(CoverLetterEditHistoryEntrySchema).default([]),
   exportMetadata: z.array(ArtifactExportSchema).default([]),
   revision: ArtifactRevisionSchema,
+  reviewedAt: IsoDateTimeSchema.nullable(),
+  submittedAt: IsoDateTimeSchema.nullable(),
+  archivedAt: IsoDateTimeSchema.nullable(),
   metadata: MetadataSchema,
 });
 

@@ -32,6 +32,31 @@
             }
           ]
         },
+        "sourceArtifactId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifactType": {
+          "type": "string",
+          "const": "cover_letter",
+          "default": "cover_letter"
+        },
+        "lifecycleStatus": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "reviewed",
+            "submitted",
+            "archived"
+          ],
+          "default": "draft"
+        },
         "title": {
           "type": "string",
           "minLength": 1
@@ -302,6 +327,36 @@
           ],
           "additionalProperties": false
         },
+        "reviewedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "submittedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "archivedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CoverLetterArtifact/properties/createdAt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "metadata": {
           "type": "object",
           "additionalProperties": {}
@@ -314,11 +369,15 @@
         "id",
         "workspaceId",
         "opportunityId",
+        "sourceArtifactId",
         "title",
         "content",
         "tone",
         "generationMetadata",
         "revision",
+        "reviewedAt",
+        "submittedAt",
+        "archivedAt",
         "metadata"
       ],
       "additionalProperties": false

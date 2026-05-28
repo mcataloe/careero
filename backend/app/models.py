@@ -740,6 +740,9 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
         Index("ix_generated_artifacts_workspace_id", "workspace_id"),
         Index("ix_generated_artifacts_application_id", "application_id"),
         Index("ix_generated_artifacts_role_id", "role_id"),
+        Index("ix_generated_artifacts_lifecycle_status", "lifecycle_status"),
+        Index("ix_generated_artifacts_evaluation_id", "evaluation_id"),
+        Index("ix_generated_artifacts_source_artifact_id", "source_artifact_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -765,9 +768,30 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
         UUID(as_uuid=True),
         ForeignKey("roles.id"),
     )
+    source_artifact_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("generated_artifacts.id"),
+    )
+    evaluation_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("compass_evaluations.id"),
+    )
+    source_resume_version_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("resume_source_versions.id"),
+    )
     artifact_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    lifecycle_status: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="draft",
+    )
+    version_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     artifact_metadata: Mapped[dict] = mapped_column(
         "metadata",
         JSONB,

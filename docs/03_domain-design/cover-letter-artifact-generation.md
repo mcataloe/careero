@@ -1,10 +1,10 @@
-﻿# Cover Letter Artifact Generation
+# Cover Letter Artifact Generation
 
 Status: Active  
 Doc Type: Domain Design  
 Layer: Layer 3 / Layer 8  
 Source of Truth: Yes  
-Last Reviewed: 2026-05-27  
+Last Reviewed: 2026-05-28
 Related Docs:
 - docs/03_domain-design/resume-artifact-generation.md
 - docs/04_ai-and-compass/compass-evaluation-model.md
@@ -74,6 +74,11 @@ The service persists generated cover letters through the existing
 - `generated_artifacts.id` is the canonical `CoverLetterArtifact.id`.
 - `generated_artifacts.role_id` links the artifact to the target Role.
 - `generated_artifacts.artifact_type` is `cover_letter`.
+- `generated_artifacts.lifecycle_status` starts as `draft`.
+- `generated_artifacts.version_number` mirrors the canonical revision number.
+- `generated_artifacts.evaluation_id` links to the target COMPASS evaluation when present.
+- `generated_artifacts.source_resume_version_id` links to the grounding resume/profile version when present.
+- `generated_artifacts.source_artifact_id` links to the prior artifact version when one exists.
 - `metadata.contract` stores the complete validated `CoverLetterArtifact`.
 - `metadata.source_resume` stores source id, source version id, source label,
   source type, and source hash when a source is available.
@@ -85,6 +90,8 @@ role has `revisionNumber = 1` and no parent. Later generations for the same
 workspace and role increment the revision and point `parentArtifactId` to the
 previous cover letter artifact.
 
-Generation is draft-only. User review, approval, export, and archive states are
-future workflow layers and should not be inferred from generation alone.
+Generation is draft-only. User review, submitted, and archive states are
+Layer 6 lifecycle workflow states and should not be inferred from generation
+alone. Export metadata records file generation and does not by itself make an
+artifact submitted.
 

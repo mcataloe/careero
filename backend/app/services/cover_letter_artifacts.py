@@ -226,7 +226,18 @@ class CoverLetterArtifactService:
                 user_id=user.id,
                 workspace_id=workspace.id,
                 role_id=role.id,
+                source_artifact_id=(
+                    uuid.UUID(artifact["revision"]["parentArtifactId"])
+                    if artifact["revision"]["parentArtifactId"]
+                    else None
+                ),
+                evaluation_id=evaluation.id if evaluation is not None else None,
+                source_resume_version_id=(
+                    source_version.id if source_version is not None else None
+                ),
                 artifact_type="cover_letter",
+                lifecycle_status=artifact["lifecycleStatus"],
+                version_number=artifact["revision"]["revisionNumber"],
                 title=artifact["title"],
                 content=artifact["content"],
                 artifact_metadata={
@@ -415,6 +426,9 @@ class CoverLetterArtifactService:
             "id": str(artifact_id),
             "workspaceId": str(workspace_id),
             "opportunityId": str(role.id),
+            "sourceArtifactId": None,
+            "artifactType": "cover_letter",
+            "lifecycleStatus": "draft",
             "title": output["title"].strip(),
             "content": output["content"].strip(),
             "tone": tone,
@@ -447,6 +461,9 @@ class CoverLetterArtifactService:
                 else "Regenerated cover letter artifact.",
                 "createdAt": now,
             },
+            "reviewedAt": None,
+            "submittedAt": None,
+            "archivedAt": None,
             "metadata": {
                 "targetEvaluationId": str(evaluation.id) if evaluation is not None else None,
                 "sourceResume": _source_resume_metadata(source_version),

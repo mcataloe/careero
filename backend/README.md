@@ -519,7 +519,7 @@ If `evaluation_id` is omitted, Careero uses the latest COMPASS evaluation for th
 
 The legacy `/api/roles/{role_id}/resume-artifacts` route remains available as a compatibility alias while persistence is Role-backed.
 
-The generated resume is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Source lineage, target evaluation linkage, revision metadata, generation metadata, and content hashes are preserved. The prompt and validation layers enforce the non-fabrication rule: employers, roles, technologies, metrics, accomplishments, credentials, and experience must come from the supplied resume/profile source or explicit user-provided inputs.
+The generated resume is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Source lineage, target evaluation linkage, lifecycle status, revision metadata, generation metadata, and content hashes are preserved. New generated resumes start as `draft`; review, submitted, and archive state changes are separate lifecycle operations. The prompt and validation layers enforce the non-fabrication rule: employers, roles, technologies, metrics, accomplishments, credentials, and experience must come from the supplied resume/profile source or explicit user-provided inputs.
 
 ## Cover Letter Artifact Generation
 
@@ -554,7 +554,7 @@ If `evaluation_id` is omitted, Careero uses the latest COMPASS evaluation when o
 
 The legacy `/api/roles/{role_id}/cover-letter-artifacts` route remains available as a compatibility alias while persistence is Role-backed.
 
-The generated cover letter is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Opportunity linkage, optional source lineage, optional target evaluation linkage, tone metadata, generation metadata, and revision metadata are preserved.
+The generated cover letter is stored in `generated_artifacts`, with the complete canonical artifact in `metadata.contract`. Opportunity linkage, lifecycle status, optional source lineage, optional target evaluation linkage, tone metadata, generation metadata, and revision metadata are preserved. New generated cover letters start as `draft`; review, submitted, and archive state changes are separate lifecycle operations.
 
 ## Local Artifact Export
 

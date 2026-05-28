@@ -30,6 +30,7 @@ from app.models import (
 )
 from app.schemas.automation import AutomationPreferencesUpdate
 from app.services.activity_log import ActivityLogService
+from app.services.artifact_lifecycle import normalize_artifact_lifecycle_status
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
@@ -485,13 +486,13 @@ class AutomationService:
             metadata = artifact.artifact_metadata or {}
             contract = metadata.get("contract") if isinstance(metadata, dict) else None
             warnings = _artifact_warnings(contract)
-            lifecycle = contract.get("lifecycleStatus") if isinstance(contract, dict) else None
+            lifecycle = normalize_artifact_lifecycle_status(artifact.lifecycle_status)
             export_metadata = contract.get("exportMetadata", []) if isinstance(contract, dict) else []
             if warnings:
                 summary = "This artifact has generation warnings that should be reviewed."
                 preview = "Review generation warnings before using or exporting this artifact."
                 confidence = "Moderate Confidence"
-            elif lifecycle not in {"reviewed", "approved", "exported"}:
+            elif lifecycle == "draft":
                 summary = "This artifact is still a draft and should be reviewed before use."
                 preview = "Review this draft before treating it as ready."
                 confidence = "Draft Only"
@@ -512,7 +513,7 @@ class AutomationService:
                 action_type=AutomationActionType.ARTIFACT_READINESS_CHECK.value,
                 title="Review artifact readiness",
                 summary=summary,
-                reason="Artifact readiness checks do not mark artifacts reviewed, approved, or submitted.",
+                reason="Artifact readiness checks do not mark artifacts reviewed, submitted, or archived.",
                 basis="Stored artifact metadata and generation warnings only.",
                 confidence=confidence,
                 source_inputs={

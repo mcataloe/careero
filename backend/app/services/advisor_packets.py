@@ -22,6 +22,7 @@ from app.models import (
     User,
 )
 from app.schemas.advisor_packets import AdvisorPacketIncludeOptions
+from app.services.artifact_lifecycle import normalize_artifact_lifecycle_status
 from app.services.current_user import CurrentUserResolutionError, resolve_current_user
 
 
@@ -255,9 +256,7 @@ def _artifact_summary(
         else None
     )
     revision = contract.get("revision", {}) if isinstance(contract, dict) else {}
-    lifecycle_status = (
-        contract.get("lifecycleStatus") if isinstance(contract, dict) else None
-    )
+    lifecycle_status = normalize_artifact_lifecycle_status(artifact.lifecycle_status)
     warnings = [
         {
             "code": (
@@ -276,13 +275,13 @@ def _artifact_summary(
             ),
         }
     ]
-    if lifecycle_status != "approved":
+    if lifecycle_status != "submitted":
         warnings.append(
             {
-                "code": "artifact_not_approved",
+                "code": "artifact_not_submitted",
                 "message": (
-                    "Generated artifact lifecycle is not approved; keep draft and "
-                    "truthfulness warnings visible before any future sharing flow."
+                    "Generated artifact lifecycle is not submitted; keep draft, review, "
+                    "and truthfulness warnings visible before any future sharing flow."
                 ),
             }
         )

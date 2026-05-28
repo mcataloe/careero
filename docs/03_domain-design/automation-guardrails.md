@@ -23,8 +23,8 @@ Implemented Layer 9 automation is suggestion-first:
 - Approval logs are first-class audit records.
 - Workspace automation preferences live in workspace preferences.
 - Communication drafts remain local suggestion previews.
-- Artifact readiness checks do not mark artifacts reviewed, approved, exported,
-  or submitted.
+- Artifact readiness checks do not mark artifacts reviewed, submitted, archived,
+  or exported.
 - Workflow state suggestions do not mutate application state.
 - External actions remain disabled.
 

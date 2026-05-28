@@ -1,10 +1,10 @@
-﻿# Advisor Collaboration Mode
+# Advisor Collaboration Mode
 
 Status: Draft  
 Doc Type: Domain Design  
 Layer: Layer 12  
 Source of Truth: Yes  
-Last Reviewed: 2026-05-27  
+Last Reviewed: 2026-05-28
 Related Docs:
 - docs/05_security-privacy-governance/privacy-data-governance.md
 - docs/01_strategy/04_cross-layer-impact-map.md
@@ -96,9 +96,9 @@ would include unless the user explicitly changes it in an approved flow.
 | Parsed opportunity fields | Packet-eligible summary | Yes | Show parse confidence and reviewed/unreviewed status where available. | Prefer selected structured fields over raw posting text. |
 | Application workflow state | Packet-eligible summary | Yes | Mark current state as user-maintained and local. | Current state can help an advisor understand timing. |
 | Application state history | Private by default | Yes | Redact timestamps or sensitive event details when needed. | History can expose decision rationale and search behavior. |
-| Generated resume artifact | Packet-eligible if user selects it | Yes | Must carry lifecycle, source-grounding, and truthfulness warnings until lifecycle is mature. | Drafts must not be treated as approved or submitted. |
-| Generated cover-letter artifact | Packet-eligible if user selects it | Yes | Must carry lifecycle, source-grounding, and truthfulness warnings until lifecycle is mature. | Drafts must not be treated as approved or submitted. |
-| Artifact lifecycle status | Packet-eligible summary | Yes | Warn when artifact is draft, unreviewed, unapproved, or not submitted. | Lifecycle status should travel with any selected artifact. |
+| Generated resume artifact | Packet-eligible if user selects it | Yes | Must carry lifecycle, source-grounding, and truthfulness warnings until lifecycle is mature. | Drafts must not be treated as submitted. |
+| Generated cover-letter artifact | Packet-eligible if user selects it | Yes | Must carry lifecycle, source-grounding, and truthfulness warnings until lifecycle is mature. | Drafts must not be treated as submitted. |
+| Artifact lifecycle status | Packet-eligible summary | Yes | Warn when artifact is draft, unreviewed, or not submitted. | Lifecycle status should travel with any selected artifact. |
 | COMPASS score | Private by default | Yes, future approved flow only | Explain COMPASS is advisory, not deterministic truth. | A score without explanation can be misleading. |
 | COMPASS explanation | Private by default | Yes, future approved flow only | Redact internal rationale, ATS notes, compensation strategy, and company commentary unless explicitly selected. | Must remain source-grounded and explainable. |
 | ATS risk notes | Private by default | Yes, future approved flow only | Strong warning that ATS notes are internal strategy and not employer-facing. | Must never be included in employer-facing artifacts. |

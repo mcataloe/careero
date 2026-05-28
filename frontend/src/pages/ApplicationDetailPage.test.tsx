@@ -200,9 +200,9 @@ const advisorPacket: AdvisorPacket = {
       updated_at: "2026-05-16T15:00:00Z",
       warnings: [
         {
-          code: "artifact_not_approved",
+          code: "artifact_not_submitted",
           message:
-            "Generated artifact lifecycle is not approved; keep draft and truthfulness warnings visible before any future sharing flow.",
+            "Generated artifact lifecycle is not submitted; keep draft, review, and truthfulness warnings visible before any future sharing flow.",
         },
       ],
     },

@@ -146,7 +146,17 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
     generated_artifact_columns = {
         column["name"] for column in inspector.get_columns("generated_artifacts")
     }
-    assert "workspace_id" in generated_artifact_columns
+    assert {
+        "workspace_id",
+        "source_artifact_id",
+        "evaluation_id",
+        "source_resume_version_id",
+        "lifecycle_status",
+        "version_number",
+        "reviewed_at",
+        "submitted_at",
+        "archived_at",
+    }.issubset(generated_artifact_columns)
 
     application_columns = {
         column["name"] for column in inspector.get_columns("applications")
@@ -205,6 +215,11 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
     assert "ix_roles_workspace_id" in role_indexes
     assert "ix_compass_evaluations_workspace_id" in compass_indexes
     assert "ix_generated_artifacts_workspace_id" in generated_artifact_indexes
+    assert {
+        "ix_generated_artifacts_lifecycle_status",
+        "ix_generated_artifacts_evaluation_id",
+        "ix_generated_artifacts_source_artifact_id",
+    }.issubset(generated_artifact_indexes)
     assert {"note_type", "deleted_at"}.issubset(application_note_columns)
     assert "deleted_at" in application_external_link_columns
     assert {

@@ -61,8 +61,7 @@ export const ConfidenceLevelSchema = z.enum(["low", "medium", "high"]);
 export const ArtifactLifecycleStatusSchema = z.enum([
   "draft",
   "reviewed",
-  "approved",
-  "exported",
+  "submitted",
   "archived",
 ]);
 
@@ -147,6 +146,7 @@ export type RemoteType = z.infer<typeof RemoteTypeSchema>;
 export type EmploymentType = z.infer<typeof EmploymentTypeSchema>;
 export type Recommendation = z.infer<typeof RecommendationSchema>;
 export type ConfidenceLevel = z.infer<typeof ConfidenceLevelSchema>;
+export type ArtifactLifecycleStatus = z.infer<typeof ArtifactLifecycleStatusSchema>;
 export type AutomationActionType = z.infer<typeof AutomationActionTypeSchema>;
 export type AutomationTargetType = z.infer<typeof AutomationTargetTypeSchema>;
 export type AutomationSuggestionStatus = z.infer<typeof AutomationSuggestionStatusSchema>;

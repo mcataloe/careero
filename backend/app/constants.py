@@ -39,6 +39,18 @@ class ApplicationInterviewStatus(StrEnum):
     NO_SHOW = "no_show"
 
 
+class ArtifactLifecycleStatus(StrEnum):
+    DRAFT = "draft"
+    REVIEWED = "reviewed"
+    SUBMITTED = "submitted"
+    ARCHIVED = "archived"
+
+
+class ArtifactType(StrEnum):
+    TAILORED_RESUME = "tailored_resume"
+    COVER_LETTER = "cover_letter"
+
+
 class AutomationActionType(StrEnum):
     FOLLOW_UP_SUGGESTION = "follow_up_suggestion"
     REMINDER_SUGGESTION = "reminder_suggestion"

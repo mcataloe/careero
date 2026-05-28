@@ -50,6 +50,7 @@ from app.services.application_state_machine import (
     can_transition,
     get_available_transitions,
 )
+from app.services.artifact_lifecycle import normalize_artifact_lifecycle_status
 from app.services.current_user import (
     CurrentUserContext,
     CurrentUserResolutionError,
@@ -1240,6 +1241,9 @@ class ApplicationWorkflowService:
                     source_id=str(artifact.id),
                     metadata={
                         "artifact_type": artifact.artifact_type,
+                        "lifecycle_status": normalize_artifact_lifecycle_status(
+                            artifact.lifecycle_status
+                        ),
                         "revision_number": revision.get("revisionNumber"),
                     },
                 )
@@ -1335,12 +1339,8 @@ class ApplicationWorkflowService:
             "id": artifact.id,
             "artifact_type": artifact.artifact_type,
             "title": artifact.title,
-            "status": (
-                contract.get("lifecycleStatus")
-                if isinstance(contract, dict)
-                else None
-            ),
-            "revision_number": revision.get("revisionNumber"),
+            "status": normalize_artifact_lifecycle_status(artifact.lifecycle_status),
+            "revision_number": artifact.version_number or revision.get("revisionNumber"),
             "updated_at": artifact.updated_at,
         }
 

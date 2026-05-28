@@ -237,7 +237,15 @@ def test_service_creates_and_persists_valid_cover_letter_artifact(
     assert persisted is not None
     assert persisted.role_id == role.id
     assert persisted.artifact_type == "cover_letter"
+    assert persisted.lifecycle_status == "draft"
+    assert persisted.version_number == 1
+    assert persisted.evaluation_id == evaluation.id
+    assert persisted.source_resume_version_id == source["active_version"]["id"]
+    assert persisted.source_artifact_id is None
     assert persisted.artifact_metadata["contract"]["id"] == artifact["id"]
+    assert persisted.artifact_metadata["contract"]["artifactType"] == "cover_letter"
+    assert persisted.artifact_metadata["contract"]["lifecycleStatus"] == "draft"
+    assert persisted.artifact_metadata["contract"]["submittedAt"] is None
     assert persisted.artifact_metadata["target_evaluation_id"] == str(evaluation.id)
 
 
@@ -422,6 +430,10 @@ def test_revision_lineage_increments_for_same_workspace_and_role(
     assert first["revision"]["revisionNumber"] == 1
     assert second["revision"]["revisionNumber"] == 2
     assert second["revision"]["parentArtifactId"] == first["id"]
+    persisted_second = seeded_session.get(GeneratedArtifact, UUID(second["id"]))
+    assert persisted_second is not None
+    assert persisted_second.version_number == 2
+    assert persisted_second.source_artifact_id == UUID(first["id"])
 
 
 def test_api_returns_503_when_ai_cover_letter_generation_is_disabled(
