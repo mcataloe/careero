@@ -12,6 +12,7 @@ Related Docs:
 This section contains findings, pressure tests, audits, and non-canonical task parking lots.
 
 - [Current pressure-test summary](current-pressure-test-summary.md)
+- [Repo reconciliation recon](repo-reconciliation-recon.md)
 - [Username deprecation audit](username-deprecation-audit.md)
 - [Simple TODO list](simple-todo-list.md)
 - `layer-recon-summaries/`: reserved for future layer recon summaries.
