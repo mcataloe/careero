@@ -59,11 +59,14 @@ class RoleParsingService:
                 input=build_role_parsing_prompt(payload),
                 text_format=RoleParseAIOutput,
                 max_output_tokens=self.settings.openai_max_output_tokens,
+                **self._model_options(),
             )
             parsed = getattr(response, "output_parsed", None)
             if parsed is None:
+                details = self._missing_parsed_output_details(response)
+                logger.warning("Role parsing response was not parseable: %s", details)
                 raise RoleParsingValidationError(
-                    "Role parser response did not include parsed output"
+                    f"Role parser did not return parseable output: {details}"
                 )
             if not isinstance(parsed, RoleParseAIOutput):
                 parsed = RoleParseAIOutput.model_validate(parsed)
@@ -109,3 +112,91 @@ class RoleParsingService:
             exclude_none=True,
         )
         return ParsedRole.model_validate(data)
+
+    def _model_options(self) -> dict[str, Any]:
+        model = self.settings.openai_default_role_parsing_model.lower()
+        if model.startswith("gpt-5"):
+            return {"reasoning": {"effort": "minimal"}}
+        return {}
+
+    def _missing_parsed_output_details(self, response: Any) -> str:
+        status = getattr(response, "status", None)
+        incomplete_reason = self._incomplete_reason(response)
+        output_types = self._output_types(response)
+        refusal = self._refusal_summary(response)
+        reasoning_tokens = self._reasoning_tokens(response)
+
+        parts: list[str] = []
+        if status:
+            if status == "incomplete" and incomplete_reason:
+                parts.append(f"incomplete {incomplete_reason}")
+            else:
+                parts.append(f"status {status}")
+        if refusal:
+            parts.append(f"refusal {refusal}")
+        if output_types:
+            parts.append(f"output types {','.join(output_types)}")
+        if reasoning_tokens is not None:
+            parts.append(f"reasoning tokens {reasoning_tokens}")
+        return "; ".join(parts) if parts else "missing output_parsed"
+
+    def _incomplete_reason(self, response: Any) -> str | None:
+        incomplete_details = getattr(response, "incomplete_details", None)
+        if incomplete_details is None:
+            return None
+        if isinstance(incomplete_details, dict):
+            reason = incomplete_details.get("reason")
+        else:
+            reason = getattr(incomplete_details, "reason", None)
+        return str(reason) if reason else None
+
+    def _output_types(self, response: Any) -> list[str]:
+        output = getattr(response, "output", None)
+        if not output:
+            return []
+        output_types: list[str] = []
+        for item in output:
+            item_type = self._field_value(item, "type")
+            if item_type:
+                output_types.append(str(item_type))
+            content = self._field_value(item, "content")
+            if not content:
+                continue
+            for content_item in content:
+                content_type = self._field_value(content_item, "type")
+                if content_type:
+                    output_types.append(str(content_type))
+        return output_types
+
+    def _refusal_summary(self, response: Any) -> str | None:
+        output = getattr(response, "output", None)
+        if not output:
+            return None
+        for item in output:
+            content = self._field_value(item, "content")
+            if not content:
+                continue
+            for content_item in content:
+                refusal = self._field_value(content_item, "refusal")
+                if refusal:
+                    return "present"
+                if self._field_value(content_item, "type") == "refusal":
+                    return "present"
+        return None
+
+    def _reasoning_tokens(self, response: Any) -> int | None:
+        usage = getattr(response, "usage", None)
+        output_token_details = self._field_value(usage, "output_tokens_details")
+        if output_token_details is None:
+            return None
+        value = self._field_value(output_token_details, "reasoning_tokens")
+        if isinstance(value, int):
+            return value
+        return None
+
+    def _field_value(self, value: Any, field: str) -> Any:
+        if value is None:
+            return None
+        if isinstance(value, dict):
+            return value.get(field)
+        return getattr(value, field, None)

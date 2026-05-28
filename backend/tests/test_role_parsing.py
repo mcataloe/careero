@@ -16,11 +16,14 @@ from app.services.role_parsing_prompt import build_role_parsing_prompt
 
 
 class FakeResponses:
-    def __init__(self, parsed=None) -> None:
+    def __init__(self, parsed=None, response=None) -> None:
         self.parsed = parsed
+        self.response = response
 
     def parse(self, **kwargs):
         self.kwargs = kwargs
+        if self.response is not None:
+            return self.response
         return SimpleNamespace(output_parsed=self.parsed)
 
 
@@ -108,6 +111,8 @@ def test_role_parsing_prompt_contains_grounding_rules() -> None:
     assert "Do not estimate compensation" in text
     assert "Missing values must be null" in text
     assert "companyWebsite and jobUrl must not be fabricated" in text
+    assert "Input did not include a complete job posting" in text
+    assert "empty extractedSkills" in text
     assert "structured JSON only" in text or "JSON only" in text
     assert "sk-" not in text
 
@@ -146,6 +151,52 @@ def test_role_parser_success_validates_and_applies_request_defaults() -> None:
     assert result.parsed.job_url == "https://example.com/jobs/1"
     assert result.metadata.parser_version == "role_parser_v1"
     assert responses.kwargs["model"] == "gpt-5-mini"
+    assert responses.kwargs["reasoning"] == {"effort": "minimal"}
+
+
+def test_role_parser_only_sends_reasoning_options_for_gpt5_models() -> None:
+    responses = FakeResponses(parsed=ai_output(roleTitle="Engineer"))
+    service = RoleParsingService(
+        settings=enabled_settings(openai_default_role_parsing_model="gpt-4o-mini"),
+        client=FakeClient(responses),
+    )
+    request = __import__(
+        "app.schemas.role_parsing",
+        fromlist=["RoleParseRequest"],
+    ).RoleParseRequest(rawText="Engineer at Acme")
+
+    service.parse(request)
+
+    assert "reasoning" not in responses.kwargs
+
+
+def test_role_parser_reports_incomplete_response_without_parsed_output() -> None:
+    response = SimpleNamespace(
+        output_parsed=None,
+        status="incomplete",
+        incomplete_details=SimpleNamespace(reason="max_output_tokens"),
+        output=[SimpleNamespace(type="reasoning", content=[])],
+        usage=SimpleNamespace(
+            output_tokens_details=SimpleNamespace(reasoning_tokens=2500),
+        ),
+    )
+    service = RoleParsingService(
+        settings=enabled_settings(),
+        client=FakeClient(FakeResponses(response=response)),
+    )
+    request = __import__(
+        "app.schemas.role_parsing",
+        fromlist=["RoleParseRequest"],
+    ).RoleParseRequest(rawText="applicant statistics")
+
+    with pytest.raises(RoleParsingValidationError) as exc:
+        service.parse(request)
+
+    message = str(exc.value)
+    assert "parseable output" in message
+    assert "incomplete max_output_tokens" in message
+    assert "output types reasoning" in message
+    assert "reasoning tokens 2500" in message
 
 
 def test_role_parser_normalizes_explicit_bare_domain_urls() -> None:

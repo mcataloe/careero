@@ -24,6 +24,9 @@ Rules:
 - companyWebsite and jobUrl must not be fabricated.
 - datePosted must only be set when explicitly present as a date.
 - warnings should explain missing/uncertain important fields.
+- If the input is irrelevant or does not include a complete job posting, still
+  return valid schema output: null scalar fields, empty extractedSkills, and a
+  warning such as "Input did not include a complete job posting."
 - confidence values must be 0.0 to 1.0 and reflect extraction confidence.
 - Do not include markdown, prose, comments, or extra fields.
 """.strip()
