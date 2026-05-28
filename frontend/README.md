@@ -40,6 +40,17 @@ App shell navigation:
   Settings.
 - Feature-specific navigation stays inside the feature workspace instead of
   taking permanent global sidebar width.
+- Dashboard, Career strategy, Settings, opportunity detail, and application
+  detail use deep-linkable local subsection routes with one focused detail panel
+  visible at a time.
+
+Dashboard workspace:
+
+- Open `/dashboard` to enter the dashboard overview.
+- Dashboard subsection routes use `/dashboard/:section` for overview, COMPASS,
+  sources, compensation, search health, recommendations, automation, artifacts,
+  and history.
+- Each dashboard subsection loads its own analytics data when opened.
 
 AI enrichment is controlled by backend configuration. The frontend works with the deterministic backend fallback when AI is disabled, missing, or unavailable.
 
@@ -61,11 +72,14 @@ Parsing fills empty fields only, does not auto-save, and keeps manual edits inta
 
 COMPASS evaluation workflow:
 
-- Open an opportunity at `/opportunities/:opportunityId`.
-- Use the compact section navigation near the top of the opportunity detail page to jump between overview, descriptions, edit controls, COMPASS evaluation, and major COMPASS sections.
+- Open an opportunity at `/opportunities/:opportunityId`; it redirects to
+  `/opportunities/:opportunityId/overview`.
+- Opportunity detail subsection routes use
+  `/opportunities/:opportunityId/:section` for overview, intelligence,
+  description, edit, and COMPASS.
 - Use `Run COMPASS evaluation` for an opportunity with no evaluation.
 - Use `Re-run evaluation` to force a new latest evaluation.
-- Use `View latest evaluation` to jump to the evaluation section.
+- Use `View latest evaluation` to jump to the COMPASS section.
 - The opportunity list shows a non-blocking evaluation indicator for each opportunity.
 - A normal run may reuse the backend cache when opportunity/source/context inputs have not changed.
 - Completed evaluations render through section blocks for summary, fit analysis, strengths, gaps, risks, ATS findings, compensation, remote fit, interview positioning, recommendations, and assumptions/confidence.
@@ -73,7 +87,7 @@ COMPASS evaluation workflow:
 
 Resume/profile grounding source:
 
-- Open `/settings`.
+- Open `/settings/resume-source`.
 - Create an active local `master_resume` source by pasting source text or importing a local file.
 - File import supports `.txt`, `.md`, `.docx`, and text-based `.pdf` files up to 5 MB.
 - Imported text is copied into the draft raw text field and is not saved until you submit the form.
@@ -84,10 +98,23 @@ Resume/profile grounding source:
 Application workflow:
 
 - Open `/applications` to view application workflows grouped by pipeline state.
-- Open `/applications/:applicationId` for workflow summary, structured interview tracking, notes, external links, and timeline.
+- Open `/applications/:applicationId`; it redirects to
+  `/applications/:applicationId/overview`.
+- Application detail subsection routes use
+  `/applications/:applicationId/:section` for overview, interviews, reminders,
+  suggestions, advisor packet, notes, links, and timeline.
 - Structured interview tracking is manual-only; calendar invites, meeting generation, email, and coaching are intentionally out of scope.
 - Application detail includes a local-only advisor packet preview with Markdown export. It is redacted by default and does not create hosted sharing, advisor accounts, invitations, comments, or public links.
 - Reminder counts can appear from backend workflow data, but the fuller reminder management UI is not merged into `main`.
+
+Settings workspace:
+
+- Open `/settings` to enter the runtime subsection.
+- Settings subsection routes use `/settings/:section` for runtime, readiness,
+  data export, account lifecycle, AI usage, plan, automation, and resume source.
+- Settings subsections mount only the active panel, so readiness, usage,
+  entitlement, export, lifecycle, automation, and resume-source APIs are not all
+  called on entry.
 
 Career strategy:
 

@@ -65,19 +65,19 @@ a {
   background: var(--mantine-color-white);
 }
 
-.strategy-workspace {
+.feature-workspace {
   display: grid;
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
   gap: var(--mantine-spacing-lg);
   align-items: start;
 }
 
-.strategy-local-navigation {
+.feature-local-navigation {
   position: sticky;
   top: 88px;
 }
 
-.strategy-detail-panel {
+.feature-detail-panel {
   min-width: 0;
 }
 
@@ -89,11 +89,11 @@ a {
 }
 
 @media (max-width: 62em) {
-  .strategy-workspace {
+  .feature-workspace {
     grid-template-columns: 1fr;
   }
 
-  .strategy-local-navigation {
+  .feature-local-navigation {
     position: static;
   }
 }

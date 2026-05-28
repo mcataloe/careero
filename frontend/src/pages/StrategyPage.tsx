@@ -3,8 +3,6 @@ import {
   Badge,
   Box,
   Group,
-  NavLink,
-  Paper,
   Select,
   SimpleGrid,
   Stack,
@@ -14,13 +12,13 @@ import {
 } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import {
-  NavLink as RouterNavLink,
   useNavigate,
   useParams,
 } from "react-router-dom";
 
 import { getCareerStrategy, getWorkspaceStrategy } from "../api/strategy";
 import { listWorkspaces } from "../api/workspaces";
+import { FeatureWorkspaceLayout } from "../components/FeatureWorkspaceLayout";
 import { ErrorState, LoadingState } from "../components/States";
 import type {
   CareerStrategySummary,
@@ -183,59 +181,22 @@ export function StrategyPage() {
         </Alert>
       ) : null}
       {!loading && !error && strategy ? (
-        <div className="strategy-workspace">
-          <StrategyLocalNavigation
+        <FeatureWorkspaceLayout
+          navLabel="Career strategy sections"
+          items={strategySections.map((section) => ({
+            ...section,
+            to: buildStrategyPath(sectionPathWorkspaceId, section.id),
+          }))}
+          activeId={activeSection}
+        >
+          <StrategySectionContent
             activeSection={activeSection}
-            workspaceId={sectionPathWorkspaceId}
+            strategy={strategy}
+            careerStrategy={careerStrategy}
           />
-          <Paper
-            className="strategy-detail-panel"
-            withBorder
-            radius="md"
-            p="lg"
-          >
-            <StrategySectionContent
-              activeSection={activeSection}
-              strategy={strategy}
-              careerStrategy={careerStrategy}
-            />
-          </Paper>
-        </div>
+        </FeatureWorkspaceLayout>
       ) : null}
     </Stack>
-  );
-}
-
-function StrategyLocalNavigation({
-  activeSection,
-  workspaceId,
-}: {
-  activeSection: StrategySectionId;
-  workspaceId: string | null;
-}) {
-  return (
-    <Paper
-      className="strategy-local-navigation"
-      component="nav"
-      aria-label="Career strategy sections"
-      withBorder
-      radius="md"
-      p="sm"
-    >
-      <Stack gap={2}>
-        {strategySections.map((section) => (
-          <NavLink
-            key={section.id}
-            component={RouterNavLink}
-            to={buildStrategyPath(workspaceId, section.id)}
-            label={section.label}
-            description={section.description}
-            active={section.id === activeSection}
-            aria-current={section.id === activeSection ? "page" : undefined}
-          />
-        ))}
-      </Stack>
-    </Paper>
   );
 }
 

@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { listAutomationSuggestions } from "../api/automation";
@@ -21,6 +22,7 @@ import { getSearchAnalytics } from "../api/searchAnalytics";
 import { getSearchHealth } from "../api/searchHealth";
 import { getSourceIntelligence } from "../api/sourceIntelligence";
 import { getCompassInsights } from "../api/compassInsights";
+import { FeatureWorkspaceLayout } from "../components/FeatureWorkspaceLayout";
 import { ErrorState, LoadingState } from "../components/States";
 import { AutomationSuggestionsPanel } from "../components/AutomationSuggestionsPanel";
 import { InsightMeta } from "../components/InsightMeta";
@@ -34,70 +36,67 @@ import type { SearchHealthResponse } from "../types/searchHealth";
 import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
 import type { CompassInsightsResponse } from "../types/compassInsights";
 
+const dashboardSections = [
+  {
+    id: "overview",
+    label: "Overview",
+    description: "Search summary and conversion",
+  },
+  {
+    id: "compass",
+    label: "COMPASS",
+    description: "Search-level fit trends",
+  },
+  {
+    id: "sources",
+    label: "Sources",
+    description: "Recruiter and source traction",
+  },
+  {
+    id: "compensation",
+    label: "Compensation",
+    description: "Stated range intelligence",
+  },
+  {
+    id: "search-health",
+    label: "Search health",
+    description: "Sustainability signals",
+  },
+  {
+    id: "recommendations",
+    label: "Recommendations",
+    description: "Read-only next steps",
+  },
+  {
+    id: "automation",
+    label: "Automation",
+    description: "Local suggestions",
+  },
+  {
+    id: "artifacts",
+    label: "Artifacts",
+    description: "Observed artifact performance",
+  },
+  {
+    id: "history",
+    label: "History",
+    description: "Historical learning",
+  },
+] as const;
+
+type DashboardSectionId = (typeof dashboardSections)[number]["id"];
+
+const dashboardSectionIds = new Set<string>(
+  dashboardSections.map((section) => section.id),
+);
+
 export function DashboardPage() {
-  const [analytics, setAnalytics] = useState<SearchAnalyticsResponse | null>(null);
-  const [artifactPerformance, setArtifactPerformance] =
-    useState<ArtifactPerformanceResponse | null>(null);
-  const [compassInsights, setCompassInsights] =
-    useState<CompassInsightsResponse | null>(null);
-  const [sourceIntelligence, setSourceIntelligence] =
-    useState<SourceIntelligenceResponse | null>(null);
-  const [compensationIntelligence, setCompensationIntelligence] =
-    useState<CompensationIntelligenceResponse | null>(null);
-  const [searchHealth, setSearchHealth] = useState<SearchHealthResponse | null>(null);
-  const [recommendations, setRecommendations] =
-    useState<RecommendationListResponse | null>(null);
-  const [historicalLearning, setHistoricalLearning] =
-    useState<HistoricalLearningResponse | null>(null);
-  const [automationSuggestions, setAutomationSuggestions] =
-    useState<AutomationSuggestionListResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { section } = useParams();
+  const activeSection = isDashboardSectionId(section) ? section : null;
 
-  async function loadAnalytics() {
-    setLoading(true);
-    setError(null);
-    try {
-      const [
-        searchAnalytics,
-        artifactAnalytics,
-        compassAnalytics,
-        sourceAnalytics,
-        compensationAnalytics,
-        searchHealthAnalytics,
-        recommendationData,
-        historicalData,
-        automationData,
-      ] = await Promise.all([
-        getSearchAnalytics(),
-        getArtifactPerformance(),
-        getCompassInsights(),
-        getSourceIntelligence(),
-        getCompensationIntelligence(),
-        getSearchHealth(),
-        getRecommendations(),
-        getHistoricalLearning(),
-        listAutomationSuggestions(),
-      ]);
-      setAnalytics(searchAnalytics);
-      setArtifactPerformance(artifactAnalytics);
-      setCompassInsights(compassAnalytics);
-      setSourceIntelligence(sourceAnalytics);
-      setCompensationIntelligence(compensationAnalytics);
-      setSearchHealth(searchHealthAnalytics);
-      setRecommendations(recommendationData);
-      setHistoricalLearning(historicalData);
-      setAutomationSuggestions(automationData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load analytics");
-    } finally {
-      setLoading(false);
-    }
+  if (!activeSection) {
+    return <Navigate to="/dashboard/overview" replace />;
   }
-
-  useEffect(() => {
-    void loadAnalytics();
-  }, []);
 
   return (
     <Stack gap="lg">
@@ -107,43 +106,176 @@ export function DashboardPage() {
           Search performance signals based on saved opportunities and application workflow activity.
         </Text>
       </div>
-
-      {loading ? <LoadingState label="Loading search analytics" /> : null}
-      {!loading && error ? (
-        <ErrorState message={error} onRetry={loadAnalytics} />
-      ) : null}
-      {!loading && !error && analytics ? (
-        <>
-          <SearchAnalyticsPanel analytics={analytics} />
-          {artifactPerformance ? (
-            <ArtifactPerformancePanel performance={artifactPerformance} />
-          ) : null}
-          {compassInsights ? <CompassInsightsPanel insights={compassInsights} /> : null}
-          {sourceIntelligence ? (
-            <SourceIntelligencePanel intelligence={sourceIntelligence} />
-          ) : null}
-          {compensationIntelligence ? (
-            <CompensationIntelligencePanel
-              intelligence={compensationIntelligence}
-            />
-          ) : null}
-          {searchHealth ? <SearchHealthPanel health={searchHealth} /> : null}
-          {recommendations ? (
-            <RecommendationsPanel recommendations={recommendations} />
-          ) : null}
-          {automationSuggestions ? (
-            <AutomationSuggestionsPanel
-              suggestions={automationSuggestions.suggestions}
-              onChanged={loadAnalytics}
-            />
-          ) : null}
-          {historicalLearning ? (
-            <HistoricalLearningPanel learning={historicalLearning} />
-          ) : null}
-        </>
-      ) : null}
+      <FeatureWorkspaceLayout
+        navLabel="Dashboard sections"
+        items={dashboardSections.map((item) => ({
+          ...item,
+          to: `/dashboard/${item.id}`,
+        }))}
+        activeId={activeSection}
+        withDetailPanel={false}
+      >
+        <DashboardSectionContent activeSection={activeSection} />
+      </FeatureWorkspaceLayout>
     </Stack>
   );
+}
+
+function DashboardSectionContent({
+  activeSection,
+}: {
+  activeSection: DashboardSectionId;
+}) {
+  switch (activeSection) {
+    case "compass":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading COMPASS trends"
+          errorMessage="Could not load COMPASS trends"
+          load={getCompassInsights}
+        >
+          {(data: CompassInsightsResponse) => <CompassInsightsPanel insights={data} />}
+        </AsyncDashboardSection>
+      );
+    case "sources":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading source intelligence"
+          errorMessage="Could not load source intelligence"
+          load={getSourceIntelligence}
+        >
+          {(data: SourceIntelligenceResponse) => (
+            <SourceIntelligencePanel intelligence={data} />
+          )}
+        </AsyncDashboardSection>
+      );
+    case "compensation":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading compensation intelligence"
+          errorMessage="Could not load compensation intelligence"
+          load={getCompensationIntelligence}
+        >
+          {(data: CompensationIntelligenceResponse) => (
+            <CompensationIntelligencePanel intelligence={data} />
+          )}
+        </AsyncDashboardSection>
+      );
+    case "search-health":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading search health"
+          errorMessage="Could not load search health"
+          load={getSearchHealth}
+        >
+          {(data: SearchHealthResponse) => <SearchHealthPanel health={data} />}
+        </AsyncDashboardSection>
+      );
+    case "recommendations":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading recommendations"
+          errorMessage="Could not load recommendations"
+          load={getRecommendations}
+        >
+          {(data: RecommendationListResponse) => (
+            <RecommendationsPanel recommendations={data} />
+          )}
+        </AsyncDashboardSection>
+      );
+    case "automation":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading automation suggestions"
+          errorMessage="Could not load automation suggestions"
+          load={listAutomationSuggestions}
+        >
+          {(data: AutomationSuggestionListResponse, reload) => (
+            <AutomationSuggestionsPanel
+              suggestions={data.suggestions}
+              onChanged={reload}
+            />
+          )}
+        </AsyncDashboardSection>
+      );
+    case "artifacts":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading artifact performance"
+          errorMessage="Could not load artifact performance"
+          load={getArtifactPerformance}
+        >
+          {(data: ArtifactPerformanceResponse) => (
+            <ArtifactPerformancePanel performance={data} />
+          )}
+        </AsyncDashboardSection>
+      );
+    case "history":
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading historical learning"
+          errorMessage="Could not load historical learning"
+          load={getHistoricalLearning}
+        >
+          {(data: HistoricalLearningResponse) => (
+            <HistoricalLearningPanel learning={data} />
+          )}
+        </AsyncDashboardSection>
+      );
+    case "overview":
+    default:
+      return (
+        <AsyncDashboardSection
+          loadingLabel="Loading search analytics"
+          errorMessage="Could not load search analytics"
+          load={getSearchAnalytics}
+        >
+          {(data: SearchAnalyticsResponse) => <SearchAnalyticsPanel analytics={data} />}
+        </AsyncDashboardSection>
+      );
+  }
+}
+
+function AsyncDashboardSection<T>({
+  loadingLabel,
+  errorMessage,
+  load,
+  children,
+}: {
+  loadingLabel: string;
+  errorMessage: string;
+  load: () => Promise<T>;
+  children: (data: T, reload: () => void) => React.ReactNode;
+}) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadData() {
+    setLoading(true);
+    setError(null);
+    try {
+      setData(await load());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadData();
+  }, []);
+
+  if (loading) {
+    return <LoadingState label={loadingLabel} />;
+  }
+
+  if (error || !data) {
+    return <ErrorState message={error ?? errorMessage} onRetry={loadData} />;
+  }
+
+  return <>{children(data, loadData)}</>;
 }
 
 function HistoricalLearningPanel({
@@ -541,4 +673,10 @@ function formatRate(value: number | null) {
 
 function formatStage(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function isDashboardSectionId(
+  value: string | undefined,
+): value is DashboardSectionId {
+  return typeof value === "string" && dashboardSectionIds.has(value);
 }

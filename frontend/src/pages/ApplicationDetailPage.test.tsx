@@ -7,12 +7,10 @@ import type {
   ApplicationDetail,
   ApplicationExternalLink,
   ApplicationInterviewStage,
-  ApplicationNote,
   ApplicationReminder,
   ApplicationTimelineEvent,
 } from "../types/applications";
 import type { AdvisorPacket } from "../types/advisorPackets";
-import type { AutomationSuggestionListResponse } from "../types/automation";
 
 function jsonResponse(response: unknown, status = 200) {
   return {
@@ -79,19 +77,6 @@ const timeline: ApplicationTimelineEvent[] = [
   },
 ];
 
-const notes: ApplicationNote[] = [
-  {
-    id: "note-1",
-    application_id: "app-1",
-    workspace_id: "workspace-1",
-    author: "Local User",
-    note_type: "recruiter",
-    body: "Ask about team scope.",
-    created_at: "2026-05-16T15:00:00Z",
-    updated_at: "2026-05-16T15:00:00Z",
-  },
-];
-
 const interviews: ApplicationInterviewStage[] = [
   {
     id: "interview-1",
@@ -141,44 +126,6 @@ const reminders: ApplicationReminder[] = [
     updated_at: "2026-05-16T15:00:00Z",
   },
 ];
-
-const automationSuggestions: AutomationSuggestionListResponse = {
-  workspace_id: "workspace-1",
-  target_type: "application",
-  target_id: "app-1",
-  external_actions_enabled: false,
-  suggestions: [
-    {
-      id: "suggestion-1",
-      workspace_id: "workspace-1",
-      target_type: "application",
-      target_id: "app-1",
-      role_id: "role-1",
-      application_id: "app-1",
-      artifact_id: null,
-      action_type: "communication_draft",
-      title: "Prepare follow-up draft",
-      summary: "A local-only follow-up draft can be reviewed.",
-      reason: "Careero can prepare review text without sending it.",
-      basis: "Generated from stored application timing only.",
-      confidence: "Draft Only",
-      source_inputs: {},
-      preview: {
-        title: "Draft follow-up note",
-        body: "Hi, I wanted to briefly follow up.",
-        content_hash: "sha256:test",
-        external_mutation: false,
-      },
-      preview_hash: "sha256:test",
-      status: "active",
-      expires_at: null,
-      policy_version: "automation_policy_v1",
-      metadata: {},
-      created_at: "2026-05-16T15:00:00Z",
-      updated_at: "2026-05-16T15:00:00Z",
-    },
-  ],
-};
 
 const advisorPacket: AdvisorPacket = {
   packet_version: "advisor_packet.local_preview.v1",
@@ -284,11 +231,15 @@ const advisorPacket: AdvisorPacket = {
   ],
 };
 
-function renderDetailPage() {
+function renderDetailPage(path = "/applications/app-1/overview") {
   render(
-    <MemoryRouter initialEntries={["/applications/app-1"]}>
+    <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/applications/:applicationId" element={<ApplicationDetailPage />} />
+        <Route
+          path="/applications/:applicationId/:section"
+          element={<ApplicationDetailPage />}
+        />
       </Routes>
     </MemoryRouter>,
   );
@@ -299,19 +250,10 @@ describe("ApplicationDetailPage", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders application summary and timeline", async () => {
+  it("renders application overview and local navigation", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValueOnce(jsonResponse(application))
-        .mockResolvedValueOnce(jsonResponse(timeline))
-        .mockResolvedValueOnce(jsonResponse(notes))
-        .mockResolvedValueOnce(jsonResponse(links))
-        .mockResolvedValueOnce(jsonResponse(reminders))
-        .mockResolvedValueOnce(jsonResponse(interviews))
-        .mockResolvedValueOnce(jsonResponse(automationSuggestions))
-        .mockResolvedValueOnce(jsonResponse(advisorPacket)),
+      vi.fn().mockResolvedValueOnce(jsonResponse(application)),
     );
 
     renderDetailPage();
@@ -319,18 +261,29 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByText("Loading application")).toBeInTheDocument();
     expect(await screen.findByText("Staff Platform Engineer")).toBeInTheDocument();
     expect(screen.getByText("Example Company")).toBeInTheDocument();
-    expect(screen.getByText("Application tracked")).toBeInTheDocument();
-    expect(screen.getByText("Ask about team scope.")).toBeInTheDocument();
-    expect(screen.getAllByText("Recruiter screen").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "Job posting" })[1]).toHaveAttribute(
-      "rel",
-      "noreferrer noopener",
-    );
     expect(screen.getByText(/Notes: 1 - Links: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
-    expect(screen.getByText("Follow up with recruiter")).toBeInTheDocument();
-    expect(screen.getByText("Prepare follow-up draft")).toBeInTheDocument();
-    expect(screen.getByText(/Draft only. Careero will not send this message./i)).toBeInTheDocument();
-    expect(screen.getByText("Advisor Packet Preview")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /timeline/i })).toHaveAttribute(
+      "href",
+      "/applications/app-1/timeline",
+    );
+    expect(screen.queryByText("Application tracked")).not.toBeInTheDocument();
+  });
+
+  it("renders advisor packet route without sharing actions", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(jsonResponse(advisorPacket))
+        .mockResolvedValueOnce(jsonResponse(links))
+        .mockResolvedValueOnce(jsonResponse(interviews))
+        .mockResolvedValueOnce(jsonResponse(reminders)),
+    );
+
+    renderDetailPage("/applications/app-1/advisor-packet");
+
+    expect(await screen.findByText("Advisor Packet Preview")).toBeInTheDocument();
     expect(screen.getByText("Local only")).toBeInTheDocument();
     expect(screen.getByText(/Local preview only\. Nothing is shared externally\./i)).toBeInTheDocument();
     expect(screen.getByText(/Reminder text can expose private deadlines or pressure points\. Review before including\./i)).toBeInTheDocument();
@@ -339,6 +292,21 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByText("Private user notes")).toBeInTheDocument();
     expect(screen.getByText(/content excluded/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /share|send|invite/i })).not.toBeInTheDocument();
+  });
+
+  it("renders timeline route independently", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(application))
+        .mockResolvedValueOnce(jsonResponse(timeline)),
+    );
+
+    renderDetailPage("/applications/app-1/timeline");
+
+    expect(await screen.findByText("Application tracked")).toBeInTheDocument();
+    expect(screen.queryByText("Ask about team scope.")).not.toBeInTheDocument();
   });
 
   it("renders an error state", async () => {

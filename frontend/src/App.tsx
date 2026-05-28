@@ -37,7 +37,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/dashboard" element={<Navigate to="/dashboard/overview" replace />} />
+      <Route path="/dashboard/:section" element={<DashboardPage />} />
       <Route path="/strategy" element={<Navigate to="/strategy/overview" replace />} />
       <Route path="/strategy/:section" element={<StrategyPage />} />
       <Route
@@ -50,13 +51,28 @@ function AppRoutes() {
       />
       <Route path="/opportunities" element={<RolesPage />} />
       <Route path="/opportunities/new" element={<RoleNewPage />} />
-      <Route path="/opportunities/:opportunityId" element={<RoleDetailPage />} />
+      <Route
+        path="/opportunities/:opportunityId"
+        element={<OpportunityDetailRedirect />}
+      />
+      <Route
+        path="/opportunities/:opportunityId/:section"
+        element={<RoleDetailPage />}
+      />
       <Route path="/roles" element={<Navigate to="/opportunities" replace />} />
       <Route path="/roles/new" element={<Navigate to="/opportunities/new" replace />} />
       <Route path="/roles/:roleId" element={<LegacyRoleDetailRedirect />} />
       <Route path="/applications" element={<ApplicationsPage />} />
-      <Route path="/applications/:applicationId" element={<ApplicationDetailPage />} />
-      <Route path="/settings" element={<SettingsPage />} />
+      <Route
+        path="/applications/:applicationId"
+        element={<ApplicationDetailRedirect />}
+      />
+      <Route
+        path="/applications/:applicationId/:section"
+        element={<ApplicationDetailPage />}
+      />
+      <Route path="/settings" element={<Navigate to="/settings/runtime" replace />} />
+      <Route path="/settings/:section" element={<SettingsPage />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
@@ -89,12 +105,22 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
 
 function LegacyRoleDetailRedirect() {
   const { roleId } = useParams();
-  return <Navigate to={`/opportunities/${roleId ?? ""}`} replace />;
+  return <Navigate to={`/opportunities/${roleId ?? ""}/overview`} replace />;
 }
 
 function WorkspaceStrategyRedirect() {
   const { workspaceId } = useParams();
   return <Navigate to={`/workspaces/${workspaceId ?? ""}/strategy/overview`} replace />;
+}
+
+function OpportunityDetailRedirect() {
+  const { opportunityId } = useParams();
+  return <Navigate to={`/opportunities/${opportunityId ?? ""}/overview`} replace />;
+}
+
+function ApplicationDetailRedirect() {
+  const { applicationId } = useParams();
+  return <Navigate to={`/applications/${applicationId ?? ""}/overview`} replace />;
 }
 
 export default App;

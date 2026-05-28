@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 vi.mock("../components/AutomationPreferencesPanel", () => ({
   AutomationPreferencesPanel: () => <div>Automation settings placeholder</div>,
@@ -227,17 +228,29 @@ describe("SettingsPage", () => {
     vi.restoreAllMocks();
   });
 
+  function renderSettingsAt(path: string) {
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/settings/:section" element={<SettingsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+  }
+
   it("renders the product readiness panel", async () => {
     vi.stubGlobal("fetch", fetchByPath());
 
-    render(<SettingsPage />);
+    renderSettingsAt("/settings/readiness");
 
     expect(await screen.findByText("Product readiness")).toBeInTheDocument();
     expect(screen.getByText("Not production-ready")).toBeInTheDocument();
     expect(
       screen.queryByText("Authentication and workspace switching are intentionally absent."),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("First-party email/password login is enabled locally.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("First-party email/password login is enabled locally."),
+    ).not.toBeInTheDocument();
   });
 
   it("downloads a local data export from settings", async () => {
@@ -250,7 +263,7 @@ describe("SettingsPage", () => {
     vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
     vi.stubGlobal("fetch", fetchByPath());
 
-    render(<SettingsPage />);
+    renderSettingsAt("/settings/data-export");
     await screen.findByText("Local data export");
     await userEvent.click(screen.getByRole("button", { name: /download json/i }));
 
@@ -265,7 +278,7 @@ describe("SettingsPage", () => {
     const fetchMock = fetchByPath();
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<SettingsPage />);
+    renderSettingsAt("/settings/account-lifecycle");
     const deletionButton = await screen.findByRole("button", {
       name: /record deletion request/i,
     });
@@ -332,7 +345,7 @@ describe("SettingsPage", () => {
       }),
     );
 
-    render(<SettingsPage />);
+    renderSettingsAt("/settings/ai-usage");
 
     expect(await screen.findByText("AI usage")).toBeInTheDocument();
     expect(screen.getByText("parse opportunity")).toBeInTheDocument();
@@ -343,7 +356,7 @@ describe("SettingsPage", () => {
   it("shows the local plan without upgrade or checkout actions", async () => {
     vi.stubGlobal("fetch", fetchByPath());
 
-    render(<SettingsPage />);
+    renderSettingsAt("/settings/plan");
 
     expect(await screen.findByText("Local plan")).toBeInTheDocument();
     expect(screen.getByText("Local Free")).toBeInTheDocument();

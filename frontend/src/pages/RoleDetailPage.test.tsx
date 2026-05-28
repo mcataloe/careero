@@ -14,11 +14,18 @@ function jsonResponse(response: unknown, status = 200) {
   };
 }
 
-function renderPage() {
+function renderPage(path = `/opportunities/${sampleRole.id}/compass`) {
   render(
-    <MemoryRouter initialEntries={[`/opportunities/${sampleRole.id}`]}>
+    <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/opportunities/:opportunityId" element={<RoleDetailPage />} />
+        <Route
+          path="/opportunities/:opportunityId"
+          element={<RoleDetailPage />}
+        />
+        <Route
+          path="/opportunities/:opportunityId/:section"
+          element={<RoleDetailPage />}
+        />
         <Route path="/opportunities" element={<div>Opportunities</div>} />
       </Routes>
     </MemoryRouter>,
@@ -64,46 +71,31 @@ describe("RoleDetailPage", () => {
   it("renders section navigation with valid role detail targets", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(sampleRole))
-      .mockResolvedValueOnce(jsonResponse(sampleEvaluation));
+      .mockResolvedValueOnce(jsonResponse(sampleRole));
     vi.stubGlobal("fetch", fetchMock);
 
-    renderPage();
+    renderPage(`/opportunities/${sampleRole.id}/overview`);
 
     expect(await screen.findByRole("link", { name: /overview/i })).toHaveAttribute(
       "href",
-      "#role-overview",
+      `/opportunities/${sampleRole.id}/overview`,
     );
-    expect(screen.getByRole("link", { name: /^description$/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /^description/i })).toHaveAttribute(
       "href",
-      "#role-description",
+      `/opportunities/${sampleRole.id}/description`,
     );
-    expect(
-      screen.getByRole("link", { name: /normalized description/i }),
-    ).toHaveAttribute("href", "#role-normalized-description");
-    expect(screen.getByRole("link", { name: /edit opportunity/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /^edit/i })).toHaveAttribute(
       "href",
-      "#role-edit",
+      `/opportunities/${sampleRole.id}/edit`,
     );
-    expect(
-      screen.getByRole("link", { name: /compass evaluation/i }),
-    ).toHaveAttribute("href", "#compass-evaluation");
-    expect(screen.getByRole("link", { name: /^summary$/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /compass/i })).toHaveAttribute(
       "href",
-      "#compass-summary",
-    );
-    expect(screen.getByRole("link", { name: /ats findings/i })).toHaveAttribute(
-      "href",
-      "#compass-ats-findings",
+      `/opportunities/${sampleRole.id}/compass`,
     );
 
     expect(document.getElementById("role-overview")).not.toBeNull();
-    expect(document.getElementById("role-description")).not.toBeNull();
-    expect(document.getElementById("role-normalized-description")).not.toBeNull();
-    expect(document.getElementById("role-edit")).not.toBeNull();
-    expect(document.getElementById("compass-evaluation")).not.toBeNull();
-    expect(document.getElementById("compass-summary")).not.toBeNull();
-    expect(document.getElementById("compass-ats-findings")).not.toBeNull();
+    expect(document.getElementById("role-description")).toBeNull();
+    expect(document.getElementById("compass-evaluation")).toBeNull();
   });
 
   it("re-runs evaluation with force enabled", async () => {

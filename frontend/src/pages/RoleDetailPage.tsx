@@ -1,6 +1,6 @@
-import { Alert, Button, Group, Stack } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Alert, Badge, Button, Group, Stack, Text, Title } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 
 import {
   archiveOpportunity,
@@ -11,16 +11,52 @@ import {
   createEvaluationWithStatus,
   getLatestEvaluation,
 } from "../api/compassEvaluations";
-import { RoleDetail } from "../components/RoleDetail";
-import { SectionNavigation } from "../components/SectionNavigation";
 import { CompassEvaluationDetail } from "../components/CompassEvaluationDetail";
+import { FeatureWorkspaceLayout } from "../components/FeatureWorkspaceLayout";
+import { RoleDetail } from "../components/RoleDetail";
 import { ErrorState, LoadingState } from "../components/States";
-import type { Role, RoleUpdatePayload } from "../types/roles";
 import type { CompassEvaluation } from "../types/compassEvaluations";
+import type { Role, RoleUpdatePayload } from "../types/roles";
+
+const opportunitySections = [
+  {
+    id: "overview",
+    label: "Overview",
+    description: "Core opportunity details",
+  },
+  {
+    id: "intelligence",
+    label: "Intelligence",
+    description: "Stored caution and category signals",
+  },
+  {
+    id: "description",
+    label: "Description",
+    description: "Raw and normalized posting text",
+  },
+  {
+    id: "edit",
+    label: "Edit",
+    description: "Status and normalized fields",
+  },
+  {
+    id: "compass",
+    label: "COMPASS",
+    description: "Evaluation and recommendations",
+  },
+] as const;
+
+type OpportunitySectionId = (typeof opportunitySections)[number]["id"];
+type RoleDetailSectionId = Exclude<OpportunitySectionId, "compass">;
+
+const opportunitySectionIds = new Set<string>(
+  opportunitySections.map((section) => section.id),
+);
 
 export function RoleDetailPage() {
-  const { opportunityId, roleId } = useParams();
+  const { opportunityId, roleId, section } = useParams();
   const currentOpportunityId = opportunityId ?? roleId;
+  const activeSection = isOpportunitySectionId(section) ? section : null;
   const navigate = useNavigate();
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,31 +68,6 @@ export function RoleDetailPage() {
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const evaluationRef = useRef<HTMLDivElement | null>(null);
-  const evaluationSectionNavItems = evaluation
-    ? [
-        { label: "Summary", targetId: "compass-summary" },
-        { label: "Fit Analysis", targetId: "compass-fit-analysis" },
-        { label: "Strengths", targetId: "compass-strengths" },
-        { label: "Gaps", targetId: "compass-gaps" },
-        { label: "Risks", targetId: "compass-risks" },
-        { label: "ATS Findings", targetId: "compass-ats-findings" },
-        { label: "Compensation", targetId: "compass-compensation" },
-        { label: "Remote Fit", targetId: "compass-remote-fit" },
-        { label: "Interview Positioning", targetId: "compass-interview-positioning" },
-        { label: "Recommendations", targetId: "compass-recommendations" },
-        { label: "Assumptions / Confidence", targetId: "compass-assumptions-confidence" },
-      ]
-    : [];
-  const sectionNavItems = [
-    { label: "Overview", targetId: "role-overview" },
-    { label: "Opportunity Intelligence", targetId: "opportunity-intelligence" },
-    { label: "Description", targetId: "role-description" },
-    { label: "Normalized Description", targetId: "role-normalized-description" },
-    { label: "Edit Opportunity", targetId: "role-edit" },
-    { label: "COMPASS Evaluation", targetId: "compass-evaluation" },
-    ...evaluationSectionNavItems,
-  ];
 
   async function loadRole() {
     if (!currentOpportunityId) return;
@@ -124,14 +135,13 @@ export function RoleDetailPage() {
         user_context: {},
         ...(force ? { force: true } : {}),
       });
-      const nextEvaluation = result.evaluation;
-      setEvaluation(nextEvaluation);
+      setEvaluation(result.evaluation);
       setNotice(
         result.status === 200
           ? "Cached COMPASS evaluation reused"
           : "COMPASS evaluation completed",
       );
-      evaluationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      navigate(`/opportunities/${currentOpportunityId}/compass`);
     } catch (err) {
       setEvaluationError(
         err instanceof Error ? err.message : "Could not run evaluation",
@@ -142,13 +152,26 @@ export function RoleDetailPage() {
   }
 
   function viewLatestEvaluation() {
-    evaluationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (currentOpportunityId) {
+      navigate(`/opportunities/${currentOpportunityId}/compass`);
+    }
   }
 
   useEffect(() => {
     void loadRole();
-    void loadEvaluation();
   }, [currentOpportunityId]);
+
+  useEffect(() => {
+    if (activeSection === "compass") {
+      void loadEvaluation();
+    }
+  }, [activeSection, currentOpportunityId]);
+
+  if (!activeSection) {
+    return (
+      <Navigate to={`/opportunities/${currentOpportunityId ?? ""}/overview`} replace />
+    );
+  }
 
   return (
     <Stack gap="lg">
@@ -163,30 +186,58 @@ export function RoleDetailPage() {
       {!loading && error ? <ErrorState message={error} onRetry={loadRole} /> : null}
       {!loading && !error && role ? (
         <>
-          <RoleDetail
-            role={role}
-            onUpdate={handleUpdate}
-            onArchive={handleArchive}
-            saving={saving}
-            archiving={archiving}
-            sectionNav={<SectionNavigation items={sectionNavItems} />}
-          />
-          <div id="compass-evaluation" ref={evaluationRef}>
-            {evaluationLoading ? <LoadingState label="Loading evaluation" /> : null}
-            {!evaluationLoading && evaluationError ? (
-              <ErrorState message={evaluationError} onRetry={loadEvaluation} />
-            ) : null}
-            {!evaluationLoading && !evaluationError ? (
-              <CompassEvaluationDetail
-                evaluation={evaluation}
-                onRun={handleRunEvaluation}
-                running={evaluating}
-                onViewLatest={viewLatestEvaluation}
+          <Group justify="space-between" align="flex-start">
+            <Stack gap={4}>
+              <Title order={1}>{role.title}</Title>
+              <Text c="dimmed">{role.company.name}</Text>
+            </Stack>
+            <Badge size="lg" variant="light">
+              {role.status}
+            </Badge>
+          </Group>
+          <FeatureWorkspaceLayout
+            navLabel="Opportunity sections"
+            items={opportunitySections.map((item) => ({
+              ...item,
+              to: `/opportunities/${role.id}/${item.id}`,
+            }))}
+            activeId={activeSection}
+            withDetailPanel={activeSection !== "compass"}
+          >
+            {activeSection === "compass" ? (
+              <div id="compass-evaluation">
+                {evaluationLoading ? <LoadingState label="Loading evaluation" /> : null}
+                {!evaluationLoading && evaluationError ? (
+                  <ErrorState message={evaluationError} onRetry={loadEvaluation} />
+                ) : null}
+                {!evaluationLoading && !evaluationError ? (
+                  <CompassEvaluationDetail
+                    evaluation={evaluation}
+                    onRun={handleRunEvaluation}
+                    running={evaluating}
+                    onViewLatest={viewLatestEvaluation}
+                  />
+                ) : null}
+              </div>
+            ) : (
+              <RoleDetail
+                role={role}
+                onUpdate={handleUpdate}
+                onArchive={handleArchive}
+                saving={saving}
+                archiving={archiving}
+                activeSection={activeSection as RoleDetailSectionId}
               />
-            ) : null}
-          </div>
+            )}
+          </FeatureWorkspaceLayout>
         </>
       ) : null}
     </Stack>
   );
+}
+
+function isOpportunitySectionId(
+  value: string | undefined,
+): value is OpportunitySectionId {
+  return typeof value === "string" && opportunitySectionIds.has(value);
 }
