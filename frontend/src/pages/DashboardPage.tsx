@@ -120,7 +120,10 @@ export function DashboardPage() {
         activeId={activeSection}
         withDetailPanel={false}
       >
-        <DashboardSectionContent activeSection={activeSection} />
+        <DashboardSectionContent
+          key={activeSection}
+          activeSection={activeSection}
+        />
       </FeatureWorkspaceLayout>
     </Stack>
   );

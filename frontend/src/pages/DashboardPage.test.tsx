@@ -2,7 +2,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DashboardPage } from "./DashboardPage";
-import { render, screen, waitFor } from "../test-utils";
+import { render, screen, userEvent, waitFor } from "../test-utils";
 import type { ApplicationPipelineResponse } from "../types/applications";
 import type { CompassInsightsResponse } from "../types/compassInsights";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
@@ -160,6 +160,29 @@ describe("DashboardPage", () => {
         "/api/analytics/compass",
         expect.any(Object),
       ),
+    );
+  });
+
+  it("reloads section data when a dashboard submenu item is clicked", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(searchAnalytics))
+      .mockResolvedValueOnce(jsonResponse(workflowPipeline))
+      .mockResolvedValueOnce(jsonResponse(compassInsights));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboardAt("/dashboard/overview");
+
+    expect(await screen.findByText("Workflow attention")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("link", { name: /compass/i }));
+
+    expect(await screen.findByText("COMPASS search trends")).toBeInTheDocument();
+    expect(screen.getByText("Strong platform fit")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/analytics/compass",
+      expect.any(Object),
     );
   });
 });
