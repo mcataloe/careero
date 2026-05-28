@@ -10,7 +10,7 @@ Documentation starts at [`docs/00_start-here.md`](docs/00_start-here.md).
 
 The canonical Careero strategic plan, current layer status, and recommended build sequence are tracked in [`docs/01_strategy/00_product-strategy.md`](docs/01_strategy/00_product-strategy.md).
 
-Use that document as the source of truth for Careero-specific LEAP Recon, layer planning, and Codex implementation prompts.
+Use that document as the source of truth for Careero-specific layer status and high-level strategy. Use [`docs/01_strategy/07_revised-build-order-execution-plan.md`](docs/01_strategy/07_revised-build-order-execution-plan.md) for the actionable LEAP/LHS prompt sequence, readiness gates, pull-forward rules, and scope discipline.
 
 Layer 7 Opportunity model strategy is captured in [`docs/03_domain-design/opportunity-model.md`](docs/03_domain-design/opportunity-model.md).
 
@@ -31,10 +31,11 @@ Older roadmap material is retained only under `docs/99_archive/` for historical 
 Current planning hierarchy:
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
-2. [`docs/01_strategy/00_product-strategy.md`](docs/01_strategy/00_product-strategy.md) - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs, including [`docs/03_domain-design/opportunity-model.md`](docs/03_domain-design/opportunity-model.md), [`docs/01_strategy/06_productization-readiness.md`](docs/01_strategy/06_productization-readiness.md), [`docs/03_domain-design/advisor-collaboration-mode.md`](docs/03_domain-design/advisor-collaboration-mode.md), [`docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`](docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md), [`docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md`](docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md), and [`docs/02_layers/16_layer-16-guided-onboarding-and-support.md`](docs/02_layers/16_layer-16-guided-onboarding-and-support.md).
-4. `docs/99_archive/*` - historical context only.
-5. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
+2. [`docs/01_strategy/00_product-strategy.md`](docs/01_strategy/00_product-strategy.md) - canonical Careero-specific layer status and high-level build order.
+3. [`docs/01_strategy/07_revised-build-order-execution-plan.md`](docs/01_strategy/07_revised-build-order-execution-plan.md) - operational build-order execution guide.
+4. Active layer-specific docs, including [`docs/03_domain-design/opportunity-model.md`](docs/03_domain-design/opportunity-model.md), [`docs/01_strategy/06_productization-readiness.md`](docs/01_strategy/06_productization-readiness.md), [`docs/03_domain-design/advisor-collaboration-mode.md`](docs/03_domain-design/advisor-collaboration-mode.md), [`docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`](docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md), [`docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md`](docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md), and [`docs/02_layers/16_layer-16-guided-onboarding-and-support.md`](docs/02_layers/16_layer-16-guided-onboarding-and-support.md).
+5. `docs/99_archive/*` - historical context only.
+6. LEAP repo - reusable LEAP framework methodology, not Careero-specific product truth.
 
 ## Current Local Capabilities
 

@@ -7,6 +7,7 @@ Source of Truth: Yes
 Last Reviewed: 2026-05-27  
 Related Docs:
 - docs/01_strategy/00_product-strategy.md
+- docs/01_strategy/07_revised-build-order-execution-plan.md
 - docs/02_layers/00_layer-index.md
 - docs/07_prompts/00_prompt-index.md
 
@@ -15,6 +16,7 @@ Careero is a local-first career operations application for managing a personal j
 ## Documentation Map
 
 - [Strategy](01_strategy/00_product-strategy.md): product direction, principles, roadmap posture, layer status, monetization boundary, and productization readiness.
+- [Revised build order execution plan](01_strategy/07_revised-build-order-execution-plan.md): operational LEAP/LHS prompt sequence, readiness gates, pull-forward rules, and scope discipline.
 - [Layers](02_layers/00_layer-index.md): canonical LEAP layer specs and layer capsules. Layer specs are source-of-truth design docs.
 - [Domain Design](03_domain-design/00_domain-index.md): opportunity, workspace, application workflow, artifact, automation, and advisor collaboration models.
 - [AI and COMPASS](04_ai-and-compass/00_ai-compass-index.md): COMPASS, AI usage controls, AI governance, and prompt-management guidance.
@@ -28,15 +30,18 @@ Careero is a local-first career operations application for managing a personal j
 
 1. This file.
 2. [Product strategy](01_strategy/00_product-strategy.md).
-3. [Layer index](02_layers/00_layer-index.md).
-4. [Domain index](03_domain-design/00_domain-index.md).
-5. [AI and COMPASS index](04_ai-and-compass/00_ai-compass-index.md).
-6. [Local deployment](06_operations/local-deployment.md).
-7. [Execution drift ledger](06_operations/execution-drift-ledger.md) before planning implementation work.
+3. [Revised build order execution plan](01_strategy/07_revised-build-order-execution-plan.md).
+4. [Layer index](02_layers/00_layer-index.md).
+5. [Domain index](03_domain-design/00_domain-index.md).
+6. [AI and COMPASS index](04_ai-and-compass/00_ai-compass-index.md).
+7. [Local deployment](06_operations/local-deployment.md).
+8. [Execution drift ledger](06_operations/execution-drift-ledger.md) before planning implementation work.
 
 ## Source-of-Truth Rules
 
 The canonical strategy lives in [docs/01_strategy/00_product-strategy.md](01_strategy/00_product-strategy.md).
+
+The operational revised build-order execution guide lives in [docs/01_strategy/07_revised-build-order-execution-plan.md](01_strategy/07_revised-build-order-execution-plan.md).
 
 Canonical layer specs live under [docs/02_layers/](02_layers/00_layer-index.md).
 

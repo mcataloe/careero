@@ -100,8 +100,8 @@ Targeted search: `rg -n "\bSTRIDE\b|\bLSROP\b" docs backend frontend packages RE
 
 | Term | Found state | Classification | Recommended handling |
 | --- | --- | --- | --- |
-| `STRIDE` | Found only in `docs/00_start-here.md`, `docs/04_ai-and-compass/00_ai-compass-index.md`, and `docs/04_ai-and-compass/compass-evaluation-model.md` as explicit legacy terminology guidance. | Preserved as historical | Leave alone. These references explain that active guidance uses COMPASS. |
-| `LSROP` | No references found in inspected repo. | Left alone | No action. |
+| `STRIDE` | Found only as explicit legacy terminology guidance during Repo A; later roadmap correction may add terminology-rule references. | Preserved as historical | Leave alone when it explains that active guidance uses COMPASS. |
+| `LSROP` | No active product or implementation references were found during Repo A; later roadmap correction may mention it as historical terminology. | Preserved as historical | Leave alone when it is part of terminology guidance. |
 | `COMPASS` | Broad active use in docs, contracts, backend services, tests, and frontend UI. | Left alone | Current canonical term. Review only for places that imply unsupported product completeness. |
 | `workspace` | Broad active use in docs/code. | Reviewed manually | Concept is current. UX management/switching is weaker than backend persistence. |
 | `search track` | Used as product language for workspace-scoped search strategy. | Reviewed manually | Keep paired with workspace until Layer 7/10 terminology is settled. |
@@ -238,4 +238,3 @@ Adjustment guidance:
 
 9. Layer 14 and Layer 16 minimum-subset recons
    - Run only if productization/beta readiness makes cost controls or onboarding/support the actual blocker.
-

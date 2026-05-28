@@ -105,7 +105,7 @@ Application workflow:
   suggestions, advisor packet, notes, links, and timeline.
 - Structured interview tracking is manual-only; calendar invites, meeting generation, email, and coaching are intentionally out of scope.
 - Application detail includes a local-only advisor packet preview with Markdown export. It is redacted by default and does not create hosted sharing, advisor accounts, invitations, comments, or public links.
-- Reminder counts can appear from backend workflow data, but the fuller reminder management UI is not merged into `main`.
+- Local reminder management is available from application detail for listing, creating, editing, and completing reminders. Reminders remain local workflow records only; hosted scheduling, notifications, calendar sync, and email delivery are not implemented.
 
 Settings workspace:
 

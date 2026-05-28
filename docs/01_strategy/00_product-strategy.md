@@ -9,10 +9,11 @@ Related Docs:
 - docs/00_start-here.md
 - docs/02_layers/00_layer-index.md
 - docs/01_strategy/03_current-layer-status.md
+- docs/01_strategy/07_revised-build-order-execution-plan.md
 
 ## Purpose
 
-This document is the Careero-specific source of truth for current layer status, build order, and LEAP Recon / Codex prompt planning.
+This document is the Careero-specific source of truth for current layer status and high-level build order. The operational LEAP/LHS execution guide for the revised build order lives in [revised build order execution plan](07_revised-build-order-execution-plan.md).
 
 Careero-specific product strategy, implementation status, domain model decisions, and layer planning belong here. Reusable LEAP methodology belongs in the separate LEAP framework repository.
 
@@ -21,16 +22,17 @@ Careero-specific product strategy, implementation status, domain model decisions
 ## Current Planning Hierarchy
 
 1. `README.md` - short project entry point and pointer to canonical planning docs.
-2. `docs/01_strategy/00_product-strategy.md` - canonical Careero-specific layer status and build order.
-3. Active layer-specific docs:
+2. `docs/01_strategy/00_product-strategy.md` - canonical Careero-specific layer status and high-level build order.
+3. `docs/01_strategy/07_revised-build-order-execution-plan.md` - operational LEAP/LHS execution guide, prompt sequence, readiness gates, and pull-forward rules.
+4. Active layer-specific docs:
    - `docs/03_domain-design/opportunity-model.md`
    - `docs/01_strategy/06_productization-readiness.md`
    - `docs/03_domain-design/advisor-collaboration-mode.md`
    - `docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`
    - `docs/02_layers/15_layer-15-api-job-sources-and-managed-deltas.md`
    - `docs/02_layers/16_layer-16-guided-onboarding-and-support.md`
-4. `docs/99_archive/*` - historical context only.
-5. LEAP repo - reusable framework methodology, not Careero product truth.
+5. `docs/99_archive/*` - historical context only.
+6. LEAP repo - reusable framework methodology, not Careero product truth.
 
 Archived roadmap material must not be used for current LEAP Recon or Codex implementation prompts unless a task explicitly asks for historical comparison.
 
@@ -266,6 +268,8 @@ Hard boundary: Layer 16 must not require COMPASS source-of-truth setup before fi
 ---
 
 # Recommended Immediate Execution Plan
+
+Operational detail for the revised build order, readiness gates, prompt sequence, and Layer 14/Layer 16 pull-forward rules lives in [revised build order execution plan](07_revised-build-order-execution-plan.md). Keep this section concise and avoid duplicating that plan.
 
 ## Step 1 â€” Repo Reality Reconciliation
 

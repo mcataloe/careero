@@ -106,7 +106,7 @@ dependencies, implement SSO/account recovery, or claim hosted readiness.
 | Stage | Definition | Current fit |
 | --- | --- | --- |
 | Local POC | Developer-run local app proving the core job-seeker workflow. | Current primary stage. |
-| Local beta | Local-first app stable enough for repeated personal use with clear data boundaries and recovery notes. | Blocked until workflow, artifact lifecycle, and readiness gates are clearer. |
+| Local beta | Local-first app stable enough for repeated personal use with clear data boundaries and recovery notes. | Blocked until workflow UX, artifact lifecycle, and readiness gates are clearer. |
 | Private hosted beta | Limited hosted environment for invited users with auth, privacy controls, tenant isolation, support process, and operational monitoring. | Future. |
 | Production SaaS | Public paid or free hosted product with production-grade privacy, security, operations, billing, support, and lifecycle controls. | Future. |
 | Future marketplace/employer-side mode | Optional employer, recruiter, or marketplace capabilities with explicit user-controlled sharing and strict disclosure. | Future and last. |
@@ -137,11 +137,11 @@ dependencies, implement SSO/account recovery, or claim hosted readiness.
 - Entitlement boundaries exist locally, but live billing and paid plan
   enforcement are not implemented.
 - Billing, subscriptions, invoices, checkout, and payment flows are not implemented.
-- AI usage metering and durable cost controls are not implemented.
+- Local AI usage visibility exists, but paid usage accounting, credits, and durable production cost controls are not implemented.
 - Production deployment architecture is not implemented.
 - Layer 11A readiness reporting exists, but it is only a status surface.
 - Artifact lifecycle UX remains incomplete.
-- Reminder API/UI reconciliation remains a production readiness blocker.
+- Local reminder API/UI exists, but hosted reminder delivery, notifications, calendar sync, and email integration are not implemented.
 - Opportunity remains Role-backed internally.
 - External integrations and external automation are intentionally disabled.
 
@@ -183,7 +183,7 @@ Layer 11 depends on Layers 1-10 becoming truthful, stable, and reviewable:
 - Layer 1 must eventually add production identity, authorization, secrets, and environment hardening.
 - Layer 2 must keep source material reviewable and provenance-aware.
 - Layer 3 and Layer 6 must keep generated artifacts grounded, traceable, reviewable, and separated from private strategy.
-- Layer 4 reminders and workflow records must be reconciled before production readiness.
+- Layer 4 local reminders and workflow records exist, but workflow UX, hosted reminder delivery, notification boundaries, and production readiness still need validation.
 - Layer 5 analytics must explain confidence and avoid overstating weak signals.
 - Layer 7 must preserve Opportunity-facing compatibility while Role-backed persistence remains explicit.
 - Layer 8 must keep local/manual integrations first and defer OAuth/cloud sync.
@@ -207,12 +207,12 @@ ranking. No employer-side visibility exists today.
 ## Exit Criteria Before Productization Implementation
 
 - Local workflow value is proven through repeated use.
-- Layer 4 reminder/workflow reconciliation is resolved.
+- Layer 4 workflow records, local reminders, and summary counts are validated, and hosted reminder delivery remains explicitly out of scope unless separately approved.
 - Layer 6 artifact lifecycle is mature enough to support paid or shared artifact workflows.
 - Privacy/data governance decisions are approved.
 - Account lifecycle and auth/provider direction are approved.
 - Deployment target and operational requirements are approved.
-- AI usage metering and cost controls are designed and approved.
+- Usage accounting and production cost controls are designed and approved, or the minimum safe Layer 14 subset is pulled forward.
 - Monetization boundaries are approved and remain job-seeker-first.
 - A fresh LEAP Recon confirms implementation scope and non-goals.
 

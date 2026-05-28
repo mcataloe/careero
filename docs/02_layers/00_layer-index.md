@@ -7,10 +7,13 @@ Source of Truth: Yes
 Last Reviewed: 2026-05-27  
 Related Docs:
 - docs/01_strategy/00_product-strategy.md
+- docs/01_strategy/07_revised-build-order-execution-plan.md
 - docs/03_domain-design/00_domain-index.md
 - docs/07_prompts/00_prompt-index.md
 
 This section contains canonical LEAP layer specs and layer capsules. Layer specs are source-of-truth product/design documentation. Generated prompts belong under [docs/07_prompts](../07_prompts/00_prompt-index.md), not here.
+
+The current execution order, prompt sequence, readiness gates, and pull-forward rules live in [revised build order execution plan](../01_strategy/07_revised-build-order-execution-plan.md). After roadmap correction, Layer 4 workflow completion is the next immediate implementation focus.
 
 - [Layer 0 - Product Foundation](00_layer-00-product-foundation.md)
 - [Layer 1 - Core Platform](01_layer-01-core-platform.md)
