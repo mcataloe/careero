@@ -21,10 +21,35 @@ export interface ApplicationWorkflowCounts {
   interviews: number;
 }
 
+export interface ApplicationWorkspaceSummary {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export interface ApplicationCompassSummary {
+  id: string;
+  evaluation_status: string;
+  recommendation: string | null;
+  overall_score: number | string | null;
+  summary: string | null;
+  updated_at: string;
+}
+
+export interface ApplicationArtifactSummary {
+  id: string;
+  artifact_type: string;
+  title: string;
+  status: string | null;
+  revision_number: number | null;
+  updated_at: string;
+}
+
 export interface ApplicationSummary {
   id: string;
   role_id: string;
   workspace_id: string;
+  workspace: ApplicationWorkspaceSummary;
   title: string;
   company: ApplicationCompanySummary;
   current_state: ApplicationWorkflowState;
@@ -33,6 +58,9 @@ export interface ApplicationSummary {
   updated_at: string;
   archived_at: string | null;
   available_next_states: ApplicationWorkflowState[];
+  compass: ApplicationCompassSummary | null;
+  resume_artifact: ApplicationArtifactSummary | null;
+  cover_letter_artifact: ApplicationArtifactSummary | null;
   counts: ApplicationWorkflowCounts;
 }
 

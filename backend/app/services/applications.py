@@ -237,8 +237,19 @@ class ApplicationWorkflowService:
             raise ApplicationWorkflowNotFoundError("Application workflow not found")
         return self.detail(application)
 
+    def get_application_for_role(self, role_id: uuid.UUID) -> dict[str, Any]:
+        application = self._require_application_for_role(role_id)
+        return self.detail(application)
+
     def get_timeline(self, application_id: uuid.UUID) -> list[dict[str, Any]]:
         application = self._require_application(application_id)
+        return self._timeline_for_application(application)
+
+    def get_timeline_for_role(self, role_id: uuid.UUID) -> list[dict[str, Any]]:
+        application = self._require_application_for_role(role_id)
+        return self._timeline_for_application(application)
+
+    def _timeline_for_application(self, application: Application) -> list[dict[str, Any]]:
         events: list[dict[str, Any]] = [
             _timeline_event(
                 application=application,
@@ -473,11 +484,17 @@ class ApplicationWorkflowService:
     def summary(self, application: Application) -> dict[str, Any]:
         role = application.role
         company = role.company
+        workspace = application.workspace
         latest_compass = self._latest_compass_summary(application)
         return {
             "id": application.id,
             "role_id": application.role_id,
             "workspace_id": application.workspace_id,
+            "workspace": {
+                "id": workspace.id,
+                "title": workspace.title,
+                "status": workspace.status,
+            },
             "title": role.title,
             "company": {
                 "id": company.id,
@@ -1038,6 +1055,19 @@ class ApplicationWorkflowService:
         )
         return self.db.scalar(statement)
 
+    def _require_application_for_role(self, role_id: uuid.UUID) -> Application:
+        user = self.get_default_user()
+        role = self._get_active_role(role_id=role_id, user_id=user.id)
+        if role is None:
+            raise ApplicationWorkflowNotFoundError("Role not found")
+        application = self._get_active_application_for_role(
+            role_id=role.id,
+            user_id=user.id,
+        )
+        if application is None:
+            raise ApplicationWorkflowNotFoundError("Application workflow not found")
+        return application
+
     def _get_workspace_for_user(
         self,
         *,
@@ -1318,6 +1348,7 @@ class ApplicationWorkflowService:
 def _application_load_options():
     return (
         joinedload(Application.role).joinedload(Role.company),
+        joinedload(Application.workspace),
         selectinload(Application.state_history),
         selectinload(Application.note_entries),
         selectinload(Application.reminders),

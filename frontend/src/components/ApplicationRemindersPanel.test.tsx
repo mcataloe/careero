@@ -43,7 +43,7 @@ describe("ApplicationRemindersPanel", () => {
       />,
     );
 
-    expect(screen.getByText("No reminders yet.")).toBeInTheDocument();
+    expect(screen.getByText(/No reminders yet/)).toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText("Reminder title"), "Follow up");
     await userEvent.type(screen.getByLabelText("Due date"), "2026-05-20T10:00");
@@ -89,6 +89,7 @@ describe("ApplicationRemindersPanel", () => {
 
     expect(screen.getByText("Follow up")).toBeInTheDocument();
     expect(screen.getByText("Ask about next steps.")).toBeInTheDocument();
+    expect(screen.getByText("Overdue")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Edit" }));
     await userEvent.clear(screen.getByLabelText("Edit reminder title"));

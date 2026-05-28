@@ -15,6 +15,7 @@ import { Navigate, useParams } from "react-router-dom";
 
 import { getArtifactPerformance } from "../api/artifactPerformance";
 import { listAutomationSuggestions } from "../api/automation";
+import { getApplicationsPipeline } from "../api/applications";
 import { getCompensationIntelligence } from "../api/compensationIntelligence";
 import { getHistoricalLearning } from "../api/historicalLearning";
 import { getRecommendations } from "../api/recommendations";
@@ -35,6 +36,10 @@ import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 import type { SearchHealthResponse } from "../types/searchHealth";
 import type { SourceIntelligenceResponse } from "../types/sourceIntelligence";
 import type { CompassInsightsResponse } from "../types/compassInsights";
+import type {
+  ApplicationPipelineResponse,
+  ApplicationSummary,
+} from "../types/applications";
 
 const dashboardSections = [
   {
@@ -226,11 +231,25 @@ function DashboardSectionContent({
     default:
       return (
         <AsyncDashboardSection
-          loadingLabel="Loading search analytics"
-          errorMessage="Could not load search analytics"
-          load={getSearchAnalytics}
+          loadingLabel="Loading search overview"
+          errorMessage="Could not load search overview"
+          load={async () => {
+            const [analytics, workflow] = await Promise.all([
+              getSearchAnalytics(),
+              getApplicationsPipeline(),
+            ]);
+            return { analytics, workflow };
+          }}
         >
-          {(data: SearchAnalyticsResponse) => <SearchAnalyticsPanel analytics={data} />}
+          {(data: {
+            analytics: SearchAnalyticsResponse;
+            workflow: ApplicationPipelineResponse;
+          }) => (
+            <SearchAnalyticsPanel
+              analytics={data.analytics}
+              workflow={data.workflow}
+            />
+          )}
         </AsyncDashboardSection>
       );
   }
@@ -566,8 +585,10 @@ function ArtifactPerformancePanel({
 
 function SearchAnalyticsPanel({
   analytics,
+  workflow,
 }: {
   analytics: SearchAnalyticsResponse;
+  workflow: ApplicationPipelineResponse;
 }) {
   const summaryItems = [
     "opportunities_saved",
@@ -582,6 +603,8 @@ function SearchAnalyticsPanel({
 
   return (
     <Stack gap="lg">
+      <WorkflowAttentionPanel workflow={workflow} />
+
       {analytics.insufficient_data.length > 0 ? (
         <Alert color="gray" title="Data is still thin">
           <Stack gap={4}>
@@ -657,6 +680,80 @@ function SearchAnalyticsPanel({
           </Table.Tbody>
         </Table>
       </Paper>
+    </Stack>
+  );
+}
+
+function WorkflowAttentionPanel({
+  workflow,
+}: {
+  workflow: ApplicationPipelineResponse;
+}) {
+  const applications: ApplicationSummary[] = Object.values(workflow.states).flat();
+  const now = new Date();
+  const due = applications.filter(
+    (application) =>
+      application.next_action_at &&
+      application.current_state !== "archived" &&
+      new Date(application.next_action_at) <= now,
+  );
+  const upcoming = applications
+    .filter(
+      (application) =>
+        application.next_action_at &&
+        application.current_state !== "archived" &&
+        new Date(application.next_action_at) > now,
+    )
+    .slice(0, 3);
+  const active = applications.filter(
+    (application) => application.current_state !== "archived",
+  );
+
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Group justify="space-between" align="flex-start">
+        <div>
+          <Title order={3}>Workflow attention</Title>
+          <Text c="dimmed" size="sm">
+            Application follow-up signal from the Layer 4 workflow pipeline.
+          </Text>
+        </div>
+        <Badge variant="light">{active.length} active</Badge>
+      </Group>
+      <SimpleWorkflowStats dueCount={due.length} upcoming={upcoming} />
+    </Paper>
+  );
+}
+
+function SimpleWorkflowStats({
+  dueCount,
+  upcoming,
+}: {
+  dueCount: number;
+  upcoming: ApplicationSummary[];
+}) {
+  return (
+    <Stack gap="sm" mt="md">
+      <Group gap="xs">
+        <Badge color={dueCount > 0 ? "orange" : "gray"} variant="light">
+          {dueCount} due or overdue
+        </Badge>
+        <Badge variant="light">{upcoming.length} upcoming</Badge>
+      </Group>
+      {upcoming.length > 0 ? (
+        <Stack gap={4}>
+          {upcoming.map((application) => (
+            <Text key={application.id} size="sm">
+              {application.title} - next action{" "}
+              {new Date(application.next_action_at ?? "").toLocaleDateString()}
+            </Text>
+          ))}
+        </Stack>
+      ) : (
+        <Text c="dimmed" size="sm">
+          No upcoming next actions are scheduled from tracked applications.
+        </Text>
+      )}
     </Stack>
   );
 }

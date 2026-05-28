@@ -49,6 +49,23 @@ function formatDateTime(value: string) {
   });
 }
 
+function reminderStatus(reminder: ApplicationReminder) {
+  if (reminder.completed_at) {
+    return { label: "Complete", color: "green" };
+  }
+  const due = new Date(reminder.due_at);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  if (due < now) {
+    return { label: "Overdue", color: "red" };
+  }
+  if (due >= today && due < tomorrow) {
+    return { label: "Due today", color: "orange" };
+  }
+  return { label: "Upcoming", color: "blue" };
+}
+
 export function ApplicationRemindersPanel({
   applicationId,
   reminders,
@@ -194,9 +211,12 @@ export function ApplicationRemindersPanel({
         ) : null}
 
         {reminders.length === 0 ? (
-          <Text c="dimmed" size="sm">
-            No reminders yet.
-          </Text>
+          <Card withBorder radius="sm" p="md">
+            <Text c="dimmed" size="sm">
+              No reminders yet. Add the next follow-up date when this application
+              needs attention.
+            </Text>
+          </Card>
         ) : (
           <Stack gap="sm">
             {reminders.map((reminder) => (
@@ -264,19 +284,21 @@ export function ApplicationRemindersPanel({
                     <div>
                       <Group gap="xs">
                         <Text fw={600}>{reminder.title}</Text>
-                        {reminder.completed_at ? (
-                          <Badge color="green" variant="light">
-                            Complete
-                          </Badge>
-                        ) : (
-                          <Badge color="blue" variant="light">
-                            Open
-                          </Badge>
-                        )}
+                        <Badge
+                          color={reminderStatus(reminder).color}
+                          variant="light"
+                        >
+                          {reminderStatus(reminder).label}
+                        </Badge>
                       </Group>
                       <Text size="sm" c="dimmed">
                         Due {formatDateTime(reminder.due_at)}
                       </Text>
+                      {reminder.completed_at ? (
+                        <Text size="xs" c="dimmed">
+                          Completed {formatDateTime(reminder.completed_at)}
+                        </Text>
+                      ) : null}
                       {reminder.notes ? (
                         <Text size="sm" mt={4} style={{ whiteSpace: "pre-wrap" }}>
                           {reminder.notes}

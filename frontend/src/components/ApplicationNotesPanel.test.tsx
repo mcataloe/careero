@@ -46,7 +46,7 @@ describe("ApplicationNotesPanel", () => {
       />,
     );
 
-    expect(screen.getByText("No notes yet.")).toBeInTheDocument();
+    expect(screen.getByText(/No notes yet/)).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText("New note"), "Created note");
     await userEvent.click(screen.getByRole("button", { name: "Add note" }));
 

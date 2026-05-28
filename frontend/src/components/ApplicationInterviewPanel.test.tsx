@@ -52,7 +52,7 @@ describe("ApplicationInterviewPanel", () => {
       />,
     );
 
-    expect(screen.getByText("No interviews tracked yet.")).toBeInTheDocument();
+    expect(screen.getByText(/No interviews tracked yet/)).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText("Interview title"), "Recruiter call");
     await userEvent.click(screen.getByRole("button", { name: "Add interview" }));
 
@@ -84,7 +84,8 @@ describe("ApplicationInterviewPanel", () => {
     );
 
     expect(screen.getByText("Technical interview")).toBeInTheDocument();
-    expect(screen.getByText(/Technical ·/)).toBeInTheDocument();
+    expect(screen.getByText(/Technical -/)).toBeInTheDocument();
+    expect(screen.getByText("Upcoming or planned")).toBeInTheDocument();
     expect(screen.getByText(/Ada Lovelace/)).toBeInTheDocument();
     expect(screen.getByText("State transition available")).toBeInTheDocument();
 

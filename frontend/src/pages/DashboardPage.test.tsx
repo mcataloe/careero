@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DashboardPage } from "./DashboardPage";
 import { render, screen, waitFor } from "../test-utils";
+import type { ApplicationPipelineResponse } from "../types/applications";
 import type { CompassInsightsResponse } from "../types/compassInsights";
 import type { SearchAnalyticsResponse } from "../types/searchAnalytics";
 
@@ -64,6 +65,52 @@ const compassInsights: CompassInsightsResponse = {
   insufficient_data: [],
 };
 
+const workflowPipeline: ApplicationPipelineResponse = {
+  workspace_id: null,
+  include_inactive: false,
+  states: {
+    discovered: [],
+    interested: [
+      {
+        id: "app-1",
+        role_id: "role-1",
+        workspace_id: "workspace-1",
+        workspace: {
+          id: "workspace-1",
+          title: "Platform search",
+          status: "active",
+        },
+        title: "Staff Platform Engineer",
+        company: {
+          id: "company-1",
+          name: "Example Company",
+          website_url: null,
+        },
+        current_state: "interested",
+        applied_at: null,
+        next_action_at: "2026-06-01T15:00:00Z",
+        updated_at: "2026-05-16T15:00:00Z",
+        archived_at: null,
+        available_next_states: ["applied", "withdrawn", "archived"],
+        compass: null,
+        resume_artifact: null,
+        cover_letter_artifact: null,
+        counts: {
+          notes: 0,
+          external_links: 0,
+          reminders: 1,
+          interviews: 0,
+        },
+      },
+    ],
+    applied: [],
+    interviewing: [],
+    offer: [],
+    rejected: [],
+    withdrawn: [],
+  },
+};
+
 function renderDashboardAt(path: string) {
   render(
     <MemoryRouter initialEntries={[path]}>
@@ -79,15 +126,21 @@ describe("DashboardPage", () => {
     vi.unstubAllGlobals();
   });
 
-  it("loads only search analytics for the overview route", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(searchAnalytics));
+  it("loads search analytics and workflow attention for the overview route", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(searchAnalytics))
+      .mockResolvedValueOnce(jsonResponse(workflowPipeline));
     vi.stubGlobal("fetch", fetchMock);
 
     renderDashboardAt("/dashboard/overview");
 
     expect(await screen.findByText("Opportunities saved")).toBeInTheDocument();
+    expect(screen.getByText("Workflow attention")).toBeInTheDocument();
+    expect(screen.getByText("1 active")).toBeInTheDocument();
     expect(screen.getByText("Prioritize active follow-ups")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/analytics/search", expect.any(Object));
+    expect(fetchMock).toHaveBeenCalledWith("/api/applications/pipeline", expect.any(Object));
     expect(fetchMock).not.toHaveBeenCalledWith(
       "/api/analytics/compass",
       expect.any(Object),

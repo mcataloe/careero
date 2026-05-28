@@ -4,7 +4,7 @@ Status: Active
 Doc Type: Domain Design  
 Layer: Layer 4  
 Source of Truth: Yes  
-Last Reviewed: 2026-05-27  
+Last Reviewed: 2026-05-28
 Related Docs:
 - docs/03_domain-design/application-interview-tracking.md
 - docs/03_domain-design/opportunity-model.md
@@ -93,6 +93,34 @@ chronological timeline view. It aggregates existing typed workflow rows,
 completed COMPASS evaluations, generated resume/cover-letter artifacts, and
 selected ActivityLog entries. The timeline stores no rows of its own and must
 not become the workflow source of truth.
+
+Layer 4B also exposes Opportunity-facing read aliases for the same workflow
+foundation:
+
+- `GET /api/opportunities/{opportunity_id}/application`
+- `GET /api/opportunities/{opportunity_id}/application/timeline`
+
+These endpoints do not create application workflows and do not introduce a new
+Opportunity persistence table. They resolve the current Role-backed Opportunity
+through the same ownership rules, return the existing application workflow when
+one exists, and keep the canonical mutation path on application transition
+endpoints.
+
+Layer 4C adds the user-facing workflow UX on top of these same records. The
+Applications page is the main command center: it shows pipeline state, workspace
+context, next-action attention, recent updates, and quick links into notes,
+reminders, interviews, and timeline. Application detail keeps routed sections
+for overview, interviews, reminders, suggestions, advisor packet, notes, links,
+and timeline; the overview now surfaces current state, workspace/search-track
+context, next action, applied date, linked artifacts where present, and visible
+state-transition controls. Opportunity detail can start tracking an existing
+opportunity as an application by using the existing ensure endpoint, but full
+workflow management remains under `/applications/{application_id}/...`.
+
+Layer 4C does not add notification delivery, calendar/email sync, recurring
+reminders, insight generation, artifact lifecycle review, or automation. Those
+remain later-layer work. Layer 4D should harden regression coverage and docs
+around these UX paths after the workflow surfaces settle.
 
 Notes:
 

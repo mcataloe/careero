@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { RoleDetailPage } from "./RoleDetailPage";
 import { sampleEvaluation, sampleRole } from "../test-data";
 import { render, screen, userEvent, waitFor } from "../test-utils";
+import type { ApplicationDetail } from "../types/applications";
 
 function jsonResponse(response: unknown, status = 200) {
   return {
@@ -31,6 +32,47 @@ function renderPage(path = `/opportunities/${sampleRole.id}/compass`) {
     </MemoryRouter>,
   );
 }
+
+const sampleApplication: ApplicationDetail = {
+  id: "app-1",
+  role_id: sampleRole.id,
+  workspace_id: "workspace-1",
+  workspace: {
+    id: "workspace-1",
+    title: "Platform search",
+    status: "active",
+  },
+  title: sampleRole.title,
+  company: sampleRole.company,
+  current_state: "interested",
+  applied_at: null,
+  next_action_at: null,
+  updated_at: "2026-05-16T15:00:00Z",
+  archived_at: null,
+  available_next_states: ["applied", "withdrawn", "archived"],
+  compass: null,
+  resume_artifact: null,
+  cover_letter_artifact: null,
+  counts: {
+    notes: 1,
+    external_links: 0,
+    reminders: 2,
+    interviews: 1,
+  },
+  workflow_metadata: {},
+  application_state: {},
+  state_history: [],
+  role: {
+    id: sampleRole.id,
+    workspace_id: "workspace-1",
+    title: sampleRole.title,
+    status: sampleRole.status,
+    company: sampleRole.company,
+    job_url: sampleRole.job_url,
+    location: sampleRole.location,
+    remote_type: sampleRole.remote_type,
+  },
+};
 
 describe("RoleDetailPage", () => {
   afterEach(() => {
@@ -71,7 +113,8 @@ describe("RoleDetailPage", () => {
   it("renders section navigation with valid role detail targets", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(sampleRole));
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404));
     vi.stubGlobal("fetch", fetchMock);
 
     renderPage(`/opportunities/${sampleRole.id}/overview`);
@@ -96,6 +139,72 @@ describe("RoleDetailPage", () => {
     expect(document.getElementById("role-overview")).not.toBeNull();
     expect(document.getElementById("role-description")).toBeNull();
     expect(document.getElementById("compass-evaluation")).toBeNull();
+  });
+
+  it("renders opportunity application workflow status when tracked", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse(sampleApplication));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage(`/opportunities/${sampleRole.id}/overview`);
+
+    expect(await screen.findByText("Application workflow")).toBeInTheDocument();
+    expect(screen.getByText("interested")).toBeInTheDocument();
+    expect(screen.getByText("Search track: Platform search")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open application/i })).toHaveAttribute(
+      "href",
+      `/applications/${sampleApplication.id}/overview`,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/opportunities/${sampleRole.id}/application`,
+      expect.any(Object),
+    );
+  });
+
+  it("renders a calm empty workflow state when opportunity is not tracked", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage(`/opportunities/${sampleRole.id}/overview`);
+
+    expect(
+      await screen.findByText("Not tracked as an application yet."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /open application/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /track as application/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts application workflow from the empty state", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(sampleRole))
+      .mockResolvedValueOnce(jsonResponse({ detail: "Not found" }, 404))
+      .mockResolvedValueOnce(jsonResponse(sampleApplication, 201));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPage(`/opportunities/${sampleRole.id}/overview`);
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: /track as application/i }),
+    );
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/opportunities/${sampleRole.id}/application`,
+        expect.objectContaining({ method: "POST" }),
+      ),
+    );
+    expect(await screen.findByText("Application workflow started")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open application/i })).toBeInTheDocument();
   });
 
   it("re-runs evaluation with force enabled", async () => {

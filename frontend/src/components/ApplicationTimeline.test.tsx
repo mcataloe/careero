@@ -15,7 +15,12 @@ const events: ApplicationTimelineEvent[] = [
     actor: "user",
     source_type: "application_state_history",
     source_id: "history-1",
-    metadata: {},
+    metadata: {
+      from_state: "discovered",
+      to_state: "interested",
+      recommendation: "apply",
+      raw_private_note: { hidden: true },
+    },
   },
   {
     id: "created-1",
@@ -37,7 +42,10 @@ describe("ApplicationTimeline", () => {
 
     expect(screen.getByText("State changed to interested")).toBeInTheDocument();
     expect(screen.getByText("Worth pursuing.")).toBeInTheDocument();
-    expect(screen.getByText("application.state_changed")).toBeInTheDocument();
+    expect(screen.getByText("application state changed")).toBeInTheDocument();
+    expect(screen.getByText("To: interested")).toBeInTheDocument();
+    expect(screen.getByText("Recommendation: apply")).toBeInTheDocument();
+    expect(screen.queryByText(/raw_private_note/i)).not.toBeInTheDocument();
     expect(screen.getByText(/by user/i)).toBeInTheDocument();
   });
 

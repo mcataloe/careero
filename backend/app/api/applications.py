@@ -69,6 +69,40 @@ def get_or_create_opportunity_application(
     return _get_or_create_opportunity_application(opportunity_id, service)
 
 
+@router.get(
+    "/opportunities/{opportunity_id}/application",
+    response_model=ApplicationDetailResponse,
+)
+def get_opportunity_application(
+    opportunity_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.get_application_for_role(opportunity_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
+@router.get(
+    "/opportunities/{opportunity_id}/application/timeline",
+    response_model=list[ApplicationTimelineEventResponse],
+)
+def get_opportunity_application_timeline(
+    opportunity_id: uuid.UUID,
+    service: ApplicationWorkflowService = Depends(get_application_workflow_service),
+):
+    try:
+        return service.get_timeline_for_role(opportunity_id)
+    except ApplicationWorkflowNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except ApplicationWorkflowSeedMissingError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+
+
 def _get_or_create_opportunity_application(
     opportunity_id: uuid.UUID,
     service: ApplicationWorkflowService,

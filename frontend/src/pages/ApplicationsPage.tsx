@@ -107,6 +107,9 @@ export function ApplicationsPage() {
   const hasApplications = states.some(
     (state) => (pipeline?.states[state] ?? []).length > 0,
   );
+  const allApplications = pipeline
+    ? Object.values(pipeline.states).flat()
+    : [];
 
   return (
     <Stack gap="lg">
@@ -136,39 +139,132 @@ export function ApplicationsPage() {
       ) : null}
 
       {!loading && !error && hasApplications ? (
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-          {states.map((state) => (
-            <Stack key={state} gap="sm">
-              <Group justify="space-between">
-                <Badge color={STATE_COLORS[state]} variant="filled">
-                  {formatStateLabel(state)}
-                </Badge>
-                <Badge variant="default">
-                  {pipeline?.states[state]?.length ?? 0}
-                </Badge>
-              </Group>
+        <Stack gap="lg">
+          <ApplicationAttentionStrip
+            applications={allApplications}
+            includeInactive={includeInactive}
+          />
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+            {states.map((state) => (
+              <Stack key={state} gap="sm">
+                <Group justify="space-between">
+                  <Badge color={STATE_COLORS[state]} variant="filled">
+                    {formatStateLabel(state)}
+                  </Badge>
+                  <Badge variant="default">
+                    {pipeline?.states[state]?.length ?? 0}
+                  </Badge>
+                </Group>
 
-              {(pipeline?.states[state] ?? []).length === 0 ? (
-                <Paper withBorder radius="md" p="md">
-                  <Text c="dimmed" size="sm" ta="center">
-                    No applications
-                  </Text>
-                </Paper>
-              ) : null}
+                {(pipeline?.states[state] ?? []).length === 0 ? (
+                  <Paper withBorder radius="md" p="md">
+                    <Text c="dimmed" size="sm" ta="center">
+                      No applications
+                    </Text>
+                  </Paper>
+                ) : null}
 
-              {(pipeline?.states[state] ?? []).map((application) => (
-                <ApplicationPipelineCard
-                  key={application.id}
-                  application={application}
-                  transitioning={transitioningId === application.id}
-                  onMove={moveApplication}
-                />
-              ))}
-            </Stack>
-          ))}
-        </SimpleGrid>
+                {(pipeline?.states[state] ?? []).map((application) => (
+                  <ApplicationPipelineCard
+                    key={application.id}
+                    application={application}
+                    transitioning={transitioningId === application.id}
+                    onMove={moveApplication}
+                  />
+                ))}
+              </Stack>
+            ))}
+          </SimpleGrid>
+        </Stack>
       ) : null}
     </Stack>
+  );
+}
+
+function ApplicationAttentionStrip({
+  applications,
+  includeInactive,
+}: {
+  applications: ApplicationSummary[];
+  includeInactive: boolean;
+}) {
+  const now = new Date();
+  const activeCount = applications.filter(
+    (application) => application.current_state !== "archived",
+  ).length;
+  const archivedCount = applications.filter(
+    (application) => application.current_state === "archived",
+  ).length;
+  const dueCount = applications.filter((application) => {
+    if (!application.next_action_at || application.current_state === "archived") {
+      return false;
+    }
+    return new Date(application.next_action_at) <= now;
+  }).length;
+  const upcomingCount = applications.filter((application) => {
+    if (!application.next_action_at || application.current_state === "archived") {
+      return false;
+    }
+    return new Date(application.next_action_at) > now;
+  }).length;
+  const recentlyUpdated = [...applications]
+    .sort(
+      (left, right) =>
+        new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime(),
+    )
+    .slice(0, 3);
+
+  return (
+    <Paper withBorder radius="md" p="lg">
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Text fw={600}>Workflow attention</Text>
+            <Text size="sm" c="dimmed">
+              Core Layer 4 signals from tracked application state and next actions.
+            </Text>
+          </div>
+          {includeInactive ? (
+            <Badge variant="light">{archivedCount} archived included</Badge>
+          ) : null}
+        </Group>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
+          <Paper withBorder radius="sm" p="md">
+            <Text size="xs" c="dimmed">
+              Active workflows
+            </Text>
+            <Title order={3}>{activeCount}</Title>
+          </Paper>
+          <Paper withBorder radius="sm" p="md">
+            <Text size="xs" c="dimmed">
+              Due or overdue
+            </Text>
+            <Title order={3}>{dueCount}</Title>
+          </Paper>
+          <Paper withBorder radius="sm" p="md">
+            <Text size="xs" c="dimmed">
+              Upcoming next actions
+            </Text>
+            <Title order={3}>{upcomingCount}</Title>
+          </Paper>
+          <Paper withBorder radius="sm" p="md">
+            <Text size="xs" c="dimmed">
+              Recently updated
+            </Text>
+            <Title order={3}>{recentlyUpdated.length}</Title>
+          </Paper>
+        </SimpleGrid>
+        {recentlyUpdated.length > 0 ? (
+          <Group gap="xs">
+            {recentlyUpdated.map((application) => (
+              <Badge key={application.id} variant="outline">
+                {application.title}
+              </Badge>
+            ))}
+          </Group>
+        ) : null}
+      </Stack>
+    </Paper>
   );
 }
 
@@ -201,6 +297,9 @@ function ApplicationPipelineCard({
           </Text>
           <Text c="dimmed" size="sm">
             {application.company.name}
+          </Text>
+          <Text c="dimmed" size="xs">
+            {application.workspace.title}
           </Text>
         </div>
 
@@ -253,6 +352,33 @@ function ApplicationPipelineCard({
             ))}
           </Group>
         ) : null}
+
+        <Group gap="xs">
+          <Button
+            component={Link}
+            to={`/applications/${application.id}/notes`}
+            size="xs"
+            variant="subtle"
+          >
+            Notes
+          </Button>
+          <Button
+            component={Link}
+            to={`/applications/${application.id}/reminders`}
+            size="xs"
+            variant="subtle"
+          >
+            Reminders
+          </Button>
+          <Button
+            component={Link}
+            to={`/applications/${application.id}/timeline`}
+            size="xs"
+            variant="subtle"
+          >
+            Timeline
+          </Button>
+        </Group>
       </Stack>
     </Card>
   );

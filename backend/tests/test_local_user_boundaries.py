@@ -178,6 +178,10 @@ def test_user_cannot_fetch_or_update_another_users_application(
     with pytest.raises(ApplicationWorkflowNotFoundError):
         user_a_applications.get_application(_as_uuid(app_b["id"]))
     with pytest.raises(ApplicationWorkflowNotFoundError):
+        user_a_applications.get_application_for_role(role_b.id)
+    with pytest.raises(ApplicationWorkflowNotFoundError):
+        user_a_applications.get_timeline_for_role(role_b.id)
+    with pytest.raises(ApplicationWorkflowNotFoundError):
         user_a_applications.update_application(
             _as_uuid(app_b["id"]),
             ApplicationMetadataUpdate(workflow_metadata={"priority": "stolen"}),

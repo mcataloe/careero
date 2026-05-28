@@ -39,6 +39,11 @@ const populatedPipeline: ApplicationPipelineResponse = {
         id: "app-1",
         role_id: "role-1",
         workspace_id: "workspace-1",
+        workspace: {
+          id: "workspace-1",
+          title: "Platform search",
+          status: "active",
+        },
         title: "Staff Platform Engineer",
         company: {
           id: "company-1",
@@ -51,6 +56,9 @@ const populatedPipeline: ApplicationPipelineResponse = {
         updated_at: "2026-05-16T12:00:00Z",
         archived_at: null,
         available_next_states: ["interested", "withdrawn", "archived"],
+        compass: null,
+        resume_artifact: null,
+        cover_letter_artifact: null,
         counts: {
           notes: 1,
           external_links: 3,
@@ -110,12 +118,14 @@ describe("ApplicationsPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Staff Platform Engineer")).toBeInTheDocument();
+    expect((await screen.findAllByText("Staff Platform Engineer")).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Staff Platform Engineer" })).toHaveAttribute(
       "href",
       "/applications/app-1",
     );
     expect(screen.getByText("Example Company")).toBeInTheDocument();
+    expect(screen.getByText("Platform search")).toBeInTheDocument();
+    expect(screen.getByText("Workflow attention")).toBeInTheDocument();
     expect(screen.getByText("1 notes")).toBeInTheDocument();
     expect(screen.getByText("3 links")).toBeInTheDocument();
     expect(screen.getByText("2 reminders")).toBeInTheDocument();

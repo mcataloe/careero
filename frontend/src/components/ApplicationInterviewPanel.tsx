@@ -53,6 +53,13 @@ function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : "Not scheduled";
 }
 
+function interviewBucket(interview: ApplicationInterviewStage) {
+  if (["completed", "canceled", "no_show"].includes(interview.status)) {
+    return "Completed or closed";
+  }
+  return "Upcoming or planned";
+}
+
 function toIsoFromDateTimeLocal(value: string) {
   if (!value) {
     return null;
@@ -84,7 +91,23 @@ export function ApplicationInterviewPanel({
 
   const hasInterviewingSuggestion =
     currentState !== "interviewing" &&
-    interviews.some((interview) => interview.state_transition_suggestion === "interviewing");
+    interviews.some(
+      (interview) => interview.state_transition_suggestion === "interviewing",
+    );
+  const groupedInterviews = [
+    {
+      label: "Upcoming or planned",
+      interviews: interviews.filter(
+        (interview) => interviewBucket(interview) === "Upcoming or planned",
+      ),
+    },
+    {
+      label: "Completed or closed",
+      interviews: interviews.filter(
+        (interview) => interviewBucket(interview) === "Completed or closed",
+      ),
+    },
+  ].filter((group) => group.interviews.length > 0);
 
   async function runMutation(mutation: () => Promise<unknown>) {
     setBusy(true);
@@ -209,79 +232,97 @@ export function ApplicationInterviewPanel({
         ) : null}
 
         {interviews.length === 0 ? (
-          <Text c="dimmed" size="sm">
-            No interviews tracked yet.
-          </Text>
+          <Card withBorder radius="sm" p="md">
+            <Text c="dimmed" size="sm">
+              No interviews tracked yet. Add recruiter screens, technical rounds,
+              panels, or offer discussions as they become real.
+            </Text>
+          </Card>
         ) : (
           <Stack gap="sm">
-            {interviews.map((interview) => (
-              <Card key={interview.id} withBorder radius="sm" p="md">
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap={4}>
-                    <Group gap="xs">
-                      <Text fw={600}>{interview.title}</Text>
-                      <Badge color={STATUS_COLORS[interview.status] ?? "gray"}>
-                        {interview.status}
-                      </Badge>
+            {groupedInterviews.map((group) => (
+              <Stack key={group.label} gap="xs">
+                <Text size="sm" fw={600}>
+                  {group.label}
+                </Text>
+                {group.interviews.map((interview) => (
+                  <Card key={interview.id} withBorder radius="sm" p="md">
+                    <Group justify="space-between" align="flex-start">
+                      <Stack gap={4}>
+                        <Group gap="xs">
+                          <Text fw={600}>{interview.title}</Text>
+                          <Badge color={STATUS_COLORS[interview.status] ?? "gray"}>
+                            {interview.status.replaceAll("_", " ")}
+                          </Badge>
+                        </Group>
+                        <Text size="sm" c="dimmed">
+                          {stageLabel(interview.stage_type)} -{" "}
+                          {formatDate(interview.scheduled_at)}
+                        </Text>
+                        {interview.interviewer_names.length ? (
+                          <Text size="sm">
+                            Interviewers: {interview.interviewer_names.join(", ")}
+                          </Text>
+                        ) : null}
+                        {interview.location_or_meeting_link ? (
+                          <Text size="sm">{interview.location_or_meeting_link}</Text>
+                        ) : null}
+                        {interview.notes ? (
+                          <Text size="sm">Notes: {interview.notes}</Text>
+                        ) : null}
+                        {interview.preparation_notes ? (
+                          <Text size="sm">Prep: {interview.preparation_notes}</Text>
+                        ) : null}
+                        {interview.outcome_notes ? (
+                          <Text size="sm">Outcome: {interview.outcome_notes}</Text>
+                        ) : null}
+                      </Stack>
+                      <Group gap="xs">
+                        <Button
+                          size="xs"
+                          variant="default"
+                          onClick={() =>
+                            runMutation(() =>
+                              completeApplicationInterview(applicationId, interview.id),
+                            )
+                          }
+                          loading={busy}
+                          disabled={interview.status === "completed"}
+                        >
+                          Complete
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="default"
+                          color="orange"
+                          onClick={() =>
+                            runMutation(() =>
+                              cancelApplicationInterview(applicationId, interview.id),
+                            )
+                          }
+                          loading={busy}
+                          disabled={["canceled", "no_show"].includes(interview.status)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          color="red"
+                          onClick={() =>
+                            runMutation(() =>
+                              deleteApplicationInterview(applicationId, interview.id),
+                            )
+                          }
+                          loading={busy}
+                        >
+                          Delete
+                        </Button>
+                      </Group>
                     </Group>
-                    <Text size="sm" c="dimmed">
-                      {stageLabel(interview.stage_type)} · {formatDate(interview.scheduled_at)}
-                    </Text>
-                    {interview.interviewer_names.length ? (
-                      <Text size="sm">
-                        Interviewers: {interview.interviewer_names.join(", ")}
-                      </Text>
-                    ) : null}
-                    {interview.location_or_meeting_link ? (
-                      <Text size="sm">{interview.location_or_meeting_link}</Text>
-                    ) : null}
-                    {interview.preparation_notes ? (
-                      <Text size="sm">Prep: {interview.preparation_notes}</Text>
-                    ) : null}
-                    {interview.outcome_notes ? (
-                      <Text size="sm">Outcome: {interview.outcome_notes}</Text>
-                    ) : null}
-                  </Stack>
-                  <Group gap="xs">
-                    <Button
-                      size="xs"
-                      variant="default"
-                      onClick={() =>
-                        runMutation(() =>
-                          completeApplicationInterview(applicationId, interview.id),
-                        )
-                      }
-                      loading={busy}
-                    >
-                      Complete
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="default"
-                      color="orange"
-                      onClick={() =>
-                        runMutation(() =>
-                          cancelApplicationInterview(applicationId, interview.id),
-                        )
-                      }
-                      loading={busy}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      color="red"
-                      onClick={() =>
-                        runMutation(() => deleteApplicationInterview(applicationId, interview.id))
-                      }
-                      loading={busy}
-                    >
-                      Delete
-                    </Button>
-                  </Group>
-                </Group>
-              </Card>
+                  </Card>
+                ))}
+              </Stack>
             ))}
           </Stack>
         )}

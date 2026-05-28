@@ -1,4 +1,15 @@
-import { Badge, Card, Group, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Group,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -11,6 +22,7 @@ import {
   listApplicationLinks,
   listApplicationNotes,
   listApplicationReminders,
+  transitionApplicationState,
 } from "../api/applications";
 import { ApplicationInterviewPanel } from "../components/ApplicationInterviewPanel";
 import { ApplicationLinksPanel } from "../components/ApplicationLinksPanel";
@@ -98,12 +110,31 @@ const applicationSectionIds = new Set<string>(
   applicationSections.map((section) => section.id),
 );
 
+function formatStateLabel(state: ApplicationWorkflowState) {
+  return state.replaceAll("_", " ");
+}
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return "Not set";
+  }
+  return new Date(value).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function ApplicationDetailPage() {
   const { applicationId, section } = useParams();
   const activeSection = isApplicationSectionId(section) ? section : null;
   const [application, setApplication] = useState<ApplicationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [transitionError, setTransitionError] = useState<string | null>(null);
+  const [transitioningState, setTransitioningState] =
+    useState<ApplicationWorkflowState | null>(null);
 
   async function loadApplication() {
     if (!applicationId) {
@@ -125,6 +156,36 @@ export function ApplicationDetailPage() {
   useEffect(() => {
     void loadApplication();
   }, [applicationId]);
+
+  async function handleStateTransition(
+    nextState: ApplicationWorkflowState,
+    reactivate = false,
+  ) {
+    if (!applicationId) {
+      return;
+    }
+    setTransitioningState(nextState);
+    setTransitionError(null);
+    setNotice(null);
+    try {
+      await transitionApplicationState(applicationId, {
+        state: nextState,
+        reactivate,
+      });
+      await loadApplication();
+      setNotice(
+        reactivate
+          ? `Application reactivated to ${formatStateLabel(nextState)}`
+          : `Application moved to ${formatStateLabel(nextState)}`,
+      );
+    } catch (err) {
+      setTransitionError(
+        err instanceof Error ? err.message : "Could not update application state",
+      );
+    } finally {
+      setTransitioningState(null);
+    }
+  }
 
   if (!activeSection) {
     return <Navigate to={`/applications/${applicationId ?? ""}/overview`} replace />;
@@ -155,10 +216,27 @@ export function ApplicationDetailPage() {
             <Text c="dimmed">{application.company.name}</Text>
           </div>
           <Badge color={STATE_COLORS[application.current_state]} variant="filled">
-            {application.current_state}
+            {formatStateLabel(application.current_state)}
           </Badge>
         </Group>
       </div>
+
+      {notice ? (
+        <Alert color="green" withCloseButton onClose={() => setNotice(null)}>
+          {notice}
+        </Alert>
+      ) : null}
+      {transitionError ? (
+        <Alert color="red" withCloseButton onClose={() => setTransitionError(null)}>
+          {transitionError}
+        </Alert>
+      ) : null}
+
+      <ApplicationWorkflowControls
+        application={application}
+        transitioningState={transitioningState}
+        onTransition={handleStateTransition}
+      />
 
       <FeatureWorkspaceLayout
         navLabel="Application sections"
@@ -228,21 +306,225 @@ function ApplicationOverviewSection({
 }: {
   application: ApplicationDetail;
 }) {
+  const quickLinks = [
+    {
+      label: "Notes",
+      value: application.counts.notes,
+      to: `/applications/${application.id}/notes`,
+    },
+    {
+      label: "Reminders",
+      value: application.counts.reminders,
+      to: `/applications/${application.id}/reminders`,
+    },
+    {
+      label: "Interviews",
+      value: application.counts.interviews,
+      to: `/applications/${application.id}/interviews`,
+    },
+    {
+      label: "Links",
+      value: application.counts.external_links,
+      to: `/applications/${application.id}/links`,
+    },
+    {
+      label: "Timeline",
+      value: application.state_history.length,
+      to: `/applications/${application.id}/timeline`,
+    },
+  ];
+
   return (
-    <Stack gap="xs">
-      <Text fw={600}>Workflow summary</Text>
-      <Text size="sm" c="dimmed">
-        Notes: {application.counts.notes} - Links:{" "}
-        {application.counts.external_links} - Reminders:{" "}
-        {application.counts.reminders} - Interviews:{" "}
-        {application.counts.interviews}
-      </Text>
-      {application.role.job_url ? (
-        <Text component="a" href={application.role.job_url} size="sm">
-          Job posting
-        </Text>
-      ) : null}
+    <Stack gap="lg">
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
+        <Paper withBorder radius="md" p="md">
+          <Text size="xs" c="dimmed">
+            Current status
+          </Text>
+          <Badge
+            mt={6}
+            color={STATE_COLORS[application.current_state]}
+            variant="light"
+          >
+            {formatStateLabel(application.current_state)}
+          </Badge>
+        </Paper>
+        <Paper withBorder radius="md" p="md">
+          <Text size="xs" c="dimmed">
+            Search track
+          </Text>
+          <Text fw={600}>{application.workspace.title}</Text>
+          <Text size="xs" c="dimmed">
+            {application.workspace.status}
+          </Text>
+        </Paper>
+        <Paper withBorder radius="md" p="md">
+          <Text size="xs" c="dimmed">
+            Next action
+          </Text>
+          <Text fw={600}>{formatDate(application.next_action_at)}</Text>
+        </Paper>
+        <Paper withBorder radius="md" p="md">
+          <Text size="xs" c="dimmed">
+            Applied
+          </Text>
+          <Text fw={600}>{formatDate(application.applied_at)}</Text>
+        </Paper>
+      </SimpleGrid>
+
+      <Card withBorder radius="md" p="lg">
+        <Stack gap="md">
+          <Group justify="space-between" align="flex-start">
+            <div>
+              <Title order={2}>Workflow overview</Title>
+              <Text c="dimmed" size="sm">
+                {application.company.name} - {application.role.location ?? "Location not set"}
+                {application.role.remote_type ? ` - ${application.role.remote_type}` : ""}
+              </Text>
+            </div>
+            {application.role.job_url ? (
+              <Button
+                component="a"
+                href={application.role.job_url}
+                target="_blank"
+                rel="noreferrer noopener"
+                variant="light"
+                size="sm"
+              >
+                Job posting
+              </Button>
+            ) : null}
+          </Group>
+
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }} spacing="sm">
+            {quickLinks.map((item) => (
+              <Paper
+                key={item.label}
+                component={Link}
+                to={item.to}
+                withBorder
+                radius="md"
+                p="md"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Text size="xs" c="dimmed">
+                  {item.label}
+                </Text>
+                <Text fw={700}>{item.value}</Text>
+              </Paper>
+            ))}
+          </SimpleGrid>
+
+          <Group gap="xs">
+            {application.compass ? (
+              <Badge color="violet" variant="light">
+                COMPASS {application.compass.recommendation ?? "complete"}
+              </Badge>
+            ) : null}
+            {application.resume_artifact ? (
+              <Badge color="teal" variant="light">
+                Resume rev {application.resume_artifact.revision_number ?? "draft"}
+              </Badge>
+            ) : null}
+            {application.cover_letter_artifact ? (
+              <Badge color="teal" variant="light">
+                Cover letter rev{" "}
+                {application.cover_letter_artifact.revision_number ?? "draft"}
+              </Badge>
+            ) : null}
+            {!application.compass &&
+            !application.resume_artifact &&
+            !application.cover_letter_artifact ? (
+              <Text size="sm" c="dimmed">
+                No generated artifacts or COMPASS summary are attached yet.
+              </Text>
+            ) : null}
+          </Group>
+        </Stack>
+      </Card>
     </Stack>
+  );
+}
+
+function ApplicationWorkflowControls({
+  application,
+  transitioningState,
+  onTransition,
+}: {
+  application: ApplicationDetail;
+  transitioningState: ApplicationWorkflowState | null;
+  onTransition: (
+    nextState: ApplicationWorkflowState,
+    reactivate?: boolean,
+  ) => Promise<void>;
+}) {
+  const [confirmingState, setConfirmingState] =
+    useState<ApplicationWorkflowState | null>(null);
+
+  if (application.available_next_states.length === 0) {
+    return null;
+  }
+
+  async function handleClick(nextState: ApplicationWorkflowState) {
+    const requiresConfirm =
+      nextState === "archived" || application.current_state === "archived";
+    if (requiresConfirm && confirmingState !== nextState) {
+      setConfirmingState(nextState);
+      return;
+    }
+    await onTransition(nextState, application.current_state === "archived");
+    setConfirmingState(null);
+  }
+
+  return (
+    <Card withBorder radius="md" p="md">
+      <Group justify="space-between" align="flex-start">
+        <Stack gap={4}>
+          <Text fw={600}>Status controls</Text>
+          <Text size="sm" c="dimmed">
+            Move this application through the saved, applied, interview, offer, and
+            archive workflow without deleting history.
+          </Text>
+        </Stack>
+        <Group gap="xs">
+          {application.available_next_states.map((nextState) => {
+            const isReactivation = application.current_state === "archived";
+            const isConfirming = confirmingState === nextState;
+            const label =
+              nextState === "archived"
+                ? isConfirming
+                  ? "Confirm archive"
+                  : "Archive"
+                : isReactivation
+                  ? isConfirming
+                    ? `Confirm reactivate to ${formatStateLabel(nextState)}`
+                    : `Reactivate to ${formatStateLabel(nextState)}`
+                  : `Move to ${formatStateLabel(nextState)}`;
+            return (
+              <Button
+                key={nextState}
+                size="xs"
+                variant={isConfirming ? "filled" : "outline"}
+                color={nextState === "archived" ? "red" : STATE_COLORS[nextState]}
+                loading={transitioningState === nextState}
+                onClick={() => handleClick(nextState)}
+              >
+                {label}
+              </Button>
+            );
+          })}
+          {confirmingState ? (
+            <Button
+              size="xs"
+              variant="subtle"
+              onClick={() => setConfirmingState(null)}
+            >
+              Cancel
+            </Button>
+          ) : null}
+        </Group>
+      </Group>
+    </Card>
   );
 }
 

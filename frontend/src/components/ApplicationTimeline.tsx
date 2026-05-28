@@ -28,6 +28,52 @@ function eventColor(eventType: string) {
   return "dark";
 }
 
+const METADATA_LABELS: Record<string, string> = {
+  from_state: "From",
+  to_state: "To",
+  state: "State",
+  due_at: "Due",
+  stage_type: "Stage",
+  status: "Status",
+  link_type: "Link",
+  recommendation: "Recommendation",
+  confidence: "Confidence",
+  revision_number: "Revision",
+  reactivate: "Reactivation",
+};
+
+function friendlyEventType(eventType: string) {
+  return eventType.replaceAll(".", " ").replaceAll("_", " ");
+}
+
+function safeMetadataEntries(metadata: Record<string, unknown>) {
+  return Object.entries(METADATA_LABELS)
+    .map(([key, label]) => {
+      const value = metadata[key];
+      if (
+        value === null ||
+        value === undefined ||
+        (typeof value !== "string" &&
+          typeof value !== "number" &&
+          typeof value !== "boolean")
+      ) {
+        return null;
+      }
+      return {
+        key,
+        label,
+        value:
+          key === "due_at" && typeof value === "string"
+            ? formatDate(value)
+            : String(value).replaceAll("_", " "),
+      };
+    })
+    .filter(
+      (entry): entry is { key: string; label: string; value: string } =>
+        entry !== null,
+    );
+}
+
 export function ApplicationTimeline({
   events,
 }: {
@@ -53,7 +99,7 @@ export function ApplicationTimeline({
             <Group gap="xs">
               <Text fw={600}>{event.title}</Text>
               <Badge size="xs" variant="light">
-                {event.event_type}
+                {friendlyEventType(event.event_type)}
               </Badge>
             </Group>
           }
@@ -67,6 +113,15 @@ export function ApplicationTimeline({
             <Text c="dimmed" size="xs">
               {formatDate(event.occurred_at)} by {event.actor}
             </Text>
+            {safeMetadataEntries(event.metadata).length > 0 ? (
+              <Group gap="xs">
+                {safeMetadataEntries(event.metadata).map((entry) => (
+                  <Badge key={entry.key} size="xs" variant="outline">
+                    {entry.label}: {entry.value}
+                  </Badge>
+                ))}
+              </Group>
+            ) : null}
           </Stack>
         </Timeline.Item>
       ))}

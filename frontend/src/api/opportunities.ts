@@ -1,5 +1,9 @@
 import { apiRequest } from "./client";
 import type {
+  ApplicationDetail,
+  ApplicationTimelineEvent,
+} from "../types/applications";
+import type {
   Opportunity,
   OpportunityCreatePayload,
   OpportunityParseRequest,
@@ -13,6 +17,33 @@ export function listOpportunities(): Promise<Opportunity[]> {
 
 export function getOpportunity(opportunityId: string): Promise<Opportunity> {
   return apiRequest<Opportunity>(`/api/opportunities/${opportunityId}`);
+}
+
+export function getOpportunityApplication(
+  opportunityId: string,
+): Promise<ApplicationDetail> {
+  return apiRequest<ApplicationDetail>(
+    `/api/opportunities/${opportunityId}/application`,
+  );
+}
+
+export function ensureOpportunityApplication(
+  opportunityId: string,
+): Promise<ApplicationDetail> {
+  return apiRequest<ApplicationDetail>(
+    `/api/opportunities/${opportunityId}/application`,
+    {
+      method: "POST",
+    },
+  );
+}
+
+export function getOpportunityApplicationTimeline(
+  opportunityId: string,
+): Promise<ApplicationTimelineEvent[]> {
+  return apiRequest<ApplicationTimelineEvent[]>(
+    `/api/opportunities/${opportunityId}/application/timeline`,
+  );
 }
 
 export function createOpportunity(

@@ -1,9 +1,12 @@
-import { Alert, Badge, Button, Group, Stack, Text, Title } from "@mantine/core";
+import { Alert, Badge, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 
+import { ApiError } from "../api/client";
 import {
   archiveOpportunity,
+  ensureOpportunityApplication,
+  getOpportunityApplication,
   getOpportunity,
   updateOpportunity,
 } from "../api/opportunities";
@@ -15,6 +18,10 @@ import { CompassEvaluationDetail } from "../components/CompassEvaluationDetail";
 import { FeatureWorkspaceLayout } from "../components/FeatureWorkspaceLayout";
 import { RoleDetail } from "../components/RoleDetail";
 import { ErrorState, LoadingState } from "../components/States";
+import type {
+  ApplicationDetail,
+  ApplicationWorkflowState,
+} from "../types/applications";
 import type { CompassEvaluation } from "../types/compassEvaluations";
 import type { Role, RoleUpdatePayload } from "../types/roles";
 
@@ -53,6 +60,17 @@ const opportunitySectionIds = new Set<string>(
   opportunitySections.map((section) => section.id),
 );
 
+const APPLICATION_STATE_COLORS: Record<ApplicationWorkflowState, string> = {
+  discovered: "gray",
+  interested: "blue",
+  applied: "teal",
+  interviewing: "violet",
+  offer: "green",
+  rejected: "red",
+  withdrawn: "orange",
+  archived: "dark",
+};
+
 export function RoleDetailPage() {
   const { opportunityId, roleId, section } = useParams();
   const currentOpportunityId = opportunityId ?? roleId;
@@ -63,6 +81,10 @@ export function RoleDetailPage() {
   const [saving, setSaving] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [evaluation, setEvaluation] = useState<CompassEvaluation | null>(null);
+  const [application, setApplication] = useState<ApplicationDetail | null>(null);
+  const [applicationLoading, setApplicationLoading] = useState(false);
+  const [applicationCreating, setApplicationCreating] = useState(false);
+  const [applicationError, setApplicationError] = useState<string | null>(null);
   const [evaluationLoading, setEvaluationLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
@@ -94,6 +116,46 @@ export function RoleDetailPage() {
       );
     } finally {
       setEvaluationLoading(false);
+    }
+  }
+
+  async function loadApplicationWorkflow() {
+    if (!currentOpportunityId || activeSection === "compass") return;
+    setApplicationLoading(true);
+    setApplicationError(null);
+    try {
+      setApplication(await getOpportunityApplication(currentOpportunityId));
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        setApplication(null);
+      } else {
+        setApplicationError(
+          err instanceof Error
+            ? err.message
+            : "Could not load application workflow",
+        );
+      }
+    } finally {
+      setApplicationLoading(false);
+    }
+  }
+
+  async function handleTrackApplication() {
+    if (!currentOpportunityId) return;
+    setApplicationCreating(true);
+    setApplicationError(null);
+    setNotice(null);
+    try {
+      setApplication(await ensureOpportunityApplication(currentOpportunityId));
+      setNotice("Application workflow started");
+    } catch (err) {
+      setApplicationError(
+        err instanceof Error
+          ? err.message
+          : "Could not start application workflow",
+      );
+    } finally {
+      setApplicationCreating(false);
     }
   }
 
@@ -162,6 +224,10 @@ export function RoleDetailPage() {
   }, [currentOpportunityId]);
 
   useEffect(() => {
+    void loadApplicationWorkflow();
+  }, [activeSection, currentOpportunityId]);
+
+  useEffect(() => {
     if (activeSection === "compass") {
       void loadEvaluation();
     }
@@ -181,7 +247,11 @@ export function RoleDetailPage() {
         </Button>
       </Group>
 
-      {notice ? <Alert color="green">{notice}</Alert> : null}
+      {notice ? (
+        <Alert color="green" withCloseButton onClose={() => setNotice(null)}>
+          {notice}
+        </Alert>
+      ) : null}
       {loading ? <LoadingState label="Loading opportunity" /> : null}
       {!loading && error ? <ErrorState message={error} onRetry={loadRole} /> : null}
       {!loading && !error && role ? (
@@ -195,6 +265,16 @@ export function RoleDetailPage() {
               {role.status}
             </Badge>
           </Group>
+          {activeSection !== "compass" ? (
+            <OpportunityApplicationSummary
+              application={application}
+              loading={applicationLoading}
+              creating={applicationCreating}
+              error={applicationError}
+              onRetry={loadApplicationWorkflow}
+              onTrack={handleTrackApplication}
+            />
+          ) : null}
           <FeatureWorkspaceLayout
             navLabel="Opportunity sections"
             items={opportunitySections.map((item) => ({
@@ -233,6 +313,79 @@ export function RoleDetailPage() {
         </>
       ) : null}
     </Stack>
+  );
+}
+
+function OpportunityApplicationSummary({
+  application,
+  loading,
+  creating,
+  error,
+  onRetry,
+  onTrack,
+}: {
+  application: ApplicationDetail | null;
+  loading: boolean;
+  creating: boolean;
+  error: string | null;
+  onRetry: () => void;
+  onTrack: () => void;
+}) {
+  if (loading) {
+    return <LoadingState label="Loading application workflow" />;
+  }
+
+  if (error) {
+    return <ErrorState message={error} onRetry={onRetry} />;
+  }
+
+  if (!application) {
+    return (
+      <Card withBorder radius="md" p="md">
+        <Group justify="space-between" align="flex-start">
+          <Stack gap={4}>
+            <Text fw={600}>Application workflow</Text>
+            <Text c="dimmed" size="sm">
+              Not tracked as an application yet.
+            </Text>
+          </Stack>
+          <Button size="xs" variant="light" loading={creating} onClick={onTrack}>
+            Track as application
+          </Button>
+        </Group>
+      </Card>
+    );
+  }
+
+  return (
+    <Card withBorder radius="md" p="md">
+      <Group justify="space-between" align="flex-start">
+        <Stack gap={4}>
+          <Text fw={600}>Application workflow</Text>
+          <Text c="dimmed" size="sm">
+            Search track: {application.workspace.title}
+          </Text>
+        </Stack>
+        <Badge color={APPLICATION_STATE_COLORS[application.current_state]} variant="light">
+          {application.current_state}
+        </Badge>
+      </Group>
+      <Group gap="sm" mt="sm">
+        <Text size="sm" c="dimmed">
+          Notes {application.counts.notes} - Reminders{" "}
+          {application.counts.reminders} - Interviews{" "}
+          {application.counts.interviews}
+        </Text>
+        <Button
+          component={Link}
+          to={`/applications/${application.id}/overview`}
+          size="xs"
+          variant="light"
+        >
+          Open application
+        </Button>
+      </Group>
+    </Card>
   );
 }
 

@@ -1,4 +1,5 @@
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApplicationDetailPage } from "./ApplicationDetailPage";
@@ -25,6 +26,11 @@ const application: ApplicationDetail = {
   id: "app-1",
   role_id: "role-1",
   workspace_id: "workspace-1",
+  workspace: {
+    id: "workspace-1",
+    title: "Platform search",
+    status: "active",
+  },
   title: "Staff Platform Engineer",
   company: {
     id: "company-1",
@@ -37,6 +43,9 @@ const application: ApplicationDetail = {
   updated_at: "2026-05-16T15:00:00Z",
   archived_at: null,
   available_next_states: ["applied", "withdrawn", "archived"],
+  compass: null,
+  resume_artifact: null,
+  cover_letter_artifact: null,
   counts: {
     notes: 1,
     external_links: 1,
@@ -261,8 +270,10 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getByText("Loading application")).toBeInTheDocument();
     expect(await screen.findByText("Staff Platform Engineer")).toBeInTheDocument();
     expect(screen.getByText("Example Company")).toBeInTheDocument();
-    expect(screen.getByText(/Notes: 1 - Links: 1 - Reminders: 0 - Interviews: 2/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /timeline/i })).toHaveAttribute(
+    expect(screen.getByText("Platform search")).toBeInTheDocument();
+    expect(screen.getByText("Current status")).toBeInTheDocument();
+    expect(screen.getByText("Workflow overview")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /timeline/i })[0]).toHaveAttribute(
       "href",
       "/applications/app-1/timeline",
     );
@@ -307,6 +318,74 @@ describe("ApplicationDetailPage", () => {
 
     expect(await screen.findByText("Application tracked")).toBeInTheDocument();
     expect(screen.queryByText("Ask about team scope.")).not.toBeInTheDocument();
+  });
+
+  it("updates application status from visible controls", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(application))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ...application,
+          current_state: "applied",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ...application,
+          current_state: "applied",
+          available_next_states: ["interviewing", "rejected", "withdrawn", "archived"],
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDetailPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: /move to applied/i }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/applications/app-1/state-transitions",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ state: "applied", reactivate: false }),
+      }),
+    );
+    expect(await screen.findByText("Application moved to applied")).toBeInTheDocument();
+  });
+
+  it("requires confirmation before archive transitions", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(application))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ...application,
+          current_state: "archived",
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ...application,
+          current_state: "archived",
+          archived_at: "2026-05-17T15:00:00Z",
+          available_next_states: ["discovered", "interested"],
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDetailPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Archive" }));
+    expect(screen.getByRole("button", { name: "Confirm archive" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Confirm archive" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/applications/app-1/state-transitions",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ state: "archived", reactivate: false }),
+      }),
+    );
   });
 
   it("renders an error state", async () => {

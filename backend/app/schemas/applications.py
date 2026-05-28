@@ -26,6 +26,12 @@ class ApplicationCompanySummary(BaseModel):
     website_url: str | None = None
 
 
+class ApplicationWorkspaceSummary(BaseModel):
+    id: uuid.UUID
+    title: str
+    status: str
+
+
 class ApplicationRoleSummary(BaseModel):
     id: uuid.UUID
     workspace_id: uuid.UUID
@@ -68,6 +74,7 @@ class ApplicationListItemResponse(BaseModel):
     id: uuid.UUID
     role_id: uuid.UUID
     workspace_id: uuid.UUID
+    workspace: ApplicationWorkspaceSummary
     title: str
     company: ApplicationCompanySummary
     current_state: ApplicationWorkflowState

@@ -32,6 +32,13 @@ function noteTypeLabel(value: string) {
   return NOTE_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? value;
 }
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 export function ApplicationNotesPanel({
   applicationId,
   notes,
@@ -150,9 +157,12 @@ export function ApplicationNotesPanel({
         ) : null}
 
         {notes.length === 0 ? (
-          <Text c="dimmed" size="sm">
-            No notes yet.
-          </Text>
+          <Card withBorder radius="sm" p="md">
+            <Text c="dimmed" size="sm">
+              No notes yet. Add recruiter context, compensation details, or follow-up
+              rationale when there is something worth preserving.
+            </Text>
+          </Card>
         ) : (
           <Stack gap="sm">
             {notes.map((note) => (
@@ -203,6 +213,12 @@ export function ApplicationNotesPanel({
                       <div>
                         <Text size="xs" c="dimmed">
                           {noteTypeLabel(note.note_type)}
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          Created {formatDateTime(note.created_at)}
+                          {note.updated_at !== note.created_at
+                            ? ` - Updated ${formatDateTime(note.updated_at)}`
+                            : ""}
                         </Text>
                         <Text style={{ whiteSpace: "pre-wrap" }}>{note.body}</Text>
                       </div>

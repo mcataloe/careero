@@ -222,6 +222,11 @@ def test_service_lists_by_workspace_and_aggregates_summaries(
     item = default_items[0]
     assert item["title"] == "Senior Platform Engineer"
     assert item["company"]["name"] == "Default Co"
+    assert item["workspace"] == {
+        "id": DEFAULT_WORKSPACE_ID,
+        "title": "Default workspace",
+        "status": "active",
+    }
     assert item["compass"]["summary"] == "Strong platform fit."
     assert item["resume_artifact"]["revision_number"] == 2
     assert item["cover_letter_artifact"]["revision_number"] == 1
@@ -924,6 +929,78 @@ def test_api_opportunity_application_alias_preserves_role_compatibility(
     assert role_response.status_code == 201
     assert opportunity_response.json()["id"] == role_response.json()["id"]
     assert opportunity_response.json()["role_id"] == str(role.id)
+
+
+def test_api_opportunity_application_read_does_not_create_workflow(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+
+    response = application_client.get(f"/api/opportunities/{role.id}/application")
+
+    assert response.status_code == 404
+    assert (
+        db_session.scalar(select(Application).where(Application.role_id == role.id))
+        is None
+    )
+
+
+def test_api_opportunity_application_read_includes_archived_workflow(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+    application_id = application_client.post(
+        f"/api/opportunities/{role.id}/application"
+    ).json()["id"]
+
+    archive_response = application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={"state": "archived", "reason": "No longer active."},
+    )
+    assert archive_response.status_code == 200
+
+    response = application_client.get(f"/api/opportunities/{role.id}/application")
+
+    assert response.status_code == 200
+    assert response.json()["id"] == application_id
+    assert response.json()["current_state"] == "archived"
+    assert response.json()["role_id"] == str(role.id)
+    assert response.json()["workspace"]["id"] == str(DEFAULT_WORKSPACE_ID)
+    assert response.json()["workspace"]["title"] == "Default workspace"
+
+
+def test_api_opportunity_application_timeline_matches_workflow_events(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session)
+    application_id = application_client.post(
+        f"/api/opportunities/{role.id}/application"
+    ).json()["id"]
+    application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={"state": "archived", "reason": "Closed."},
+    )
+    application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={
+            "state": "interested",
+            "reason": "Reopened.",
+            "reactivate": True,
+        },
+    )
+
+    response = application_client.get(
+        f"/api/opportunities/{role.id}/application/timeline"
+    )
+
+    assert response.status_code == 200
+    event_types = [event["event_type"] for event in response.json()]
+    assert "application.created" in event_types
+    assert "application.archived" in event_types
+    assert "application.reactivated" in event_types
 
 
 def test_api_interview_stage_crud(
