@@ -69,6 +69,14 @@ def parse_role(
     service: RoleParsingService = Depends(get_role_parsing_service),
     usage_service: AIUsageService = Depends(get_ai_usage_service),
 ):
+    return parse_role_with_usage(payload, service, usage_service)
+
+
+def parse_role_with_usage(
+    payload: RoleParseRequest,
+    service: RoleParsingService,
+    usage_service: AIUsageService,
+) -> RoleParseResponse:
     started_at = time.perf_counter()
     try:
         user = usage_service.current_user()

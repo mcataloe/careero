@@ -10,6 +10,10 @@ from app.database import get_db
 from app.main import create_app
 from app.models import Role
 from app.schemas.role_parsing import ParsedRole, RoleParseResponse
+from app.services.role_parsing import (
+    RoleParsingUnavailableError,
+    RoleParsingValidationError,
+)
 from app.seed import seed_local_data
 
 
@@ -119,10 +123,17 @@ def test_opportunity_routes_create_list_detail_update_intelligence_and_archive(
     assert opportunity_api_client.get("/api/opportunities").json() == []
 
 
-def test_opportunity_parse_route_uses_role_backed_parser() -> None:
+def test_opportunity_parse_route_uses_role_backed_parser_and_usage_events() -> None:
     app = create_app()
+    events = []
 
     class FakeService:
+        settings = type(
+            "Settings",
+            (),
+            {"openai_default_role_parsing_model": "gpt-5-mini"},
+        )()
+
         def parse(self, payload):
             return RoleParseResponse(
                 parsed=ParsedRole(roleTitle="Engineer", company="Acme"),
@@ -143,7 +154,7 @@ def test_opportunity_parse_route_uses_role_backed_parser() -> None:
             return User()
 
         def record_event(self, payload):
-            return None
+            events.append(payload)
 
     app.dependency_overrides[get_role_parsing_service] = lambda: FakeService()
     app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
@@ -162,3 +173,105 @@ def test_opportunity_parse_route_uses_role_backed_parser() -> None:
     assert response.json()["parsed"]["roleTitle"] == "Engineer"
     assert roles_response.status_code == 200
     assert roles_response.json()["parsed"]["roleTitle"] == "Engineer"
+    assert [event.event_type for event in events] == [
+        "requested",
+        "completed",
+        "requested",
+        "completed",
+    ]
+    assert {event.feature for event in events} == {"parse_opportunity"}
+    assert {event.model for event in events} == {"gpt-5-mini"}
+
+
+def test_opportunity_parse_route_records_skipped_disabled_usage_event() -> None:
+    app = create_app()
+    events = []
+
+    class UnavailableService:
+        settings = type(
+            "Settings",
+            (),
+            {"openai_default_role_parsing_model": "gpt-5-mini"},
+        )()
+
+        def parse(self, payload):
+            raise RoleParsingUnavailableError("AI role parsing is disabled")
+
+    class FakeUsageService:
+        class FakeDb:
+            def commit(self):
+                return None
+
+        db = FakeDb()
+
+        def current_user(self):
+            class User:
+                id = "00000000-0000-4000-8000-000000000001"
+
+            return User()
+
+        def record_event(self, payload):
+            events.append(payload)
+
+    app.dependency_overrides[get_role_parsing_service] = lambda: UnavailableService()
+    app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/opportunities/parse",
+            json={"rawText": "Engineer at Acme"},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 503
+    assert [event.event_type for event in events] == [
+        "requested",
+        "skipped_disabled",
+    ]
+    assert events[-1].error_class == "RoleParsingUnavailableError"
+
+
+def test_opportunity_parse_route_records_failed_usage_event() -> None:
+    app = create_app()
+    events = []
+
+    class InvalidService:
+        settings = type(
+            "Settings",
+            (),
+            {"openai_default_role_parsing_model": "gpt-5-mini"},
+        )()
+
+        def parse(self, payload):
+            raise RoleParsingValidationError("Role parser returned invalid data")
+
+    class FakeUsageService:
+        class FakeDb:
+            def commit(self):
+                return None
+
+        db = FakeDb()
+
+        def current_user(self):
+            class User:
+                id = "00000000-0000-4000-8000-000000000001"
+
+            return User()
+
+        def record_event(self, payload):
+            events.append(payload)
+
+    app.dependency_overrides[get_role_parsing_service] = lambda: InvalidService()
+    app.dependency_overrides[get_ai_usage_service] = lambda: FakeUsageService()
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/opportunities/parse",
+            json={"rawText": "Engineer at Acme"},
+        )
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 502
+    assert [event.event_type for event in events] == [
+        "requested",
+        "failed",
+    ]
+    assert events[-1].error_class == "RoleParsingValidationError"
