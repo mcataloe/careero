@@ -16,7 +16,7 @@ Status summary:
 
 - Layers 0-4 are built for current local MVP scope, with production hardening still incomplete.
 - Layer 5 is stabilized for current local MVP insight behavior.
-- Layer 6 is complete for current local MVP artifact lifecycle scope; comparison, standalone workspace artifact browsing, and frontend export convenience remain future.
+- Layer 6 is complete for current local MVP artifact lifecycle scope; comparison and standalone workspace artifact browsing remain future. Basic local frontend export/download exists in Layer 8.
 - Layer 7 opportunity compatibility is the next immediate implementation sequence; Layers 7-10 are partially built or in active local-first evolution.
 - Layers 11-12 are readiness/governance layers with local foundations and future hosted blockers.
 - Layers 13-16 are future or appended strategic layers.

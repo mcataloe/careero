@@ -77,7 +77,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - GeneratedArtifact persistence, truthfulness checks, and artifact performance records
 - application persistence, state machine, state history, list/detail APIs, and pipeline APIs
 - application notes, external links, structured interviews, local reminders, timeline aggregation, and activity log
-- local integration adapter boundary and backend local Markdown/DOCX/PDF artifact export
+- local integration adapter boundary and local Markdown/DOCX/PDF artifact export/download
 - automation suggestion persistence, approval logs, workspace automation preferences, and review surfaces
 - search analytics, artifact performance analytics, COMPASS insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and dashboard surfaces
 
@@ -86,7 +86,7 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - Local application reminders exist but remain local workflow records only; no cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
 - External-link workflow summaries exist and application list/detail summary counts include links alongside notes, reminders, and interviews.
 - Private remote branch or PR drift, if any, must be validated before being treated as complete.
-- Layer 5 is stabilized for current local MVP insight behavior. Layer 6 artifact lifecycle is complete for current local MVP lifecycle scope; comparison and frontend export convenience remain later work.
+- Layer 5 is stabilized for current local MVP insight behavior. Layer 6 artifact lifecycle is complete for current local MVP lifecycle scope; comparison remains later work, while basic local frontend export/download exists.
 
 ### Not yet built / still future
 
@@ -104,7 +104,6 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 - support/help/bug/suggestion feedback capture
 - privacy-safe support payload governance
 - artifact comparison workflow
-- dedicated frontend artifact export workflow
 - destructive persistence migration from Role table/model/foreign-key naming
 - Google Docs import
 - Gmail/Outlook integration
@@ -132,12 +131,12 @@ Layers 14, 15, and 16 are planning-only in `main`; none of their model catalog, 
 | Layer 0 | Product Foundation | Built / defined | Product mission, user-first posture, search-track concept, AI governance, UX philosophy, monetization caution, and risk boundaries are defined. |
 | Layer 1 | Local Platform Foundation | Built locally / first-party password auth foundation started; production incomplete | Local backend, frontend, database, migrations, config, seed model, email/password registration/login, and local HttpOnly session cookies exist. Production auth hardening, account recovery, SSO, tenancy, and authorization hardening remain future. |
 | Layer 2 | Intake, Parsing & Grounding | Mostly built | Manual role intake, AI-assisted parsing, resume/profile source storage, active source grounding, and local imports exist. Parser confidence UX and richer source normalization remain. |
-| Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle delegated | COMPASS and artifact generation foundations exist. Artifact lifecycle is implemented in Layer 6; artifact comparison and frontend export convenience remain future. |
+| Layer 3 | COMPASS + Artifact Foundation | Mostly built / lifecycle delegated | COMPASS and artifact generation foundations exist. Artifact lifecycle is implemented in Layer 6; artifact comparison remains future. Basic local frontend export/download exists in Layer 8. |
 | Layer 4 | Application Workflow | Complete for current local MVP scope | Applications, state transitions, timeline, notes, external links, local reminders, structured interview tracking, archive/reactivate, workspace context, workflow UX, and regression coverage exist. Cloud reminders, notification delivery, calendar sync, email integration, hosted automation, production auth, and Layer 11 readiness gates remain future. |
 | Layer 5 | Workflow Intelligence / Insights | Stabilized for current local MVP scope | Analytics, dashboard insight surfaces, normalized contracts, provenance/confidence metadata, thin-data handling, shared UI rendering, and focused tests exist. Durable insight snapshots, richer workspace switching UX, artifact lifecycle integration, advanced strategy synthesis, model usage accounting, and onboarding guidance remain later-layer work. |
-| Layer 6 | Advanced COMPASS + Artifact Lifecycle | Complete for current local MVP scope | Four-state artifact lifecycle, versioning foundation, submitted-version protection, review/submit/archive API, application artifact UX, opportunity integration, timeline events, and employer-facing content boundaries exist. Artifact comparison, standalone workspace artifact browser, and frontend export convenience remain future. |
+| Layer 6 | Advanced COMPASS + Artifact Lifecycle | Complete for current local MVP scope | Four-state artifact lifecycle, versioning foundation, submitted-version protection, review/submit/archive API, application artifact UX, opportunity integration, timeline events, employer-facing content boundaries, and basic local export/download controls exist. Artifact comparison and standalone workspace artifact browser remain future. |
 | Layer 7 | Opportunity Model Strategy | Layer 7C persistence migration implemented locally | Opportunity-facing API and UX are canonical, physical persistence is Opportunity-backed, and `/api/roles`, frontend `/roles`, `Role` aliases, historical role activity logs, and selected `role_id` payload fields remain compatibility debt. |
-| Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and backend Markdown/DOCX/PDF artifact export exist. Frontend export workflow, Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
+| Layer 8 | Integrations | Partially built / local export started | Local integration adapter boundary and Markdown/DOCX/PDF artifact export/download exist. Google Docs, Gmail/Outlook, calendar, browser/share, and cloud sync remain future. |
 | Layer 9 | Automation Guardrails | Partially built / local guardrail foundation started | Durable suggestions, approval logs, workspace preferences, and review surfaces exist. External actions, batch approvals, and state-changing automation remain prohibited/future. |
 | Layer 10 | Advanced Search Tracks / Career Strategy | Partially built / derived strategy synthesis MVP started | Read-only workspace strategy summary and internal cross-track comparison exist. No durable strategy tables, external market data, AI strategy memory, or automation mutation. |
 | Layer 11 | Productization / Deployment / Monetization | Future / readiness surface and local foundations started | Productization, privacy/data governance, account lifecycle, AI usage/cost controls, monetization boundaries, and deployment gates are documented. Local readiness, current-user context, local auth, local export, lifecycle request tracking, local AI usage events, and local entitlement reporting exist. Production auth hardening, account recovery, OAuth/SSO, billing, tenant isolation, hosted export/delete, retention enforcement, paid quotas, credits, and production deployment remain future. |
@@ -165,7 +164,7 @@ Layer 2 turns raw job/opportunity and source-material input into structured, rev
 
 ## Layer 3 â€” COMPASS + Artifact Foundation
 
-Layer 3 evaluates opportunities and generates grounded application artifacts. Generation foundations exist and Layer 6 now owns artifact lifecycle, submitted-version tracking, artifact retrieval UX, and explicit internal-strategy vs employer-facing separation. Artifact comparison and frontend export convenience remain future.
+Layer 3 evaluates opportunities and generates grounded application artifacts. Generation foundations exist and Layer 6 now owns artifact lifecycle, submitted-version tracking, artifact retrieval UX, and explicit internal-strategy vs employer-facing separation. Artifact comparison remains future; basic local frontend export/download is handled in Layer 8.
 
 ## Layer 4 â€” Application Workflow
 
@@ -182,7 +181,7 @@ Layer 5 turns workflow activity into useful guidance. Current local MVP insight 
 
 ## Layer 6 â€” Advanced COMPASS + Artifact Lifecycle
 
-Layer 6 turns generated output from an AI result into durable, inspectable, user-reviewed product records through lifecycle states, submitted tracking, protected edit/version behavior, review/submit/archive flows, application retrieval UX, and strict employer-facing artifact boundaries. Deeper comparison, standalone workspace artifact browsing, and frontend export convenience remain later work.
+Layer 6 turns generated output from an AI result into durable, inspectable, user-reviewed product records through lifecycle states, submitted tracking, protected edit/version behavior, review/submit/archive flows, application retrieval UX, and strict employer-facing artifact boundaries. Deeper comparison and standalone workspace artifact browsing remain later work; basic local frontend export/download is handled in Layer 8.
 
 ## Layer 7 â€” Opportunity Model Strategy
 

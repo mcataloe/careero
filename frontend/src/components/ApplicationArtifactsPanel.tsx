@@ -17,6 +17,7 @@ import {
   IconCheck,
   IconCopyPlus,
   IconDeviceFloppy,
+  IconDownload,
   IconFileText,
   IconSend,
 } from "@tabler/icons-react";
@@ -24,10 +25,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   archiveArtifact,
+  downloadArtifactExport,
   markArtifactReviewed,
   markArtifactSubmitted,
   updateArtifactDraft,
 } from "../api/artifacts";
+import type { ArtifactExportFormat } from "../api/artifacts";
 import type { ArtifactLifecycleStatus, ArtifactRecord } from "../types/artifacts";
 import type { ApplicationDetail } from "../types/applications";
 
@@ -37,6 +40,16 @@ const STATUS_COLORS: Record<ArtifactLifecycleStatus, string> = {
   submitted: "green",
   archived: "dark",
 };
+
+const EXPORT_FORMAT_LABELS: Record<ArtifactExportFormat, string> = {
+  md: "Markdown",
+  docx: "DOCX",
+  pdf: "PDF",
+};
+
+const EXPORT_FORMATS = Object.keys(
+  EXPORT_FORMAT_LABELS,
+) as ArtifactExportFormat[];
 
 export function ApplicationArtifactsPanel({
   application,
@@ -372,11 +385,17 @@ function ArtifactDetail({
   const [draftContent, setDraftContent] = useState(artifact.content);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [exportingFormat, setExportingFormat] =
+    useState<ArtifactExportFormat | null>(null);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     setDraftTitle(artifact.title);
     setDraftContent(artifact.content);
     setSaveError(null);
+    setExportNotice(null);
+    setExportError(null);
     onEditChange(false);
   }, [artifact.id]);
 
@@ -395,6 +414,22 @@ function ArtifactDetail({
       setSaveError(err instanceof Error ? err.message : "Could not save artifact");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function exportArtifact(format: ArtifactExportFormat) {
+    setExportingFormat(format);
+    setExportNotice(null);
+    setExportError(null);
+    try {
+      const result = await downloadArtifactExport(artifact.id, format);
+      triggerDownload(result.blob, result.filename);
+      setExportNotice(`Downloaded ${EXPORT_FORMAT_LABELS[format]} export locally.`);
+      await onChanged();
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Could not export artifact");
+    } finally {
+      setExportingFormat(null);
     }
   }
 
@@ -458,6 +493,46 @@ function ArtifactDetail({
             </Badge>
           ))}
         </Group>
+
+        <Stack gap="xs">
+          <Text fw={600} size="sm">
+            Export locally
+          </Text>
+          <Group gap="xs">
+            {EXPORT_FORMATS.map((format) => (
+              <Button
+                key={format}
+                size="xs"
+                variant="outline"
+                leftSection={<IconDownload size={14} />}
+                loading={exportingFormat === format}
+                onClick={() => void exportArtifact(format)}
+              >
+                Download {EXPORT_FORMAT_LABELS[format]}
+              </Button>
+            ))}
+          </Group>
+          {exportNotice ? (
+            <Alert
+              color="green"
+              withCloseButton
+              closeButtonLabel="Dismiss export notification"
+              onClose={() => setExportNotice(null)}
+            >
+              {exportNotice}
+            </Alert>
+          ) : null}
+          {exportError ? (
+            <Alert
+              color="red"
+              withCloseButton
+              closeButtonLabel="Dismiss export error"
+              onClose={() => setExportError(null)}
+            >
+              {exportError}
+            </Alert>
+          ) : null}
+        </Stack>
 
         {artifact.lifecycle_status === "draft" && editing ? (
           <Stack gap="sm">
@@ -526,6 +601,17 @@ function ArtifactDetail({
       </Stack>
     </Paper>
   );
+}
+
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function TraceLabel({ label, value }: { label: string; value: string | null }) {

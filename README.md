@@ -51,6 +51,7 @@ Current planning hierarchy:
 - Evaluation caching, prompt/ruleset versioning, audit metadata, and activity-log inspection.
 - Backend artifact-generation foundations for resume and cover-letter drafts, with truthfulness checks and generated-artifact persistence.
 - Backend local Markdown/DOCX/PDF export for stored generated artifacts.
+- Frontend local Markdown/DOCX/PDF download controls for selected application artifacts.
 - Application workflow tracking with state machine, state history, notes, external links, local reminders, timeline, pipeline views, and structured interview tracking.
 - Local reminder API routes and application-detail reminder UX for listing, creating, editing, and completing reminders. No cloud scheduling, calendar sync, email notifications, or external reminder delivery exists.
 - Analytics and dashboard surfaces for search analytics, COMPASS insights, source intelligence, compensation intelligence, search health, recommendations, historical learning, and artifact performance.
@@ -93,7 +94,6 @@ Careero does not yet include:
 - Durable strategy tables, hidden strategy memory, or user-unreviewed saved retrospectives.
 - Dedicated artifact list/detail/review/edit/approve/archive UX.
 - Submitted artifact tracking.
-- Dedicated frontend artifact export workflow.
 - Google Docs import.
 - Gmail/Outlook integration.
 - Calendar sync.

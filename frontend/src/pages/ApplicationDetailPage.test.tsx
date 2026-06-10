@@ -23,6 +23,40 @@ function jsonResponse(response: unknown, status = 200) {
   };
 }
 
+function blobResponse(
+  response: Blob,
+  headers: Record<string, string> = {},
+  status = 200,
+) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: new Headers(headers),
+    blob: vi.fn().mockResolvedValue(response),
+    json: vi.fn().mockRejectedValue(new Error("Export response is not JSON")),
+  };
+}
+
+function stubDownloadUrl() {
+  const createObjectURL = vi.fn().mockReturnValue("blob:careero-artifact");
+  const revokeObjectURL = vi.fn();
+  const anchorClick = vi
+    .spyOn(HTMLAnchorElement.prototype, "click")
+    .mockImplementation(() => undefined);
+  Object.defineProperty(URL, "createObjectURL", {
+    configurable: true,
+    value: createObjectURL,
+  });
+  Object.defineProperty(URL, "revokeObjectURL", {
+    configurable: true,
+    value: revokeObjectURL,
+  });
+  return { anchorClick, createObjectURL, revokeObjectURL };
+}
+
+const originalCreateObjectURL = URL.createObjectURL;
+const originalRevokeObjectURL = URL.revokeObjectURL;
+
 const application: ApplicationDetail = {
   id: "app-1",
   role_id: "role-1",
@@ -322,6 +356,23 @@ function renderDetailPage(path = "/applications/app-1/overview") {
 describe("ApplicationDetailPage", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    if (originalCreateObjectURL) {
+      Object.defineProperty(URL, "createObjectURL", {
+        configurable: true,
+        value: originalCreateObjectURL,
+      });
+    } else {
+      Reflect.deleteProperty(URL, "createObjectURL");
+    }
+    if (originalRevokeObjectURL) {
+      Object.defineProperty(URL, "revokeObjectURL", {
+        configurable: true,
+        value: originalRevokeObjectURL,
+      });
+    } else {
+      Reflect.deleteProperty(URL, "revokeObjectURL");
+    }
   });
 
   it("renders application overview and local navigation", async () => {
@@ -441,7 +492,92 @@ describe("ApplicationDetailPage", () => {
     expect(screen.getAllByText("Submitted cover letter").length).toBeGreaterThan(0);
     expect(screen.getByText("Employer-facing resume content.")).toBeInTheDocument();
     expect(screen.getByText("Submitted versions")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download markdown/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download docx/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download pdf/i })).toBeInTheDocument();
     expect(screen.queryByText(/ATS risk|private strategy/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: /share|send|invite|cloud|sync|upload|publish/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("downloads selected artifact exports with the backend filename", async () => {
+    const { anchorClick, createObjectURL, revokeObjectURL } = stubDownloadUrl();
+    const refreshedArtifact = {
+      ...resumeArtifact,
+      traceability: {
+        ...resumeArtifact.traceability,
+        export_formats: ["md", "docx"],
+      },
+    };
+    const exportResponse = blobResponse(
+      new Blob(["docx bytes"], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      }),
+      {
+        "content-disposition": 'attachment; filename="targeted-resume.docx"',
+        "x-careero-content-hash": "sha256:test-hash",
+      },
+    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(application))
+      .mockResolvedValueOnce(jsonResponse([resumeArtifact]))
+      .mockResolvedValueOnce(exportResponse)
+      .mockResolvedValueOnce(jsonResponse([refreshedArtifact]))
+      .mockResolvedValueOnce(jsonResponse(application));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDetailPage("/applications/app-1/artifacts");
+
+    await userEvent.click(await screen.findByRole("button", { name: /download docx/i }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/artifacts/artifact-resume-1/exports/docx",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+    expect(exportResponse.blob).toHaveBeenCalled();
+    expect(exportResponse.json).not.toHaveBeenCalled();
+    expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+    expect(anchorClick).toHaveBeenCalled();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:careero-artifact");
+    expect(await screen.findByText("Downloaded DOCX export locally.")).toBeInTheDocument();
+    expect(await screen.findByText("DOCX")).toBeInTheDocument();
+  });
+
+  it("shows dismissible artifact export errors", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(application))
+      .mockResolvedValueOnce(jsonResponse([resumeArtifact]))
+      .mockResolvedValueOnce(
+        jsonResponse({ detail: "PDF export requires local dependencies" }, 503),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDetailPage("/applications/app-1/artifacts");
+
+    await userEvent.click(await screen.findByRole("button", { name: /download pdf/i }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/artifacts/artifact-resume-1/exports/pdf",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+    expect(
+      await screen.findByText("PDF export requires local dependencies"),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: /dismiss export error/i }));
+    expect(
+      screen.queryByText("PDF export requires local dependencies"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders artifact empty state", async () => {
