@@ -130,7 +130,7 @@ describe("ProductReadinessPanel", () => {
     expect(screen.getByText("Not production-ready")).toBeInTheDocument();
     expect(screen.getByText("local")).toBeInTheDocument();
     expect(screen.getByText("local poc")).toBeInTheDocument();
-    expect(screen.getByText("Role parsing: Enabled")).toBeInTheDocument();
+    expect(screen.getByText("Opportunity parsing: Enabled")).toBeInTheDocument();
     expect(screen.getByText("COMPASS enrichment: Disabled")).toBeInTheDocument();
     expect(screen.queryByText("Production ready")).toBeNull();
   });

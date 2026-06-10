@@ -60,7 +60,7 @@ export function RoleDetail({
 
   if (activeSection === "overview") {
     return (
-      <Stack id="role-overview" gap="md">
+      <Stack id="opportunity-overview" gap="md">
         <Group justify="space-between" align="flex-start">
           <div>
             <Title order={2}>Overview</Title>
@@ -172,13 +172,13 @@ export function RoleDetail({
     return (
       <Stack>
         <Title order={2}>Description</Title>
-        <div id="role-description">
+        <div id="opportunity-description">
           <ExpandableTextSection title="Raw description">
             <MarkdownPreviewBlock value={valueOrDash(role.raw_description)} />
           </ExpandableTextSection>
         </div>
         <Divider />
-        <div id="role-normalized-description">
+        <div id="opportunity-normalized-description">
           <ExpandableTextSection title="Normalized description">
             <MarkdownPreviewBlock value={valueOrDash(role.normalized_description)} />
           </ExpandableTextSection>
@@ -189,7 +189,7 @@ export function RoleDetail({
 
   return (
     <form
-      id="role-edit"
+      id="opportunity-edit"
       onSubmit={form.onSubmit((values) =>
         onUpdate({
           status: values.status,

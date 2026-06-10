@@ -17,7 +17,9 @@ function enabledLabel(enabled: boolean) {
 function AiFeatureSummary({ flags }: { flags: AiFeatureFlags }) {
   return (
     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
-      <Text size="sm">Role parsing: {enabledLabel(flags.role_parsing_enabled)}</Text>
+      <Text size="sm">
+        Opportunity parsing: {enabledLabel(flags.role_parsing_enabled)}
+      </Text>
       <Text size="sm">COMPASS enrichment: {enabledLabel(flags.compass_enrichment_enabled)}</Text>
       <Text size="sm">Resume generation: {enabledLabel(flags.resume_generation_enabled)}</Text>
       <Text size="sm">
