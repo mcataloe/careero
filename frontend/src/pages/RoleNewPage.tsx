@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 
 import { createOpportunity } from "../api/opportunities";
 import { RoleForm } from "../components/RoleForm";
-import type { RoleCreatePayload } from "../types/roles";
+import type { OpportunityCreatePayload } from "../types/opportunities";
 
 export function RoleNewPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(payload: RoleCreatePayload) {
+  async function handleSubmit(payload: OpportunityCreatePayload) {
     setSubmitting(true);
     setError(null);
     try {

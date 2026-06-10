@@ -9,7 +9,7 @@ import type {
   OpportunityParseRequest,
   OpportunityParseResponse,
   OpportunityUpdatePayload,
-} from "../types/roles";
+} from "../types/opportunities";
 
 export function listOpportunities(): Promise<Opportunity[]> {
   return apiRequest<Opportunity[]>("/api/opportunities");
