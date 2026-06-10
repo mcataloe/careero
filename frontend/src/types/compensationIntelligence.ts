@@ -1,6 +1,7 @@
 import type { Insight } from "./insights";
 
 export interface CompensationObservation {
+  opportunity_id: string;
   role_id: string;
   title: string;
   compensation_min: number | null;

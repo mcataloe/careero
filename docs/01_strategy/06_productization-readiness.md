@@ -142,7 +142,7 @@ dependencies, implement SSO/account recovery, or claim hosted readiness.
 - Layer 11A readiness reporting exists, but it is only a status surface.
 - Artifact lifecycle UX remains incomplete.
 - Local reminder API/UI exists, but hosted reminder delivery, notifications, calendar sync, and email integration are not implemented.
-- Opportunity remains Role-backed internally.
+- Opportunity is persistence-backed by `opportunities`; legacy Role names remain compatibility debt.
 - External integrations and external automation are intentionally disabled.
 
 ## What Can Be Built Now
@@ -185,7 +185,7 @@ Layer 11 depends on Layers 1-10 becoming truthful, stable, and reviewable:
 - Layer 3 and Layer 6 must keep generated artifacts grounded, traceable, reviewable, and separated from private strategy.
 - Layer 4 local reminders and workflow records exist, but workflow UX, hosted reminder delivery, notification boundaries, and production readiness still need validation.
 - Layer 5 analytics must explain confidence and avoid overstating weak signals.
-- Layer 7 must preserve Opportunity-facing compatibility while Role-backed persistence remains explicit.
+- Layer 7 must preserve Opportunity-facing compatibility while remaining Role compatibility debt stays explicit.
 - Layer 8 must keep local/manual integrations first and defer OAuth/cloud sync.
 - Layer 9 must keep automation suggestion-first, review-first, and audit-first.
 - Layer 10 must remain advisory and source-grounded.

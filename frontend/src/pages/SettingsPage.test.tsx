@@ -317,6 +317,7 @@ describe("SettingsPage", () => {
               user_id: "00000000-0000-4000-8000-000000000001",
               workspace_id: null,
               role_id: null,
+              opportunity_id: null,
               application_id: null,
               artifact_id: null,
               feature: "parse_opportunity",

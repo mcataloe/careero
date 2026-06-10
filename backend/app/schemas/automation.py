@@ -25,6 +25,7 @@ class AutomationSuggestionResponse(BaseModel):
     workspace_id: uuid.UUID
     target_type: AutomationTargetType | str
     target_id: uuid.UUID
+    opportunity_id: uuid.UUID | None = None
     role_id: uuid.UUID | None = None
     application_id: uuid.UUID | None = None
     artifact_id: uuid.UUID | None = None

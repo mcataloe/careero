@@ -139,4 +139,8 @@ def test_list_get_update_and_archive_role(
             select(ActivityLog.action).where(ActivityLog.entity_id == role_uuid)
         )
     )
-    assert actions == ["role.created", "role.updated", "role.archived"]
+    assert actions == [
+        "opportunity.created",
+        "opportunity.updated",
+        "opportunity.archived",
+    ]

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 AIUsageFeature = Literal[
@@ -29,6 +29,7 @@ class AIUsageEventCreate(BaseModel):
 
     user_id: UUID
     workspace_id: UUID | None = None
+    opportunity_id: UUID | None = None
     role_id: UUID | None = None
     application_id: UUID | None = None
     artifact_id: UUID | None = None
@@ -46,6 +47,17 @@ class AIUsageEventCreate(BaseModel):
     content_hash: str | None = Field(default=None, max_length=100)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def opportunity_and_role_ids_must_match(self) -> "AIUsageEventCreate":
+        if self.opportunity_id is not None and self.role_id is not None:
+            if self.opportunity_id != self.role_id:
+                raise ValueError("opportunity_id and role_id must match")
+        if self.opportunity_id is None:
+            self.opportunity_id = self.role_id
+        if self.role_id is None:
+            self.role_id = self.opportunity_id
+        return self
+
 
 class AIUsageEventResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -53,6 +65,7 @@ class AIUsageEventResponse(BaseModel):
     id: UUID
     user_id: UUID
     workspace_id: UUID | None
+    opportunity_id: UUID | None
     role_id: UUID | None
     application_id: UUID | None
     artifact_id: UUID | None

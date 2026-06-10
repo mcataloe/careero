@@ -20,6 +20,7 @@ class CompassEvaluationResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
     workspace_id: uuid.UUID
+    opportunity_id: uuid.UUID
     role_id: uuid.UUID
     evaluation_status: CompassEvaluationStatus
     overall_score: Decimal | None

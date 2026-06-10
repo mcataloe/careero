@@ -71,6 +71,7 @@ def drop_known_schema(database_url: str) -> None:
                             compass_evaluations,
                             resume_source_versions,
                             resume_sources,
+                            opportunities,
                             roles,
                             workspaces,
                             job_sources,

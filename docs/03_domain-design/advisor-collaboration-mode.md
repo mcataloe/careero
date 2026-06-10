@@ -222,7 +222,7 @@ sync, and production auth/provider choices are outside this Build Unit.
 | Layer 4 Application Workflow | Application state, selected timeline facts, links, reminders, interviews, and user-authored context are packet candidates only after review and redaction. |
 | Layer 5 Workflow Intelligence / Insights | Analytics and confidence signals must not overclaim. Insights should disclose basis and uncertainty before any advisor-visible use. |
 | Layer 6 Advanced COMPASS + Artifact Lifecycle | Artifact lifecycle maturity is required before shared artifact workflows can be trusted. Draft/unreviewed warnings must travel with artifacts. |
-| Layer 7 Opportunity Model Strategy | Layer 12 must stay compatible with Opportunity-facing language while persistence remains Role-backed. No destructive Role-to-Opportunity migration belongs in Layer 12. |
+| Layer 7 Opportunity Model Strategy | Layer 12 must stay compatible with Opportunity-facing language and legacy Role compatibility identifiers after the Layer 7C persistence migration. No further Role compatibility cleanup belongs in Layer 12. |
 | Layer 8 Integrations | Layer 12 cannot introduce cloud sync, OAuth, external send, Gmail/Outlook, calendar, browser/share, or public-link behavior without separate approval. |
 | Layer 9 Automation Guardrails | Collaboration cannot weaken suggestion-first, review-first, audit-first automation. No auto-send, auto-apply, batch approvals, or external mutation. |
 | Layer 10 Advanced Search Tracks / Career Strategy | Strategy synthesis is read-only, advisory, source-grounded, and private by default. It is not packet-visible unless a future approved flow explicitly allows it. |

@@ -77,7 +77,7 @@ Production readiness requires:
 - Migration runbook.
 - Backup-before-migration process.
 - Rollback or forward-fix expectations.
-- Compatibility windows for Role-backed Opportunity persistence.
+- Compatibility windows for legacy Role aliases after Opportunity persistence migration.
 - Test database validation.
 
 Layer 11C adds an auth migration for user credential/session fields. Production

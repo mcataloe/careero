@@ -932,6 +932,7 @@ def test_api_opportunity_application_alias_preserves_role_compatibility(
     assert opportunity_response.status_code == 201
     assert role_response.status_code == 201
     assert opportunity_response.json()["id"] == role_response.json()["id"]
+    assert opportunity_response.json()["opportunity_id"] == str(role.id)
     assert opportunity_response.json()["role_id"] == str(role.id)
 
 
@@ -970,6 +971,7 @@ def test_api_opportunity_application_read_includes_archived_workflow(
     assert response.status_code == 200
     assert response.json()["id"] == application_id
     assert response.json()["current_state"] == "archived"
+    assert response.json()["opportunity_id"] == str(role.id)
     assert response.json()["role_id"] == str(role.id)
     assert response.json()["workspace"]["id"] == str(DEFAULT_WORKSPACE_ID)
     assert response.json()["workspace"]["title"] == "Default workspace"

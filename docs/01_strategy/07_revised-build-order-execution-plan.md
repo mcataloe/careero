@@ -50,7 +50,7 @@ artifact lifecycle is complete for current local MVP lifecycle scope, and Layer
 | Layer 4 | Application Workflow | Complete for current MVP workflow scope | Lower-layer local foundations exist; hosted/productized delivery remains later. | None unless Layer 4D validation finds a blocker. | State machine, notes, links, reminders, interviews, timeline, pipeline, workflow UX, and regression coverage exist locally. Hosted reminder delivery, calendar/email sync, and production hardening remain future. |
 | Layer 5 | Workflow Intelligence and Insights | Stabilized for current local MVP scope | Depends on reliable Layer 4 workflow data, now hardened for local MVP use. | None unless Layer 5D validation finds a blocker. | Dashboard and analytics surfaces, normalized contracts, confidence/basis/provenance metadata, thin-data behavior, shared insight UI, and focused tests exist. Durable snapshots and advanced strategy remain later-layer work. |
 | Layer 6 | Advanced COMPASS and Artifact Lifecycle | Complete for current local MVP lifecycle scope | Depends on Layer 3 generation and Layer 4 workflow context. | None unless Layer 6E validation finds a blocker. | Four-state lifecycle, versioning foundation, submitted-version protection, review/submit/archive API, application artifact UX, opportunity integration, timeline events, and employer-facing content boundaries exist. Comparison, standalone workspace artifact browsing, and frontend export convenience remain future. |
-| Layer 7 | Opportunity Model Strategy | Layer 7B compatibility hardened; Layer 7C deferred | Depends on stable workflow and artifact semantics. | Layer 8 local export/integration recon, or separate Layer 7C migration recon only if destructive persistence cleanup is explicitly approved. | Public Opportunity language and APIs are hardened while persistence remains Role-backed. |
+| Layer 7 | Opportunity Model Strategy | Layer 7C persistence migration implemented locally | Depends on stable workflow and artifact semantics. | Layer 8 local export/integration recon, or post-7C compatibility cleanup if explicitly scoped. | Public Opportunity language, APIs, and persistence are canonical; Role compatibility aliases remain. |
 | Layer 8 | Integrations and Export | Partially implemented | Depends on Opportunity semantics and artifact lifecycle. | Layer 8 - Local export UX / integration recon. | Backend local export exists; frontend artifact export workflow and external integrations remain future. |
 | Layer 9 | Automation Guardrails | Partially implemented | Depends on trustworthy workflow and approval boundaries. | Layer 9 - Automation guardrail hardening. | Suggestions, approval logs, and preferences exist; external/state-changing automation remains prohibited. |
 | Layer 10 | Advanced Search Tracks and Career Strategy | Partially implemented | Depends on Layer 4/5/6 data maturity. | Layer 10 - Strategy stabilization. | Read-only strategy synthesis exists; no durable strategy memory or external market data. |
@@ -77,7 +77,7 @@ Later prompt groups:
 
 - Layer 5 - future insight expansion: durable snapshots, richer workspace switching UX, artifact lifecycle provenance, advanced strategy synthesis, model usage accounting, and onboarding help after later dependencies are ready.
 - Layer 6 - future artifact expansion: artifact comparison, standalone workspace artifact browsing, richer evidence mapping, and frontend export convenience.
-- Layer 7 - Opportunity compatibility: Layer 7B is hardened for current local MVP use. Keep Role-backed persistence explicit; plan Layer 7C only through a separately approved destructive migration recon.
+- Layer 7 - Opportunity model: Layer 7C migrated physical persistence to Opportunity-backed naming for current local MVP use. Keep `/api/roles`, frontend `/roles` redirects, historical role activity logs, and selected `role_id` compatibility payloads explicit until a later cleanup is approved.
 - Layer 8 - Integrations: start with local/manual export UX before OAuth, cloud sync, or external account linking.
 - Layer 9 - Automation: preserve suggestion-first, review-first, audit-first behavior.
 - Layer 10 - Strategy: keep strategy read-only, source-grounded, and non-mutating.
@@ -145,7 +145,7 @@ Minimum safe Layer 16 subset:
 - Preserve STRIDE references that explicitly explain historical naming or migration context.
 - LSROP should be treated as historical unless a migration note requires it.
 - Workspace is the persisted search context. Search track is the product-facing concept for a user's focused search lane.
-- Opportunity is the product-facing term. Current persistence remains Role-backed until a separate destructive migration is approved.
+- Opportunity is the product-facing and persistence-facing term. Legacy Role naming remains compatibility debt only.
 - Employer-side, recruiter-side, marketplace, sponsored placement, and pay-to-rank concepts remain future-facing and must not distort the user-first MVP.
 
 ## 8. Scope Discipline

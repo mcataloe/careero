@@ -10,6 +10,7 @@ class CompassTrendInsight(InsightResponse):
 
 
 class CompassTrendPoint(BaseModel):
+    opportunity_id: uuid.UUID
     role_id: uuid.UUID
     created_at: str
     overall_score: float | None

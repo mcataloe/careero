@@ -20,8 +20,9 @@ The canonical local artifact lifecycle states are:
 
 Legacy `approved` and `exported` lifecycle metadata should be normalized as compatibility metadata, not treated as current lifecycle states. Export history remains separate from lifecycle status.
 
-Artifacts are user-owned and may be linked to a workspace/search track, Role-backed
-opportunity, application workflow, COMPASS evaluation, source resume version, and
+Artifacts are user-owned and may be linked to a workspace/search track,
+Opportunity-backed persistence record, application workflow, COMPASS evaluation,
+source resume version, and
 source artifact. The persisted artifact row owns lifecycle status, version number,
 parent/source artifact linkage, and reviewed/submitted/archived timestamps. The
 canonical artifact contract in metadata mirrors those fields for compatibility.

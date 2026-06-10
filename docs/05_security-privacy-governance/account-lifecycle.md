@@ -94,7 +94,7 @@ Hosted modes require:
 - Account-scoped workspace access checks.
 - Server-side authorization on every user data request.
 - Tests proving users cannot access other users' records.
-- Isolation for Opportunity/Role-backed records, applications, artifacts,
+- Isolation for Opportunity records, legacy Role compatibility identifiers, applications, artifacts,
   notes, reminders, interviews, analytics, and automation logs.
 - Operational logging that avoids leaking private content.
 
@@ -154,7 +154,7 @@ Future export must include:
 - Account/profile data.
 - Workspaces/search tracks.
 - Resume/profile sources and versions.
-- Opportunities and Role-backed compatibility identifiers where relevant.
+- Opportunities and legacy Role compatibility identifiers where relevant.
 - COMPASS evaluations.
 - Generated artifacts and export metadata.
 - Applications, state history, notes, reminders, interviews, and links.

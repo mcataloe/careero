@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Role
+from app.models import Opportunity, Role
 
 
 class RoleRepository:
@@ -79,3 +79,6 @@ class RoleRepository:
             .order_by(Role.date_found.desc(), Role.created_at.desc())
         )
         return list(self.db.scalars(statement))
+
+
+OpportunityRepository = RoleRepository

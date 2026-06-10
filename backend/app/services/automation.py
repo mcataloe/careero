@@ -707,6 +707,7 @@ def _suggestion_response(suggestion: AutomationSuggestion) -> dict[str, Any]:
         "workspace_id": suggestion.workspace_id,
         "target_type": suggestion.target_type,
         "target_id": suggestion.target_id,
+        "opportunity_id": suggestion.opportunity_id,
         "role_id": suggestion.role_id,
         "application_id": suggestion.application_id,
         "artifact_id": suggestion.artifact_id,

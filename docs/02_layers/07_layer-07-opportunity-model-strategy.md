@@ -9,6 +9,6 @@ Related Docs:
 - docs/03_domain-design/opportunity-model.md
 - docs/05_security-privacy-governance/canonical-domain-model.md
 
-Layer 7 owns the transition from internal Role-backed persistence toward outward Opportunity semantics.
+Layer 7 owns the transition from internal Role-backed history toward outward and persisted Opportunity semantics.
 
 Canonical detail lives in [opportunity model](../03_domain-design/opportunity-model.md).

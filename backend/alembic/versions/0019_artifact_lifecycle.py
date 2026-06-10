@@ -160,7 +160,7 @@ def upgrade() -> None:
         ["id"],
     )
     op.create_foreign_key(
-        "fk_generated_artifacts_source_resume_version_id_resume_source_versions",
+        "fk_generated_artifacts_resume_version_id",
         "generated_artifacts",
         "resume_source_versions",
         ["source_resume_version_id"],
@@ -197,7 +197,7 @@ def downgrade() -> None:
         table_name="generated_artifacts",
     )
     op.drop_constraint(
-        "fk_generated_artifacts_source_resume_version_id_resume_source_versions",
+        "fk_generated_artifacts_resume_version_id",
         "generated_artifacts",
         type_="foreignkey",
     )

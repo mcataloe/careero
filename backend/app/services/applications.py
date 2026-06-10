@@ -80,6 +80,10 @@ _TIMELINE_ROLE_ACTIVITY = {
     "role.created",
     "role.updated",
     "role.archived",
+    "opportunity.created",
+    "opportunity.updated",
+    "opportunity.archived",
+    "opportunity.intelligence.refreshed",
 }
 
 
@@ -489,7 +493,8 @@ class ApplicationWorkflowService:
         workspace = application.workspace
         latest_compass = self._latest_compass_summary(application)
         return {
-            "id": application.id,
+            "id": str(application.id),
+            "opportunity_id": application.opportunity_id,
             "role_id": application.role_id,
             "workspace_id": application.workspace_id,
             "workspace": {
@@ -538,6 +543,20 @@ class ApplicationWorkflowService:
             "workflow_metadata": application.workflow_metadata or {},
             "application_state": application_state,
             "state_history": application_state["stateHistory"],
+            "opportunity": {
+                "id": role.id,
+                "workspace_id": role.workspace_id,
+                "title": role.title,
+                "status": role.status,
+                "company": {
+                    "id": company.id,
+                    "name": company.name,
+                    "website_url": company.website_url,
+                },
+                "job_url": role.job_url,
+                "location": role.location,
+                "remote_type": role.remote_type,
+            },
             "role": {
                 "id": role.id,
                 "workspace_id": role.workspace_id,
@@ -1319,7 +1338,7 @@ class ApplicationWorkflowService:
                         ActivityLog.action.in_(_TIMELINE_APPLICATION_ACTIVITY),
                     ),
                     and_(
-                        ActivityLog.entity_type == "role",
+                        ActivityLog.entity_type.in_(["role", "opportunity"]),
                         ActivityLog.entity_id == application.role_id,
                         ActivityLog.action.in_(_TIMELINE_ROLE_ACTIVITY),
                     ),
@@ -1636,6 +1655,10 @@ def _activity_title(log: ActivityLog) -> str:
         "role.created": "Role captured",
         "role.updated": "Role updated",
         "role.archived": "Role archived",
+        "opportunity.created": "Opportunity captured",
+        "opportunity.updated": "Opportunity updated",
+        "opportunity.archived": "Opportunity archived",
+        "opportunity.intelligence.refreshed": "Opportunity intelligence refreshed",
     }
     return titles.get(log.action, log.action.replace(".", " "))
 
@@ -1655,6 +1678,7 @@ def _safe_activity_metadata(log: ActivityLog) -> dict[str, Any]:
         "to_state",
         "reactivate",
         "role_id",
+        "opportunity_id",
         "workspace_id",
         "note_id",
         "note_type",

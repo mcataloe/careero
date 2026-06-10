@@ -35,6 +35,7 @@ export const sampleRole: Role = {
 export const sampleEvaluation: CompassEvaluation = {
   id: "44444444-4444-4444-8444-444444444444",
   user_id: "00000000-0000-4000-8000-000000000001",
+  opportunity_id: sampleRole.id,
   role_id: sampleRole.id,
   evaluation_status: "completed",
   overall_score: "82.00",

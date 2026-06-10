@@ -102,6 +102,7 @@ def compensation_observation(role: Role) -> dict[str, Any]:
     metadata = role.parse_metadata or {}
     employment_type = metadata.get("employmentType")
     return {
+        "opportunity_id": role.id,
         "role_id": role.id,
         "title": role.title,
         "compensation_min": low,

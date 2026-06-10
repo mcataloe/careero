@@ -47,6 +47,7 @@ export interface AutomationSuggestion {
   workspace_id: string;
   target_type: AutomationTargetType | string;
   target_id: string;
+  opportunity_id: string | null;
   role_id: string | null;
   application_id: string | null;
   artifact_id: string | null;

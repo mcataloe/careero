@@ -31,6 +31,7 @@ export interface EvidenceItem {
 export interface CompassEvaluation {
   id: string;
   user_id?: string;
+  opportunity_id?: string;
   role_id?: string;
   workspaceId?: string;
   opportunityId?: string;

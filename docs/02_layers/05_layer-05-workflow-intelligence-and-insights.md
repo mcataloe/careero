@@ -58,7 +58,7 @@ COMPASS is the current evaluation framework. Do not introduce legacy evaluation-
 ## Deferred Work
 
 - Layer 6: artifact lifecycle, submitted artifacts, artifact-source references, and review/submit/export UX.
-- Layer 7: Opportunity compatibility surface and future Role-backed persistence migration decisions.
+- Layer 7: Opportunity compatibility surface and post-7C Role compatibility cleanup decisions.
 - Layer 10: advanced search-track strategy and cross-track synthesis beyond current read-only MVP.
 - Layer 14: model usage accounting, model routing, prompt architecture, and credit controls.
 - Layer 16: guided onboarding and contextual help for users with thin search data.

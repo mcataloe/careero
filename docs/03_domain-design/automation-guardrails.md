@@ -57,7 +57,7 @@ Layer 9 must not implement:
 - automatic submitted-artifact marking
 - employer-facing content containing internal COMPASS, ATS, compensation, or
   strategy analysis
-- destructive Role-to-Opportunity persistence rename
+- post-7C Role compatibility cleanup
 
 ## Approval Behavior
 

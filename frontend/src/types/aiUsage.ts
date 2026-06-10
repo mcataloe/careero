@@ -2,6 +2,7 @@ export interface AIUsageEvent {
   id: string;
   user_id: string;
   workspace_id: string | null;
+  opportunity_id: string | null;
   role_id: string | null;
   application_id: string | null;
   artifact_id: string | null;

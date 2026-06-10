@@ -43,7 +43,7 @@ Current planning hierarchy:
 - Local PostgreSQL persistence with Alembic migrations.
 - Local React + Vite frontend.
 - Workspace/search-track persistence and seeded default local workspace.
-- Opportunity-facing intake, list, detail, update, and archive workflow backed by current `Role` persistence.
+- Opportunity-backed intake, list, detail, update, and archive workflow with legacy `/api/roles` compatibility aliases.
 - Optional AI-assisted role parsing for pasted job posts, with user review before save.
 - Local resume/profile source storage for COMPASS grounding, with paste or local file import.
 - Deterministic COMPASS scoring for stored opportunities.

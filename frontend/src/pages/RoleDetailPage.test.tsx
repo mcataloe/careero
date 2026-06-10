@@ -36,6 +36,7 @@ function renderPage(path = `/opportunities/${sampleRole.id}/compass`) {
 const sampleApplication: ApplicationDetail = {
   id: "app-1",
   role_id: sampleRole.id,
+  opportunity_id: sampleRole.id,
   workspace_id: "workspace-1",
   workspace: {
     id: "workspace-1",
@@ -62,6 +63,16 @@ const sampleApplication: ApplicationDetail = {
   workflow_metadata: {},
   application_state: {},
   state_history: [],
+  opportunity: {
+    id: sampleRole.id,
+    workspace_id: "workspace-1",
+    title: sampleRole.title,
+    status: sampleRole.status,
+    company: sampleRole.company,
+    job_url: sampleRole.job_url,
+    location: sampleRole.location,
+    remote_type: sampleRole.remote_type,
+  },
   role: {
     id: sampleRole.id,
     workspace_id: "workspace-1",

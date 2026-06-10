@@ -24,7 +24,7 @@ prompts so local-first readiness is not confused with production readiness.
 | Layer 4 Application Workflow | Application state machine, history, notes, external links, interviews, local reminder records, timeline, and pipeline surfaces. | Application state ownership, reviewable workflow state, or the boundary that local reminders are not hosted notifications. | Workflow UX validation, hosted reminder delivery boundaries, and production notification/calendar/email decisions. | Production readiness requires coherent workflow records, exports, and explicit hosted reminder non-goals or implementation scope. |
 | Layer 5 Workflow Intelligence / Insights | Analytics, recommendations, compensation/source/search health, historical learning. | Confidence limits or source-basis explanation. | Workspace filtering, deterministic validation, and calibration. | Paid analytics must be transparent and avoid overclaiming. |
 | Layer 6 Advanced COMPASS + Artifact Lifecycle | Artifact lifecycle direction, evidence mapping, submitted artifact tracking goals. | Employer-facing artifact safety boundaries. | Review/edit/submit/archive, submitted tracking, comparison, and frontend export UX. | Monetization should wait until artifacts are durable product objects. |
-| Layer 7 Opportunity Model Strategy | Opportunity-facing compatibility and Role-backed persistence documentation. | Destructive Role-to-Opportunity persistence rename. | Compatibility debt and broad `role_id` consumers. | Hosted exports/deletion must account for Role-backed Opportunity records until migration is approved. |
+| Layer 7 Opportunity Model Strategy | Opportunity-facing API/UX and Opportunity-backed persistence. | Compatibility cleanup for `/api/roles`, frontend `/roles`, `Role` aliases, historical role activity logs, and selected `role_id` payload fields. | Compatibility debt and broad legacy `role_id` consumers. | Hosted exports/deletion must account for Opportunity-backed records and legacy compatibility identifiers. |
 | Layer 8 Integrations | Local export boundary and future integration constraints. | Deferral of OAuth, token storage, background sync, and external account linking. | Frontend artifact export workflow and integration privacy design. | Hosted integrations require auth, secrets, consent, revocation, and audit design. |
 | Layer 9 Automation Guardrails | Suggestions, approval logs, workspace preferences, disabled external actions. | Suggestion-first, review-first, audit-first automation. | No external executors, batch approvals, or state-changing automation are approved. | Production automation requires fresh approval and safety review per action class. |
 | Layer 10 Advanced Search Tracks / Career Strategy | Read-only strategy synthesis from stored Careero evidence. | Advisory, source-grounded, non-mutating strategy behavior. | Strategy depends on Layer 4/5/6 data maturity. | Strategy may inform paid power-user value only after confidence is calibrated. |
@@ -59,8 +59,8 @@ prompts so local-first readiness is not confused with production readiness.
 - Productization cannot make employer-facing artifacts include internal COMPASS,
   ATS risk, compensation strategy, company commentary, or private rationale.
 - Billing and AI quotas must not create hidden sponsored prioritization.
-- Opportunity-facing language must keep Role-backed persistence explicit until a
-  separate destructive migration is approved.
+- Opportunity-facing language must keep remaining Role compatibility debt explicit
+  after the Layer 7C persistence migration.
 - Marketplace/employer-side work stays last.
 
 

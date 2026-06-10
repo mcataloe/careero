@@ -43,6 +43,10 @@ class ApplicationRoleSummary(BaseModel):
     remote_type: str | None = None
 
 
+class ApplicationOpportunitySummary(ApplicationRoleSummary):
+    pass
+
+
 class ApplicationCompassSummary(BaseModel):
     id: uuid.UUID
     evaluation_status: str
@@ -72,6 +76,7 @@ class ApplicationListItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    opportunity_id: uuid.UUID
     role_id: uuid.UUID
     workspace_id: uuid.UUID
     workspace: ApplicationWorkspaceSummary
@@ -93,6 +98,7 @@ class ApplicationDetailResponse(ApplicationListItemResponse):
     workflow_metadata: dict[str, Any]
     application_state: dict[str, Any]
     state_history: list[dict[str, Any]]
+    opportunity: ApplicationOpportunitySummary
     role: ApplicationRoleSummary
 
 

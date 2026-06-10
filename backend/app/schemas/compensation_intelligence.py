@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from app.schemas.insights import InsightResponse
 
 class CompensationObservation(BaseModel):
+    opportunity_id: uuid.UUID
     role_id: uuid.UUID
     title: str
     compensation_min: float | None

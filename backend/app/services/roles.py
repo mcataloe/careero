@@ -130,7 +130,7 @@ class RoleService:
         self._log_activity(
             user_id=user.id,
             entity_id=role.id,
-            action="role.created",
+            action="opportunity.created",
             details={"title": role.title, "workspace_id": str(workspace.id)},
         )
         self.opportunity_intelligence.refresh_role(role)
@@ -176,7 +176,7 @@ class RoleService:
             self._log_activity(
                 user_id=user.id,
                 entity_id=role.id,
-                action="role.updated",
+                action="opportunity.updated",
                 details={"changed_fields": sorted(changed_fields)},
             )
             self.db.commit()
@@ -192,7 +192,7 @@ class RoleService:
         self._log_activity(
             user_id=user.id,
             entity_id=role.id,
-            action="role.opportunity_intelligence.refreshed",
+            action="opportunity.intelligence.refreshed",
             details={},
         )
         self.db.commit()
@@ -207,7 +207,7 @@ class RoleService:
         self._log_activity(
             user_id=user.id,
             entity_id=role.id,
-            action="role.archived",
+            action="opportunity.archived",
             details={},
         )
         self.db.commit()
@@ -316,8 +316,17 @@ class RoleService:
     ) -> None:
         self.activity_log.append(
             user_id=user_id,
-            entity_type="role",
+            entity_type="opportunity",
             entity_id=entity_id,
             action=action,
             details=details,
         )
+
+
+OpportunityService = RoleService
+OpportunityIntakeError = RoleIntakeError
+OpportunityNotFoundError = RoleNotFoundError
+OpportunityDependencyNotFoundError = RoleDependencyNotFoundError
+OpportunitySeedMissingError = RoleSeedMissingError
+OpportunityWorkspaceNotFoundError = RoleWorkspaceNotFoundError
+OpportunityWorkspaceInactiveError = RoleWorkspaceInactiveError

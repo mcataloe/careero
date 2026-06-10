@@ -38,6 +38,7 @@ const populatedPipeline: ApplicationPipelineResponse = {
       {
         id: "app-1",
         role_id: "role-1",
+        opportunity_id: "role-1",
         workspace_id: "workspace-1",
         workspace: {
           id: "workspace-1",

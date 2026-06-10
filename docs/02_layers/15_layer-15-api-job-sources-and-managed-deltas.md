@@ -124,7 +124,7 @@ Candidate records:
 - `opportunity_source_link`
 - `managed_delta_review`
 
-These names are candidates, not final schema commitments. LEAP Recon should validate naming against the existing Role-backed / Opportunity-facing transition.
+These names are candidates, not final schema commitments. LEAP Recon should validate naming against the current Opportunity-backed persistence model and remaining Role compatibility aliases.
 
 ## Normalized Job Posting Fields
 
@@ -322,7 +322,7 @@ Exact TTLs should be validated during Layer 15 Recon.
 
 Layer 15 depends on Layer 7 Opportunity semantics.
 
-Layer 15 should not force a destructive Role-to-Opportunity migration. It should target the Opportunity-facing compatibility surface and preserve the current persistence reality until a separate migration is approved.
+Layer 15 should not remove Role compatibility aliases. It should target the Opportunity-backed persistence model and preserve compatibility surfaces until a separate cleanup is approved.
 
 Layer 15 should define:
 

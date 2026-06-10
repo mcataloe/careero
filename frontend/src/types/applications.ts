@@ -47,6 +47,7 @@ export interface ApplicationArtifactSummary {
 
 export interface ApplicationSummary {
   id: string;
+  opportunity_id: string;
   role_id: string;
   workspace_id: string;
   workspace: ApplicationWorkspaceSummary;
@@ -75,10 +76,13 @@ export interface ApplicationRoleSummary {
   remote_type: string | null;
 }
 
+export type ApplicationOpportunitySummary = ApplicationRoleSummary;
+
 export interface ApplicationDetail extends ApplicationSummary {
   workflow_metadata: Record<string, unknown>;
   application_state: Record<string, unknown>;
   state_history: Record<string, unknown>[];
+  opportunity: ApplicationOpportunitySummary;
   role: ApplicationRoleSummary;
 }
 

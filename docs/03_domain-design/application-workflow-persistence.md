@@ -107,7 +107,7 @@ foundation:
 - `GET /api/opportunities/{opportunity_id}/application/timeline`
 
 These endpoints do not create application workflows and do not introduce a new
-Opportunity persistence table. They resolve the current Role-backed Opportunity
+Opportunity persistence table. They resolve the current Opportunity-backed
 through the same ownership rules, return the existing application workflow when
 one exists, and keep the canonical mutation path on application transition
 endpoints.

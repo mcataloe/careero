@@ -145,6 +145,7 @@ def build_compass_trend_insights(
 def _trend_point(evaluation: CompassEvaluation) -> dict[str, Any]:
     role = evaluation.role
     return {
+        "opportunity_id": evaluation.opportunity_id,
         "role_id": evaluation.role_id,
         "created_at": evaluation.created_at.isoformat(),
         "overall_score": float(evaluation.overall_score)

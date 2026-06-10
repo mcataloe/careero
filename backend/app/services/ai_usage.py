@@ -43,7 +43,7 @@ class AIUsageService:
         event = AIUsageEvent(
             user_id=payload.user_id,
             workspace_id=payload.workspace_id,
-            role_id=payload.role_id,
+            opportunity_id=payload.opportunity_id,
             application_id=payload.application_id,
             artifact_id=payload.artifact_id,
             feature=payload.feature,
@@ -80,6 +80,7 @@ def usage_response(event: AIUsageEvent) -> dict[str, Any]:
         "id": event.id,
         "user_id": event.user_id,
         "workspace_id": event.workspace_id,
+        "opportunity_id": event.opportunity_id,
         "role_id": event.role_id,
         "application_id": event.application_id,
         "artifact_id": event.artifact_id,

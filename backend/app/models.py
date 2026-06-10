@@ -16,7 +16,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, synonym
 
 
 class Base(DeclarativeBase):
@@ -78,7 +78,8 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     companies: Mapped[list["Company"]] = relationship(back_populates="user")
-    roles: Mapped[list["Role"]] = relationship(back_populates="user")
+    opportunities: Mapped[list["Opportunity"]] = relationship(back_populates="user")
+    roles = synonym("opportunities")
     compass_evaluations: Mapped[list["CompassEvaluation"]] = relationship(
         back_populates="user"
     )
@@ -156,7 +157,8 @@ class Workspace(TimestampMixin, Base):
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     user: Mapped[User] = relationship(back_populates="workspaces")
-    roles: Mapped[list["Role"]] = relationship(back_populates="workspace")
+    opportunities: Mapped[list["Opportunity"]] = relationship(back_populates="workspace")
+    roles = synonym("opportunities")
     compass_evaluations: Mapped[list["CompassEvaluation"]] = relationship(
         back_populates="workspace"
     )
@@ -182,18 +184,19 @@ class Company(TimestampMixin, SoftDeleteMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     user: Mapped[User] = relationship(back_populates="companies")
-    roles: Mapped[list["Role"]] = relationship(back_populates="company")
+    opportunities: Mapped[list["Opportunity"]] = relationship(back_populates="company")
+    roles = synonym("opportunities")
 
 
-class Role(TimestampMixin, SoftDeleteMixin, Base):
-    __tablename__ = "roles"
+class Opportunity(TimestampMixin, SoftDeleteMixin, Base):
+    __tablename__ = "opportunities"
     __table_args__ = (
-        Index("ix_roles_user_id", "user_id"),
-        Index("ix_roles_workspace_id", "workspace_id"),
-        Index("ix_roles_company_id", "company_id"),
-        Index("ix_roles_source_id", "source_id"),
-        Index("ix_roles_status", "status"),
-        Index("ix_roles_user_status", "user_id", "status"),
+        Index("ix_opportunities_user_id", "user_id"),
+        Index("ix_opportunities_workspace_id", "workspace_id"),
+        Index("ix_opportunities_company_id", "company_id"),
+        Index("ix_opportunities_source_id", "source_id"),
+        Index("ix_opportunities_status", "status"),
+        Index("ix_opportunities_user_status", "user_id", "status"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -238,14 +241,17 @@ class Role(TimestampMixin, SoftDeleteMixin, Base):
     )
     date_posted: Mapped[date | None] = mapped_column(Date)
 
-    user: Mapped[User] = relationship(back_populates="roles")
-    workspace: Mapped[Workspace] = relationship(back_populates="roles")
-    company: Mapped[Company] = relationship(back_populates="roles")
-    source: Mapped["JobSource | None"] = relationship(back_populates="roles")
+    user: Mapped[User] = relationship(back_populates="opportunities")
+    workspace: Mapped[Workspace] = relationship(back_populates="opportunities")
+    company: Mapped[Company] = relationship(back_populates="opportunities")
+    source: Mapped["JobSource | None"] = relationship(back_populates="opportunities")
     compass_evaluations: Mapped[list["CompassEvaluation"]] = relationship(
-        back_populates="role"
+        back_populates="opportunity"
     )
-    applications: Mapped[list["Application"]] = relationship(back_populates="role")
+    applications: Mapped[list["Application"]] = relationship(back_populates="opportunity")
+
+
+Role = Opportunity
 
 
 class JobSource(TimestampMixin, SoftDeleteMixin, Base):
@@ -269,7 +275,8 @@ class JobSource(TimestampMixin, SoftDeleteMixin, Base):
     source_type: Mapped[str | None] = mapped_column(String(100))
     website_url: Mapped[str | None] = mapped_column(String(2048))
 
-    roles: Mapped[list[Role]] = relationship(back_populates="source")
+    opportunities: Mapped[list[Opportunity]] = relationship(back_populates="source")
+    roles = synonym("opportunities")
 
 
 class ResumeSource(TimestampMixin, Base):
@@ -340,12 +347,12 @@ class CompassEvaluation(TimestampMixin, SoftDeleteMixin, Base):
     __table_args__ = (
         Index("ix_compass_evaluations_user_id", "user_id"),
         Index("ix_compass_evaluations_workspace_id", "workspace_id"),
-        Index("ix_compass_evaluations_role_id", "role_id"),
+        Index("ix_compass_evaluations_opportunity_id", "opportunity_id"),
         Index("ix_compass_evaluations_status", "evaluation_status"),
-        Index("ix_compass_evaluations_role_created_at", "role_id", "created_at"),
+        Index("ix_compass_evaluations_opportunity_created_at", "opportunity_id", "created_at"),
         Index(
-            "ix_compass_evaluations_role_input_hash",
-            "role_id",
+            "ix_compass_evaluations_opportunity_input_hash",
+            "opportunity_id",
             "evaluation_input_hash",
         ),
         Index("ix_compass_evaluations_ai_status", "ai_status"),
@@ -367,11 +374,12 @@ class CompassEvaluation(TimestampMixin, SoftDeleteMixin, Base):
         ForeignKey("workspaces.id"),
         nullable=False,
     )
-    role_id: Mapped[uuid.UUID] = mapped_column(
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("opportunities.id"),
         nullable=False,
     )
+    role_id = synonym("opportunity_id")
     evaluation_status: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
@@ -435,7 +443,8 @@ class CompassEvaluation(TimestampMixin, SoftDeleteMixin, Base):
 
     user: Mapped[User] = relationship(back_populates="compass_evaluations")
     workspace: Mapped[Workspace] = relationship(back_populates="compass_evaluations")
-    role: Mapped[Role] = relationship(back_populates="compass_evaluations")
+    opportunity: Mapped[Opportunity] = relationship(back_populates="compass_evaluations")
+    role = synonym("opportunity")
 
 
 class Application(TimestampMixin, SoftDeleteMixin, Base):
@@ -443,15 +452,15 @@ class Application(TimestampMixin, SoftDeleteMixin, Base):
     __table_args__ = (
         Index("ix_applications_user_id", "user_id"),
         Index("ix_applications_workspace_id", "workspace_id"),
-        Index("ix_applications_role_id", "role_id"),
+        Index("ix_applications_opportunity_id", "opportunity_id"),
         Index("ix_applications_job_source_id", "job_source_id"),
         Index("ix_applications_current_state", "current_state"),
         Index("ix_applications_workspace_state", "workspace_id", "current_state"),
         Index("ix_applications_next_action_at", "next_action_at"),
         Index("ix_applications_archived_at", "archived_at"),
         Index(
-            "uq_applications_active_role_id",
-            "role_id",
+            "uq_applications_active_opportunity_id",
+            "opportunity_id",
             unique=True,
             postgresql_where=text("deleted_at IS NULL"),
         ),
@@ -472,11 +481,12 @@ class Application(TimestampMixin, SoftDeleteMixin, Base):
         ForeignKey("workspaces.id"),
         nullable=False,
     )
-    role_id: Mapped[uuid.UUID] = mapped_column(
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("opportunities.id"),
         nullable=False,
     )
+    role_id = synonym("opportunity_id")
     job_source_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("job_sources.id"),
@@ -495,7 +505,8 @@ class Application(TimestampMixin, SoftDeleteMixin, Base):
     workflow_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
     workspace: Mapped[Workspace] = relationship(back_populates="applications")
-    role: Mapped[Role] = relationship(back_populates="applications")
+    opportunity: Mapped[Opportunity] = relationship(back_populates="applications")
+    role = synonym("opportunity")
     state_history: Mapped[list["ApplicationStateHistory"]] = relationship(
         back_populates="application",
         order_by="ApplicationStateHistory.changed_at",
@@ -739,7 +750,7 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
         Index("ix_generated_artifacts_user_id", "user_id"),
         Index("ix_generated_artifacts_workspace_id", "workspace_id"),
         Index("ix_generated_artifacts_application_id", "application_id"),
-        Index("ix_generated_artifacts_role_id", "role_id"),
+        Index("ix_generated_artifacts_opportunity_id", "opportunity_id"),
         Index("ix_generated_artifacts_lifecycle_status", "lifecycle_status"),
         Index("ix_generated_artifacts_evaluation_id", "evaluation_id"),
         Index("ix_generated_artifacts_source_artifact_id", "source_artifact_id"),
@@ -764,10 +775,11 @@ class GeneratedArtifact(TimestampMixin, SoftDeleteMixin, Base):
         UUID(as_uuid=True),
         ForeignKey("applications.id"),
     )
-    role_id: Mapped[uuid.UUID | None] = mapped_column(
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("opportunities.id"),
     )
+    role_id = synonym("opportunity_id")
     source_artifact_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("generated_artifacts.id"),
@@ -805,7 +817,7 @@ class ArtifactPerformanceRecord(TimestampMixin, Base):
     __table_args__ = (
         Index("ix_artifact_performance_records_user_id", "user_id"),
         Index("ix_artifact_performance_records_workspace_id", "workspace_id"),
-        Index("ix_artifact_performance_records_role_id", "role_id"),
+        Index("ix_artifact_performance_records_opportunity_id", "opportunity_id"),
         Index("ix_artifact_performance_records_application_id", "application_id"),
         Index("ix_artifact_performance_records_artifact_id", "artifact_id"),
         Index("ix_artifact_performance_records_artifact_type", "artifact_type"),
@@ -826,11 +838,12 @@ class ArtifactPerformanceRecord(TimestampMixin, Base):
         ForeignKey("workspaces.id"),
         nullable=False,
     )
-    role_id: Mapped[uuid.UUID] = mapped_column(
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("opportunities.id"),
         nullable=False,
     )
+    role_id = synonym("opportunity_id")
     application_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("applications.id"),
@@ -868,7 +881,7 @@ class AutomationSuggestion(TimestampMixin, Base):
         Index("ix_automation_suggestions_action_type", "action_type"),
         Index("ix_automation_suggestions_status", "status"),
         Index("ix_automation_suggestions_application_id", "application_id"),
-        Index("ix_automation_suggestions_role_id", "role_id"),
+        Index("ix_automation_suggestions_opportunity_id", "opportunity_id"),
         Index("ix_automation_suggestions_artifact_id", "artifact_id"),
     )
 
@@ -889,10 +902,11 @@ class AutomationSuggestion(TimestampMixin, Base):
     )
     target_type: Mapped[str] = mapped_column(String(100), nullable=False)
     target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    role_id: Mapped[uuid.UUID | None] = mapped_column(
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("opportunities.id"),
     )
+    role_id = synonym("opportunity_id")
     application_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("applications.id"),
@@ -1019,7 +1033,7 @@ class AIUsageEvent(Base):
     __table_args__ = (
         Index("ix_ai_usage_events_user_id", "user_id"),
         Index("ix_ai_usage_events_workspace_id", "workspace_id"),
-        Index("ix_ai_usage_events_role_id", "role_id"),
+        Index("ix_ai_usage_events_opportunity_id", "opportunity_id"),
         Index("ix_ai_usage_events_feature", "feature"),
         Index("ix_ai_usage_events_event_type", "event_type"),
         Index("ix_ai_usage_events_created_at", "created_at"),
@@ -1039,7 +1053,11 @@ class AIUsageEvent(Base):
         UUID(as_uuid=True),
         ForeignKey("workspaces.id"),
     )
-    role_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("roles.id"))
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("opportunities.id"),
+    )
+    role_id = synonym("opportunity_id")
     application_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("applications.id"),

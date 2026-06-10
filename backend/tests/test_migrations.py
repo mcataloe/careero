@@ -8,7 +8,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "users",
         "workspaces",
         "companies",
-        "roles",
+        "opportunities",
         "job_sources",
         "compass_evaluations",
         "resume_sources",
@@ -26,7 +26,9 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "auth_sessions",
     }.issubset(set(inspector.get_table_names()))
 
-    role_columns = {column["name"] for column in inspector.get_columns("roles")}
+    opportunity_columns = {
+        column["name"] for column in inspector.get_columns("opportunities")
+    }
     assert {
         "workspace_id",
         "source_id",
@@ -41,7 +43,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "status",
         "date_found",
         "date_posted",
-    }.issubset(role_columns)
+    }.issubset(opportunity_columns)
 
     compass_columns = {
         column["name"] for column in inspector.get_columns("compass_evaluations")
@@ -86,10 +88,10 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
     }
     assert {
         "ix_compass_evaluations_user_id",
-        "ix_compass_evaluations_role_id",
+        "ix_compass_evaluations_opportunity_id",
         "ix_compass_evaluations_status",
-        "ix_compass_evaluations_role_created_at",
-        "ix_compass_evaluations_role_input_hash",
+        "ix_compass_evaluations_opportunity_created_at",
+        "ix_compass_evaluations_opportunity_input_hash",
         "ix_compass_evaluations_ai_status",
         "ix_compass_evaluations_ruleset_version",
     }.issubset(compass_indexes)
@@ -176,12 +178,12 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
     }
     assert {
         "ix_applications_workspace_id",
-        "ix_applications_role_id",
+        "ix_applications_opportunity_id",
         "ix_applications_current_state",
         "ix_applications_workspace_state",
         "ix_applications_next_action_at",
         "ix_applications_archived_at",
-        "uq_applications_active_role_id",
+        "uq_applications_active_opportunity_id",
     }.issubset(application_indexes)
 
     for table_name in (
@@ -194,7 +196,9 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         columns = {column["name"] for column in inspector.get_columns(table_name)}
         assert {"id", "application_id", "user_id", "workspace_id"}.issubset(columns)
 
-    role_indexes = {index["name"] for index in inspector.get_indexes("roles")}
+    opportunity_indexes = {
+        index["name"] for index in inspector.get_indexes("opportunities")
+    }
     generated_artifact_indexes = {
         index["name"] for index in inspector.get_indexes("generated_artifacts")
     }
@@ -212,7 +216,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         index["name"]
         for index in inspector.get_indexes("application_external_links")
     }
-    assert "ix_roles_workspace_id" in role_indexes
+    assert "ix_opportunities_workspace_id" in opportunity_indexes
     assert "ix_compass_evaluations_workspace_id" in compass_indexes
     assert "ix_generated_artifacts_workspace_id" in generated_artifact_indexes
     assert {
@@ -240,7 +244,7 @@ def test_alembic_migration_creates_initial_tables(migrated_engine) -> None:
         "workspace_id",
         "target_type",
         "target_id",
-        "role_id",
+        "opportunity_id",
         "application_id",
         "artifact_id",
         "action_type",

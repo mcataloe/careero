@@ -26,6 +26,7 @@ function jsonResponse(response: unknown, status = 200) {
 const application: ApplicationDetail = {
   id: "app-1",
   role_id: "role-1",
+  opportunity_id: "role-1",
   workspace_id: "workspace-1",
   workspace: {
     id: "workspace-1",
@@ -56,6 +57,20 @@ const application: ApplicationDetail = {
   workflow_metadata: {},
   application_state: {},
   state_history: [],
+  opportunity: {
+    id: "role-1",
+    workspace_id: "workspace-1",
+    title: "Staff Platform Engineer",
+    status: "interested",
+    company: {
+      id: "company-1",
+      name: "Example Company",
+      website_url: null,
+    },
+    job_url: "https://example.com/jobs/1",
+    location: "Remote",
+    remote_type: "remote",
+  },
   role: {
     id: "role-1",
     workspace_id: "workspace-1",

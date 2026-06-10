@@ -20,6 +20,7 @@ const suggestion: AutomationSuggestion = {
   target_type: "application",
   target_id: "application-1",
   role_id: "role-1",
+  opportunity_id: "role-1",
   application_id: "application-1",
   artifact_id: null,
   action_type: "communication_draft",
