@@ -23,7 +23,7 @@ import type {
   ApplicationWorkflowState,
 } from "../types/applications";
 import type { CompassEvaluation } from "../types/compassEvaluations";
-import type { Role, RoleUpdatePayload } from "../types/roles";
+import type { Opportunity, OpportunityUpdatePayload } from "../types/opportunities";
 
 const opportunitySections = [
   {
@@ -76,7 +76,7 @@ export function RoleDetailPage() {
   const currentOpportunityId = opportunityId ?? roleId;
   const activeSection = isOpportunitySectionId(section) ? section : null;
   const navigate = useNavigate();
-  const [role, setRole] = useState<Role | null>(null);
+  const [role, setRole] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [archiving, setArchiving] = useState(false);
@@ -159,7 +159,7 @@ export function RoleDetailPage() {
     }
   }
 
-  async function handleUpdate(payload: RoleUpdatePayload) {
+  async function handleUpdate(payload: OpportunityUpdatePayload) {
     if (!currentOpportunityId) return;
     setSaving(true);
     setError(null);

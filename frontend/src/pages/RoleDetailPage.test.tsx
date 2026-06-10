@@ -136,8 +136,8 @@ describe("RoleDetailPage", () => {
       `/opportunities/${sampleRole.id}/compass`,
     );
 
-    expect(document.getElementById("role-overview")).not.toBeNull();
-    expect(document.getElementById("role-description")).toBeNull();
+    expect(document.getElementById("opportunity-overview")).not.toBeNull();
+    expect(document.getElementById("opportunity-description")).toBeNull();
     expect(document.getElementById("compass-evaluation")).toBeNull();
   });
 

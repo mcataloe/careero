@@ -8,7 +8,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.constants import ApplicationWorkflowState, CompassEvaluationStatus
+from app.constants import (
+    ApplicationWorkflowState,
+    ArtifactLifecycleStatus,
+    CompassEvaluationStatus,
+)
 from app.database import get_db
 from app.main import create_app
 from app.models import (
@@ -1018,6 +1022,42 @@ def test_api_opportunity_application_timeline_missing_workflow_returns_not_found
         db_session.scalar(select(Application).where(Application.role_id == role.id))
         is None
     )
+
+
+def test_api_opportunity_application_state_is_distinct_from_opportunity_and_artifact_status(
+    application_client: TestClient,
+    db_session: Session,
+) -> None:
+    role = create_role(db_session, status="interested")
+    application_response = application_client.post(
+        f"/api/opportunities/{role.id}/application"
+    )
+    application_id = application_response.json()["id"]
+    artifact = GeneratedArtifact(
+        user_id=role.user_id,
+        workspace_id=role.workspace_id,
+        role_id=role.id,
+        artifact_type="tailored_resume",
+        title="Submitted resume",
+        content="resume",
+        lifecycle_status=ArtifactLifecycleStatus.SUBMITTED.value,
+    )
+    db_session.add(artifact)
+    db_session.commit()
+
+    transition_response = application_client.post(
+        f"/api/applications/{application_id}/state-transitions",
+        json={"state": "applied", "reason": "Submitted application."},
+    )
+    opportunity_response = application_client.get(f"/api/opportunities/{role.id}")
+
+    assert transition_response.status_code == 200
+    assert transition_response.json()["current_state"] == "applied"
+    assert transition_response.json()["role_id"] == str(role.id)
+    assert opportunity_response.status_code == 200
+    assert opportunity_response.json()["status"] == "interested"
+    db_session.refresh(artifact)
+    assert artifact.lifecycle_status == ArtifactLifecycleStatus.SUBMITTED.value
 
 
 def test_api_interview_stage_crud(

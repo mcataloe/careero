@@ -2,15 +2,16 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from app.api.roles import get_role_parsing_service, get_role_service
+from app.api.roles import (
+    get_ai_usage_service,
+    get_role_parsing_service,
+    get_role_service,
+    parse_role_with_usage,
+)
 from app.schemas.role_parsing import RoleParseRequest, RoleParseResponse
 from app.schemas.roles import OpportunityCreate, OpportunityResponse, OpportunityUpdate
-from app.services.role_parsing import (
-    RoleParsingProviderError,
-    RoleParsingService,
-    RoleParsingUnavailableError,
-    RoleParsingValidationError,
-)
+from app.services.ai_usage import AIUsageService
+from app.services.role_parsing import RoleParsingService
 from app.services.roles import (
     RoleDependencyNotFoundError,
     RoleNotFoundError,
@@ -42,24 +43,9 @@ def create_opportunity(
 def parse_opportunity(
     payload: RoleParseRequest,
     service: RoleParsingService = Depends(get_role_parsing_service),
+    usage_service: AIUsageService = Depends(get_ai_usage_service),
 ):
-    try:
-        return service.parse(payload)
-    except RoleParsingUnavailableError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(exc),
-        )
-    except RoleParsingValidationError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=str(exc),
-        )
-    except RoleParsingProviderError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=str(exc),
-        )
+    return parse_role_with_usage(payload, service, usage_service)
 
 
 @router.get("", response_model=list[OpportunityResponse])

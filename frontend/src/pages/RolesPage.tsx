@@ -6,11 +6,11 @@ import { listOpportunities } from "../api/opportunities";
 import { getLatestEvaluation } from "../api/compassEvaluations";
 import { RolesList } from "../components/RolesList";
 import { ErrorState, LoadingState } from "../components/States";
-import type { Role } from "../types/roles";
+import type { Opportunity } from "../types/opportunities";
 import type { EvaluationSummaryState } from "../types/compassEvaluations";
 
 export function RolesPage() {
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [roles, setRoles] = useState<Opportunity[]>([]);
   const [evaluationStates, setEvaluationStates] = useState<
     Record<string, EvaluationSummaryState>
   >({});
@@ -34,7 +34,7 @@ export function RolesPage() {
     }
   }
 
-  async function loadEvaluationIndicators(nextRoles: Role[]) {
+  async function loadEvaluationIndicators(nextRoles: Opportunity[]) {
     await Promise.all(
       nextRoles.map(async (role) => {
         try {
