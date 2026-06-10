@@ -12,7 +12,7 @@ Layer 7A design artifact.
 
 This document defines Careero's Opportunity model strategy before any destructive persistence migration. It is the source of truth for Layer 7B compatibility work and later Layer 7C migration decisions.
 
-Layer 7B status: the Opportunity-facing compatibility surface has started. `/api/opportunities` and frontend `/opportunities` routes are the canonical outward surfaces, while `/api/roles` and legacy `/roles` frontend paths remain compatibility surfaces. Persistence remains Role-backed for now.
+Layer 7B status: the Opportunity-facing compatibility surface is hardened for the current local MVP scope. `/api/opportunities` and frontend `/opportunities` routes are the canonical outward surfaces, while `/api/roles` and legacy `/roles` frontend paths remain compatibility surfaces. Persistence remains Role-backed for now, and the destructive Layer 7C persistence migration remains deferred.
 
 ## 1. Purpose
 
@@ -27,6 +27,7 @@ Opportunity should become Careero's central durable intelligence object.
 - `Role` is the current backend and persistence object.
 - The `roles` table currently stores job/opportunity-like records.
 - `/api/opportunities` now provides Opportunity-facing aliases for intake, parse, list, detail, update, opportunity intelligence refresh, and archive behavior.
+- `/api/opportunities/parse` and `/api/roles/parse` share the same parser and safe AI usage-event recording path.
 - `/api/roles` remains available as a compatibility surface for existing local workflows and tests.
 - Frontend `/opportunities`, `/opportunities/new`, and `/opportunities/:opportunityId` routes are canonical; legacy `/roles` routes redirect to the Opportunity routes.
 - `role_id` is currently used by COMPASS evaluations, Applications, GeneratedArtifacts, artifact performance records, analytics, source intelligence, and historical learning services.
@@ -34,6 +35,7 @@ Opportunity should become Careero's central durable intelligence object.
 - `OpportunityStatusSchema`, `ApplicationWorkflowStateSchema`, and `ArtifactLifecycleStatusSchema` already exist in `packages/contracts/src/enums.ts`.
 - `OpportunityIntelligenceService` already exists in the backend, but it is currently Role-backed and stores intelligence under `Role.parse_metadata["opportunityIntelligence"]`.
 - User-visible primary intake/list/detail labels now use Opportunity language, while internal component/type names may remain Role-backed during the compatibility phase.
+- Frontend Opportunity types are explicit aliases over the temporary Role-backed response shapes.
 
 ## 3. Opportunity Definition
 
@@ -222,6 +224,13 @@ Layer 7B does not:
 - Implement Layer 9 automation.
 
 The destructive persistence rename should be a separate follow-up after the outward Opportunity surface is stable.
+
+Layer 7B retained compatibility debt:
+
+- The `roles` table, SQLAlchemy `Role` model, and `role_id` foreign keys remain current persistence.
+- Runtime `Role.status` remains narrower than the canonical `OpportunityStatusSchema`; status expansion belongs in a separate approved change.
+- COMPASS evaluation APIs still use `/api/roles/{role_id}/evaluations` during the compatibility phase.
+- Internal frontend `Role*` component names remain until a later cleanup can avoid unnecessary churn.
 
 ## 11. Deduplication and Similarity Strategy
 
