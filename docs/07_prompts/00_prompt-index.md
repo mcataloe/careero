@@ -4,7 +4,7 @@ Status: Active
 Doc Type: Prompt  
 Layer: N/A  
 Source of Truth: No  
-Last Reviewed: 2026-05-27  
+Last Reviewed: 2026-09-28  
 Related Docs:
 - docs/02_layers/00_layer-index.md
 - docs/01_strategy/00_product-strategy.md
@@ -24,3 +24,7 @@ Filled LEAP Recon requests:
 - [Layer 08 LEAP Recon request](leap-recon/filled/layer-08-leap-recon-request.md)
 - [Layer 11 LEAP Recon request](leap-recon/filled/layer-11-leap-recon-request.md)
 - [Layer 12 LEAP Recon request](leap-recon/filled/layer-12-leap-recon-request.md)
+
+LHS prompts:
+
+- [Job Intelligence Ingestion and Candidate Matching Pipeline](lhs/job-intelligence-ingestion-and-matching-lhs.md)
