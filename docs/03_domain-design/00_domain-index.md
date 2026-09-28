@@ -12,6 +12,7 @@ Related Docs:
 This section contains conceptual models and product behavior design.
 
 - [Opportunity model](opportunity-model.md)
+- [Candidate-opportunity matching and extraction strategy](candidate-opportunity-matching.md)
 - [Workspace intelligence](workspace-intelligence.md)
 - [Application workflow persistence](application-workflow-persistence.md)
 - [Application interview tracking](application-interview-tracking.md)
