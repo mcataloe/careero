@@ -26,6 +26,7 @@ Careero-specific product strategy, implementation status, domain model decisions
 3. `docs/01_strategy/07_revised-build-order-execution-plan.md` - operational LEAP/LHS execution guide, prompt sequence, readiness gates, and pull-forward rules.
 4. Active layer-specific docs:
    - `docs/03_domain-design/opportunity-model.md`
+   - `docs/03_domain-design/candidate-opportunity-matching.md`
    - `docs/01_strategy/06_productization-readiness.md`
    - `docs/03_domain-design/advisor-collaboration-mode.md`
    - `docs/02_layers/14_layer-14-model-catalog-and-prompt-management.md`
@@ -160,7 +161,7 @@ Layer 1 provides the local-first technical foundation. It is built locally but p
 
 ## Layer 2 â€” Intake, Parsing & Grounding
 
-Layer 2 turns raw job/opportunity and source-material input into structured, reviewable, grounded system data. It is stable enough to build on, while parser confidence UX, source deduplication, company/source/recruiter normalization, and Google Docs import remain future.
+Layer 2 turns raw job/opportunity and source-material input into structured, reviewable, grounded system data. It is stable enough to build on, while parser confidence UX, source deduplication, company/source/recruiter normalization, and Google Docs import remain future. Candidate/opportunity parsing and matching should follow the staged, model-agnostic optimization strategy in `docs/03_domain-design/candidate-opportunity-matching.md`: hard constraints and lexical retrieval first, then canonical capability matching, relational graph inference, semantic matching, and LLM adjudication only for unresolved ambiguity.
 
 ## Layer 3 â€” COMPASS + Artifact Foundation
 
